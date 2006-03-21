@@ -1261,7 +1261,7 @@ GuildAdsTrade = {
 					
 				-- Set name
 				if (info.name) then
-					local _, _, _, hex = GetItemQualityColor(info.quality)
+					local _, _, _, hex = GetItemQualityColor(info.quality or 2)
 					getglobal(textField):SetText(hex..info.name.."|r");
 				else
 					getglobal(textField):SetText(button.item);
