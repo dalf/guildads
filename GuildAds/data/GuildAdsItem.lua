@@ -133,6 +133,14 @@ function GuildAdsInternalTooltip_ItemReady()
 	
 	GuildAds_GetItemInfo(GuildAdsITT.currentItemRef);
 	GuildAdsInternalTooltip_ParseTooltip(GuildAdsITT.currentItemRef);
+	local found, _, itemLink1 = string.find(GuildAdsITT.currentItemRef, "enchant:(%d+)");
+	if found then
+		-- enchant link : create a fake texture, type, subtype
+		local t = GuildAds_ItemInfo[GuildAdsITT.currentItemRef];
+		t.texture = "Interface/Icons/Spell_Holy_GreaterHeal";
+		t.type = GUILDADS_SKILLS[9];
+		t.subtype = "";
+	end
 	
 	GuildAdsITT.itemRefs[GuildAdsITT.currentItemRef] = nil;
 	GuildAdsITT.count = GuildAdsITT.count-1;
