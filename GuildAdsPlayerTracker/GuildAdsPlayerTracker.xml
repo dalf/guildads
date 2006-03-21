@@ -1,0 +1,349 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.blizzard.com/wow/ui/ ..\FrameXML\UI.xsd">
+	<Script file="localization.lua"/>
+	<Script file="GPTRegionData.lua"/>
+	<Script file="GuildAdsPlayerTracker.lua"/>
+
+	<!-- Frame to handle all core events --> 
+	<Frame name="GuildAdsPlayerTrackerFrame" parent="WorldFrame"> 
+		<Scripts> 
+			<OnLoad>
+				GuildAdsPlayerTracker.onLoad();
+			</OnLoad>
+			<OnEvent>
+				GuildAdsPlayerTracker.onEvent(event);
+			</OnEvent>
+			<OnUpdate>
+				GuildAdsPlayerTracker.onUpdate(arg1);
+			</OnUpdate>
+		</Scripts> 
+   	</Frame> 
+   	
+	<Button name="GuildAdsPlayerTrackerMiniTemplate" hidden="true" virtual="true">
+		<Size>
+			<AbsDimension x="12" y="12"/>
+		</Size>
+		<Anchors>
+			<Anchor point="CENTER" relativeTo="MinimapBackdrop" relativePoint="TOPLEFT">
+				<Offset>
+					<AbsDimension x="-51" y="60"/>
+				</Offset>
+			</Anchor>
+		</Anchors>
+		<Scripts>
+			<OnLoad>
+				this:SetFrameLevel(this:GetFrameLevel() + 1);
+				this:RegisterForClicks("LeftButtonUp", "RightButtonUp");
+			</OnLoad>
+			<OnEnter>
+				GuildAdsPlayerTracker.showMiniMapToolTip();
+			</OnEnter>
+			<OnLeave>
+				GameTooltip:Hide();
+			</OnLeave>
+			<OnClick>
+				GuildAdsPlayerTracker.miniMap_OnClick(arg1);
+			</OnClick>			
+		</Scripts>
+		<NormalTexture name="$parentTexture" file="Interface\AddOns\GuildAdsPlayerTracker\MiniMapGuildAdsPlayerTrackerIcon"/>
+	</Button>
+	<Button name="GuildAdsPlayerTrackerMini1" inherits="GuildAdsPlayerTrackerMiniTemplate" id="1" hidden="false" parent="Minimap" toplevel="true"/>
+	<Button name="GuildAdsPlayerTrackerMini2" inherits="GuildAdsPlayerTrackerMiniTemplate" id="2" hidden="false" parent="Minimap" toplevel="true"/>
+	<Button name="GuildAdsPlayerTrackerMini3" inherits="GuildAdsPlayerTrackerMiniTemplate" id="3" hidden="false" parent="Minimap" toplevel="true"/>
+	<Button name="GuildAdsPlayerTrackerMini4" inherits="GuildAdsPlayerTrackerMiniTemplate" id="4" hidden="false" parent="Minimap" toplevel="true"/>
+	<Button name="GuildAdsPlayerTrackerMini5" inherits="GuildAdsPlayerTrackerMiniTemplate" id="5" hidden="false" parent="Minimap" toplevel="true"/>
+	<Button name="GuildAdsPlayerTrackerMini6" inherits="GuildAdsPlayerTrackerMiniTemplate" id="6" hidden="false" parent="Minimap" toplevel="true"/>
+	<Button name="GuildAdsPlayerTrackerMini7" inherits="GuildAdsPlayerTrackerMiniTemplate" id="7" hidden="false" parent="Minimap" toplevel="true"/>
+	<Button name="GuildAdsPlayerTrackerMini8" inherits="GuildAdsPlayerTrackerMiniTemplate" id="8" hidden="false" parent="Minimap" toplevel="true"/>
+	<Button name="GuildAdsPlayerTrackerMini9" inherits="GuildAdsPlayerTrackerMiniTemplate" id="9" hidden="false" parent="Minimap" toplevel="true"/>
+	<Button name="GuildAdsPlayerTrackerMini10" inherits="GuildAdsPlayerTrackerMiniTemplate" id="10" hidden="false" parent="Minimap" toplevel="true"/>
+	<Button name="GuildAdsPlayerTrackerMini11" inherits="GuildAdsPlayerTrackerMiniTemplate" id="11" hidden="false" parent="Minimap" toplevel="true"/>
+	<Button name="GuildAdsPlayerTrackerMini12" inherits="GuildAdsPlayerTrackerMiniTemplate" id="12" hidden="false" parent="Minimap" toplevel="true"/>
+	<Button name="GuildAdsPlayerTrackerMini13" inherits="GuildAdsPlayerTrackerMiniTemplate" id="13" hidden="false" parent="Minimap" toplevel="true"/>
+	<Button name="GuildAdsPlayerTrackerMini14" inherits="GuildAdsPlayerTrackerMiniTemplate" id="14" hidden="false" parent="Minimap" toplevel="true"/>
+	<Button name="GuildAdsPlayerTrackerMini15" inherits="GuildAdsPlayerTrackerMiniTemplate" id="15" hidden="false" parent="Minimap" toplevel="true"/>
+	<Button name="GuildAdsPlayerTrackerMini16" inherits="GuildAdsPlayerTrackerMiniTemplate" id="16" hidden="false" parent="Minimap" toplevel="true"/>
+	<Button name="GuildAdsPlayerTrackerMini17" inherits="GuildAdsPlayerTrackerMiniTemplate" id="17" hidden="false" parent="Minimap" toplevel="true"/>
+	<Button name="GuildAdsPlayerTrackerMini18" inherits="GuildAdsPlayerTrackerMiniTemplate" id="18" hidden="false" parent="Minimap" toplevel="true"/>
+	<Button name="GuildAdsPlayerTrackerMini19" inherits="GuildAdsPlayerTrackerMiniTemplate" id="19" hidden="false" parent="Minimap" toplevel="true"/>
+	<Button name="GuildAdsPlayerTrackerMini20" inherits="GuildAdsPlayerTrackerMiniTemplate" id="20" hidden="false" parent="Minimap" toplevel="true"/>
+	<Button name="GuildAdsPlayerTrackerMini21" inherits="GuildAdsPlayerTrackerMiniTemplate" id="21" hidden="false" parent="Minimap" toplevel="true"/>
+	<Button name="GuildAdsPlayerTrackerMini22" inherits="GuildAdsPlayerTrackerMiniTemplate" id="22" hidden="false" parent="Minimap" toplevel="true"/>
+	<Button name="GuildAdsPlayerTrackerMini23" inherits="GuildAdsPlayerTrackerMiniTemplate" id="23" hidden="false" parent="Minimap" toplevel="true"/>
+	<Button name="GuildAdsPlayerTrackerMini24" inherits="GuildAdsPlayerTrackerMiniTemplate" id="24" hidden="false" parent="Minimap" toplevel="true"/>
+	<Button name="GuildAdsPlayerTrackerMini25" inherits="GuildAdsPlayerTrackerMiniTemplate" id="25" hidden="false" parent="Minimap" toplevel="true"/>
+   	
+   	
+	<Button name="GuildAdsPlayerTrackerMainTemplate" hidden="true" virtual="true">
+		<Size>
+			<AbsDimension x="16" y="16"/>
+		</Size>
+		<Anchors>
+			<Anchor point="CENTER"/>
+		</Anchors>
+		<Scripts>
+			<OnLoad>
+				this:SetFrameLevel(this:GetFrameLevel() + 1);
+			</OnLoad>
+			<OnEnter>
+				GuildAdsPlayerTracker.showWorldMapToolTip();
+			</OnEnter>
+			<OnLeave>
+				WorldMapTooltip:Hide();
+			</OnLeave>
+		</Scripts>
+		<NormalTexture name="$parentTexture" file="Interface\AddOns\GuildAdsPlayerTracker\WorldMapGuildAdsPlayerTrackerIcon"/>
+	</Button>
+   	
+   	<Button name="GuildAdsPlayerTrackerMain1" inherits="GuildAdsPlayerTrackerMainTemplate" id="1" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain2" inherits="GuildAdsPlayerTrackerMainTemplate" id="2" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain3" inherits="GuildAdsPlayerTrackerMainTemplate" id="3" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain4" inherits="GuildAdsPlayerTrackerMainTemplate" id="4" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain5" inherits="GuildAdsPlayerTrackerMainTemplate" id="5" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain6" inherits="GuildAdsPlayerTrackerMainTemplate" id="6" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain7" inherits="GuildAdsPlayerTrackerMainTemplate" id="7" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain8" inherits="GuildAdsPlayerTrackerMainTemplate" id="8" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain9" inherits="GuildAdsPlayerTrackerMainTemplate" id="9" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain10" inherits="GuildAdsPlayerTrackerMainTemplate" id="10" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain11" inherits="GuildAdsPlayerTrackerMainTemplate" id="11" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain12" inherits="GuildAdsPlayerTrackerMainTemplate" id="12" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain13" inherits="GuildAdsPlayerTrackerMainTemplate" id="13" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain14" inherits="GuildAdsPlayerTrackerMainTemplate" id="14" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain15" inherits="GuildAdsPlayerTrackerMainTemplate" id="15" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain16" inherits="GuildAdsPlayerTrackerMainTemplate" id="16" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain17" inherits="GuildAdsPlayerTrackerMainTemplate" id="17" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain18" inherits="GuildAdsPlayerTrackerMainTemplate" id="18" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain19" inherits="GuildAdsPlayerTrackerMainTemplate" id="19" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain20" inherits="GuildAdsPlayerTrackerMainTemplate" id="20" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain21" inherits="GuildAdsPlayerTrackerMainTemplate" id="21" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain22" inherits="GuildAdsPlayerTrackerMainTemplate" id="22" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain23" inherits="GuildAdsPlayerTrackerMainTemplate" id="23" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain24" inherits="GuildAdsPlayerTrackerMainTemplate" id="24" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain25" inherits="GuildAdsPlayerTrackerMainTemplate" id="25" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain26" inherits="GuildAdsPlayerTrackerMainTemplate" id="26" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain27" inherits="GuildAdsPlayerTrackerMainTemplate" id="27" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain28" inherits="GuildAdsPlayerTrackerMainTemplate" id="28" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain29" inherits="GuildAdsPlayerTrackerMainTemplate" id="29" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain30" inherits="GuildAdsPlayerTrackerMainTemplate" id="30" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain31" inherits="GuildAdsPlayerTrackerMainTemplate" id="31" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain32" inherits="GuildAdsPlayerTrackerMainTemplate" id="32" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain33" inherits="GuildAdsPlayerTrackerMainTemplate" id="33" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain34" inherits="GuildAdsPlayerTrackerMainTemplate" id="34" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain35" inherits="GuildAdsPlayerTrackerMainTemplate" id="35" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain36" inherits="GuildAdsPlayerTrackerMainTemplate" id="36" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain37" inherits="GuildAdsPlayerTrackerMainTemplate" id="37" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain38" inherits="GuildAdsPlayerTrackerMainTemplate" id="38" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain39" inherits="GuildAdsPlayerTrackerMainTemplate" id="39" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain40" inherits="GuildAdsPlayerTrackerMainTemplate" id="40" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain41" inherits="GuildAdsPlayerTrackerMainTemplate" id="41" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain42" inherits="GuildAdsPlayerTrackerMainTemplate" id="42" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain43" inherits="GuildAdsPlayerTrackerMainTemplate" id="43" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain44" inherits="GuildAdsPlayerTrackerMainTemplate" id="44" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain45" inherits="GuildAdsPlayerTrackerMainTemplate" id="45" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain46" inherits="GuildAdsPlayerTrackerMainTemplate" id="46" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain47" inherits="GuildAdsPlayerTrackerMainTemplate" id="47" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain48" inherits="GuildAdsPlayerTrackerMainTemplate" id="48" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain49" inherits="GuildAdsPlayerTrackerMainTemplate" id="49" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain50" inherits="GuildAdsPlayerTrackerMainTemplate" id="50" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain51" inherits="GuildAdsPlayerTrackerMainTemplate" id="51" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain52" inherits="GuildAdsPlayerTrackerMainTemplate" id="52" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain53" inherits="GuildAdsPlayerTrackerMainTemplate" id="53" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain54" inherits="GuildAdsPlayerTrackerMainTemplate" id="54" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain55" inherits="GuildAdsPlayerTrackerMainTemplate" id="55" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain56" inherits="GuildAdsPlayerTrackerMainTemplate" id="56" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain57" inherits="GuildAdsPlayerTrackerMainTemplate" id="57" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain58" inherits="GuildAdsPlayerTrackerMainTemplate" id="58" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain59" inherits="GuildAdsPlayerTrackerMainTemplate" id="59" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain60" inherits="GuildAdsPlayerTrackerMainTemplate" id="60" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain61" inherits="GuildAdsPlayerTrackerMainTemplate" id="61" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain62" inherits="GuildAdsPlayerTrackerMainTemplate" id="62" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain63" inherits="GuildAdsPlayerTrackerMainTemplate" id="63" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain64" inherits="GuildAdsPlayerTrackerMainTemplate" id="64" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain65" inherits="GuildAdsPlayerTrackerMainTemplate" id="65" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain66" inherits="GuildAdsPlayerTrackerMainTemplate" id="66" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain67" inherits="GuildAdsPlayerTrackerMainTemplate" id="67" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain68" inherits="GuildAdsPlayerTrackerMainTemplate" id="68" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain69" inherits="GuildAdsPlayerTrackerMainTemplate" id="69" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain70" inherits="GuildAdsPlayerTrackerMainTemplate" id="70" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain71" inherits="GuildAdsPlayerTrackerMainTemplate" id="71" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain72" inherits="GuildAdsPlayerTrackerMainTemplate" id="72" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain73" inherits="GuildAdsPlayerTrackerMainTemplate" id="73" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain74" inherits="GuildAdsPlayerTrackerMainTemplate" id="74" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain75" inherits="GuildAdsPlayerTrackerMainTemplate" id="75" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain76" inherits="GuildAdsPlayerTrackerMainTemplate" id="76" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain77" inherits="GuildAdsPlayerTrackerMainTemplate" id="77" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain78" inherits="GuildAdsPlayerTrackerMainTemplate" id="78" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain79" inherits="GuildAdsPlayerTrackerMainTemplate" id="79" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain80" inherits="GuildAdsPlayerTrackerMainTemplate" id="80" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain81" inherits="GuildAdsPlayerTrackerMainTemplate" id="81" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain82" inherits="GuildAdsPlayerTrackerMainTemplate" id="82" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain83" inherits="GuildAdsPlayerTrackerMainTemplate" id="83" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain84" inherits="GuildAdsPlayerTrackerMainTemplate" id="84" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain85" inherits="GuildAdsPlayerTrackerMainTemplate" id="85" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain86" inherits="GuildAdsPlayerTrackerMainTemplate" id="86" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain87" inherits="GuildAdsPlayerTrackerMainTemplate" id="87" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain88" inherits="GuildAdsPlayerTrackerMainTemplate" id="88" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain89" inherits="GuildAdsPlayerTrackerMainTemplate" id="89" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain90" inherits="GuildAdsPlayerTrackerMainTemplate" id="90" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain91" inherits="GuildAdsPlayerTrackerMainTemplate" id="91" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain92" inherits="GuildAdsPlayerTrackerMainTemplate" id="92" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain93" inherits="GuildAdsPlayerTrackerMainTemplate" id="93" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain94" inherits="GuildAdsPlayerTrackerMainTemplate" id="94" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain95" inherits="GuildAdsPlayerTrackerMainTemplate" id="95" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain96" inherits="GuildAdsPlayerTrackerMainTemplate" id="96" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain97" inherits="GuildAdsPlayerTrackerMainTemplate" id="97" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain98" inherits="GuildAdsPlayerTrackerMainTemplate" id="98" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain99" inherits="GuildAdsPlayerTrackerMainTemplate" id="99" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain100" inherits="GuildAdsPlayerTrackerMainTemplate" id="100" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain101" inherits="GuildAdsPlayerTrackerMainTemplate" id="101" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain102" inherits="GuildAdsPlayerTrackerMainTemplate" id="102" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain103" inherits="GuildAdsPlayerTrackerMainTemplate" id="103" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain104" inherits="GuildAdsPlayerTrackerMainTemplate" id="104" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain105" inherits="GuildAdsPlayerTrackerMainTemplate" id="105" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain106" inherits="GuildAdsPlayerTrackerMainTemplate" id="106" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain107" inherits="GuildAdsPlayerTrackerMainTemplate" id="107" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain108" inherits="GuildAdsPlayerTrackerMainTemplate" id="108" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain109" inherits="GuildAdsPlayerTrackerMainTemplate" id="109" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain110" inherits="GuildAdsPlayerTrackerMainTemplate" id="110" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain111" inherits="GuildAdsPlayerTrackerMainTemplate" id="111" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain112" inherits="GuildAdsPlayerTrackerMainTemplate" id="112" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain113" inherits="GuildAdsPlayerTrackerMainTemplate" id="113" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain114" inherits="GuildAdsPlayerTrackerMainTemplate" id="114" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain115" inherits="GuildAdsPlayerTrackerMainTemplate" id="115" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain116" inherits="GuildAdsPlayerTrackerMainTemplate" id="116" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain117" inherits="GuildAdsPlayerTrackerMainTemplate" id="117" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain118" inherits="GuildAdsPlayerTrackerMainTemplate" id="118" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain119" inherits="GuildAdsPlayerTrackerMainTemplate" id="119" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain120" inherits="GuildAdsPlayerTrackerMainTemplate" id="120" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain121" inherits="GuildAdsPlayerTrackerMainTemplate" id="121" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain122" inherits="GuildAdsPlayerTrackerMainTemplate" id="122" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain123" inherits="GuildAdsPlayerTrackerMainTemplate" id="123" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain124" inherits="GuildAdsPlayerTrackerMainTemplate" id="124" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain125" inherits="GuildAdsPlayerTrackerMainTemplate" id="125" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain126" inherits="GuildAdsPlayerTrackerMainTemplate" id="126" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain127" inherits="GuildAdsPlayerTrackerMainTemplate" id="127" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain128" inherits="GuildAdsPlayerTrackerMainTemplate" id="128" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain129" inherits="GuildAdsPlayerTrackerMainTemplate" id="129" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain130" inherits="GuildAdsPlayerTrackerMainTemplate" id="130" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain131" inherits="GuildAdsPlayerTrackerMainTemplate" id="131" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain132" inherits="GuildAdsPlayerTrackerMainTemplate" id="132" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain133" inherits="GuildAdsPlayerTrackerMainTemplate" id="133" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain134" inherits="GuildAdsPlayerTrackerMainTemplate" id="134" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain135" inherits="GuildAdsPlayerTrackerMainTemplate" id="135" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain136" inherits="GuildAdsPlayerTrackerMainTemplate" id="136" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain137" inherits="GuildAdsPlayerTrackerMainTemplate" id="137" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain138" inherits="GuildAdsPlayerTrackerMainTemplate" id="138" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain139" inherits="GuildAdsPlayerTrackerMainTemplate" id="139" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain140" inherits="GuildAdsPlayerTrackerMainTemplate" id="140" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain141" inherits="GuildAdsPlayerTrackerMainTemplate" id="141" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain142" inherits="GuildAdsPlayerTrackerMainTemplate" id="142" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain143" inherits="GuildAdsPlayerTrackerMainTemplate" id="143" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain144" inherits="GuildAdsPlayerTrackerMainTemplate" id="144" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain145" inherits="GuildAdsPlayerTrackerMainTemplate" id="145" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain146" inherits="GuildAdsPlayerTrackerMainTemplate" id="146" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain147" inherits="GuildAdsPlayerTrackerMainTemplate" id="147" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain148" inherits="GuildAdsPlayerTrackerMainTemplate" id="148" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain149" inherits="GuildAdsPlayerTrackerMainTemplate" id="149" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain150" inherits="GuildAdsPlayerTrackerMainTemplate" id="150" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain151" inherits="GuildAdsPlayerTrackerMainTemplate" id="151" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain152" inherits="GuildAdsPlayerTrackerMainTemplate" id="152" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain153" inherits="GuildAdsPlayerTrackerMainTemplate" id="153" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain154" inherits="GuildAdsPlayerTrackerMainTemplate" id="154" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain155" inherits="GuildAdsPlayerTrackerMainTemplate" id="155" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain156" inherits="GuildAdsPlayerTrackerMainTemplate" id="156" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain157" inherits="GuildAdsPlayerTrackerMainTemplate" id="157" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain158" inherits="GuildAdsPlayerTrackerMainTemplate" id="158" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain159" inherits="GuildAdsPlayerTrackerMainTemplate" id="159" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain160" inherits="GuildAdsPlayerTrackerMainTemplate" id="160" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain161" inherits="GuildAdsPlayerTrackerMainTemplate" id="161" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain162" inherits="GuildAdsPlayerTrackerMainTemplate" id="162" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain163" inherits="GuildAdsPlayerTrackerMainTemplate" id="163" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain164" inherits="GuildAdsPlayerTrackerMainTemplate" id="164" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain165" inherits="GuildAdsPlayerTrackerMainTemplate" id="165" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain166" inherits="GuildAdsPlayerTrackerMainTemplate" id="166" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain167" inherits="GuildAdsPlayerTrackerMainTemplate" id="167" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain168" inherits="GuildAdsPlayerTrackerMainTemplate" id="168" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain169" inherits="GuildAdsPlayerTrackerMainTemplate" id="169" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain170" inherits="GuildAdsPlayerTrackerMainTemplate" id="170" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain171" inherits="GuildAdsPlayerTrackerMainTemplate" id="171" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain172" inherits="GuildAdsPlayerTrackerMainTemplate" id="172" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain173" inherits="GuildAdsPlayerTrackerMainTemplate" id="173" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain174" inherits="GuildAdsPlayerTrackerMainTemplate" id="174" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain175" inherits="GuildAdsPlayerTrackerMainTemplate" id="175" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain176" inherits="GuildAdsPlayerTrackerMainTemplate" id="176" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain177" inherits="GuildAdsPlayerTrackerMainTemplate" id="177" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain178" inherits="GuildAdsPlayerTrackerMainTemplate" id="178" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain179" inherits="GuildAdsPlayerTrackerMainTemplate" id="179" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain180" inherits="GuildAdsPlayerTrackerMainTemplate" id="180" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain181" inherits="GuildAdsPlayerTrackerMainTemplate" id="181" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain182" inherits="GuildAdsPlayerTrackerMainTemplate" id="182" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain183" inherits="GuildAdsPlayerTrackerMainTemplate" id="183" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain184" inherits="GuildAdsPlayerTrackerMainTemplate" id="184" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain185" inherits="GuildAdsPlayerTrackerMainTemplate" id="185" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain186" inherits="GuildAdsPlayerTrackerMainTemplate" id="186" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain187" inherits="GuildAdsPlayerTrackerMainTemplate" id="187" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain188" inherits="GuildAdsPlayerTrackerMainTemplate" id="188" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain189" inherits="GuildAdsPlayerTrackerMainTemplate" id="189" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain190" inherits="GuildAdsPlayerTrackerMainTemplate" id="190" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain191" inherits="GuildAdsPlayerTrackerMainTemplate" id="191" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain192" inherits="GuildAdsPlayerTrackerMainTemplate" id="192" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain193" inherits="GuildAdsPlayerTrackerMainTemplate" id="193" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain194" inherits="GuildAdsPlayerTrackerMainTemplate" id="194" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain195" inherits="GuildAdsPlayerTrackerMainTemplate" id="195" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain196" inherits="GuildAdsPlayerTrackerMainTemplate" id="196" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain197" inherits="GuildAdsPlayerTrackerMainTemplate" id="197" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain198" inherits="GuildAdsPlayerTrackerMainTemplate" id="198" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain199" inherits="GuildAdsPlayerTrackerMainTemplate" id="199" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain200" inherits="GuildAdsPlayerTrackerMainTemplate" id="200" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain201" inherits="GuildAdsPlayerTrackerMainTemplate" id="201" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain202" inherits="GuildAdsPlayerTrackerMainTemplate" id="202" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain203" inherits="GuildAdsPlayerTrackerMainTemplate" id="203" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain204" inherits="GuildAdsPlayerTrackerMainTemplate" id="204" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain205" inherits="GuildAdsPlayerTrackerMainTemplate" id="205" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain206" inherits="GuildAdsPlayerTrackerMainTemplate" id="206" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain207" inherits="GuildAdsPlayerTrackerMainTemplate" id="207" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain208" inherits="GuildAdsPlayerTrackerMainTemplate" id="208" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain209" inherits="GuildAdsPlayerTrackerMainTemplate" id="209" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain210" inherits="GuildAdsPlayerTrackerMainTemplate" id="210" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain211" inherits="GuildAdsPlayerTrackerMainTemplate" id="211" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain212" inherits="GuildAdsPlayerTrackerMainTemplate" id="212" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain213" inherits="GuildAdsPlayerTrackerMainTemplate" id="213" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain214" inherits="GuildAdsPlayerTrackerMainTemplate" id="214" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain215" inherits="GuildAdsPlayerTrackerMainTemplate" id="215" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain216" inherits="GuildAdsPlayerTrackerMainTemplate" id="216" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain217" inherits="GuildAdsPlayerTrackerMainTemplate" id="217" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain218" inherits="GuildAdsPlayerTrackerMainTemplate" id="218" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain219" inherits="GuildAdsPlayerTrackerMainTemplate" id="219" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain220" inherits="GuildAdsPlayerTrackerMainTemplate" id="220" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain221" inherits="GuildAdsPlayerTrackerMainTemplate" id="221" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain222" inherits="GuildAdsPlayerTrackerMainTemplate" id="222" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain223" inherits="GuildAdsPlayerTrackerMainTemplate" id="223" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain224" inherits="GuildAdsPlayerTrackerMainTemplate" id="224" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain225" inherits="GuildAdsPlayerTrackerMainTemplate" id="225" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain226" inherits="GuildAdsPlayerTrackerMainTemplate" id="226" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain227" inherits="GuildAdsPlayerTrackerMainTemplate" id="227" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain228" inherits="GuildAdsPlayerTrackerMainTemplate" id="228" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain229" inherits="GuildAdsPlayerTrackerMainTemplate" id="229" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain230" inherits="GuildAdsPlayerTrackerMainTemplate" id="230" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain231" inherits="GuildAdsPlayerTrackerMainTemplate" id="231" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain232" inherits="GuildAdsPlayerTrackerMainTemplate" id="232" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain233" inherits="GuildAdsPlayerTrackerMainTemplate" id="233" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain234" inherits="GuildAdsPlayerTrackerMainTemplate" id="234" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain235" inherits="GuildAdsPlayerTrackerMainTemplate" id="235" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain236" inherits="GuildAdsPlayerTrackerMainTemplate" id="236" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain237" inherits="GuildAdsPlayerTrackerMainTemplate" id="237" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain238" inherits="GuildAdsPlayerTrackerMainTemplate" id="238" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain239" inherits="GuildAdsPlayerTrackerMainTemplate" id="239" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain240" inherits="GuildAdsPlayerTrackerMainTemplate" id="240" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain241" inherits="GuildAdsPlayerTrackerMainTemplate" id="241" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain242" inherits="GuildAdsPlayerTrackerMainTemplate" id="242" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain243" inherits="GuildAdsPlayerTrackerMainTemplate" id="243" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain244" inherits="GuildAdsPlayerTrackerMainTemplate" id="244" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain245" inherits="GuildAdsPlayerTrackerMainTemplate" id="245" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain246" inherits="GuildAdsPlayerTrackerMainTemplate" id="246" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain247" inherits="GuildAdsPlayerTrackerMainTemplate" id="247" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain248" inherits="GuildAdsPlayerTrackerMainTemplate" id="248" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain249" inherits="GuildAdsPlayerTrackerMainTemplate" id="249" parent="WorldMapButton"/>
+	<Button name="GuildAdsPlayerTrackerMain250" inherits="GuildAdsPlayerTrackerMainTemplate" id="250" parent="WorldMapButton"/>
+</Ui>

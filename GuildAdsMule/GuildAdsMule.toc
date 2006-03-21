@@ -1,0 +1,15 @@
+## Interface: 1900
+## Title: GuildAdsMule
+## Title-frFR: GuildAdsMule
+## Author: Zarkan, Fkai
+## Version: 2.0
+## Notes: Guild Ads Mule 
+## Notes-frFR: Gestion des mules 
+## eMail: guildads@gmail.com
+## URL: http://www.curse-gaming.com/mod.php?addid=1767
+## Dependencies: GuildAds
+## OptionalDeps:
+## DefaultState: Enabled
+## LoadOnDemand: 0
+## SavedVariables:
+GuildAdsMule.xml

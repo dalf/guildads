@@ -1,0 +1,8 @@
+## Interface: 1700 
+## Title: GuildAdsPlayerTracker
+## Notes: GuildAdsPlayerTracker shows GuildAds members on World and Mini map. Version 1.0.
+## Version: 1.00
+## OptionalDeps:
+## Dependencies: GuildAds
+## SavedVariables:
+GuildAdsPlayerTracker.xml

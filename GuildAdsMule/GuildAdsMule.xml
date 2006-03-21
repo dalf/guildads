@@ -1,0 +1,24 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
+	
+	<Script file="GuildAdsMule.lua" />
+		
+	<Button name="GuildAdsMuleButton" inherits="UIPanelButtonTemplate" parent="BankFrame" text="mule">
+		<Size>
+			<AbsDimension x="124" y="21"/>
+		</Size>
+		<Anchors>
+			<Anchor point="TOPRIGHT" relativeTo="BankFrame" relativePoint="TOPRIGHT">
+				<Offset>
+					<AbsDimension x="-35" y="-33"/>
+				</Offset>
+			</Anchor>
+		</Anchors>
+		<Scripts>
+			<OnClick>
+				GuildAdsMule.refresh();
+			</OnClick>
+		</Scripts>
+	</Button>
+
+</Ui>
