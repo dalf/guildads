@@ -131,22 +131,26 @@ end
 function GuildAdsInternalTooltip_ItemReady()
 	GuildAds_ChatDebug(GA_DEBUG_STORAGE, "  - ItemReady:"..GuildAdsITT.currentItemRef);
 	
+	-- GetItemInfo again
 	GuildAds_GetItemInfo(GuildAdsITT.currentItemRef);
+	-- parse tooltips
 	GuildAdsInternalTooltip_ParseTooltip(GuildAdsITT.currentItemRef);
+	-- for enchant link : create a fake texture, type, subtype
 	local found, _, itemLink1 = string.find(GuildAdsITT.currentItemRef, "enchant:(%d+)");
 	if found then
-		-- enchant link : create a fake texture, type, subtype
 		local t = GuildAds_ItemInfo[GuildAdsITT.currentItemRef];
 		t.texture = "Interface/Icons/Spell_Holy_GreaterHeal";
 		t.type = GUILDADS_SKILLS[9];
 		t.subtype = "";
 	end
 	
+	-- hide tooltip
 	GuildAdsITT.itemRefs[GuildAdsITT.currentItemRef] = nil;
 	GuildAdsITT.count = GuildAdsITT.count-1;
 	
 	GuildAdsITT:Hide();
 	
+	-- next item if there is one
 	local itemRef = next(GuildAdsITT.itemRefs);
 	if itemRef then
 		GuildAdsInternalTooltip_SetItem(itemRef);
@@ -162,9 +166,30 @@ function GuildAdsInternalTooltip_ParseTooltip(itemRef)
 		GuildAds_ItemInfo[itemRef]._tt = true;
 	end
 	
+	-- use first line of the tooltip to get a name
 	if not GuildAds_ItemInfo[itemRef].name then
 		GuildAds_ItemInfo[itemRef].name = getglobal("GuildAdsITTTextLeft1"):GetText();
 	end
+	
+	-- use color of first line of the tooltip to get quality
+	if not GuildAds_ItemInfo[itemRef].quality then
+		local r, g, b = getglobal("GuildAdsITTTextLeft1"):GetTextColor()
+		local color = string.format("%02x%02x%02x", r*255, g*255, b*255);
+		-- there is some round problem : find the minimum distance between GetItemQualityColor() values and GetTextColor() values
+		local rr, gg, bb;
+		local d = 10;
+		local q = 1;
+		for quality=1,6,1 do
+			rr, gg, bb = GetItemQualityColor(quality);
+			local dd = math.abs(rr-r)+math.abs(gg-g)+math.abs(bb-b);
+			if dd<d then
+				d = dd;
+				q = quality;
+			end
+		end
+		GuildAds_ItemInfo[itemRef].quality = q;
+	end
+	
 	
 	GuildAds_ItemInfo[itemRef].soulbound = false;
 	GuildAds_ItemInfo[itemRef].questitem = false;
