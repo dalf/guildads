@@ -1196,13 +1196,17 @@
 							</Anchors>
 						</NormalTexture>
 						<HighlightTexture alphaMode="ADD" file="Interface\Buttons\ButtonHilight-Square"/>
-						<!--
 						<Scripts>
-							<OnClick>
-								GuildAdsTrade.myAds.edit(nil);
-							</OnClick>
+							<OnEnter>
+								GameTooltip:SetOwner(this, "ANCHOR_RIGHT");
+								GameTooltip:SetHyperlink(GuildAdsTrade.currentItem);
+								CursorUpdate();
+							</OnEnter>
+							<OnLeave>
+								GameTooltip:Hide();
+								ResetCursor();
+							</OnLeave>
 						</Scripts>
-						-->
 					</Button>
 					
 					<Frame name="GuildAdsEditItem"  hidden="false">

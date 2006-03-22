@@ -124,9 +124,20 @@ GuildAdsTrade = {
 		GuildAdsTrade.debug("onShow");
 		if (GuildAdsTrade.currentTab == GuildAdsTrade.TAB_REQUEST or 
 			GuildAdsTrade.currentTab == GuildAdsTrade.TAB_AVAILABLE) then
-			GuildAdsTrade.exchangeButtonsUpdate(GuildAdsTrade.currentTab,true);
+			GuildAdsTrade.exchangeButtonsUpdate(GuildAdsTrade.currentTab);
 		else 
 			GuildAdsTrade.myAds.updateMyAdsFrame();
+		end;
+	end;
+	
+	onItemInfoReady = function()
+		GuildAdsTrade.debug("onItemInfoReady");
+		if (GuildAdsTrade.currentTab == GuildAdsTrade.TAB_REQUEST or 
+			GuildAdsTrade.currentTab == GuildAdsTrade.TAB_AVAILABLE) then
+			GuildAdsTrade.exchangeButtonsUpdate(GuildAdsTrade.currentTab);
+		else 
+			GuildAdsTrade.myAds.updateMyAdsFrame();
+			GuildAdsTrade.setEditItem(GuildAdsTrade.currentItem);
 		end;
 	end;
 	
@@ -209,7 +220,7 @@ GuildAdsTrade = {
 			end
 			if (tochat ~= nil) then
 				local info = GuildAds_ItemInfo[item] or {};
-				local _, _, _, hex = GetItemQualityColor(info.quality or 2)
+				local _, _, _, hex = GetItemQualityColor(info.quality or 1)
 				tochat = tochat .. hex.."|H"..item.."|h["..info.name.."]|r";
 				if data.q then
 					tochat = tochat.." x "..data.q;
@@ -502,17 +513,28 @@ GuildAdsTrade = {
 		else
 			count = data.q or count or "";
 		end
-		GuildAdsEditCount:SetText(count);
 		
-		GuildAdsEditBox:SetText(data.c or "");
+		GuildAdsTrade.setEditItem(item, count, data.c or "", data~=nil);
+	end;
+	
+	setEditItem = function(item, count, text)
+		if text then
+			GuildAdsEditBox:SetText(text);
+		end
+		if count then
+			GuildAdsEditCount:SetText(count);
+		end
 		
-		if info then
-			GuildAdsEditTexture:SetNormalTexture(info.texture);
-			local _, _, _, hex = GetItemQualityColor(info.quality or 1)
-			GuildAdsEditTextureName:SetText(hex..info.name.."|r");
-		else
-			GuildAdsEditTextureName:SetText(item);
-			GuildAdsEditTexture:SetNormalTexture("");
+		if item then
+			local info = GuildAds_ItemInfo[item];
+			if info then
+				GuildAdsEditTexture:SetNormalTexture(info.texture);
+				local _, _, _, hex = GetItemQualityColor(info.quality or 1)
+				GuildAdsEditTextureName:SetText(hex..info.name.."|r");
+			else
+				GuildAdsEditTexture:SetNormalTexture("");
+				GuildAdsEditTextureName:SetText(item);
+			end
 		end
 	end;
 	
@@ -683,7 +705,7 @@ GuildAdsTrade = {
 				GameTooltip:Show();
 				local info = GuildAds_ItemInfo[item];
 				if info then
-					GuildAdsUITools:TooltipAddTT(GameTooltip, GetItemQualityColor(info.quality or 2), item, info.name, data.q or 1);
+					GuildAdsUITools:TooltipAddTT(GameTooltip, GetItemQualityColor(info.quality or 1), item, info.name, data.q or 1);
 				end
 			end
 			
@@ -1261,7 +1283,7 @@ GuildAdsTrade = {
 					
 				-- Set name
 				if (info.name) then
-					local _, _, _, hex = GetItemQualityColor(info.quality or 2)
+					local _, _, _, hex = GetItemQualityColor(info.quality or 1)
 					getglobal(textField):SetText(hex..info.name.."|r");
 				else
 					getglobal(textField):SetText(button.item);
