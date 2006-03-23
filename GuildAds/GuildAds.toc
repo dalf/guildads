@@ -46,6 +46,6 @@ ui\tradeCraft\GuildAdsCraftFrame.xml
 ui\tradeTooltip\GuildAdsTooltip.xml
 ui\skill\GuildAdsSkillFrame.xml
 ui\inventory\GuildAdsInventoryFrame.xml
-ui\GEM\GuildAdsEventFrame.xml
+ui\GEM\GuildAdsGEMEventFrame.xml
 ui\GC\GuildAdsGCEventFrame.xml
 ui\minimapButton\GuildAdsMinimapButton.xml

@@ -86,8 +86,8 @@ GuildAdsGEMEvent = {
 		-- simple integration : one channel
 		local alias = ""; -- GEM_COM_Channels[GEM_DefaultSendChannel].alias;
 		local slash = ""; -- GEM_COM_Channels[GEM_DefaultSendChannel].slash;
-		local channel = GuildAdsConfig_GetChannelName();
-		local password = GuildAdsConfig_GetChannelPassword();
+		
+		local channel, password = GuildAds:GetDefaultChannel();
 		
 		if strupper(channel) ~= strupper(GEM_DefaultSendChannel) then
 			-- leave default channel
@@ -100,7 +100,7 @@ GuildAdsGEMEvent = {
 	end;
 	
 	onChannelLeave = function()
-		local channel = GuildAdsConfig_GetChannelName();
+		local channel = GuildAds:GetDefaultChannel();
 		GuildAdsGEMEvent.debug("Remove channel :"..channel);
 		GEMOptions_RemoveChannel(channel);
 	end;
