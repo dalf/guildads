@@ -11,7 +11,9 @@
 SIMPLECOMM_DEBUG = false;				-- output debug information
 
 SIMPLECOMM_CHARACTERSPERTICK_MAX = 512;	-- char per tick
-SIMPLECOMM_TICK_DELAY = 1;				-- delay in second between tick
+SIMPLECOMM_OUTBOUND_TICK_DELAY = 1;		-- delay in second between tick
+
+SIMPLECOMM_INBOUND_TICK_DELAY = 0.125;	-- TODO : change from 0.125 to 0.5 according to FPS
 
 local PIPE_ENTITIE = "\127p";
 
@@ -41,6 +43,8 @@ local SimpleComm_messageQueueLast = SimpleComm_messageQueueHeader;
 	-- .to
 	-- .serialized
 	-- .next
+	
+local SimpleComm_inboundMessageQueue = {};
 	
 local SimpleComm_sentBytes = 0;
 local SimpleComm_channelId = nil;
@@ -123,13 +127,13 @@ end
 local function SimpleComm_initChannel()
 	DEBUG_MSG("[SimpleComm_initChannel] begin");
 	SimpleComm_messageQueue = { };
-	SimpleCommFrame.update = SIMPLECOMM_TICK_DELAY;
+	SimpleCommFrame.outbound = SIMPLECOMM_OUTBOUND_TICK_DELAY;
 	DEBUG_MSG("[SimpleComm_initChannel] end");
 	return SimpleComm_joinChannel();
 end
 
 local function SimpleComm_doneChannel()
-	SimpleCommFrame.update = nil;
+	SimpleCommFrame.outbound = nil;
 	SimpleComm_leaveChannel();
 end
 
@@ -200,18 +204,17 @@ end
 -- 
 ---------------------------------------------------------------------------------
 function SimpleComm_SetFlag(player, flag, message)
+	if flag then
+		SimpleComm_Flags[player] = { flag=flag; message=message; count = 0 };
+	else
+		SimpleComm_Flags[player] = nil;
+	end
 	if player==nil then
 		player = UnitName("player");
 		if SimpleComm_FlagListener then
 			SimpleComm_FlagListener(flag, message);
 		end
 	end
-	if flag then
-		SimpleComm_Flags[player] = { flag=flag; message=message; count = 0 };
-	else
-		SimpleComm_Flags[player] = nil;
-	end
-
 end
 
 function SimpleComm_GetFlag(player)
@@ -380,7 +383,10 @@ local function SimpleComm_ParseMessage(author, text, channel)
 	if packet then
 		local message = SimpleComm_Unserialize(packet);
 		if message and SimpleComm_Handler then
-			SimpleComm_Handler(author, message, channel);
+			tinsert(SimpleComm_inboundMessageQueue, { author, message, channel });
+			if not SimpleCommFrame.inbound then
+				SimpleCommFrame.inbound = SIMPLECOMM_INBOUND_TICK_DELAY;
+			end
 		end
 	end
 end
@@ -568,13 +574,29 @@ ChatFrame_OnEvent = SimpleComm_newChatFrame_OnEvent;
 -- 
 ---------------------------------------------------------------------------------
 function SimpleComm_OnUpdate(elapsed)
-	if (this.update) then
-		this.update = this.update - elapsed;
-		if (this.update <=0) then
-			SimpleComm_SendQueue(SIMPLECOMM_TICK_DELAY - this.update);
-			this.update = SIMPLECOMM_TICK_DELAY;
+	if (this.outbound) then
+		this.outbound = this.outbound - elapsed;
+		if (this.outbound <=0) then
+			SimpleComm_SendQueue(SIMPLECOMM_OUTBOUND_TICK_DELAY - this.outbound);
+			this.outbound = SIMPLECOMM_OUTBOUND_TICK_DELAY;
 		end
-	elseif (this.initChannel) then
+	end
+	
+	if (this.inbound) then
+		this.inbound = this.inbound - elapsed;
+		if (this.inbound <= 0) and (SimpleComm_inboundMessageQueue[1]) then
+			local message = SimpleComm_inboundMessageQueue[1];
+			table.remove(SimpleComm_inboundMessageQueue, 1);
+			if SimpleComm_inboundMessageQueue[1] then
+				this.inbound = SIMPLECOMM_INBOUND_TICK_DELAY;
+			else
+				this.inbound = nil;
+			end
+			SimpleComm_Handler(message[1], message[2], message[3]);
+		end
+	end
+	
+	if (this.initChannel) then
 		this.initChannel = this.initChannel - elapsed;
 		if (this.initChannel <= 0) then
 			SimpleComm_initChannel();
