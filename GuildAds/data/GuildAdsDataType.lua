@@ -57,7 +57,11 @@ function GuildAdsDataType:clear()
 	error("GuildAdsDataType:deleteAll not implemented", 2);
 end
 
-function GuildAdsDataType:setRevision(playerName, id, revisionNumber)
+function GuildAdsDataType:getRevision(playerName)
+	error("GuildAdsDataType:getRevision not implemented", 2);
+end
+
+function GuildAdsDataType:setRevision(playerName, revisionNumber)
 	error("GuildAdsDataType:setRevision not implemented", 2);
 end
 
@@ -153,10 +157,12 @@ function GuildAdsDataType:isValid()
     -- Check metainformations
     if type(self.metaInformations) == "table" then
 		local metainfo = self.metaInformations;
+		
 		-- check name
 		if type(metainfo.name)~="string" then
 			return false, "Data type name check failed.";
 		end
+		
 		-- check version
 		if type(metainfo.guildadsCompatible)~="number" or metainfo.guildadsCompatible>GUILDADS_VERSION then
 			return false, "Data type incompatible with this version of GuildAds";
@@ -165,6 +171,11 @@ function GuildAdsDataType:isValid()
 		-- check parent
 		if metainfo.parent ~= GuildAdsDataType.PROFILE and metainfo.parent ~= GuildAdsDataType.CHANNEL then
 			return false, "Invalid metainformations.parent";
+		end
+		
+		-- check schema for network
+		if type(self.schema)~="table" or type(self.schema.id)~="string" or type(self.schema.data)~="table" then
+			return false, "Invalid schema";
 		end
 	else
 		return false, "Data type Metainformations check failed.";
