@@ -103,7 +103,7 @@ function GuildAdsMainDataType:get(author, id)
 end
 
 function GuildAdsMainDataType:getRevision(author)
-	return self.profile:getRaw(author).main._u;
+	return self.profile:getRaw(author).main._u or 0;
 end
 
 function GuildAdsMainDataType:setRevision(author, updateTag)

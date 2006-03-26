@@ -69,6 +69,10 @@ function GuildAdsInventoryDataType:get(author, id)
 	return self.profile:getRaw(author).inventory[id];
 end
 
+function GuildAdsInventoryDataType:getRevision(author)
+	return self.profile:getRaw(author).inventory._u or 0;
+end
+
 function GuildAdsInventoryDataType:setRevision(author, updateTag)
 	self.profile:getRaw(author).inventory._u = updateTag;
 end

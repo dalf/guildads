@@ -68,6 +68,10 @@ function GuildAdsSkillDataType:get(author, id)
 	return self.profile:getRaw(author).skills[id];
 end
 
+function GuildAdsSkillDataType:getRevision(author)
+	return self.profile:getRaw(author).skills._u or 0;
+end
+
 function GuildAdsSkillDataType:setRevision(author, updateTag)
 	self.profile:getRaw(author).skills._u = updateTag;
 end

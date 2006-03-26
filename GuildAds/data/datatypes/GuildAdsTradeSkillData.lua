@@ -84,6 +84,10 @@ function GuildAdsTradeSkillDataType:get(author, id)
 	return self.profile:getRaw(author).craft[id];
 end
 
+function GuildAdsTradeSkillDataType:getRevision(author)
+	return self.profile:getRaw(author).craft._u or 0;
+end
+
 function GuildAdsTradeSkillDataType:setRevision(author, updateTag)
 	self.profile:getRaw(author).craft._u = updateTag;
 end

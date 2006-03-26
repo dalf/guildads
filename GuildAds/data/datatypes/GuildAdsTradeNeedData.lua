@@ -49,6 +49,10 @@ function GuildAdsTradeNeedDataType:setRevision(author, updateTag)
 	self.profile:getRaw(author).items._un = updateTag;
 end
 
+function GuildAdsTradeNeedDataType:getRevision(author)
+	return self.profile:getRaw(author).items._un or 0;
+end
+
 function GuildAdsTradeNeedDataType:setRaw(author, id, info, updateTag)
 	local items = self.db.items;
 	self.db.items[id].n[author] = info;

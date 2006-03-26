@@ -51,6 +51,10 @@ function GuildAdsTradeOfferDataType:setRevision(author, updateTag)
 	self.profile:getRaw(author).items._uo = updateTag;
 end
 
+function GuildAdsTradeOfferDataType:getRevision(author)
+	return self.profile:getRaw(author).items._uo or 0;
+end
+
 function GuildAdsTradeOfferDataType:rawset(author, id, info, updateTag)
 	local items = self.db.items;
 	self.db.items[id].o[author] = info;
