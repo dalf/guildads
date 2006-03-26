@@ -204,13 +204,13 @@ end
 -- 
 ---------------------------------------------------------------------------------
 function SimpleComm_SetFlag(player, flag, message)
+	player = player or UnitName("player");
 	if flag then
 		SimpleComm_Flags[player] = { flag=flag; message=message; count = 0 };
 	else
 		SimpleComm_Flags[player] = nil;
 	end
-	if player==nil then
-		player = UnitName("player");
+	if player==UnitName("player") then
 		if SimpleComm_FlagListener then
 			SimpleComm_FlagListener(flag, message);
 		end
