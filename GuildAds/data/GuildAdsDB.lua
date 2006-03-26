@@ -364,8 +364,9 @@ function GuildAdsDB:GetCurrentTime()
 	t.sec = nil;
 	
 	local local_min = t.hour*60+t.min;
+	local server_min = hours*60+minutes; 
 	
-	local TimeShift = hours*60+minutes-local_min;
+	local TimeShift = server_min-local_min;
 	if math.abs(TimeShift)>=12*60 then
 		if local_min<server_min then
 			TimeShift = TimeShift-DayMin;
