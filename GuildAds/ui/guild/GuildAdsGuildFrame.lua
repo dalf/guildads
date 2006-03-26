@@ -29,6 +29,8 @@ GuildAdsGuild = {
 		}
 	};
 	
+	onlineCache = {},
+	
 	onConfigChanged = function(path, key, value)
 		if key=="GroupByAccount" then
 			GuildAdsGuild.peopleButtonsUpdate(true);
@@ -157,6 +159,14 @@ GuildAdsGuild = {
 		end
 	end;
 	
+	---------------------------------------------------------------------------------
+	--
+	-- isOnline
+	--
+	---------------------------------------------------------------------------------		
+	isOnline = function(playerName)
+		return GuildAdsComm:IsOnLine(playerName) or GuildAdsGuild.onlineCache[playerName] or false;
+	end;
 
 	---------------------------------------------------------------------------------
 	--
@@ -210,7 +220,7 @@ GuildAdsGuild = {
 		for _, playerName in linear do
 			if type(playerName)=="string" then
 				count = count + 1;
-				if GuildAdsComm:IsOnLine(playerName) then
+				if GuildAdsGuild.isOnline(playerName) then
 					countOnline = countOnline+1;
 				end
 			end
@@ -311,7 +321,8 @@ GuildAdsGuild = {
 			GameTooltip:SetOwner(obj, "ANCHOR_BOTTOMRIGHT");
 			
 			-- Add player name
-			local ocolor = GuildAdsUITools.onlineColor[GuildAdsComm:IsOnLine(owner)];
+			local ocolor = GuildAdsUITools.onlineColor[GuildAdsGuild.isOnline(owner)];
+			GuildAdsGuild.debug(owner..":"..tostring(GuildAdsComm:IsOnLine(owner))..","..tostring(GuildAdsGuild.onlineCache[owner])..":"..type(ocolor));
 			GameTooltip:AddLine(owner, ocolor.r, ocolor.g, ocolor.b);
 			
 			-- Add guild name
@@ -347,7 +358,7 @@ GuildAdsGuild = {
 				button:UnlockHighlight();
 			end
 			
-			local ocolor = GuildAdsUITools.onlineColor[GuildAdsComm:IsOnLine(playerName)];
+			local ocolor = GuildAdsUITools.onlineColor[GuildAdsGuild.isOnline(playerName)];
 			
 			-- icon will be nicer
 			local prefix;
@@ -427,7 +438,7 @@ GuildAdsGuild = {
 			info.value = owner;
 			info.func = GuildAdsGuild.contextMenu.whisper;
 			--[[
-			if not GuildAdsComm:IsOnLine(owner) then
+			if not GuildAdsGuild.isOnline(owner) then
 				info.disabled = 1
 			end
 			]]
@@ -578,8 +589,7 @@ GuildAdsGuild = {
 		end;
 		
 		adIsVisible = function(playerName)
-			-- if GuildAds_AdIsVisible(GUILDADS_MSG_TYPE_ANNONCE, ad) then
-			if not (GuildAdsGuild.getProfileValue(nil, "ShowOfflines") or GuildAdsComm:IsOnLine(playerName)) then
+			if not (GuildAdsGuild.getProfileValue(nil, "ShowOfflines") or GuildAdsGuild.isOnline(playerName)) then
 				return false;
 			end
 			local class = GuildAdsDB.profile.Main:get(playerName, GuildAdsDB.profile.Main.Class);
@@ -615,7 +625,11 @@ GuildAdsGuild = {
 								GuildAdsDB.profile.Main:set(name, GuildAdsDB.profile.Main.Guild, g_guildName);
 								GuildAdsDB.profile.Main:set(name, GuildAdsDB.profile.Main.Class, GuildAdsDB.profile.Main:getClassIdFromName(class));
 								GuildAdsDB.profile.Main:set(name, GuildAdsDB.profile.Main.CreationTime, GuildAdsDB:GetCurrentTime());
-								GuildAdsComm:SetOnlineStatus(name, online)
+								if online then
+									GuildAdsGuild.onlineCache[name] = true;
+								else
+									GuildAdsGuild.onlineCache[name] = false;
+								end
 								tinsert(workingTable, name);
 							end
 							GuildAdsDB.profile.Main:set(name, GuildAdsDB.profile.Main.GuildRank, rank);
