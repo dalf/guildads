@@ -24,7 +24,11 @@ GuildAdsTableDataType.iteratorId = function(state, id)
 		id, data = next(state[1], id);
 	end
 	if id then
-		return id, state[2], data, data._u;
+		if type(data)=="table" then
+			return id, state[2], data, data._u;
+		else
+			return id, state[2], data;
+		end
 	end
 end
 	
