@@ -132,7 +132,7 @@ function GuildAdsDataType:triggerEvent(playerName, id)
 				obj(self, playerName, id)
 			else
 				if( obj[method] ) then 
-					obj[method](self, playerName, id);
+					obj[method](obj, self, playerName, id);
 				end
 			end
 		end
