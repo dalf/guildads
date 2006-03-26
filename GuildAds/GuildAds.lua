@@ -103,7 +103,6 @@ function GuildAds:JoinChannel()
 	self.channelName, self.channelPassword = self:GetDefaultChannel();
 	
 	-- GuildAdsComm : init
-	GAC_Init(self.playerName, self.channelName, self.channelPassword);
 	GuildAdsComm:JoinChannel(self.channelName, self.channelPassword)
 	
 	-- Init first step done
@@ -275,16 +274,6 @@ function GuildAds_OnUpdate(elapsed)
 			end
 		end
 	else
-		if (this.SynchronizeOfflinesTimer) then
-			this.SynchronizeOfflinesTimer = this.SynchronizeOfflinesTimer - elapsed;
-			if (this.SynchronizeOfflinesTimer <= 0) then
-				this.SynchronizeOfflinesTimer = nil;
-				if (this.SynchronizeOfflinesTimerEnd) then
-					GAC_SynchronizeOfflinesEnd();
-				else
-					GAC_SynchronizeOfflines(this.SynchronizeOfflinesCount);
-				end
-			end
-		end
+		GuildAdsComm:ProcessQueues(elapsed);
 	end
 end

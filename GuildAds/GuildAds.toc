@@ -29,6 +29,8 @@ data\datatypes\GuildAdsInventoryData.lua
 data\datatypes\GuildAdsTradeSkillData.lua
 data\datatypes\GuildAdsSimpleEventData.lua
 network\SimpleComm.xml
+network\GuildAdsCodecs.lua
+network\GuildAdsDTS.lua
 network\GuildAdsComm.lua
 window\GuildAdsWindow.xml
 window\GuildAdsMainWindow.xml
