@@ -15,6 +15,18 @@ GuildAdsMainDataType = GuildAdsTableDataType:new({
         guildadsCompatible = 200,
 		parent = GuildAdsDataType.PROFILE
 	};
+	schema = {
+		id = "String",
+		data = {
+			[1] = { key="g",  	codec="String" },
+			[2] = { key="gr", 	codec="String" },
+			[3] = { key="gri",	codec="Integer" },
+			[4] = { key="l",	codec="Integer" },
+			[5] = { key="c",	codec="Integer" },
+			[6] = { key="r",	codec="Integer" },
+			[7] = { key="a",	codec="String" }
+		}
+	};
 	Guild = "g";
 	GuildRank = "gr";
 	GuildRankIndex = "gri";
@@ -22,7 +34,7 @@ GuildAdsMainDataType = GuildAdsTableDataType:new({
 	Class = "c";
 	Race = "r";
 	Account = "a";
-	CreationTime = "_t";	
+	CreationTime = "_t";
 });
 
 function GuildAdsMainDataType:Initialize()
@@ -88,6 +100,10 @@ function GuildAdsMainDataType:get(author, id)
 		error("author is nil", 2);
 	end
 	return self.profile:getRaw(author).main[id];
+end
+
+function GuildAdsMainDataType:getRevision(author)
+	return self.profile:getRaw(author).main._u;
 end
 
 function GuildAdsMainDataType:setRevision(author, updateTag)

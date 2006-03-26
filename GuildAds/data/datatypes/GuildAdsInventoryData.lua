@@ -16,6 +16,13 @@ GuildAdsInventoryDataType = GuildAdsTableDataType:new({
 		version = 1,
         guildadsCompatible = 200,
 		parent = GuildAdsDataType.PROFILE
+	};
+	schema = {
+		id = "Integer";
+		data = {
+			[1] = { key="i", 	codec="ItemRef" },
+			[2] = { key="q",	codec="Integer" }
+		}
 	}
 });
 

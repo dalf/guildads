@@ -14,6 +14,12 @@ GuildAdsTradeSkillDataType = GuildAdsTableDataType:new({
 		version = 1,
         guildadsCompatible = 200,
 		parent = GuildAdsDataType.PROFILE
+	};
+	schema = {
+		id = "ItemRef",
+		data = {
+			[1] = { key="cd",	codec="BigInteger" },
+		}
 	}
 });
 

@@ -14,6 +14,13 @@ GuildAdsSkillDataType = GuildAdsTableDataType:new({
 		version = 1,
         guildadsCompatible = 200,
 		parent = GuildAdsDataType.PROFILE
+	};
+	schema = {
+		id = "Integer",
+		data = {
+			[1] = { key="v",	codec="Integer" },
+			[2] = { key="m",	codec="Integer" }
+		}
 	}
 });
 

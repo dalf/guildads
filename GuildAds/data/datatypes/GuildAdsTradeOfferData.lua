@@ -16,6 +16,13 @@ GuildAdsTradeOfferDataType = GuildAdsDataType:new({
 		version = 1,
         guildadsCompatible = 200,
 		parent = GuildAdsDataType.CHANNEL
+	};
+	schema = {
+		id = "ItemRef",
+		data = {
+			[1] = { key="q",	codec="Integer" },
+			[2] = { key="c",	codec="String" }
+		}
 	}
 });
 
