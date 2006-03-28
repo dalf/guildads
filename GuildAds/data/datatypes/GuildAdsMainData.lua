@@ -17,7 +17,7 @@ GuildAdsMainDataType = GuildAdsTableDataType:new({
 	};
 	schema = {
 		id = "String",
-		data = {
+		keys = {
 			[1] = { key="g",  	codec="String" },
 			[2] = { key="gr", 	codec="String" },
 			[3] = { key="gri",	codec="Integer" },

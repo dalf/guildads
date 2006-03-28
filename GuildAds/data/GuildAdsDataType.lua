@@ -174,7 +174,11 @@ function GuildAdsDataType:isValid()
 		end
 		
 		-- check schema for network
-		if type(self.schema)~="table" or type(self.schema.id)~="string" or type(self.schema.data)~="table" then
+		if type(self.schema)~="table" then
+			return false, "No schema";
+		end
+		
+		if not((type(self.schema.id)=="string" and type(self.schema.data)=="table") or type(self.schema.keys)=="table") then
 			return false, "Invalid schema";
 		end
 	else
