@@ -37,42 +37,60 @@ function GuildAdsCodec.decode(s)
 end;
 
 -------------------------------------------
-GuildAdsCodecTable = GuildAdsCodec:new({}, "Table", 1);
+GuildAdsCodecRaw = GuildAdsCodec:new({}, "Raw", 1);
 
-local t = {};
-function GuildAdsCodecTable.encode(o)
-	local s = self.schema;
-	table.setn(t, table.getn(s));
-	local l;
-	for i, d in ipairs(s) do
-		t[i] = GuildAdsCodecs[d.codec].encode(o[d.key]);
-		if t[i] ~= "" then
-			l = i;
-		end
-	end
-	if l then
-		return table.concat(t, ">", 1, l)..">";
-	else
-		return "";
-	end
+function GuildAdsCodecRaw.encode(obj)
+	return obj;
 end
 
-function GuildAdsCodecTable.decode(o)
-	local o;
-	local s = self.schema;
-	local i=1;
+function GuildAdsCodecRaw.decode(obj)
+	return obj;
+end
+
+-------------------------------------------
+GuildAdsCodecTable = GuildAdsCodec:new({}, "Table", 1);
+
+function GuildAdsCodecTable:new(o, id, version)
+	local codec = GuildAdsCodec.new(self, o, id, version);
 	
-	for str in string.gfind(text, "([^\>]*)>") do
-		o = o or {};
-		local d = s[i];
-		if d then
-			o[d.key] = GuildAdsCodecs[d.codec].decode(str);
+	codec.t = {};
+	table.setn(codec.t, table.getn(codec.schema));
+	
+	codec.encode = function(o)
+		local t = codec.t;
+		local l;
+		for i, d in ipairs(codec.schema) do
+			t[i] = GuildAdsCodecs[d.codec].encode(o[d.key]);
+			if t[i] ~= "" then
+				l = i;
+			end
 		end
-		
-		i = i + 1;
+		if l then
+			return table.concat(t, "/", 1, l);
+		else
+			return "";
+		end
 	end
 	
-	return o;
+	codec.decode = function(o)
+		local i=1;
+		local t;
+		
+		o = o.."/";
+		for str in string.gfind(o, "([^\/]*)/") do
+			t = t or {};
+			local d = codec.schema[i];
+			if d then
+				t[d.key] = GuildAdsCodecs[d.codec].decode(str);
+			end
+			
+			i = i + 1;
+		end
+		
+		return t;
+	end
+	
+	return codec;
 end
 
 -------------------------------------------
@@ -179,14 +197,14 @@ end
 -------------------------------------------
 GuildAdsCodecString = GuildAdsCodec:new({}, "String", 1);
 
-GuildAdsCodecString.SpecialChars = "|>,/:;&|\n";
+GuildAdsCodecString.SpecialChars = "|>/,:;&|\n";
 
 GuildAdsCodecString.SpecialCharMap =
 {
-	p = "|",
-	gt = ">",
+	p = "|",	-- item link
+	gt = ">",	-- separator for serialized command
+	s = "/",	-- separator for serialized table
 	c = ",",
-	s = "/",
 	cn = ":",
 	sc = ";",
 	a = "&",
