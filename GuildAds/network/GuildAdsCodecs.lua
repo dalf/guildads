@@ -155,21 +155,22 @@ function GuildAdsCodecInteger.decode(str)
 end
 
 -------------------------------------------
+-- BigInteger : convert integer to base 64
 GuildAdsCodecBigInteger = GuildAdsCodec:new({}, "BigInteger", 1);
+
+GuildAdsCodecBigInteger.e = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ+-";
+GuildAdsCodecBigInteger.d = {};
+
+for i=1, string.len(GuildAdsCodecBigInteger.e), 1 do
+	GuildAdsCodecBigInteger.d[string.byte(GuildAdsCodecBigInteger.e, i )] = i-1;
+end
 
 function GuildAdsCodecBigInteger.encode(obj)
 	if obj then
-		-- convertion en base 52
 		value = "";
 		while (obj ~= 0) do
-			i = math.floor(obj / 52);
-			j = obj - i*52;
-			if (j>=26) then
-				value = string.char(65+j-26)..value;
-			else
-				value = string.char(96+j)..value;
-			end
-			obj = i;
+			value = string.char(string.byte(GuildAdsCodecBigInteger.e, bit.band(obj, 63)+1 ))..value;
+			obj = bit.rshift(obj, 6);
 		end
 		return value;
 	end
@@ -182,13 +183,7 @@ function GuildAdsCodecBigInteger.decode(str)
 	else
 		number = 0;
 		for i=1, string.len(str),1  do
-			o = string.byte(str, i);
-			if (o> 95) then
-				j = o-96;
-			else
-				j = o-65+26;
-			end
-			number = number*52 + j;
+			number = bit.lshift(number, 6) + GuildAdsCodecBigInteger.d[string.byte(str, i)];
 		end
 		return number;
 	end
@@ -264,12 +259,11 @@ end
 -------------------------------------------
 GuildAdsCodecItemRef = GuildAdsCodec:new({}, "ItemRef", 1);
 
-function GuildAdsCodecItemRef.encode(str)
-	if obj == nil then
-		return "";
-	else
+function GuildAdsCodecItemRef.encode(obj)
+	if obj then
 		return string.gsub(string.gsub(obj, "item\:", "\@"), ":0:0:0", "\*");
 	end
+	return "";
 end
 
 function GuildAdsCodecItemRef.decode(str)
