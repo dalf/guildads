@@ -21,7 +21,8 @@ GuildAdsTradeOfferDataType = GuildAdsDataType:new({
 		id = "ItemRef",
 		data = {
 			[1] = { key="q",	codec="Integer" },
-			[2] = { key="c",	codec="String" }
+			[2] = { key="_t",	codec="BigInteger" },
+			[3] = { key="c",	codec="String" },
 		}
 	}
 });
@@ -76,7 +77,7 @@ function GuildAdsTradeOfferDataType:set(author, id, info)
 		if items[author]==nil or info.q~=items[author].q or info.c~=items[author].c then
 			local profileItems = self.profile:getRaw(author).items;
 			profileItems._uo = 1 + (profileItems._uo or 0);
-			info._u = profileItems._un;
+			info._u = profileItems._uo;
 			items[author] = info;
 			self:triggerEvent(author, id);
 			return info;
@@ -122,7 +123,7 @@ GuildAdsTradeOfferDataType.iteratorId = function(state, item)
 		item, data = next(t, item);
 	end
 	if item then
-		return item, author, data.o[author], data.o[author]._t
+		return item, author, data.o[author], data.o[author]._u
 	end
 end
 

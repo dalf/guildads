@@ -114,7 +114,6 @@ function GuildAdsMainDataType:setRaw(author, id, info, updateTag)
 	local main =self.profile:getRaw(author).main;
 	main[id] = info;
 	if info then
-		main[id]._u = updateTag;
 		return true;
 	end;
 end

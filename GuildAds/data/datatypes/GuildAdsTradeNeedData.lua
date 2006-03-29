@@ -19,7 +19,8 @@ GuildAdsTradeNeedDataType = GuildAdsDataType:new({
 		id = "ItemRef",
 		data = {
 			[1] = { key="q",	codec="Integer" },
-			[2] = { key="c",	codec="String" }
+			[2] = { key="_t",	codec="BigInteger" },
+			[3] = { key="c",	codec="String" },
 		}
 	}
 });
@@ -119,7 +120,7 @@ GuildAdsTradeNeedDataType.iteratorId = function(state, item)
 		item, data = next(t, item);
 	end
 	if item then
-		return item, author, data.n[author], data.n[author]._t
+		return item, author, data.n[author], data.n[author]._u
 	end
 end
 
