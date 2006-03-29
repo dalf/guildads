@@ -387,7 +387,7 @@ end
 function GuildAdsComm:SendChatFlag()
 	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendChatFlag");
 	local flag, message = SimpleComm_GetFlag(GuildAds.playerName);
-	SimpleComm_SendRawMessage(nil, GUILDADS_MSG_PREFIX.."CF>"..(flag or "")..">"..(message or ""));
+	SimpleComm_SendRawMessage(nil, GUILDADS_MSG_PREFIX.."CF>"..(flag or "")..">"..(message or "")..">");
 end
 
 function GuildAdsComm:SendSearch(dataType, playerName)
@@ -471,23 +471,25 @@ function GuildAdsComm:ParseMessage(playerName, message, channelName)
 		self.transactions[playerName].__index = self.transactions[playerName];
 		DTS:ReceiveOpenTransaction(playerName, message.playerName, message.fromRevision)
 	elseif message.command == "CT" then
-		DTS:ReceiveCloseTransaction(message.playerName, message.revision)
+		DTS:ReceiveCloseTransaction(playerName, message.revision)
 		self.transactions[playerName] = nil;
 	elseif message.command == "N" then
 		local id = GuildAdsCodecs[DTS.dataType.schema.id].decode(message.id);
 		local data = GuildAdsCodecs[message.dataTypeName.."Data"].decode(message.data);
-		DTS:ReceiveNewRevision(message.playerName, message.revision, id, data)
+		DTS:ReceiveNewRevision(playerName, message.revision, id, data)
 	elseif message.command == "O" then
 		local revisions = {};
 		local revision;
-		for revision in string.gfind(revisions, "([^\/]*)/?$?") do
+		for revision in string.gfind(message.revisions, "([^\/]*)/?$?") do
 			revision = tonumber(revision);
-			revisions[tonumber(revision)] = true;
+			if revision then
+				revisions[tonumber(revision)] = true;
+			end
 		end
-		DTS:ReceiveOldRevisions(message.playerName, message.revisions)
+		DTS:ReceiveOldRevisions(playerName, revisions)
 	elseif message.command == "K" then
 		local keys = GuildAdsCodecs[message.dataTypeName.."Keys"].decode(message.keys);
-		DTS:ReceiveKeys(message.playerName, keys);
+		DTS:ReceiveKeys(playerName, keys);
 	end
 end
 

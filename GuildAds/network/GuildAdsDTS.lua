@@ -233,14 +233,14 @@ function GuildAdsDTS:ReceiveOldRevisions(sourceName, revisions)
 		
 		-- find which id to delete
 		for id, _, data, revision in self.dataType:iterator(self.playerName) do
-			if not self.revisions[revision] then
+			if not revisions[revision] then
 				tinsert(self.deleteTable, id);
 			end
 		end
 		
 		-- delete them
 		for _, id in self.deleteTable do
-			dataType:setRaw(self.playerName, id, nil, nil)
+			self.dataType:setRaw(self.playerName, id, nil, nil)
 		end
 		
 		table.setn(self.deleteTable, 0);
