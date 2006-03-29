@@ -56,11 +56,21 @@ end
 
 function GuildAdsTradeNeedDataType:setRaw(author, id, info, updateTag)
 	local items = self.db.items;
-	self.db.items[id].n[author] = info;
 	if info then
-		self:rawsetUpdateTag(author, updateTag);
+		if (self.db.items[id] == nil) then
+			self.db.items[id] = {};
+		end
+		if (self.db.items[id].n == nil) then
+			self.db.items[id].n = {};
+		end
+		self.db.items[id].n[author] = info;
+		info._u = revision;
 		return true;
-	end;
+	else
+		if self.db.items[id] and self.db.items[id].n then
+			self.db.items[id].n[author] = nil;
+		end
+	end
 end
 
 function GuildAdsTradeNeedDataType:set(author, id, info)
