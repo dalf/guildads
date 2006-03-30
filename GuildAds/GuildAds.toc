@@ -1,4 +1,4 @@
-## Interface: 10900
+## Interface: 11000
 ## Title: GuildAds
 ## Author: Zarkan, Fkai
 ## Version: 2.0
