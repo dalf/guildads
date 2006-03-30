@@ -98,6 +98,7 @@ local SerializeCommand = {
 		[1] = { key="dataTypeName",	codec="String" },
 		[2] = { key="playerName",	codec="String" },
 		[3] = { key="fromRevision",	codec="Integer" },
+		[4] = { key="toRevision",	codec="Integer" },
 	};
 	
 	N= {
@@ -115,7 +116,6 @@ local SerializeCommand = {
 	};
 	
 	CT= {
-		[1] = { key="revision",		codec="Integer" },
 	}
 };
 
@@ -204,6 +204,7 @@ GuildAdsComm = AceModule:new({
 	channelPassword = "",
 	
 	IGNOREMYMESSAGE = {
+		M=true,
 		CF=true,
 		OT=true,
 		N=true,
@@ -240,7 +241,7 @@ function GuildAdsComm:Initialize()
 end
 
 function GuildAdsComm:JoinChannel(channel, password)
-	self.channelName = string.lower(channel)
+	self.channelName = channel
 	self.channelPassword = password
 	
 	SimpleComm_Init(channel, password, GAC_GetGuildChatFrame());
@@ -252,12 +253,18 @@ end
 function GuildAdsComm.OnJoin(self)
 	self=self or GuildAdsComm;
 	
+	-- add my self to the channel
+	GuildAdsDB.channel[self.channelName]:addPlayer(GuildAds.playerName);
+	
+	-- I'm online
+	self:SetOnlineStatus(GuildAds.playerName, true);
+	
 	-- create DTS
 	for name, profile in GuildAdsDB.profile do
 		self.DTS[name] = GuildAdsDTS:new(self.channelName, profile);
 	end
 	
-	for name, channel in GuildAdsDB.channel[GuildAds.channelName] do
+	for name, channel in GuildAdsDB.channel[self.channelName] do
 		if type(channel)=="table" then
 			self.DTS[name] = GuildAdsDTS:new(self.channelName, channel);
 		end
@@ -266,16 +273,14 @@ function GuildAdsComm.OnJoin(self)
 	-- Send Meta
 	self:SendMeta();
 	
-	-- TODO : le reste....
---~ 	for name, DTS in pairs(self.DTS) do
---~ 		self:QueueSearch(DTS, GuildAds.playerName);
---~ 	end
+	-- TODO
+	for name, DTS in pairs(self.DTS) do
+		self:QueueSearch(DTS, GuildAds.playerName);
+		DTS.dataType:registerEvent(GuildAdsComm, "OnDBUpdate");
+	end
 
 --~ 	self:QueueSearch(self.DTS.Main, GuildAds.playerName);
-
-	self:QueueSearch(self.DTS.TradeOffer, GuildAds.playerName);
-	self.DTS.TradeOffer.dataType:registerEvent(GuildAdsComm, "OnDBUpdate");
-	
+--~ 	self:QueueSearch(self.DTS.TradeOffer, GuildAds.playerName);
 --~ 	self:QueueSearch(self.DTS.TradeNeed, GuildAds.playerName);
 end
 
@@ -361,7 +366,6 @@ function GuildAdsComm:SetOnlineStatus(playerName, status)
 				GuildAdsPlugin_OnEvent(GAS_EVENT_CONNECTION, playerName, true);
 			end
 			GuildAdsPlugin_OnEvent(GAS_EVENT_ONLINE, playerName, true);
-			self:SendMeta();	-- TODO : send whisper
 		end
 	else
 		if (self.isOnline[playerName]) then
@@ -379,9 +383,9 @@ function GuildAdsComm:SetOnlineStatus(playerName, status)
 	end
 end
 
-function GuildAdsComm:SendMeta()
+function GuildAdsComm:SendMeta(toPlayerName)
 	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendMeta");
-	SimpleComm_SendRawMessage(nil, GUILDADS_MSG_PREFIX.."M>"..GUILDADS_VERSION..">"..self.startTime..">"..self.state..">");
+	SimpleComm_SendRawMessage(toPlayerName, GUILDADS_MSG_PREFIX.."M>"..GUILDADS_VERSION..">"..self.startTime..">"..self.state..">");
 end
 
 function GuildAdsComm:SendChatFlag()
@@ -405,13 +409,13 @@ function GuildAdsComm:SendRevisionChannel(dataType, playerName, who, revision, w
 	SimpleComm_SendRawMessage(nil, GUILDADS_MSG_PREFIX.."SR>"..dataType.metaInformations.name..">"..playerName..">"..who..">"..revision..">"..worstRevision..">");
 end
 
-function GuildAdsComm:SendOpenTransaction(dataType, playerName, fromRevision)
+function GuildAdsComm:SendOpenTransaction(dataType, playerName, fromRevision, toRevision)
 	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendOpenTransaction");
-	SimpleComm_SendRawMessage(nil, GUILDADS_MSG_PREFIX.."OT>"..dataType.metaInformations.name..">"..playerName..">"..fromRevision..">");
+	SimpleComm_SendRawMessage(nil, GUILDADS_MSG_PREFIX.."OT>"..dataType.metaInformations.name..">"..playerName..">"..fromRevision..">"..toRevision..">");
 end
 
 function GuildAdsComm:SendRevision(dataType, playerName, revision, id, data)
-	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendRevision");
+	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendNewRevision");
 	SimpleComm_SendRawMessage(nil, GUILDADS_MSG_PREFIX.."N>"..revision..">"..GuildAdsCodecs[dataType.schema.id].encode(id)..">"..GuildAdsCodecs[dataType.metaInformations.name.."Data"].encode(data)..">");
 end
 
@@ -420,13 +424,13 @@ function GuildAdsComm:SendKeys(dataType, playerName, keys)
 end
 
 function GuildAdsComm:SendOldRevision(dataType, playerName, revisions)
-	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendKeepRevision");
+	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendOldRevision");
 	SimpleComm_SendRawMessage(nil, GUILDADS_MSG_PREFIX.."O>"..table.concat(revisions, "/")..">");
 end
 
-function GuildAdsComm:SendCloseTransaction(dataType, playerName, revision)
+function GuildAdsComm:SendCloseTransaction(dataType, playerName)
 	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendCloseTransaction");
-	SimpleComm_SendRawMessage(nil, GUILDADS_MSG_PREFIX.."CT>"..revision..">");
+	SimpleComm_SendRawMessage(nil, GUILDADS_MSG_PREFIX.."CT>");
 end
 
 function GuildAdsComm.OnMessage(playerName, message, channel)
@@ -450,11 +454,13 @@ function GuildAdsComm:ParseMessage(playerName, message, channelName)
 			version = message.version
 		}
 		self:SetOnlineStatus(playerName, true);
-		GuildAdsDB.channel[channelName]:addPlayer(playerName);
+		self:SendMeta(playerName);
+		GuildAdsDB.channel[self.channelName]:addPlayer(playerName);
 	elseif message.command == "CF" then
-		SimpleComm_SetFlag(author, message.flag, message.text);
+		SimpleComm_SetFlag(playerName, message.flag, message.text);
 	elseif message.command == "S" then
 		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "S("..message.playerName..")");
+		self:DeleteDuplicateSearch(DTS, message.playerName);
 		DTS:ReceiveSearch(message.playerName)
 	elseif message.command == "R" then
 		DTS:ReceiveRevision(message.playerName, message.who, message.revision, message.weight, message.worstRevision)
@@ -464,20 +470,24 @@ function GuildAdsComm:ParseMessage(playerName, message, channelName)
 		DTS:ReceiveSearchResult(message.playerName, message.who, message.fromRevision, message.toRevision)
 	elseif message.command == "OT" then
 		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"ReceiveOpenTransaction("..message.playerName..","..message.fromRevision);
+		self:DeleteDuplicateUpdate(DTS, self.playerName, GuildAds.playerName, message.fromRevision, message.toRevision)
 		self.transactions[playerName] = {
 			playerName = message.playerName,
-			dataTypeName = message.dataTypeName
+			dataTypeName = message.dataTypeName,
+			lmt=time()
 		}
 		self.transactions[playerName].__index = self.transactions[playerName];
-		DTS:ReceiveOpenTransaction(playerName, message.playerName, message.fromRevision)
+		DTS:ReceiveOpenTransaction(playerName, message.playerName, message.fromRevision, message.toRevision)
 	elseif message.command == "CT" then
-		DTS:ReceiveCloseTransaction(playerName, message.revision)
+		DTS:ReceiveCloseTransaction(playerName)
 		self.transactions[playerName] = nil;
 	elseif message.command == "N" then
+		self.transactions[playerName].lmt = time();
 		local id = GuildAdsCodecs[DTS.dataType.schema.id].decode(message.id);
 		local data = GuildAdsCodecs[message.dataTypeName.."Data"].decode(message.data);
 		DTS:ReceiveNewRevision(playerName, message.revision, id, data)
 	elseif message.command == "O" then
+		self.transactions[playerName].lmt = time();
 		local revisions = {};
 		local revision;
 		for revision in string.gfind(message.revisions, "([^\/]*)/?$?") do
@@ -488,6 +498,7 @@ function GuildAdsComm:ParseMessage(playerName, message, channelName)
 		end
 		DTS:ReceiveOldRevisions(playerName, revisions)
 	elseif message.command == "K" then
+		self.transactions[playerName].lmt = time();
 		local keys = GuildAdsCodecs[message.dataTypeName.."Keys"].decode(message.keys);
 		DTS:ReceiveKeys(playerName, keys);
 	end
@@ -499,6 +510,7 @@ function GuildAdsComm:OnDBUpdate(dataType, playerName, id)
 end
 
 function GuildAdsComm:DeleteDuplicateUpdate(DTS, playerName, who, fromRevision, toRevision)
+	-- TODO : a quoi sert who?
 	local i = 1;
 	while self.updateQueue[i] do
 		local update = self.updateQueue[i];
@@ -513,6 +525,20 @@ function GuildAdsComm:DeleteDuplicateUpdate(DTS, playerName, who, fromRevision, 
 			i=i+1;
 		end
 	end
+end
+
+function GuildAdsComm:DeleteDuplicateSearch(DTS, playerName)
+	local i=1;
+	while self.searchQueue[i] do
+		local search = self.searchQueue[i];
+		if 		(search.DTS==DTS)
+			and	(search.playerName==playerName)
+		then
+			table.remove(self.searchQueue, i);
+		else
+			i = i + 1;
+		end
+	end	
 end
 
 function GuildAdsComm:FindSearch(DTS, playerName)
@@ -540,12 +566,20 @@ function GuildAdsComm:QueueSearch(DTS, playerName)
 	if not self:FindSearch(DTS, playerName) then
 		table.insert(self.searchQueue, { DTS=DTS, playerName=playerName} );
 		if not self.searchQueueDelay then
-			self.searchQueueDelay = 1;
+			self.searchQueueDelay = 2;
 		end
 	end
 end
 
 function GuildAdsComm:ProcessQueues(elapsed)
+	-- Is there some opened transactions ?
+	if next(self.transactions) then
+		-- then don't flood the channel with my update/search
+		-- TODO : ajouter un time out, sinon une transaction non fermée bloque tout
+		return;
+	end
+	
+	-- First : send update
 	if self.updateQueueDelay then
 		self.updateQueueDelay = self.updateQueueDelay - elapsed;
 		if self.updateQueueDelay<=0 and self.updateQueue[1] then
@@ -561,21 +595,22 @@ function GuildAdsComm:ProcessQueues(elapsed)
 				self.updateQueueDelay = nil;
 			end
 		end
-	end
-	
-	if self.searchQueueDelay then
-		self.searchQueueDelay = self.searchQueueDelay - elapsed;
-		if self.searchQueueDelay<=0 and self.searchQueue[1] then
-			local search = self.searchQueue[1];
-			if search.DTS.state=="READY" then
-				table.remove(self.searchQueue, 1);
-				search.DTS:SendSearch(search.playerName);
-			end
-			
-			if self.searchQueue[1] then
-				self.searchQueueDelay = 1;
-			else
-				self.searchQueueDelay = nil;
+	else
+		-- No update ? then send search
+		if self.searchQueueDelay then
+			self.searchQueueDelay = self.searchQueueDelay - elapsed;
+			if self.searchQueueDelay<=0 and self.searchQueue[1] then
+				local search = self.searchQueue[1];
+				if search.DTS.state=="READY" then
+					table.remove(self.searchQueue, 1);
+					search.DTS:SendSearch(search.playerName);
+				end
+				
+				if self.searchQueue[1] then
+					self.searchQueueDelay = 2;
+				else
+					self.searchQueueDelay = nil;
+				end
 			end
 		end
 	end

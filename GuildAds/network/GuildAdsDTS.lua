@@ -22,7 +22,7 @@ function GuildAdsDTS:new(channelName, dataType)
 	if dataType.schema.keys then
 		local keysCodec = GuildAdsCodecTable:new({ schema=dataType.schema.keys }, dataType.metaInformations.name.."Keys", 1);
 	end
-	
+	-- la recherche doit être par joueur
 	local o = {
 		channelName = channelName;	-- TODO : not use
 		dataType = dataType;
@@ -90,7 +90,7 @@ end
 function GuildAdsDTS:SendRevision()
 --~ 	if self.state=="SEARCH" then
 --~ 		self.state = "SENT";
-		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"state="..self.state);
+--~ 		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"state="..self.state);
 		if GuildAdsComm.isOnline[GuildAds.playerName].p then
 			-- send result to parent in whisper
 			GuildAdsComm:SendRevisionWhisper(GuildAdsComm.isOnline[GuildAds.playerName].p, self.dataType, self.playerName, self.best.playerName, self.best.revision, self.best.weight, self.worst.revision);
@@ -101,7 +101,7 @@ function GuildAdsDTS:SendRevision()
 --~ 	end
 end
 
-function GuildAdsDTS:ReceiveRevision(playerName, revision, weight, worstRevision)
+function GuildAdsDTS:ReceiveRevision(playerName, who, revision, weight, worstRevision)
 --~ 	if self.state~="SEARCH" then
 --~ 		return;
 --~ 	end
@@ -127,7 +127,14 @@ function GuildAdsDTS:ReceiveRevision(playerName, revision, weight, worstRevision
 	
 	self.count = self.count+1;
 	
-	if self.count==3 then
+	local countMax;
+	if GuildAdsComm.isOnline[GuildAds.playerName].c2 then
+		countMax = 3
+	else
+		countMax = 2
+	end;
+	
+	if self.count==zz then
 		self:SendRevision()
 	end
 end
@@ -149,7 +156,7 @@ function GuildAdsDTS:SendUpdate(playerName, fromRevision)
 		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"state="..self.state);
 		
 		-- send open transaction
-		GuildAdsComm:SendOpenTransaction(self.dataType, playerName, fromRevision);
+		GuildAdsComm:SendOpenTransaction(self.dataType, playerName, fromRevision, self.dataType:getRevision(playerName));
 		
 		if self.dataType.schema.data then
 			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"data");
@@ -160,7 +167,7 @@ function GuildAdsDTS:SendUpdate(playerName, fromRevision)
 		end
 
 		-- send close transaction with the current revision number
-		GuildAdsComm:SendCloseTransaction(self.dataType, playerName, self.dataType:getRevision(playerName));
+		GuildAdsComm:SendCloseTransaction(self.dataType, playerName);
 		self.state="READY";
 	end
 end
@@ -172,8 +179,8 @@ function GuildAdsDTS:SendUpdateData(playerName, fromRevision)
 	local newEntries = 0;
 	-- send new entries >r1
 	for id, _, data, revision in self.dataType:iterator(playerName) do
-		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "  - new("..tostring(revision)..")="..id);
 		if (revision>fromRevision) then
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "  - new("..tostring(revision)..")="..id);
 			newEntries = newEntries + 1;
 			-- send this revision
 			GuildAdsComm:SendRevision(self.dataType, playerName, revision, id, data);
@@ -198,7 +205,7 @@ function GuildAdsDTS:SendUpdateKeys(playerName, fromRevision)
 	GuildAdsComm:SendKeys(self.dataType, playerName, keys)
 end
 
-function GuildAdsDTS:ReceiveOpenTransaction(sourceName, playerName, fromRevision)
+function GuildAdsDTS:ReceiveOpenTransaction(sourceName, playerName, fromRevision, toRevision)
 	if self.state=="READY" then
 		self.state="OPEN"
 		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"state="..self.state);
@@ -206,12 +213,13 @@ function GuildAdsDTS:ReceiveOpenTransaction(sourceName, playerName, fromRevision
 		self.playerName = playerName
 		self.sourceName = sourceName;
 		self.fromRevision = fromRevision;
+		self.toRevision = toRevision;
 	end
 end
 
-function GuildAdsDTS:ReceiveCloseTransaction(sourceName, revision)
+function GuildAdsDTS:ReceiveCloseTransaction(sourceName)
 	if ((self.state=="OPEN") and (self.sourceName==sourceName)) or (self.state=="STANDBY") then
-		self.dataType:setRevision(self.playerName, revision);
+		self.dataType:setRevision(self.playerName, self.toRevision);
 		
 		self.state="READY"
 		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"state="..self.state);
