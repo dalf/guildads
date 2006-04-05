@@ -29,7 +29,7 @@ GuildAds = AceAddon:new({
 	name          = GUILDADS_TITLE,
     description   = GUILDADS_TITLE,
     version       = "2.0 alpha",
-    releaseDate   = "03-08-2006",
+    releaseDate   = "04-05-2006",
     aceCompatible = 103,
     author        = "Zarkan, Fkai",
     email         = "guildads@gmail.com",
@@ -44,6 +44,7 @@ GuildAds = AceAddon:new({
 	joinChannelAttempts = 0,
 	channelName			= "",
 	channelPassword		= "",
+	channelNameFrom		= "",				-- channel name from : guild, party, raid, player
 	playerName 			= false,
 	windows				= {}
 })
@@ -114,7 +115,7 @@ function GuildAds:JoinChannel()
 	end
 	
 	-- Init du channel
-	self.channelName, self.channelPassword = self:GetDefaultChannel();
+	self.channelName, self.channelPassword, self.channelNameFrom = self:GetDefaultChannel();
 	
 	-- GuildAdsComm : init
 	GuildAdsComm:JoinChannel(self.channelName, self.channelPassword)
@@ -213,8 +214,11 @@ function GuildAds:CheckChannelName()
 end
 
 function GuildAds:GetDefaultChannel()
+	local source;
 	local channel = GuildAdsDB:GetConfigValue(GuildAdsDB.PROFILE_PATH, "ChannelName");
-	if not channel then
+	if channel then
+		source="config";
+	else
 		-- If in a guild
 		local go_guildName, go_GuildRankName, go_guildRankIndex = GetGuildInfo("player");
 		if go_guildName then			
@@ -227,6 +231,7 @@ function GuildAds:GetDefaultChannel()
 				name = string.sub(name, 0, 31);
 			end
 			channel = name;
+			source = "guild";
 		end
 		
 		-- channel name bases on the raid leader name
@@ -235,16 +240,18 @@ function GuildAds:GetDefaultChannel()
 				local name, rank = GetRaidRosterInfo(Raid_Member_ID_Number);
 				if rank==2 then
 					channel = "GuildAds"..name;
+					source = "raid";
 				end
 			end
 		end
 		
 		-- channel name bases on the group leader name 
 		if ( GetNumPartyMembers() > 0 ) then
-			for groupindex = 1,4 do
+			for groupindex = 1,GetNumPartyMembers() do
 				local unit = "party"..groupindex;
 				if UnitIsPartyLeader(unit) then
 					channel = "GuildAds"..UnitName(unit);
+					source = "party";
 				end
 			end
 		end
@@ -252,9 +259,10 @@ function GuildAds:GetDefaultChannel()
 		-- channel name bases on the player name
 		if not channel then
 			channel = "GuildAds"..GuildAds.playerName;
+			source = "player";
 		end
 	end
-	return channel, GuildAdsDB:GetConfigValue(GuildAdsDB.PROFILE_PATH, "ChannelPassword");
+	return channel, GuildAdsDB:GetConfigValue(GuildAdsDB.PROFILE_PATH, "ChannelPassword"), source;
 end
 
 function GuildAds:SetDefaultChannel(name, password)
