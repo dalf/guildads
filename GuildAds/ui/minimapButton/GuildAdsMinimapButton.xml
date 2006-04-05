@@ -13,7 +13,9 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 			</OnLoad>
 			<OnClick>
 				if (arg1 == "LeftButton") then
-					GuildAds:ToggleMainWindow()
+					if GuildAds.channelJoined then
+						GuildAds:ToggleMainWindow()
+					end
 				else
 					GuildAds:ToggleOptionsWindow()
 				end

@@ -11,15 +11,6 @@
 --[[
     Debug module
 ]]
-
-GA_DEBUG_GLOBAL = 1; -- Blanc
-GA_DEBUG_CHANNEL = 2; -- Bleu clair
-GA_DEBUG_CHANNEL_HIGH = 3;
-GA_DEBUG_PROTOCOL = 4; -- Jaune foncé
-GA_DEBUG_STORAGE = 5; -- Vert foncé
-GA_DEBUG_GUI = 6; -- Cyan clair
-GA_DEBUG_PLUGIN = 8; -- Cyan foncé
-
 GuildAds_DebugPlugin = {
 	metaInformations = { 
 		name = "Debug",
@@ -95,5 +86,3 @@ GuildAds_DebugPlugin = {
 		GuildAdsDebug_Log:AddMessage(date("[%H:%M:%S] ")..str, GuildAds_DebugPlugin.colors[dbg_type][1], GuildAds_DebugPlugin.colors[dbg_type][2], GuildAds_DebugPlugin.colors[dbg_type][3]);
 	end;
 }
-
-GuildAds_ChatDebug = GuildAds_DebugPlugin.addDebugMessageFake;

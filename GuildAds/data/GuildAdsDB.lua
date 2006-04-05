@@ -192,7 +192,9 @@ GuildAdsDBchannelMT = {
 		return t[n];
 	end;
 	
+	-- TODO : gerer le case des noms
 	getChannel = function(channelName)
+		ChatFrame1:AddMessage("Ask channel["..channelName.."]");
 		channelName = (channelName or GuildAds.channelName).."@"..GuildAds.factionName;
 		local t = GuildAdsDB.db.channels[channelName];
 		if t == nil then

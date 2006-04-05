@@ -1,6 +1,6 @@
 ﻿----------------------------------------------------------------------------------
 --
--- GuildAdsDRS.lua (DataType Synchronization)
+-- GuildAdsDTS.lua (DataType Synchronization)
 --
 -- Author: Zarkan, Fkaï of European Ner'zhul (Horde)
 -- URL : http://guildads.sourceforge.net
@@ -10,7 +10,7 @@
 
 GuildAdsDTS = {};
 
-function GuildAdsDTS:new(channelName, dataType)
+function GuildAdsDTS:new(dataType)
 	if not dataType.metaInformations or  not dataType.metaInformations.name then
 		return;
 	end
@@ -24,7 +24,6 @@ function GuildAdsDTS:new(channelName, dataType)
 	end
 	-- la recherche doit être par joueur
 	local o = {
-		channelName = channelName;	-- TODO : not use
 		dataType = dataType;
 		playerName = "";
 		best = {
@@ -37,7 +36,7 @@ function GuildAdsDTS:new(channelName, dataType)
 			revision = 0,
 			weight = 0
 		};
-		count = 0;
+		count = 0;			-- for search
 		state = "READY";
 		deleteTable = {};
 	};

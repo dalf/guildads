@@ -42,12 +42,14 @@ GuildAdsMinimapButtonCore = {
 		if not GuildAdsMinimapButtonCore.getConfigValue(nil, "RadiusOffset") then
 			GuildAdsMinimapButtonCore.defaultsOptions();
 		end
-		
+	end;
+	
+	onChannelJoin = function()
 		-- Show button
 		if not ButtonHole then
 			GuildAdsMinimapButtonCore.update();
 			GuildAdsMinimapButton:Show();
-		end		
+		end
 	end;
 	
 	onConfigChanged = function(path, key, value)

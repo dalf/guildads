@@ -42,15 +42,6 @@ local function GAC_GetGuildChatFrame()
 	return DEFAULT_CHAT_FRAME;
 end
 
-GAC_GetFlag = SimpleComm_GetFlag;
-
-function GAC_Reinit(channel, password)
-	-- Reinit GuildAdsComm
-	SimpleComm_SetChannel(channel, password);
-	
-	-- Init after the channel is joined (GAC_Synchronize called by SimpleComm)
-end
-
 --------------------------------------------------------------------------------
 --
 -- Serialize/Unserialize 
@@ -244,7 +235,12 @@ function GuildAdsComm:JoinChannel(channel, password)
 	self.channelName = channel
 	self.channelPassword = password
 	
-	SimpleComm_Init(channel, password, GAC_GetGuildChatFrame());
+	if self.alreadyJoined then
+		SimpleComm_SetChannel(channel, password);
+	else
+		SimpleComm_Init(channel, password, GAC_GetGuildChatFrame());
+		self.alreadyJoined = true;
+	end
 
 	local command, alias = GuildAds:GetDefaultChannelAlias();
 	SimpleComm_InitAlias(command, alias);
@@ -260,23 +256,26 @@ function GuildAdsComm.OnJoin(self)
 	self:SetOnlineStatus(GuildAds.playerName, true);
 	
 	-- create DTS
-	for name, profile in GuildAdsDB.profile do
-		self.DTS[name] = GuildAdsDTS:new(self.channelName, profile);
+	for name, profileDT in GuildAdsDB.profile do
+		self.DTS[name] = GuildAdsDTS:new(profileDT);
 	end
 	
-	for name, channel in GuildAdsDB.channel[self.channelName] do
-		if type(channel)=="table" then
-			self.DTS[name] = GuildAdsDTS:new(self.channelName, channel);
+	for name, channelDT in GuildAdsDB.channel[self.channelName] do
+		if type(channelDT)=="table" then
+			self.DTS[name] = GuildAdsDTS:new(channelDT);
 		end
 	end
+	
+	-- for plugins
+	GuildAdsPlugin_OnChannelJoin();
 	
 	-- Send Meta
 	self:SendMeta();
 	
 	-- TODO
 	for name, DTS in pairs(self.DTS) do
-		self:QueueSearch(DTS, GuildAds.playerName);
 		DTS.dataType:registerEvent(GuildAdsComm, "OnDBUpdate");
+		self:QueueSearch(DTS, GuildAds.playerName);
 	end
 
 --~ 	self:QueueSearch(self.DTS.Main, GuildAds.playerName);
@@ -286,8 +285,23 @@ end
 
 function GuildAdsComm.OnLeave(self)
 	self=self or GuildAdsComm;
-	self.state = "LEAVING";
-	self:SendMeta();
+	
+	-- for plugins
+	GuildAdsPlugin_OnChannelLeave();
+	
+	-- Delete queues
+	self.searchQueueDelay = nil;
+	self.updateQueueDelay = nil;
+
+	for i=1,table.getn(self.searchQueue) do table.remove(self.searchQueue) end
+	for i=1,table.getn(self.updateQueue) do table.remove(self.updateQueue) end
+
+	for name, DTS in pairs(self.DTS) do
+		DTS.dataType:unregisterEvent(GuildAdsComm);
+	end
+	
+--~ 	self.state = "LEAVE";
+--~ 	self:SendMeta();
 end
 
 function GuildAdsComm:CHAT_MSG_CHANNEL_JOIN()

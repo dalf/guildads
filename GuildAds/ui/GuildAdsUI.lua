@@ -1,3 +1,4 @@
+--[[
 Envoyer la demande pour playerName, dataType
 	Chacun fixe l opcode "RLR" (request last revision)
 	Pas de fils -> envois au parent
@@ -19,7 +20,7 @@ Probleme :
 	
 	
 GuildAdsComm:SendUpdate
-
+]]
 
 --[[
 	Initialiaze
