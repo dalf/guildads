@@ -12,6 +12,14 @@ GUILDADS_VERSION          = 200.1;
 
 GUILDADS_MAX_CHANNEL_JOIN_ATTEMPTS = 5;				-- Wait 8 seconds more if no channel are joined
 
+GA_DEBUG_GLOBAL = 1;
+GA_DEBUG_CHANNEL = 2;
+GA_DEBUG_CHANNEL_HIGH = 3;
+GA_DEBUG_PROTOCOL = 4;
+GA_DEBUG_STORAGE = 5;
+GA_DEBUG_GUI = 6;
+GA_DEBUG_PLUGIN = 8;
+
 GUILDADS_MAPBOOLEAN = {
 	[true] = "Yes",
 	[false] = "No"
@@ -47,7 +55,9 @@ function GuildAds:Initialize()
 	GuildAds.channelJoined = false;
 	
 	-- RegisterEvent
-	self:RegisterEvent("PLAYER_GUILD_UPDATE");
+	self:RegisterEvent("PLAYER_GUILD_UPDATE", "CheckChannelName");
+	self:RegisterEvent("RAID_ROSTER_UPDATE", "CheckChannelName");
+	self:RegisterEvent("PARTY_MEMBERS_CHANGED", "CheckChannelName");
 	
 	-- Init player name, faction name, realm name
 	self.playerName = UnitName("player");
@@ -72,9 +82,13 @@ function GuildAds:Initialize()
 	end
 	GuildAds_ChatDebug(GA_DEBUG_GLOBAL,"[GuildAdsWindow:Create] end");
 	
+	-- Initialize Plugins
+	GuildAds_ChatDebug(GA_DEBUG_GLOBAL,"[GuildAdsPlugin_OnInit] begin");
+  	GuildAdsPlugin_OnInit();
+  	GuildAds_ChatDebug(GA_DEBUG_GLOBAL,"[GuildAdsPlugin_OnInit] end");
+	
 	-- Call GuildAds:JoinChannel() in 8 seconds
 	GuildAdsSystem:Show();
-	GuildAdsSystem.Reinit = false;
 	GuildAdsSystem.InitTimer = 8;
 	
 	GuildAds_ChatDebug(GA_DEBUG_GLOBAL,"[GuildAds:Initialize] end");
@@ -108,34 +122,16 @@ function GuildAds:JoinChannel()
 	-- Init first step done
 	GuildAds.channelJoined = true;
 	
-	-- Initialize Plugins
-	-- TODO : déplacer dans :Initialize() (-> le problème du reseau non init)
-	GuildAds_ChatDebug(GA_DEBUG_GLOBAL,"[GuildAdsPlugin_OnInit] begin");
-  	GuildAdsPlugin_OnInit();
-  	GuildAds_ChatDebug(GA_DEBUG_GLOBAL,"[GuildAdsPlugin_OnInit] end");
-	
 	GuildAds_ChatDebug(GA_DEBUG_GLOBAL,"[GuildAds:JoinChannel] end");
 end
 
 function GuildAds:ChangeChannel()
 	GuildAds_ChatDebug(GA_DEBUG_GLOBAL,"[GuildAds:ChangeChannel]");
-	GAC_SendRemoveAll(nil);
+	-- TODO : retirer sa présence du channel
 	
-	GuildAdsSystem.Reinit = true;
-	GuildAdsSystem.InitTimer = 2;
-end
-
-function GuildAds:JoinChannelAgain()
-	GuildAds_ChatDebug(GA_DEBUG_GLOBAL,"[GuildAds:JoinChannelAgain]");
 	GuildAds.channelJoined = false;
 	
-	-- Reinit du channel
-	self.channelName, self.channelPassword = self:GetDefaultChannel();
-	
-	-- Reinit GuildAdsComm
-	GAC_Reinit(self.channelName, self.channelPassword);
-	
-	GuildAds.channelJoined = true;
+	GuildAdsSystem.InitTimer = 2;
 end
 
 function GuildAds:ToggleMainWindow()
@@ -194,7 +190,7 @@ function GuildAds:DisplayDebugInfo()
 		{text="realm", val=tostring(self.realmName) },
 		{text="channelJoined", val=self.channelJoined, map=GUILDADS_MAPBOOLEAN},
 		{text="channel", val=tostring(self.channelName) },
-		{text="joinChannelAttempts", val=tostring(self.channelJoined) }
+		{text="joinChannelAttempts", val=tostring(self.joinChannelAttempts) }
 	});
 end
 
@@ -210,8 +206,7 @@ end
 function GuildAds:ResetOthers()
 end
 
-function GuildAds:PLAYER_GUILD_UPDATE()
-	-- Changement de guilde ?
+function GuildAds:CheckChannelName()
 	if self.channelJoined and self:GetDefaultChannel() ~= self.channelName then
 		GuildAds:ChangeChannel()
 	end
@@ -220,8 +215,10 @@ end
 function GuildAds:GetDefaultChannel()
 	local channel = GuildAdsDB:GetConfigValue(GuildAdsDB.PROFILE_PATH, "ChannelName");
 	if not channel then
+		-- If in a guild
 		local go_guildName, go_GuildRankName, go_guildRankIndex = GetGuildInfo("player");
-		if (go_guildName) then
+		if go_guildName then			
+			-- channel name bases on the guild name
 			name = "GuildAds";
 			for word in string.gfind(go_guildName,"[^ ]+") do
 				name = name..word;
@@ -230,8 +227,31 @@ function GuildAds:GetDefaultChannel()
 				name = string.sub(name, 0, 31);
 			end
 			channel = name;
-		else
-			channel = "GuildAdsGlobal";
+		end
+		
+		-- channel name bases on the raid leader name
+		if GetNumRaidMembers()>0 then
+			for i=1, GetNumRaidMembers(), 1 do
+				local name, rank = GetRaidRosterInfo(Raid_Member_ID_Number);
+				if rank==2 then
+					channel = "GuildAds"..name;
+				end
+			end
+		end
+		
+		-- channel name bases on the group leader name 
+		if ( GetNumPartyMembers() > 0 ) then
+			for groupindex = 1,4 do
+				local unit = "party"..groupindex;
+				if UnitIsPartyLeader(unit) then
+					channel = "GuildAds"..UnitName(unit);
+				end
+			end
+		end
+		
+		-- channel name bases on the player name
+		if not channel then
+			channel = "GuildAds"..GuildAds.playerName;
 		end
 	end
 	return channel, GuildAdsDB:GetConfigValue(GuildAdsDB.PROFILE_PATH, "ChannelPassword");
@@ -263,17 +283,20 @@ GuildAds:RegisterForLoad()
 -- 
 ---------------------------------------------------------------------------------
 function GuildAds_OnUpdate(elapsed)
+	GuildAdsComm:ProcessQueues(elapsed);
 	if (this.InitTimer) then
 		this.InitTimer = this.InitTimer - elapsed;
 		if (this.InitTimer <= 0) then
 			this.InitTimer = nil;
-			if (this.Reinit) then
-				GuildAds:JoinChannelAgain()
-			else
-				GuildAds:JoinChannel()
-			end
+			GuildAds:JoinChannel()
 		end
-	else
-		GuildAdsComm:ProcessQueues(elapsed);
 	end
+end
+
+---------------------------------------------------------------------------------
+--
+-- Debug function
+-- 
+---------------------------------------------------------------------------------
+function GuildAds_ChatDebug()
 end
