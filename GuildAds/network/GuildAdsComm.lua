@@ -273,13 +273,14 @@ function GuildAdsComm.OnJoin(self)
 	self:SendMeta();
 	
 	-- TODO
-	for name, DTS in pairs(self.DTS) do
-		DTS.dataType:registerEvent(GuildAdsComm, "OnDBUpdate");
-		self:QueueSearch(DTS, GuildAds.playerName);
-	end
+--~ 	for name, DTS in pairs(self.DTS) do
+--~ 		DTS.dataType:registerEvent(GuildAdsComm, "OnDBUpdate");
+--~ 		self:QueueSearch(DTS, GuildAds.playerName);
+--~ 	end
 
 --~ 	self:QueueSearch(self.DTS.Main, GuildAds.playerName);
---~ 	self:QueueSearch(self.DTS.TradeOffer, GuildAds.playerName);
+	self:QueueSearch(self.DTS.TradeOffer, GuildAds.playerName);
+	self.DTS.TradeOffer.dataType:registerEvent(GuildAdsComm, "OnDBUpdate");
 --~ 	self:QueueSearch(self.DTS.TradeNeed, GuildAds.playerName);
 end
 
@@ -410,15 +411,15 @@ end
 
 function GuildAdsComm:SendSearch(dataType, playerName)
 	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendSearch");
-	SimpleComm_SendRawMessage(playerName, GUILDADS_MSG_PREFIX.."S>"..dataType.metaInformations.name..">"..playerName..">");
+	SimpleComm_SendRawMessage(nil, GUILDADS_MSG_PREFIX.."S>"..dataType.metaInformations.name..">"..playerName..">");
 end
 
-function GuildAdsComm:SendRevisionWhisper(toPlayerName, dataType, playerName, who, revision, weight, worstRevision)
+function GuildAdsComm:SendSearchResultToParent(parentPlayerName, dataType, playerName, who, revision, weight, worstRevision)
 	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendRevisionWhisper");
-	SimpleComm_SendRawMessage(toPlayerName, GUILDADS_MSG_PREFIX.."R>"..dataType.metaInformations.name..">"..playerName..">"..who..">"..revision..">"..weight..">"..worstRevision..">");
+	SimpleComm_SendRawMessage(parentPlayerName, GUILDADS_MSG_PREFIX.."R>"..dataType.metaInformations.name..">"..playerName..">"..who..">"..revision..">"..weight..">"..worstRevision..">");
 end
 
-function GuildAdsComm:SendRevisionChannel(dataType, playerName, who, revision, worstRevision)
+function GuildAdsComm:SendSearchResult(dataType, playerName, who, revision, worstRevision)
 	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendRevisionChannel");
 	SimpleComm_SendRawMessage(nil, GUILDADS_MSG_PREFIX.."SR>"..dataType.metaInformations.name..">"..playerName..">"..who..">"..revision..">"..worstRevision..">");
 end
@@ -468,8 +469,11 @@ function GuildAdsComm:ParseMessage(playerName, message, channelName)
 			version = message.version
 		}
 		self:SetOnlineStatus(playerName, true);
-		self:SendMeta(playerName);
-		GuildAdsDB.channel[self.channelName]:addPlayer(playerName);
+		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "---- send meta"..playerName);
+		if channelName then
+			self:SendMeta(playerName);
+			GuildAdsDB.channel[self.channelName]:addPlayer(playerName);
+		end
 	elseif message.command == "CF" then
 		SimpleComm_SetFlag(playerName, message.flag, message.text);
 	elseif message.command == "S" then
@@ -477,7 +481,7 @@ function GuildAdsComm:ParseMessage(playerName, message, channelName)
 		self:DeleteDuplicateSearch(DTS, message.playerName);
 		DTS:ReceiveSearch(message.playerName)
 	elseif message.command == "R" then
-		DTS:ReceiveRevision(message.playerName, message.who, message.revision, message.weight, message.worstRevision)
+		DTS:ReceiveRevision(playerName, message.playerName, message.who, message.revision, message.weight, message.worstRevision)
 	elseif message.command == "SR" then
 		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "S("..message.playerName..")="..message.who.."("..message.fromRevision.."->"..message.toRevision..")");
 		self:DeleteDuplicateUpdate(DTS, message.playerName, message.who, message.fromRevision, message.toRevision);

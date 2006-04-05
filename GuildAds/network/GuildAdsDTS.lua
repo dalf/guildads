@@ -22,23 +22,18 @@ function GuildAdsDTS:new(dataType)
 	if dataType.schema.keys then
 		local keysCodec = GuildAdsCodecTable:new({ schema=dataType.schema.keys }, dataType.metaInformations.name.."Keys", 1);
 	end
-	-- la recherche doit être par joueur
+	
+	-- TODO : transaction by sourceName
 	local o = {
-		dataType = dataType;
-		playerName = "";
-		best = {
-			playerName = "",
-			revision = 0,
-			weight = 0
-		};
-		worst = {
-			playerName = "",
-			revision = 0,
-			weight = 0
-		};
-		count = 0;			-- for search
 		state = "READY";
+		dataType = dataType;
+		search = {};
+		---- about transaction
 		deleteTable = {};
+		-- playerName
+		-- sourceName
+		-- toRevision
+		-- fromRevision
 	};
 	self.__index = self;
 	setmetatable(o, self);
@@ -54,99 +49,103 @@ end
 function GuildAdsDTS:GetWeight()
 	local fps = GetFramerate()
 	local _, _, lag = GetNetStats();
-	return fps*(1000-lag);
+	return math.floor(fps*(1000-lag));
 end
 
 function GuildAdsDTS:SendSearch(playerName)
---~ 	if self.state=="READY" then
---~ 		self.state="STARTINGSEARCH";
-		self.playerName = playerName;
-
-		self.best.playerName = GuildAds.playerName;
-		self.best.revision = self.dataType:getRevision(playerName);
-		self.best.weight = self:GetWeight();
-		self.worst.playerName = GuildAds.playerName;
-		self.worst.revision = self.dataType:getRevision(playerName);
-		self.worst.weight = self:GetWeight();
-		self.count = 1;
+	if self.state=="READY" then
+		if not self.search[playerName] then
+			self.search[playerName] = {
+				best = {
+					playerName = GuildAds.playerName,
+					revision = self.dataType:getRevision(playerName),
+					weight = self:GetWeight()
+				};
+				worstRevision = self.dataType:getRevision(playerName),
+			};
+		end
 		
 		-- envoyer la demande de recherche sur le canal (playerName)
 		GuildAdsComm:SendSearch(self.dataType, playerName);
---~ 	end
+	end
 end
 
 function GuildAdsDTS:ReceiveSearch(playerName)
---~ 	if self.state=="STARTINGSEARCH" then 
---~ 		self.state = "SEARCH";
+	if self.search[playerName] then
 		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"state="..self.state);
 		if not (GuildAdsComm.isOnline[GuildAds.playerName].c1 or GuildAdsComm.isOnline[GuildAds.playerName].c2) then
 			-- I'm a leaf : don't wait, send my revision information to my parent
-			self:SendRevision();
+			self:SendRevision(playerName);
 		end
---~ 	end
+	end
 end
 
-function GuildAdsDTS:SendRevision()
---~ 	if self.state=="SEARCH" then
+function GuildAdsDTS:SendRevision(playerName)
+	if self.search[playerName] then
 --~ 		self.state = "SENT";
 --~ 		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"state="..self.state);
+		local result = self.search[playerName];
 		if GuildAdsComm.isOnline[GuildAds.playerName].p then
 			-- send result to parent in whisper
-			GuildAdsComm:SendRevisionWhisper(GuildAdsComm.isOnline[GuildAds.playerName].p, self.dataType, self.playerName, self.best.playerName, self.best.revision, self.best.weight, self.worst.revision);
+			GuildAdsComm:SendSearchResultToParent(GuildAdsComm.isOnline[GuildAds.playerName].p, self.dataType, playerName, result.best.playerName, result.best.revision, result.best.weight, result.worstRevision);
 		else
 			-- send result to channel
-			GuildAdsComm:SendRevisionChannel(self.dataType, self.playerName, self.best.playerName, self.best.revision, self.worst.revision);
+			GuildAdsComm:SendSearchResult(self.dataType, playerName, result.best.playerName, result.best.revision, result.worstRevision);
 		end
---~ 	end
+	end
 end
 
-function GuildAdsDTS:ReceiveRevision(playerName, who, revision, weight, worstRevision)
---~ 	if self.state~="SEARCH" then
---~ 		return;
---~ 	end
-	if self.count>=3 then
-		error("More than 2 childs");
+function GuildAdsDTS:ReceiveRevision(childPlayerName, playerName, who, revision, weight, worstRevision)
+	if not self.search[playerName] then
 		return;
 	end
-	
-	local best = self.best;
+	local result = self.search[playerName];
+	local best = result.best;
 	if  (revision>best.revision) or
 		(best.revision==revision and weight>best.weight) then
-		best.playerName = playerName;
+		best.playerName = who;
 		best.revision = revision;
 		best.weight = weight;
 	end
 	
-	local worst = self.worst;
-	if (worstRevision<worst.revision) then
-		worst.playerName = playerName;
-		worst.revision = revision;
-		worst.weight = weight;		
+	if (worstRevision<result.worstRevision) then
+		result.worstRevision = worstRevision;		
 	end
 	
-	self.count = self.count+1;
+	if childPlayerName == GuildAdsComm.isOnline[GuildAds.playerName].c1 then
+		result.c1 = true;
+	end
 	
-	local countMax;
-	if GuildAdsComm.isOnline[GuildAds.playerName].c2 then
-		countMax = 3
-	else
-		countMax = 2
-	end;
+	if childPlayerName == GuildAdsComm.isOnline[GuildAds.playerName].c2 then
+		result.c2 = true;
+	end
 	
-	if self.count==zz then
-		self:SendRevision()
+	if (	GuildAdsComm.isOnline[GuildAds.playerName].c1
+		and result.c1
+		and GuildAdsComm.isOnline[GuildAds.playerName].c2 
+		and result.c2)
+	   or
+	   (	GuildAdsComm.isOnline[GuildAds.playerName].c1
+		and result.c1
+		and not GuildAdsComm.isOnline[GuildAds.playerName].c1
+		and not result.c2
+	   )
+	then
+		self:SendRevision(playerName)
 	end
 end
 
 function GuildAdsDTS:ReceiveSearchResult(playerName, who, fromRevision, toRevision)
---~ 	if (self.state=="SEARCH") or (self.state=="SENT") then
---~ 		self.state="READY"
+	if self.search[playerName] then
+		self.state="READY"
 		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"state="..self.state);
 		
 		if (GuildAds.playerName==who) and (fromRevision<toRevision) then
 			GuildAdsComm:QueueUpdate(self, playerName, fromRevision, self.dataType:getRevision(playerName));
 		end
---~ 	end
+		
+		self.search[playerName] = nil;
+	end
 end
 
 function GuildAdsDTS:SendUpdate(playerName, fromRevision)
@@ -227,7 +226,7 @@ end
 
 function GuildAdsDTS:ReceiveNewRevision(sourceName, revision, id, data)
 	if (self.state=="OPEN") and (self.sourceName==sourceName) then
-		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"NEW("..tostring(id)..")");
+		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"NEW("..tostring(self.playerName)..","..tostring(id)..")");
 		self.dataType:setRaw(self.playerName, id, data, revision);
 	end
 end
