@@ -30,10 +30,6 @@ GuildAdsTradeTooltip = {
 	};
 	
 	onInit = function()
-		-- Register for events
-		GuildAdsDB.channel[GuildAds.channelName].TradeNeed:registerEvent(GuildAdsTradeTooltip.onDBUpdate);
-		GuildAdsDB.channel[GuildAds.channelName].TradeOffer:registerEvent(GuildAdsTradeTooltip.onDBUpdate);
-
 		-- Hook SetItemRef
 		-- TODO : add support for LootLink, ItemMatrix, KC_Items 
 		GuildAdsTradeTooltip.hookSetItemRef = SetItemRef;
@@ -41,6 +37,10 @@ GuildAdsTradeTooltip = {
 	end;
 	
 	onChannelJoin = function()
+		-- Register for events
+		GuildAdsDB.channel[GuildAds.channelName].TradeNeed:registerEvent(GuildAdsTradeTooltip.onDBUpdate);
+		GuildAdsDB.channel[GuildAds.channelName].TradeOffer:registerEvent(GuildAdsTradeTooltip.onDBUpdate);
+		
 		-- Scan database
 		GuildAdsItems = {};
 		for _, item, playerName, data in GuildAdsDB.channel[GuildAds.channelName].TradeNeed:iterator() do
@@ -52,6 +52,10 @@ GuildAdsTradeTooltip = {
 	end;
 	
 	onChannelLeave = function()
+		-- Unregister for events
+		GuildAdsDB.channel[GuildAds.channelName].TradeNeed:unregisterEvent(GuildAdsTradeTooltip.onDBUpdate);
+		GuildAdsDB.channel[GuildAds.channelName].TradeOffer:unregisterEvent(GuildAdsTradeTooltip.onDBUpdate);
+	
 		-- Clear database
 		GuildAdsItems = {};
 	end;

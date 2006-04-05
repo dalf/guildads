@@ -132,9 +132,6 @@ GuildAdsTrade = {
 	onInit = function() 
 		GuildAdsTrade.initialized = true;
 		
-		GuildAdsDB.channel[GuildAds.channelName].TradeNeed:registerEvent(GuildAdsTrade.onDBUpdate);
-		GuildAdsDB.channel[GuildAds.channelName].TradeOffer:registerEvent(GuildAdsTrade.onDBUpdate);
-		
 		GuildAdsTrade.filterClass.init();
 		
 		if ReagentData then
@@ -143,6 +140,7 @@ GuildAdsTrade = {
 			UIDropDownMenu_SetWidth(100,  getglobal("GuildAds_Filter_ZoneDropDown"));
 		end
 		
+		-- TODO : todo on first show of the frame, not now
 		GuildAdsTrade.selectTab(GuildAdsTrade.TAB_REQUEST);
 		
 		-- Init date filter
@@ -169,6 +167,18 @@ GuildAdsTrade = {
 		
 		end
 		GuildAdsTrade.PrepareSortArrow();
+	end;
+	
+	onChannelJoin = function()
+		-- Register for events
+		GuildAdsDB.channel[GuildAds.channelName].TradeNeed:registerEvent(GuildAdsTradeTooltip.onDBUpdate);
+		GuildAdsDB.channel[GuildAds.channelName].TradeOffer:registerEvent(GuildAdsTradeTooltip.onDBUpdate);
+	end;
+	
+	onChannelLeave = function()
+		-- Unregister for events
+		GuildAdsDB.channel[GuildAds.channelName].TradeNeed:unregisterEvent(GuildAdsTradeTooltip.onDBUpdate);
+		GuildAdsDB.channel[GuildAds.channelName].TradeOffer:unregisterEvent(GuildAdsTradeTooltip.onDBUpdate);
 	end;
 	
 	onConfigChanged = function(path, key, value)
@@ -227,7 +237,7 @@ GuildAdsTrade = {
  			GuildAds_DateFilterLabel:SetText(GUILDADS_ITEMS.everything);
  			GuildAdsTrade.setProfileValue(nil, "HideAdsOlderThan", nil);
  		end
- 		GuildAdsTrade.exchangeButtonsUpdate(GuildAdsTrade.currentTab,true);
+ 		GuildAdsTrade.exchangeButtonsUpdate(GuildAdsTrade.currentTab, true);
  	end;
 	
 	PrepareSortArrow = function() 
