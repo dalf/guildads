@@ -122,23 +122,11 @@ GuildAdsTrade = {
 	
 	onShow = function()
 		GuildAdsTrade.debug("onShow");
-		if (GuildAdsTrade.currentTab == GuildAdsTrade.TAB_REQUEST or 
-			GuildAdsTrade.currentTab == GuildAdsTrade.TAB_AVAILABLE) then
-			GuildAdsTrade.exchangeButtonsUpdate(GuildAdsTrade.currentTab);
-		else 
-			GuildAdsTrade.myAds.updateMyAdsFrame();
-		end;
+		GuildAdsTrade.updateCurrentTab();
 	end;
 	
 	onItemInfoReady = function()
-		GuildAdsTrade.debug("onItemInfoReady");
-		if (GuildAdsTrade.currentTab == GuildAdsTrade.TAB_REQUEST or 
-			GuildAdsTrade.currentTab == GuildAdsTrade.TAB_AVAILABLE) then
-			GuildAdsTrade.exchangeButtonsUpdate(GuildAdsTrade.currentTab);
-		else 
-			GuildAdsTrade.myAds.updateMyAdsFrame();
-			GuildAdsTrade.setEditItem(GuildAdsTrade.currentItem);
-		end;
+		GuildAdsTrade.updateCurrentTab();
 	end;
 	
 	onInit = function() 
@@ -186,7 +174,7 @@ GuildAdsTrade = {
 	onConfigChanged = function(path, key, value)
 		if key=="HideOfflinePlayer" or key=="HideMyAds" then
 			GuildAdsTrade.data.resetCache();
-			GuildAdsTrade.exchangeButtonsUpdate(GuildAdsTrade.currentTab,true);
+			GuildAdsTrade.updateCurrentTab();
 		elseif key=="PublishMyAds" then
 			-- TODO : delete or implement this feature
 			if value then
@@ -536,6 +524,17 @@ GuildAdsTrade = {
 				GuildAdsEditTextureName:SetText(item);
 			end
 		end
+	end;
+	
+	updateCurrentTab = function()
+		GuildAdsTrade.debug("onItemInfoReady");
+		if (GuildAdsTrade.currentTab == GuildAdsTrade.TAB_REQUEST or 
+			GuildAdsTrade.currentTab == GuildAdsTrade.TAB_AVAILABLE) then
+			GuildAdsTrade.exchangeButtonsUpdate(GuildAdsTrade.currentTab);
+		else 
+			GuildAdsTrade.myAds.updateMyAdsFrame();
+			GuildAdsTrade.setEditItem(GuildAdsTrade.currentItem);
+		end;
 	end;
 	
 	myButton = {
