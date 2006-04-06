@@ -97,7 +97,6 @@ GuildAdsInventory = {
 	end;
 	
 	SlotUpdate = function(slot, item, count)
-		GuildAdsInventory.debug("[GuildAdsInventory.SlotUpdate] slot: "..slot);
 		button = getglobal("GuildAdsInspect"..SlotIdText[slot]);
 		currentInventory[slot]= item;
 		if (item) then
@@ -133,8 +132,8 @@ GuildAdsInventory = {
 		end
 		if sendRequest then
 			-- Send inspect request
-			GuildAdsInventory.debug("sending request");
-			GAC_SendRequestInspect(GuildAdsInspectWindow.playerName);			
+			-- GuildAdsInventory.debug("sending request");
+			-- TODO : update on demand
 		end;
 	end;
 	
