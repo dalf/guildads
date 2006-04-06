@@ -40,6 +40,10 @@ function GuildAdsDTS:new(dataType)
 	return o;
 end
 
+function GuildAdsDTS:__tostring()
+	return self.dataType.metaInformations.name.."["..self.state.."]";
+end
+
 
 --------------------------------------------------------------------------------
 --
@@ -54,23 +58,13 @@ end
 
 function GuildAdsDTS:SendSearch(playerName)
 	if self.state=="READY" then
-		if not self.search[playerName] then
-			self.search[playerName] = {
-				best = {
-					playerName = GuildAds.playerName,
-					revision = self.dataType:getRevision(playerName),
-					weight = self:GetWeight()
-				};
-				worstRevision = self.dataType:getRevision(playerName),
-			};
-		end
-		
 		-- envoyer la demande de recherche sur le canal (playerName)
 		GuildAdsComm:SendSearch(self.dataType, playerName);
 	end
 end
 
 function GuildAdsDTS:ReceiveSearch(playerName)
+	self:InitializeSearch(playerName);
 	if self.search[playerName] then
 		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"state="..self.state);
 		if not (GuildAdsComm.isOnline[GuildAds.playerName].c1 or GuildAdsComm.isOnline[GuildAds.playerName].c2) then
@@ -80,10 +74,22 @@ function GuildAdsDTS:ReceiveSearch(playerName)
 	end
 end
 
+function GuildAdsDTS:InitializeSearch(playerName)
+	if not self.search[playerName] then
+		self.search[playerName] = {
+			best = {
+				playerName = GuildAds.playerName,
+				revision = self.dataType:getRevision(playerName),
+				weight = self:GetWeight()
+			};
+			worstRevision = self.dataType:getRevision(playerName),
+		};
+	end
+end
+
 function GuildAdsDTS:SendRevision(playerName)
 	if self.search[playerName] then
---~ 		self.state = "SENT";
---~ 		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"state="..self.state);
+		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"GuildAdsDTS:SendRevision");
 		local result = self.search[playerName];
 		if GuildAdsComm.isOnline[GuildAds.playerName].p then
 			-- send result to parent in whisper
@@ -127,7 +133,7 @@ function GuildAdsDTS:ReceiveRevision(childPlayerName, playerName, who, revision,
 	   or
 	   (	GuildAdsComm.isOnline[GuildAds.playerName].c1
 		and result.c1
-		and not GuildAdsComm.isOnline[GuildAds.playerName].c1
+		and not GuildAdsComm.isOnline[GuildAds.playerName].c2
 		and not result.c2
 	   )
 	then
@@ -137,8 +143,6 @@ end
 
 function GuildAdsDTS:ReceiveSearchResult(playerName, who, fromRevision, toRevision)
 	if self.search[playerName] then
-		self.state="READY"
-		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"state="..self.state);
 		
 		if (GuildAds.playerName==who) and (fromRevision<toRevision) then
 			GuildAdsComm:QueueUpdate(self, playerName, fromRevision, self.dataType:getRevision(playerName));
