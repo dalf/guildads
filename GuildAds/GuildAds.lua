@@ -235,7 +235,7 @@ function GuildAds:GetDefaultChannel()
 		end
 		
 		-- channel name bases on the raid leader name
-		if GetNumRaidMembers()>0 then
+		if not channel and GetNumRaidMembers()>0 then
 			for i=1, GetNumRaidMembers(), 1 do
 				local name, rank = GetRaidRosterInfo(Raid_Member_ID_Number);
 				if rank==2 then
@@ -246,7 +246,7 @@ function GuildAds:GetDefaultChannel()
 		end
 		
 		-- channel name bases on the group leader name 
-		if ( GetNumPartyMembers() > 0 ) then
+		if not channel and ( GetNumPartyMembers() > 0 ) then
 			for groupindex = 1,GetNumPartyMembers() do
 				local unit = "party"..groupindex;
 				if UnitIsPartyLeader(unit) then
