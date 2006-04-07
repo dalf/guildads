@@ -316,7 +316,7 @@ end
 
 function GuildAdsPlugin_OnChannelLeave()
 	for pluginName, plugin in GuildAdsPlugin.PluginsList do
-		if type(plugin.onChannelJoin) == "function" then
+		if type(plugin.onChannelLeave) == "function" then
 			GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "onChannelLeave: "..pluginName);
 			plugin.onChannelLeave();
 		end
