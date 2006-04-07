@@ -501,29 +501,29 @@ function GuildAdsComm.OnMessage(playerName, message, channel)
  	if playerName ~= GuildAds.playerName or not GuildAdsComm.IGNOREMYMESSAGE[message.command] then
 		GuildAdsComm:ParseMessage(playerName, message, channel)
 	else
-		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"[GuildAdsComm.OnMessage] Ignore message from my self : "..tostring(message.command));
+		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"- OnMessage: Ignore message from my self, command="..tostring(message.command));
 	end
 end
 
 function GuildAdsComm:ParseMessage(playerName, message, channelName)
-	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"[GuildAdsComm:ParseMessage]"..playerName..","..tostring(message.command)..","..tostring(channelName));
+	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"- ParseMessage: "..playerName..","..tostring(message.command)..","..tostring(channelName));
 	if self.transactions[playerName] then
 		setmetatable(message, self.transactions[playerName]);
 	end
 	local DTS = self.DTS[message.dataTypeName];
 	if message.command == "M" then
+		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "ReceiveMeta("..playerName..")");
 		self.playerInfo[playerName] = {
 			state = message.state;
 			onlineSince = message.onlineSince;
 			version = message.version
 		}
 		self:SetOnlineStatus(playerName, true);
-		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "---- send meta"..playerName);
 		if channelName then
 			self:SendMeta(playerName);
 			self:SendSearchAboutMyData();
-			GuildAdsDB.channel[self.channelName]:addPlayer(playerName);
 		end
+		GuildAdsDB.channel[GuildAds.channelName]:addPlayer(playerName);
 	elseif message.command == "CF" then
 		SimpleComm_SetFlag(playerName, message.flag, message.text);
 	elseif message.command == "S" then
@@ -531,49 +531,71 @@ function GuildAdsComm:ParseMessage(playerName, message, channelName)
 		self:DeleteDuplicateSearch(DTS, message.playerName);
 		DTS:ReceiveSearch(message.playerName)
 	elseif message.command == "R" then
-		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "ReceiveRevision("..tostring(DTS)..","..message.playerName..")");
+		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "ReceiveRevision("..tostring(DTS)..","..message.playerName..")="..message.who.."("..message.worstRevision.."->"..message.revision..")");
 		DTS:ReceiveRevision(playerName, message.playerName, message.who, message.revision, message.weight, message.worstRevision)
 	elseif message.command == "SR" then
 		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "ReceiveSearchResult("..tostring(DTS)..","..message.playerName..")="..message.who.."("..message.fromRevision.."->"..message.toRevision..")");
 		self:DeleteDuplicateUpdate(DTS, message.playerName, message.who, message.fromRevision, message.toRevision);
 		DTS:ReceiveSearchResult(message.playerName, message.who, message.fromRevision, message.toRevision)
 	elseif message.command == "OT" then
-		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"ReceiveOpenTransaction("..tostring(DTS)..","..message.playerName..","..message.fromRevision);
-		self:DeleteDuplicateUpdate(DTS, self.playerName, GuildAds.playerName, message.fromRevision, message.toRevision)
-		self.transactions[playerName] = {
-			playerName = message.playerName,
-			dataTypeName = message.dataTypeName,
-			lmt=time()
-		}
-		self.transactions[playerName].__index = self.transactions[playerName];
-		DTS:ReceiveOpenTransaction(playerName, message.playerName, message.fromRevision, message.toRevision)
-	elseif message.command == "CT" then
-		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"ReceiveCloseTransaction("..tostring(DTS)..","..message.playerName..")");
-		DTS:ReceiveCloseTransaction(playerName)
-		self.transactions[playerName] = nil;
-	elseif message.command == "N" then
-		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"ReceiveNewRevision("..tostring(DTS)..","..message.playerName..")");
-		self.transactions[playerName].lmt = time();
-		local id = GuildAdsCodecs[DTS.dataType.schema.id].decode(message.id);
-		local data = GuildAdsCodecs[message.dataTypeName.."Data"].decode(message.data);
-		DTS:ReceiveNewRevision(playerName, message.revision, id, data)
-	elseif message.command == "O" then
-		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"ReceiveOldRevisions("..tostring(DTS)..","..message.playerName..")");
-		self.transactions[playerName].lmt = time();
-		local revisions = {};
-		local revision;
-		for revision in string.gfind(message.revisions, "([^\/]*)/?$?") do
-			revision = tonumber(revision);
-			if revision then
-				revisions[tonumber(revision)] = true;
-			end
+		if not self.transactions[playerName] then
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"ReceiveOpenTransaction("..tostring(DTS)..","..message.playerName..","..message.fromRevision);
+			self:DeleteDuplicateUpdate(DTS, self.playerName, GuildAds.playerName, message.fromRevision, message.toRevision)
+			self.transactions[playerName] = {
+				playerName = message.playerName,
+				dataTypeName = message.dataTypeName,
+				fromRevision = message.fromRevision,
+				toRevision = message.toRevision,
+				lmt=time()
+			}
+			self.transactions[playerName].__index = self.transactions[playerName];
+			DTS:ReceiveOpenTransaction(self.transactions[playerName])
+		else
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "Ignore OPEN TRANSACTION from "..sourceName.." (already open)");
 		end
-		DTS:ReceiveOldRevisions(playerName, revisions)
+	elseif message.command == "CT" then
+		if self.transactions[playerName] then
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"ReceiveCloseTransaction("..tostring(DTS)..","..message.playerName..")");
+			DTS:ReceiveCloseTransaction(self.transactions[playerName])
+			self.transactions[playerName] = nil;
+		else
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "Ignore CLOSE TRANSACTION from "..sourceName.." (no transaction)");
+		end
+	elseif message.command == "N" then
+		if self.transactions[playerName] then
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"ReceiveNewRevision("..tostring(DTS)..","..message.playerName..","..tostring(id)..")");
+			self.transactions[playerName].lmt = time();
+			local id = GuildAdsCodecs[DTS.dataType.schema.id].decode(message.id);
+			local data = GuildAdsCodecs[message.dataTypeName.."Data"].decode(message.data);
+			DTS:ReceiveNewRevision(self.transactions[playerName], message.revision, id, data)
+		else
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "Ignore NEW from "..sourceName.." (no transaction)");
+		end
+	elseif message.command == "O" then
+		if self.transactions[playerName] then
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"ReceiveOldRevisions("..tostring(DTS)..","..message.playerName..")");
+			self.transactions[playerName].lmt = time();
+			local revisions = {};
+			local revision;
+			for revision in string.gfind(message.revisions, "([^\/]*)/?$?") do
+				revision = tonumber(revision);
+				if revision then
+					revisions[tonumber(revision)] = true;
+				end
+			end
+			DTS:ReceiveOldRevisions(self.transactions[playerName], revisions)
+		else
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "Ignore OLD from "..sourceName.." (no transaction)");
+		end
 	elseif message.command == "K" then
-		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"ReceiveKeys("..tostring(DTS)..","..message.playerName..")");
-		self.transactions[playerName].lmt = time();
-		local keys = GuildAdsCodecs[message.dataTypeName.."Keys"].decode(message.keys);
-		DTS:ReceiveKeys(playerName, keys);
+		if self.transactions[playerName] then
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"ReceiveKeys("..tostring(DTS)..","..message.playerName..")");
+			self.transactions[playerName].lmt = time();
+			local keys = GuildAdsCodecs[message.dataTypeName.."Keys"].decode(message.keys);
+			DTS:ReceiveKeys(self.transactions[playerName], keys);
+		else
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "Ignore KEYS from "..sourceName.." (no transaction)");
+		end
 	end
 end
 
@@ -657,10 +679,8 @@ function GuildAdsComm:ProcessQueues(elapsed)
 		self.updateQueueDelay = self.updateQueueDelay - elapsed;
 		if self.updateQueueDelay<=0 and self.updateQueue[1] then
 			local update = self.updateQueue[1];
-			if update.DTS.state=="READY" then
-				table.remove(self.updateQueue, 1);
-				update.DTS:SendUpdate(update.playerName, update.fromRevision);
-			end
+			table.remove(self.updateQueue, 1);
+			update.DTS:SendUpdate(update.playerName, update.fromRevision);
 			
 			if self.updateQueue[1] then
 				self.updateQueueDelay = 1; -- check every second
@@ -674,13 +694,11 @@ function GuildAdsComm:ProcessQueues(elapsed)
 			self.searchQueueDelay = self.searchQueueDelay - elapsed;
 			if self.searchQueueDelay<=0 and self.searchQueue[1] then
 				local search = self.searchQueue[1];
-				if search.DTS.state=="READY" then
-					table.remove(self.searchQueue, 1);
-					search.DTS:SendSearch(search.playerName);
-				end
+				table.remove(self.searchQueue, 1);
+				search.DTS:SendSearch(search.playerName);
 				
 				if self.searchQueue[1] then
-					self.searchQueueDelay = 2;
+					self.searchQueueDelay = 2;	-- chec every two seconds
 				else
 					self.searchQueueDelay = nil;
 				end
