@@ -172,7 +172,11 @@ function GuildAdsCodecBigInteger.encode(obj)
 			value = string.char(string.byte(GuildAdsCodecBigInteger.e, bit.band(obj, 63)+1 ))..value;
 			obj = bit.rshift(obj, 6);
 		end
-		return value;
+		if value=="" then
+			return "0"
+		else
+			return value;
+		end
 	end
 	return "";
 end
@@ -192,49 +196,50 @@ end
 -------------------------------------------
 GuildAdsCodecString = GuildAdsCodec:new({}, "String", 1);
 
-GuildAdsCodecString.SpecialChars = "|>/,:;&|\n";
+GuildAdsCodecString.SpecialChars = "|>/\31\n";
 
 GuildAdsCodecString.SpecialCharMap =
 {
-	p = "|",	-- item link
-	gt = ">",	-- separator for serialized command
-	s = "/",	-- separator for serialized table
-	c = ",",
-	cn = ":",
-	sc = ";",
-	a = "&",
-	b = "|",
-	n = "\n",
+	b = "|",		-- item link
+	gt = ">",		-- separator for serialized command
+	s = "/",		-- separator for serialized table
+	ei = "\31",		-- \31 for nil value
+	n = "\n",		-- \n forbidden in chat
 };
 
 function GuildAdsCodecString.encode(pString)
-	return string.gsub(
-					pString or "",
-					"(["..GuildAdsCodecString.SpecialChars.."])",
-					function (pField)
-						for vName, vChar in GuildAdsCodecString.SpecialCharMap do
-							if vChar == pField then
-								return "&"..vName..";";
+	if pString then
+		return string.gsub(
+						pString,
+						"(["..GuildAdsCodecString.SpecialChars.."])",
+						function (pField)
+							for vName, vChar in GuildAdsCodecString.SpecialCharMap do
+								if vChar == pField then
+									return "&"..vName..";";
+								end
 							end
-						end
-						
-						return "";
-					end);
+							
+							return "";
+						end);
+	end
+	return "\31";
 end
 
 function GuildAdsCodecString.decode(pString)
-	return string.gsub(
-					pString,
-					"&(%w+);", 
-					function (pField)
-						local	vChar = GuildAdsCodecString.SpecialCharMap[pField];
-						
-						if vChar ~= nil then
-							return vChar;
-						else
-							return pField;
-						end
-					end);
+	if pString ~= "\31" then
+		return string.gsub(
+						pString,
+						"&(%w+);", 
+						function (pField)
+							local	vChar = GuildAdsCodecString.SpecialCharMap[pField];
+							
+							if vChar ~= nil then
+								return vChar;
+							else
+								return pField;
+							end
+						end);
+	end
 end
 
 -------------------------------------------
@@ -261,6 +266,12 @@ GuildAdsCodecItemRef = GuildAdsCodec:new({}, "ItemRef", 1);
 
 function GuildAdsCodecItemRef.encode(obj)
 	if obj then
+		--[[ TODO 
+			- nombre en base 64
+			- @ 	pour 	item:
+			- ?? 	pour 	enchant:
+			- *		pour	:0:0:0 
+		]]
 		return string.gsub(string.gsub(obj, "item\:", "\@"), ":0:0:0", "\*");
 	end
 	return "";
