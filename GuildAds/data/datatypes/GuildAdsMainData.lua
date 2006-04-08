@@ -34,7 +34,6 @@ GuildAdsMainDataType = GuildAdsTableDataType:new({
 	Class = "c";
 	Race = "r";
 	Account = "a";
-	CreationTime = "_t";
 });
 
 function GuildAdsMainDataType:Initialize()
@@ -49,20 +48,15 @@ function GuildAdsMainDataType:Initialize()
 end
 
 function GuildAdsMainDataType:onLevelUp()
-	if self:set(GuildAds.playerName, self.Level, arg1) then
-		self:set(GuildAds.playerName, self.CreationTime, GuildAdsDB:GetCurrentTime());
-	end
+	self:set(GuildAds.playerName, self.Level, arg1);
 end
 
 function GuildAdsMainDataType:onGuildUpdate()
 	local guildName, guildRankName, guildRankIndex = GetGuildInfo("player");
 	
-	local change = self:set(GuildAds.playerName, self.Guild, guildName);
-	change = self:set(GuildAds.playerName, self.GuildRank, guildRank) or change;
-	change = self:set(GuildAds.playerName, self.GuildRankIndex, guildRankIndex) or change;
-	if change then
-		self:set(GuildAds.playerName, self.CreationTime, GuildAdsDB:GetCurrentTime());
-	end
+	self:set(GuildAds.playerName, self.Guild, guildName);
+	self:set(GuildAds.playerName, self.GuildRank, guildRank);
+	self:set(GuildAds.playerName, self.GuildRankIndex, guildRankIndex);
 end
 
 function GuildAdsMainDataType:getClassIdFromName(ClassName)
