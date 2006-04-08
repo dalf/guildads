@@ -616,25 +616,26 @@ GuildAdsGuild = {
 				
 				if (IsInGuild()) then
 					GuildRoster();
-					-- should wait for the GUILD_ROSTER_UPDATE event
+					-- TODO should wait for the GUILD_ROSTER_UPDATE event
 					local numAllGuildMembers = GetNumGuildMembers(true);
 					if (numAllGuildMembers>=0) then 
 						for currentplayer = 1,numAllGuildMembers do
 							local name, rank, rankIndex, level, class, zone, note, officernote, online, status = GetGuildRosterInfo(currentplayer);
-							if not players[name] then
-								GuildAdsDB.profile.Main:set(name, GuildAdsDB.profile.Main.Guild, g_guildName);
-								GuildAdsDB.profile.Main:set(name, GuildAdsDB.profile.Main.Class, GuildAdsDB.profile.Main:getClassIdFromName(class));
-								GuildAdsDB.profile.Main:set(name, GuildAdsDB.profile.Main.CreationTime, GuildAdsDB:GetCurrentTime());
-								if online then
-									GuildAdsGuild.onlineCache[name] = true;
-								else
-									GuildAdsGuild.onlineCache[name] = false;
+							if name then
+								if not players[name] then
+									GuildAdsDB.profile.Main:set(name, GuildAdsDB.profile.Main.Guild, g_guildName);
+									GuildAdsDB.profile.Main:set(name, GuildAdsDB.profile.Main.Class, GuildAdsDB.profile.Main:getClassIdFromName(class));
+									if online then
+										GuildAdsGuild.onlineCache[name] = true;
+									else
+										GuildAdsGuild.onlineCache[name] = false;
+									end
+									tinsert(workingTable, name);
 								end
-								tinsert(workingTable, name);
+								GuildAdsDB.profile.Main:set(name, GuildAdsDB.profile.Main.GuildRank, rank);
+								GuildAdsDB.profile.Main:set(name, GuildAdsDB.profile.Main.GuildRankIndex, rankIndex);
+								GuildAdsDB.profile.Main:set(name, GuildAdsDB.profile.Main.Level, level);
 							end
-							GuildAdsDB.profile.Main:set(name, GuildAdsDB.profile.Main.GuildRank, rank);
-							GuildAdsDB.profile.Main:set(name, GuildAdsDB.profile.Main.GuildRankIndex, rankIndex);
-							GuildAdsDB.profile.Main:set(name, GuildAdsDB.profile.Main.Level, level);
 						end
 					end
 				end
