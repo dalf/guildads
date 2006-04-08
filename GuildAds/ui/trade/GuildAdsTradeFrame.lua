@@ -170,15 +170,17 @@ GuildAdsTrade = {
 	end;
 	
 	onChannelJoin = function()
+		GuildAdsTrade.debug("onChannelJoin("..GuildAds.channelName..")");
 		-- Register for events
-		GuildAdsDB.channel[GuildAds.channelName].TradeNeed:registerEvent(GuildAdsTradeTooltip.onDBUpdate);
-		GuildAdsDB.channel[GuildAds.channelName].TradeOffer:registerEvent(GuildAdsTradeTooltip.onDBUpdate);
+		GuildAdsDB.channel[GuildAds.channelName].TradeNeed:registerEvent(GuildAdsTrade.onDBUpdate);
+		GuildAdsDB.channel[GuildAds.channelName].TradeOffer:registerEvent(GuildAdsTrade.onDBUpdate);
 	end;
 	
 	onChannelLeave = function()
+		GuildAdsTrade.debug("onChannelLeave");
 		-- Unregister for events
-		GuildAdsDB.channel[GuildAds.channelName].TradeNeed:unregisterEvent(GuildAdsTradeTooltip.onDBUpdate);
-		GuildAdsDB.channel[GuildAds.channelName].TradeOffer:unregisterEvent(GuildAdsTradeTooltip.onDBUpdate);
+		GuildAdsDB.channel[GuildAds.channelName].TradeNeed:unregisterEvent(GuildAdsTrade.onDBUpdate);
+		GuildAdsDB.channel[GuildAds.channelName].TradeOffer:unregisterEvent(GuildAdsTrade.onDBUpdate);
 	end;
 	
 	onConfigChanged = function(path, key, value)
@@ -198,6 +200,7 @@ GuildAdsTrade = {
 	end;
 	
 	onDBUpdate = function(dataType, playerName, item)
+		GuildAdsTrade.debug("onDBUpdate");
 		-- refresh tabs (offer, need, my ads)
 		GuildAdsTrade.data.resetCache();
 		
