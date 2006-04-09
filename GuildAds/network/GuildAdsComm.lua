@@ -190,13 +190,6 @@ end
 
 ------------------------------------
 GuildAdsComm = AceModule:new({
-	hasJoined = {},
-	isOnline = {},
-	playerList = {},
-	playerInfo = {},
-	channelName = "",
-	channelPassword = "",
-	
 	IGNOREMYMESSAGE = {
 		M=true,
 		CF=true,
@@ -207,8 +200,17 @@ GuildAdsComm = AceModule:new({
 		CT=true,
 	},
 	
-	transactions = {},
+	hasJoined = {},
+	isOnline = {},
+	playerList = {},
+	playerInfo = {},
+	channelName = "",
+	channelPassword = "",
+	
 	DTS = {},
+	
+	expectedTransactions = {},		-- except my transactions
+	transactions = {},
 	updateQueue = {},
 	searchQueue = {},
 });
@@ -404,11 +406,17 @@ function GuildAdsComm:_UpdateTree()
 		p = i>1 and bit.rshift(i, 1);
 		c = bit.lshift(i, 1);
 		if type(self.isOnline[playerName]) == "table" then
+			self.isOnline[playerName].i = i;
 			self.isOnline[playerName].p = self.playerList[p];
 			self.isOnline[playerName].c1 = self.playerList[c];
 			self.isOnline[playerName].c2 = self.playerList[c+1];
 		else
-			self.isOnline[playerName] = { p=self.playerList[p], c1=self.playerList[c], c2=self.playerList[c+1] };
+			self.isOnline[playerName] = { 
+				i=i, 
+				p=self.playerList[p], 
+				c1=self.playerList[c], 
+				c2=self.playerList[c+1]
+			};
 		end
 	end
 end
@@ -521,7 +529,9 @@ function GuildAdsComm:ParseMessage(playerName, message, channelName)
 		self:SetOnlineStatus(playerName, true);
 		if channelName then
 			self:SendMeta(playerName);
-			self:SendSearchAboutMyData();
+			
+			local delay = self.isOnline[GuildAds.playerName].i*10;
+			GuildAdsTask:AddNamedSchedule("JoinChannel", delay, nil, nil, self.SendSearchAboutMyData, self);
 		end
 		GuildAdsDB.channel[GuildAds.channelName]:addPlayer(playerName);
 	elseif message.command == "CF" then
@@ -535,6 +545,9 @@ function GuildAdsComm:ParseMessage(playerName, message, channelName)
 		DTS:ReceiveRevision(playerName, message.playerName, message.who, message.revision, message.weight, message.worstRevision)
 	elseif message.command == "SR" then
 		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "ReceiveSearchResult("..tostring(DTS)..","..message.playerName..")="..message.who.."("..message.fromRevision.."->"..message.toRevision..")");
+		if (message.who ~= GuildAds.playerName) and (message.fromRevision<message.toRevision) then
+			self.expectedTransactions[message.playerName..":"..message.dataTypeName] = time();
+		end
 		self:DeleteDuplicateUpdate(DTS, message.playerName, message.who, message.fromRevision, message.toRevision);
 		DTS:ReceiveSearchResult(message.playerName, message.who, message.fromRevision, message.toRevision)
 	elseif message.command == "OT" then
@@ -542,6 +555,7 @@ function GuildAdsComm:ParseMessage(playerName, message, channelName)
 			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "Duplicate OPEN TRANSACTION from "..playerName.." (already open)");
 		end
 		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"ReceiveOpenTransaction("..tostring(DTS)..","..message.playerName..","..message.fromRevision);
+		self.expectedTransactions[message.playerName..":"..message.dataTypeName] = nil;
 		self:DeleteDuplicateUpdate(DTS, self.playerName, GuildAds.playerName, message.fromRevision, message.toRevision)
 		self.transactions[playerName] = {
 			playerName = message.playerName,
@@ -666,8 +680,8 @@ function GuildAdsComm:QueueSearch(DTS, playerName)
 end
 
 function GuildAdsComm:ProcessQueues(elapsed)
-	-- Is there some opened transactions ?
-	if next(self.transactions) then
+	-- Is there some opened/expected transactions ?
+	if next(self.transactions) or next(self.expectedTransactions) then
 		-- then don't flood the channel with my update/search
 		-- TODO : ajouter un time out, sinon une transaction non fermée bloque tout
 		return;
