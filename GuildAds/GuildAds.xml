@@ -2,28 +2,15 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.blizzard.com/wow/ui/FrameXML/UI.xsd">
 	
-	<!--
-		this.InitTimer : timer to call 
-				GuildAds_ReinitSecond() is this.Reinit==true
-				GuildAds_Init() is this.Reinit==false
-			
-		this.SynchronizeOfflinesTimer :
-			if this.SynchronizeOfflinesTimerEnd then
-				GAC_SynchronizeOfflines(this.SynchronizeOfflinesCount)
-			else
-				GAC_SynchronizeOfflinesEnd()
-			end
-				
-	-->
 	<Frame name="GuildAdsSystem" parent="UIParent">
 		<Scripts>
 			<OnUpdate>
-				GuildAds_OnUpdate(arg1);
+				GuildAdsTask:Update();
+				GuildAdsComm:ProcessQueues(arg1);
 			</OnUpdate>
 		</Scripts>
 	</Frame>
 	
-	<!-- GuildAdsInternalTooltip name is too long... -->
 	<GameTooltip name="GuildAdsITT" inherits="GameTooltipTemplate" parent="UIParent" frameStrata="HIGH" hidden="true">
 		<Size>
 			<AbsDimension x="128" y="64"/>

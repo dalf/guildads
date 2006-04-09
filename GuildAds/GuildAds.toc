@@ -16,6 +16,7 @@ localization.lua
 localization.de.lua
 localization.fr.lua
 GuildAds.lua
+GuildAdsTask.lua
 GuildAds.xml
 GuildAdsConfig.xml
 data\GuildAdsItem.lua

@@ -55,15 +55,15 @@ function GuildAds:Initialize()
 	-- Start uninitialized
 	GuildAds.channelJoined = false;
 	
-	-- RegisterEvent
-	self:RegisterEvent("PLAYER_GUILD_UPDATE", "CheckChannelName");
-	self:RegisterEvent("RAID_ROSTER_UPDATE", "CheckChannelName");
-	self:RegisterEvent("PARTY_MEMBERS_CHANGED", "CheckChannelName");
-	
 	-- Init player name, faction name, realm name
 	self.playerName = UnitName("player");
 	self.factionName = UnitFactionGroup("player");
 	self.realmName = GetCVar("realmName");
+	
+	-- RegisterEvent
+	self:RegisterEvent("PLAYER_GUILD_UPDATE", "CheckChannelName");
+	self:RegisterEvent("RAID_ROSTER_UPDATE", "CheckChannelName");
+	self:RegisterEvent("PARTY_MEMBERS_CHANGED", "CheckChannelName");
 	
 	-- Initialize database
 	GuildAdsDB:Initialize(); 
@@ -90,7 +90,7 @@ function GuildAds:Initialize()
 	
 	-- Call GuildAds:JoinChannel() in 8 seconds
 	GuildAdsSystem:Show();
-	GuildAdsSystem.InitTimer = 8;
+	GuildAdsTask:AddNamedSchedule("JoinChannel", 8, nil, nil, self.JoinChannel, self)
 	
 	GuildAds_ChatDebug(GA_DEBUG_GLOBAL,"[GuildAds:Initialize] end");
 end
@@ -106,10 +106,10 @@ function GuildAds:JoinChannel()
 	-- does general channels exists ? if not delayed init
 	local firstChannelNumber = GetChannelList();
 	if (firstChannelNumber == nil) then
-		GuildAds_ChatDebug(GA_DEBUG_GLOBAL,"[GuildAds_Init] delay - channels");
+		GuildAds_ChatDebug(GA_DEBUG_GLOBAL,"[GuildAds:JoinChannel] delay 2 seconds");
 		self.joinChannelAttempts = self.joinChannelAttempts +1;
 		if (self.joinChannelAttempts <= GUILDADS_MAX_CHANNEL_JOIN_ATTEMPTS) then
-			GuildAdsSystem.InitTimer = 2;
+			GuildAdsTask:AddNamedSchedule("JoinChannel", 2, nil, nil, self.JoinChannel, self);
 			return;
 		end
 	end
@@ -128,11 +128,9 @@ end
 
 function GuildAds:ChangeChannel()
 	GuildAds_ChatDebug(GA_DEBUG_GLOBAL,"[GuildAds:ChangeChannel]");
-	-- TODO : retirer sa présence du channel
 	
 	GuildAds.channelJoined = false;
-	
-	GuildAdsSystem.InitTimer = 2;
+	GuildAdsTask:AddNamedSchedule("JoinChannel", 2, nil, nil, self.JoinChannel, self);
 end
 
 function GuildAds:ToggleMainWindow()
@@ -284,22 +282,6 @@ function GuildAds:SetDefaultChannelAlias(command, alias)
 end
 
 GuildAds:RegisterForLoad()
-
----------------------------------------------------------------------------------
---
--- Called by WOW for each frame
--- 
----------------------------------------------------------------------------------
-function GuildAds_OnUpdate(elapsed)
-	GuildAdsComm:ProcessQueues(elapsed);
-	if (this.InitTimer) then
-		this.InitTimer = this.InitTimer - elapsed;
-		if (this.InitTimer <= 0) then
-			this.InitTimer = nil;
-			GuildAds:JoinChannel()
-		end
-	end
-end
 
 ---------------------------------------------------------------------------------
 --
