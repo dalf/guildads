@@ -538,28 +538,27 @@ function GuildAdsComm:ParseMessage(playerName, message, channelName)
 		self:DeleteDuplicateUpdate(DTS, message.playerName, message.who, message.fromRevision, message.toRevision);
 		DTS:ReceiveSearchResult(message.playerName, message.who, message.fromRevision, message.toRevision)
 	elseif message.command == "OT" then
-		if not self.transactions[playerName] then
-			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"ReceiveOpenTransaction("..tostring(DTS)..","..message.playerName..","..message.fromRevision);
-			self:DeleteDuplicateUpdate(DTS, self.playerName, GuildAds.playerName, message.fromRevision, message.toRevision)
-			self.transactions[playerName] = {
-				playerName = message.playerName,
-				dataTypeName = message.dataTypeName,
-				fromRevision = message.fromRevision,
-				toRevision = message.toRevision,
-				lmt=time()
-			}
-			self.transactions[playerName].__index = self.transactions[playerName];
-			DTS:ReceiveOpenTransaction(self.transactions[playerName])
-		else
-			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "Ignore OPEN TRANSACTION from "..sourceName.." (already open)");
+		if self.transactions[playerName] then
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "Duplicate OPEN TRANSACTION from "..playerName.." (already open)");
 		end
+		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"ReceiveOpenTransaction("..tostring(DTS)..","..message.playerName..","..message.fromRevision);
+		self:DeleteDuplicateUpdate(DTS, self.playerName, GuildAds.playerName, message.fromRevision, message.toRevision)
+		self.transactions[playerName] = {
+			playerName = message.playerName,
+			dataTypeName = message.dataTypeName,
+			fromRevision = message.fromRevision,
+			toRevision = message.toRevision,
+			lmt=time()
+		}
+		self.transactions[playerName].__index = self.transactions[playerName];
+		DTS:ReceiveOpenTransaction(self.transactions[playerName])
 	elseif message.command == "CT" then
 		if self.transactions[playerName] then
 			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"ReceiveCloseTransaction("..tostring(DTS)..","..message.playerName..")");
 			DTS:ReceiveCloseTransaction(self.transactions[playerName])
 			self.transactions[playerName] = nil;
 		else
-			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "Ignore CLOSE TRANSACTION from "..sourceName.." (no transaction)");
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "Ignore CLOSE TRANSACTION from "..playerName.." (no transaction)");
 		end
 	elseif message.command == "N" then
 		if self.transactions[playerName] then
@@ -569,7 +568,7 @@ function GuildAdsComm:ParseMessage(playerName, message, channelName)
 			local data = GuildAdsCodecs[message.dataTypeName.."Data"].decode(message.data);
 			DTS:ReceiveNewRevision(self.transactions[playerName], message.revision, id, data)
 		else
-			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "Ignore NEW from "..sourceName.." (no transaction)");
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "Ignore NEW from "..playerName.." (no transaction)");
 		end
 	elseif message.command == "O" then
 		if self.transactions[playerName] then
@@ -585,7 +584,7 @@ function GuildAdsComm:ParseMessage(playerName, message, channelName)
 			end
 			DTS:ReceiveOldRevisions(self.transactions[playerName], revisions)
 		else
-			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "Ignore OLD from "..sourceName.." (no transaction)");
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "Ignore OLD from "..playerName.." (no transaction)");
 		end
 	elseif message.command == "K" then
 		if self.transactions[playerName] then
@@ -594,7 +593,7 @@ function GuildAdsComm:ParseMessage(playerName, message, channelName)
 			local keys = GuildAdsCodecs[message.dataTypeName.."Keys"].decode(message.keys);
 			DTS:ReceiveKeys(self.transactions[playerName], keys);
 		else
-			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "Ignore KEYS from "..sourceName.." (no transaction)");
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "Ignore KEYS from "..playerName.." (no transaction)");
 		end
 	end
 end
