@@ -25,10 +25,10 @@ GuildAdsSkillDataType = GuildAdsTableDataType:new({
 });
 
 function GuildAdsSkillDataType:Initialize()
-	self:onUpdate();
+	GuildAdsTask:AddNamedSchedule("GuildAdsSkillDataTypeInit", 8, nil, nil, self.onUpdate, self)
 	self:RegisterEvent("CHARACTER_POINTS_CHANGED", "onUpdate");
 	self:RegisterEvent("CHAT_MSG_SKILL", "onUpdate");
-	self:RegisterEvent("PLAYER_LEVEL_UP", "onUpdate");   -- to update max skill rank
+	self:RegisterEvent("PLAYER_LEVEL_UP", "onUpdate");   -- to update the max skill rank
 end
 
 function GuildAdsSkillDataType:onUpdate()
