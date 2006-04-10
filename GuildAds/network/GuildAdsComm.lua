@@ -509,12 +509,11 @@ function GuildAdsComm.OnMessage(playerName, message, channel)
  	if playerName ~= GuildAds.playerName or not GuildAdsComm.IGNOREMYMESSAGE[message.command] then
 		GuildAdsComm:ParseMessage(playerName, message, channel)
 	else
-		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"- OnMessage: Ignore message from my self, command="..tostring(message.command));
+		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"Ignore message from my self, command="..tostring(message.command));
 	end
 end
 
 function GuildAdsComm:ParseMessage(playerName, message, channelName)
-	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"- ParseMessage: "..playerName..","..tostring(message.command)..","..tostring(channelName));
 	if self.transactions[playerName] then
 		setmetatable(message, self.transactions[playerName]);
 	end
@@ -545,18 +544,32 @@ function GuildAdsComm:ParseMessage(playerName, message, channelName)
 		DTS:ReceiveRevision(playerName, message.playerName, message.who, message.revision, message.weight, message.worstRevision)
 	elseif message.command == "SR" then
 		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "ReceiveSearchResult("..tostring(DTS)..","..message.playerName..")="..message.who.."("..message.fromRevision.."->"..message.toRevision..")");
+		-- update self.expectedTransactions
 		if (message.who ~= GuildAds.playerName) and (message.fromRevision<message.toRevision) then
-			self.expectedTransactions[message.playerName..":"..message.dataTypeName] = time();
+			tinsert(self.expectedTransactions, {
+				t = 20,
+				p = message.playerName,
+				dtn = message.dataTypeName,
+			});
 		end
+		-- update self.updateQueue
 		self:DeleteDuplicateUpdate(DTS, message.playerName, message.who, message.fromRevision, message.toRevision);
+		-- parse message
 		DTS:ReceiveSearchResult(message.playerName, message.who, message.fromRevision, message.toRevision)
 	elseif message.command == "OT" then
 		if self.transactions[playerName] then
-			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "Duplicate OPEN TRANSACTION from "..playerName.." (already open)");
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "|cffff1e00Duplicate|r OPEN TRANSACTION from "..playerName.." (already open)");
 		end
 		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"ReceiveOpenTransaction("..tostring(DTS)..","..message.playerName..","..message.fromRevision);
-		self.expectedTransactions[message.playerName..":"..message.dataTypeName] = nil;
+		-- update self.expectedTransactions
+		for k, v in self.expectedTransactions do
+			if (v.p == message.playerName) and (v.dtn == message.dataTypeName) then
+				table.remove(self.expectedTransactions, k);
+			end
+		end
+		-- update self.updateQueue
 		self:DeleteDuplicateUpdate(DTS, self.playerName, GuildAds.playerName, message.fromRevision, message.toRevision)
+		-- add transaction
 		self.transactions[playerName] = {
 			playerName = message.playerName,
 			dataTypeName = message.dataTypeName,
@@ -565,6 +578,7 @@ function GuildAdsComm:ParseMessage(playerName, message, channelName)
 			lmt=time()
 		}
 		self.transactions[playerName].__index = self.transactions[playerName];
+		-- parse message
 		DTS:ReceiveOpenTransaction(self.transactions[playerName])
 	elseif message.command == "CT" then
 		if self.transactions[playerName] then
@@ -572,7 +586,7 @@ function GuildAdsComm:ParseMessage(playerName, message, channelName)
 			DTS:ReceiveCloseTransaction(self.transactions[playerName])
 			self.transactions[playerName] = nil;
 		else
-			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "Ignore CLOSE TRANSACTION from "..playerName.." (no transaction)");
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "|cffff1e00Ignore|r CLOSE TRANSACTION from "..playerName.." (no transaction)");
 		end
 	elseif message.command == "N" then
 		if self.transactions[playerName] then
@@ -582,7 +596,7 @@ function GuildAdsComm:ParseMessage(playerName, message, channelName)
 			local data = GuildAdsCodecs[message.dataTypeName.."Data"].decode(message.data);
 			DTS:ReceiveNewRevision(self.transactions[playerName], message.revision, id, data)
 		else
-			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "Ignore NEW from "..playerName.." (no transaction)");
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "|cffff1e00Ignore|r NEW from "..playerName.." (no transaction)");
 		end
 	elseif message.command == "O" then
 		if self.transactions[playerName] then
@@ -598,7 +612,7 @@ function GuildAdsComm:ParseMessage(playerName, message, channelName)
 			end
 			DTS:ReceiveOldRevisions(self.transactions[playerName], revisions)
 		else
-			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "Ignore OLD from "..playerName.." (no transaction)");
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "|cffff1e00Ignore|r OLD from "..playerName.." (no transaction)");
 		end
 	elseif message.command == "K" then
 		if self.transactions[playerName] then
@@ -607,7 +621,7 @@ function GuildAdsComm:ParseMessage(playerName, message, channelName)
 			local keys = GuildAdsCodecs[message.dataTypeName.."Keys"].decode(message.keys);
 			DTS:ReceiveKeys(self.transactions[playerName], keys);
 		else
-			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "Ignore KEYS from "..playerName.." (no transaction)");
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "|cffff1e00Ignore|r KEYS from "..playerName.." (no transaction)");
 		end
 	end
 end
@@ -680,10 +694,35 @@ function GuildAdsComm:QueueSearch(DTS, playerName)
 end
 
 function GuildAdsComm:ProcessQueues(elapsed)
-	-- Is there some opened/expected transactions ?
-	if next(self.transactions) or next(self.expectedTransactions) then
-		-- then don't flood the channel with my update/search
-		-- TODO : ajouter un time out, sinon une transaction non fermée bloque tout
+	-- Is there some opened transactions ?
+	if next(self.transactions) then
+		local t = time();
+		
+		-- timeout about opened transactions
+		local k, v = next(self.transactions);
+		if k then
+			if v.lmt+20<t then
+				self.transactions[k] = nil;
+				GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"|cffff1e00Timeout|r opened transaction from "..k);
+			end
+		end
+		
+		-- don't flood the channel with my update/search
+		return;
+	end
+	
+	-- Is there some expected transactions ?
+	if next(self.expectedTransactions) then
+		-- timeout about expected transactions
+		for k, v in self.expectedTransactions do
+			v.t = v.t - elapsed;
+			if v.t<=0 then
+				GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"|cffff1e00Timeout|r expected transaction : "..tostring(v.p)..","..tostring(v.dtn));
+				table.remove(self.expectedTransactions, k);
+			end
+		end
+		
+		-- don't flood the channel with my update/search
 		return;
 	end
 	
@@ -696,7 +735,7 @@ function GuildAdsComm:ProcessQueues(elapsed)
 			update.DTS:SendUpdate(update.playerName, update.fromRevision);
 			
 			if self.updateQueue[1] then
-				self.updateQueueDelay = 1; -- check every second
+				self.updateQueueDelay = 2; -- check two second
 			else
 				self.updateQueueDelay = nil;
 			end
@@ -711,7 +750,7 @@ function GuildAdsComm:ProcessQueues(elapsed)
 				search.DTS:SendSearch(search.playerName);
 				
 				if self.searchQueue[1] then
-					self.searchQueueDelay = 2;	-- chec every two seconds
+					self.searchQueueDelay = 2;	-- check every two seconds
 				else
 					self.searchQueueDelay = nil;
 				end
