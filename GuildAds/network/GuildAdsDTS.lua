@@ -162,7 +162,6 @@ function GuildAdsDTS:SendUpdateData(playerName, fromRevision)
 	-- send new entries >r1
 	for id, _, data, revision in self.dataType:iterator(playerName) do
 		if (revision>fromRevision) then
-			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "  - new("..tostring(revision)..")="..id);
 			newEntries = newEntries + 1;
 			-- send this revision
 			GuildAdsComm:SendRevision(self.dataType, playerName, revision, id, data);
@@ -219,7 +218,7 @@ end
 
 function GuildAdsDTS:ReceiveKeys(transaction, keys)
 	for key, data in pairs(keys) do
-		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"  - ["..tostring(key).."]="..tostring(data)..")");
+		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"  - ["..tostring(key).."]="..tostring(data));
 		self.dataType:setRaw(transaction.playerName, key, data);
 	end
 end

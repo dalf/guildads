@@ -237,6 +237,8 @@ function GuildAdsComm:Initialize()
 end
 
 function GuildAdsComm:JoinChannel(channel, password)
+--~ 	LoggingChat(true);
+	
 	self.channelName = channel
 	self.channelPassword = password
 	
@@ -283,8 +285,8 @@ function GuildAdsComm.OnJoin(self)
 	-- Send Meta
 	self:SendMeta();
 	
-	-- Send search about my data
-	self:SendSearchAboutMyData();
+	-- Send search about my data in ten seconds (need a valid search tree)
+	GuildAdsTask:AddNamedSchedule("JoinChannel", 10, nil, nil, self.SendSearchAboutMyData, self);
 	
 	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "[GuildAdsComm.OnJoin] end");
 end
@@ -485,7 +487,7 @@ function GuildAdsComm:SendOpenTransaction(dataType, playerName, fromRevision, to
 end
 
 function GuildAdsComm:SendRevision(dataType, playerName, revision, id, data)
-	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendNewRevision("..dataType.metaInformations.name..","..playerName..")");
+	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendNewRevision("..dataType.metaInformations.name..","..playerName..","..tostring(id)..")");
 	SimpleComm_SendRawMessage(nil, GUILDADS_MSG_PREFIX.."N>"..revision..">"..GuildAdsCodecs[dataType.schema.id].encode(id)..">"..GuildAdsCodecs[dataType.metaInformations.name.."Data"].encode(data)..">");
 end
 
@@ -529,7 +531,7 @@ function GuildAdsComm:ParseMessage(playerName, message, channelName)
 		if channelName then
 			self:SendMeta(playerName);
 			
-			local delay = self.isOnline[GuildAds.playerName].i*10;
+			local delay = self.isOnline[GuildAds.playerName].i*10+20;
 			GuildAdsTask:AddNamedSchedule("JoinChannel", delay, nil, nil, self.SendSearchAboutMyData, self);
 		end
 		GuildAdsDB.channel[GuildAds.channelName]:addPlayer(playerName);
@@ -547,7 +549,7 @@ function GuildAdsComm:ParseMessage(playerName, message, channelName)
 		-- update self.expectedTransactions
 		if (message.who ~= GuildAds.playerName) and (message.fromRevision<message.toRevision) then
 			tinsert(self.expectedTransactions, {
-				t = 20,
+				t = 40,
 				p = message.playerName,
 				dtn = message.dataTypeName,
 			});
@@ -680,7 +682,7 @@ function GuildAdsComm:QueueUpdate(DTS, playerName, fromRevision, toRevsion)
 	self:DeleteDuplicateUpdate(DTS, playerName, GuildAds.playerName, fromRevision, toRevision);
 	table.insert(self.updateQueue, { DTS=DTS, playerName=playerName, fromRevision=fromRevision, toRevision=toRevision });
 	if not self.updateQueueDelay then
-		self.updateQueueDelay = 1;
+		self.updateQueueDelay = 2+random(20);
 	end
 end
 
@@ -694,6 +696,10 @@ function GuildAdsComm:QueueSearch(DTS, playerName)
 end
 
 function GuildAdsComm:ProcessQueues(elapsed)
+	if elapsed>0.75 then
+		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"|cffff1e00Lag !!!|r");
+	end
+	
 	-- Is there some opened transactions ?
 	if next(self.transactions) then
 		local t = time();
