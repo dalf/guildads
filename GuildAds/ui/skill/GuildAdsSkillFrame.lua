@@ -337,6 +337,54 @@ local indice = 1;
 
 end
 
+function GuildAdsSkill_Clear_OnClick() 
+	local indice = 1;
+	for i =1, 6 do
+		for j=1, 3 do
+		button = getglobal("GuildAdsProfessionButton"..indice);
+		if (g_currentTab == GUILDADSSKILL_TAB_PROFESSION) then
+	       node = PROFESSION_ARRAY[i][j]; 
+		elseif (g_currentTab == GUILDADSSKILL_TAB_SKILL) then
+		   node = SKILL_ARRAY[i][j]; 
+		end
+		slot = getglobal("GuildAdsProfessionButton"..indice.."Slot");
+		if (node["texture"]) then
+				GuildAdsSkill.setProfileValue("Filters", node["id"], nil);
+				SetItemButtonDesaturated(button, 1, 0.4, 0.4, 0.4);
+				slot:SetVertexColor(0.4, 0.4, 0.4);
+				node["selected"] = false;
+		end
+		indice = indice + 1;
+		end
+	end
+	GuildAdsSkill_UpdateGlobalAdButtons(true);
+end
+
+
+function GuildAdsSkill_All_OnClick() 
+	local indice = 1;
+	for i =1, 6 do
+		for j=1, 3 do
+		button = getglobal("GuildAdsProfessionButton"..indice);
+		if (g_currentTab == GUILDADSSKILL_TAB_PROFESSION) then
+	       node = PROFESSION_ARRAY[i][j]; 
+		elseif (g_currentTab == GUILDADSSKILL_TAB_SKILL) then
+		   node = SKILL_ARRAY[i][j]; 
+		end
+		slot = getglobal("GuildAdsProfessionButton"..indice.."Slot");
+		if (node["texture"]) then
+		    	GuildAdsSkill.setProfileValue("Filters", node["id"], true);
+				SetItemButtonDesaturated(button, nil);
+				slot:SetVertexColor(1.0, 0.82, 0);
+				node["selected"] = true;
+		end
+		indice = indice + 1;
+		end
+	end
+	GuildAdsSkill_UpdateGlobalAdButtons(true);
+end
+
+
 function GuildAdsSkill_ProfessionAdButton_OnClick(myProfessionID) 
 	local indice = 1;
 	for i =1, 6 do
@@ -362,12 +410,12 @@ function GuildAdsSkill_ProfessionAdButton_OnClick(myProfessionID)
 					node["selected"] = true;
 				end
 			else 
-			 if (not IsControlKeyDown()) then
-				GuildAdsSkill.setProfileValue("Filters", node["id"], nil);
-					SetItemButtonDesaturated(button, 1, 0.4, 0.4, 0.4);
-					slot:SetVertexColor(0.4, 0.4, 0.4);
-				node["selected"]= false;
-			 end
+--~ 				if (not IsControlKeyDown()) then
+--~ 					GuildAdsSkill.setProfileValue("Filters", node["id"], nil);
+--~ 					SetItemButtonDesaturated(button, 1, 0.4, 0.4, 0.4);
+--~ 					slot:SetVertexColor(0.4, 0.4, 0.4);
+--~ 					node["selected"]= false;
+--~ 				end
 			end
 		end
 		indice = indice + 1;

@@ -504,7 +504,40 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 							</OnVerticalScroll>
 						</Scripts>
 					</ScrollFrame>
-					
+					<Button name="GuildAdsSkillRemoveButton" inherits="UIPanelButtonTemplate" text="--Clear">
+						<Size>
+							<AbsDimension x="100" y="21"/>
+						</Size>
+						<Anchors>
+							<Anchor point="TOPRIGHT" relativeTo="GuildAdsMyAdButton13" relativePoint="BOTTOMRIGHT">
+								<Offset>
+									<AbsDimension x="-200" y="-110"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnClick>
+								GuildAdsSkill_Clear_OnClick();
+							</OnClick>
+						</Scripts>
+					</Button>
+					<Button name="GuildAdsAllButton" inherits="UIPanelButtonTemplate" text="--All">
+						<Size>
+							<AbsDimension x="100" y="21"/>
+						</Size>
+						<Anchors>
+							<Anchor point="TOPRIGHT" relativeTo="GuildAdsSkillRemoveButton" relativePoint="TOPRIGHT">
+								<Offset>
+									<AbsDimension x="-150" y="0"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnClick>
+								GuildAdsSkill_All_OnClick();
+							</OnClick>
+						</Scripts>
+					</Button>
 				</Frames>
 			</Frame>
 
@@ -517,437 +550,6 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 					</Anchor>
 				</Anchors>
 				<Frames>
-				<!--
-					<Button name="GuildAdsMyAdButton1" inherits="GuildAdsMyAdButtonTemplate" id="1">
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="GuildAdsMainWindowFrame">					
-								<Offset>
-									<AbsDimension x="15" y="-75"/>
-								</Offset>
-							</Anchor>
-						</Anchors>
-					</Button>
-					<Button name="GuildAdsMyAdButton2" inherits="GuildAdsMyAdButtonTemplate" id="2">
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="GuildAdsMyAdButton1" relativePoint="BOTTOMLEFT">
-								<Offset>
-									<AbsDimension x="0" y="0"/>
-								</Offset>
-							</Anchor>
-						</Anchors>
-					</Button>
-					
-					<Button name="GuildAdsMyAdButton3" inherits="GuildAdsMyAdButtonTemplate" id="3">
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="GuildAdsMyAdButton2" relativePoint="BOTTOMLEFT">
-								<Offset>
-									<AbsDimension x="0" y="0"/>
-								</Offset>
-							</Anchor>
-						</Anchors>
-					</Button>
-					
-					<Button name="GuildAdsMyAdButton4" inherits="GuildAdsMyAdButtonTemplate" id="4">
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="GuildAdsMyAdButton3" relativePoint="BOTTOMLEFT">
-								<Offset>
-									<AbsDimension x="0" y="0"/>
-								</Offset>
-							</Anchor>
-						</Anchors>
-					</Button>
-					
-					<Button name="GuildAdsMyAdButton5" inherits="GuildAdsMyAdButtonTemplate" id="5">
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="GuildAdsMyAdButton4" relativePoint="BOTTOMLEFT">
-								<Offset>
-									<AbsDimension x="0" y="0"/>
-								</Offset>
-							</Anchor>
-						</Anchors>
-					</Button>
-					
-					<Button name="GuildAdsMyAdButton6" inherits="GuildAdsMyAdButtonTemplate" id="6">
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="GuildAdsMyAdButton5" relativePoint="BOTTOMLEFT">
-								<Offset>
-									<AbsDimension x="0" y="0"/>
-								</Offset>
-							</Anchor>
-						</Anchors>
-					</Button>
-					
-					<Button name="GuildAdsMyAdButton7" inherits="GuildAdsMyAdButtonTemplate" id="7">
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="GuildAdsMyAdButton6" relativePoint="BOTTOMLEFT">
-								<Offset>
-									<AbsDimension x="0" y="0"/>
-								</Offset>
-							</Anchor>
-						</Anchors>
-					</Button>
-					
-					<Button name="GuildAdsMyAdButton8" inherits="GuildAdsMyAdButtonTemplate" id="8">
-					<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="GuildAdsMyAdButton7" relativePoint="BOTTOMLEFT">
-								<Offset>
-									<AbsDimension x="0" y="0"/>
-								</Offset>
-							</Anchor>
-						</Anchors>
-					</Button>
-					
-					<Button name="GuildAdsMyAdButton9" inherits="GuildAdsMyAdButtonTemplate" id="9">
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="GuildAdsMyAdButton8" relativePoint="BOTTOMLEFT">
-								<Offset>
-									<AbsDimension x="0" y="0"/>
-								</Offset>
-							</Anchor>
-						</Anchors>
-					</Button>
-					
-					<Button name="GuildAdsMyAdButton10" inherits="GuildAdsMyAdButtonTemplate" id="10">
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="GuildAdsMyAdButton9" relativePoint="BOTTOMLEFT">
-								<Offset>
-									<AbsDimension x="0" y="0"/>
-								</Offset>
-							</Anchor>
-						</Anchors>
-					</Button>
-					
-					<Button name="GuildAdsMyAdButton11" inherits="GuildAdsMyAdButtonTemplate" id="11">
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="GuildAdsMyAdButton10" relativePoint="BOTTOMLEFT">
-								<Offset>
-									<AbsDimension x="0" y="0"/>
-								</Offset>
-							</Anchor>
-						</Anchors>
-					</Button>
-					
-					<Button name="GuildAdsMyAdButton12" inherits="GuildAdsMyAdButtonTemplate" id="12">
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="GuildAdsMyAdButton11" relativePoint="BOTTOMLEFT">
-								<Offset>
-									<AbsDimension x="0" y="0"/>
-								</Offset>
-							</Anchor>
-						</Anchors>
-					</Button>
-					
-					<Button name="GuildAdsMyAdButton13" inherits="GuildAdsMyAdButtonTemplate" id="13">
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="GuildAdsMyAdButton12" relativePoint="BOTTOMLEFT">
-								<Offset>
-									<AbsDimension x="0" y="0"/>
-								</Offset>
-							</Anchor>
-						</Anchors>
-					</Button>
-					-->
-					
-					<!--
-					<ScrollFrame name="GuildAdsMyAdScrollFrame" inherits="FauxScrollFrameTemplate">
-						<Size>
-							<AbsDimension x="465" y="273"/>
-						</Size>
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="GuildAdsMyAdButton1" relativePoint="TOPLEFT">
-								<Offset>
-									<AbsDimension x="0" y="0"/>
-								</Offset>
-							</Anchor>
-						</Anchors>
-						<Scripts>
-							<OnVerticalScroll>
-								FauxScrollFrame_OnVerticalScroll(GUILDADS_ADBUTTONSIZEY, GuildAds_UpdateMyExchangeFrame);
-							</OnVerticalScroll>
-						</Scripts>
-					</ScrollFrame>
-					
-					<EditBox name="GuildAdsEditBox" letters="200" autoFocus="false" historyLines="256">
-						<Size>
-							<AbsDimension x="465" y="26"/>
-						</Size>
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="GuildAdsMyAdButton13" relativePoint="BOTTOMLEFT">
-								<Offset>
-									<AbsDimension x="10" y="-10"/>
-								</Offset>
-							</Anchor>
-						</Anchors>
-						<TextInsets>
-							<AbsInset  left="0" right="5" />
-						</TextInsets>
-						<Layers>
-							<Layer level="BACKGROUND">
-								<Texture name="$parentLeft" file="Interface\Common\Common-Input-Border">
-									<Size>
-										<AbsDimension x="8" y="26"/>
-									</Size>
-									<Anchors>
-										<Anchor point="TOPLEFT">
-											<Offset>
-												<AbsDimension x="-5" y="0"/>
-											</Offset>
-										</Anchor>
-									</Anchors>
-									<TexCoords left="0" right="0.0625" top="0" bottom="0.625"/>
-								</Texture>
-								<Texture name="$parentRight" file="Interface\Common\Common-Input-Border">
-									<Size>
-										<AbsDimension x="8" y="26"/>
-									</Size>
-									<Anchors>
-										<Anchor point="RIGHT">
-											<Offset>
-												<AbsDimension x="0" y="0"/>
-											</Offset>
-										</Anchor>
-									</Anchors>
-									<TexCoords left="0.9375" right="1.0" top="0" bottom="0.625"/>
-								</Texture>
-								<Texture name="$parentMiddle" file="Interface\Common\Common-Input-Border">
-									<Size>
-										<AbsDimension x="10" y="26"/>
-									</Size>
-									<Anchors>
-										<Anchor point="LEFT" relativeTo="$parentLeft" relativePoint="RIGHT"/>
-										<Anchor point="RIGHT" relativeTo="$parentRight" relativePoint="LEFT"/>
-									</Anchors>
-									<TexCoords left="0.0625" right="0.9375" top="0" bottom="0.625"/>
-								</Texture>
-							</Layer>
-						</Layers>
-						
-						<Scripts>
-							<OnShow>
-								this:ClearFocus();
-							</OnShow>
-							<OnEnterPressed>
-								this:ClearFocus();
-							</OnEnterPressed>
-							<OnEscapePressed>
-								this:ClearFocus();
-							</OnEscapePressed>
-							<OnTextChanged>
-								GuildAdsSkill_AddButtonUpdate();
-							</OnTextChanged>
-						</Scripts>
-						<FontString inherits="ChatFontNormal" bytes="256"/>
-					</EditBox>
-			
-					<Button name="GuildAdsEditTexture">
-						<Size>
-							<AbsDimension x="36" y="36"/>
-						</Size>
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="GuildAdsEditBox" relativePoint="BOTTOMLEFT">
-								<Offset>
-									<AbsDimension x="0" y="-5"/>
-								</Offset>
-							</Anchor>
-						</Anchors>
-						<Layers>
-							<Layer level="BACKGROUND">
-								<Texture file="Interface\Buttons\UI-EmptySlot-Disabled">
-									<Size>
-										<AbsDimension x="56" y="56"/>
-									</Size>
-									<Anchors>
-										<Anchor point="CENTER">
-											<Offset>
-												<AbsDimension x="0" y="-1"/>
-											</Offset>
-										</Anchor>
-									</Anchors>
-								</Texture>
-								<Texture name="$parentNameFrame" file="Interface\QuestFrame\UI-QuestItemNameFrame">
-									<Size>
-										<AbsDimension x="150" y="64"/>
-									</Size>
-									<Anchors>
-										<Anchor point="LEFT">
-											<Offset>
-												<AbsDimension x="32" y="0"/>
-											</Offset>
-										</Anchor>
-									</Anchors>
-								</Texture>
-								<FontString name="$parentName" inherits="GameFontHighlight" justifyH="LEFT">
-									<Size>
-										<AbsDimension x="120" y="36"/>
-									</Size>
-									<Anchors>
-										<Anchor point="LEFT">
-											<Offset>
-												<AbsDimension x="48" y="0"/>
-											</Offset>
-										</Anchor>
-									</Anchors>
-								</FontString>
-							</Layer>
-						</Layers>
-						<NormalTexture>
-							<Size>
-								<AbsDimension x="36" y="36"/>
-							</Size>
-							<Anchors>
-								<Anchor point="CENTER">
-									<Offset>
-										<AbsDimension x="0" y="-1"/>
-									</Offset>
-								</Anchor>
-							</Anchors>
-						</NormalTexture>
-						<HighlightTexture alphaMode="ADD" file="Interface\Buttons\ButtonHilight-Square"/>
-						<Scripts>
-							<OnClick>
-								GuildAdsSkill_MyAdsEdit(nil);
-							</OnClick>
-						</Scripts>
-					</Button>
-					
-					<Frame name="GuildAdsEditItem"  hidden="false">
-						<Frames>
-							<EditBox name="GuildAdsEditCount" letters="3" historyLines="0" numeric="true" autoFocus="false">
-								<Size>
-									<AbsDimension x="55" y="20"/>
-								</Size>
-								<Anchors>
-									<Anchor point="LEFT" relativeTo="GuildAdsEditTexture" relativePoint="RIGHT">
-										<Offset>
-											<AbsDimension x="150" y="-8"/>
-										</Offset>
-									</Anchor>
-								</Anchors>
-								<Layers>
-									<Layer level="BACKGROUND">
-										<FontString name="$parentName" inherits="GameFontHighlightSmall" justifyH="LEFT" text="GUILDADS_QUANTITY">
-											<Size>
-												<AbsDimension x="55" y="16"/>
-											</Size>
-											<Anchors>
-												<Anchor point="TOP">
-													<Offset>
-														<AbsDimension x="0" y="16" />
-													</Offset>
-												</Anchor>
-											</Anchors>
-										</FontString>
-										<Texture name="$parentLeft" file="Interface\Common\Common-Input-Border">
-											<Size>
-												<AbsDimension x="8" y="20"/>
-											</Size>
-											<Anchors>
-												<Anchor point="TOPLEFT">
-													<Offset>
-														<AbsDimension x="-5" y="0"/>
-													</Offset>
-												</Anchor>
-											</Anchors>
-											<TexCoords left="0" right="0.0625" top="0" bottom="0.625"/>
-										</Texture>
-										<Texture name="$parentRight" file="Interface\Common\Common-Input-Border">
-											<Size>
-												<AbsDimension x="8" y="20"/>
-											</Size>
-											<Anchors>
-												<Anchor point="RIGHT">
-													<Offset>
-														<AbsDimension x="0" y="0"/>
-													</Offset>
-												</Anchor>
-											</Anchors>
-											<TexCoords left="0.9375" right="1.0" top="0" bottom="0.625"/>
-										</Texture>
-										<Texture name="$parentMiddle" file="Interface\Common\Common-Input-Border">
-											<Size>
-												<AbsDimension x="10" y="20"/>
-											</Size>
-											<Anchors>
-												<Anchor point="LEFT" relativeTo="$parentLeft" relativePoint="RIGHT"/>
-												<Anchor point="RIGHT" relativeTo="$parentRight" relativePoint="LEFT"/>
-											</Anchors>
-											<TexCoords left="0.0625" right="0.9375" top="0" bottom="0.625"/>
-										</Texture>
-									</Layer>
-								</Layers>
-								<Scripts>
-									<OnEnterPressed>
-										this:ClearFocus();
-									</OnEnterPressed>
-									<OnEscapePressed>
-										this:ClearFocus();
-									</OnEscapePressed>
-									<OnEditFocusLost>
-										this:HighlightText(0, 0);
-									</OnEditFocusLost>
-									<OnEditFocusGained>
-										this:HighlightText();
-									</OnEditFocusGained>
-								</Scripts>
-								<FontString inherits="ChatFontNormal"/>
-							</EditBox>
-						</Frames>
-					</Frame>
-						
-					<Button name="GuildAdsRemoveButton" inherits="UIPanelButtonTemplate" text="GUILDADS_BUTTON_REMOVE">
-						<Size>
-							<AbsDimension x="100" y="21"/>
-						</Size>
-						<Anchors>
-							<Anchor point="TOPRIGHT" relativeTo="GuildAdsMyAdButton13" relativePoint="BOTTOMRIGHT">
-								<Offset>
-									<AbsDimension x="-5" y="-50"/>
-								</Offset>
-							</Anchor>
-						</Anchors>
-						<Scripts>
-							<OnClick>
-								GuildAdsSkill_RemoveButton_OnClick();
-							</OnClick>
-						</Scripts>
-					</Button>
-					
-					<Button name="GuildAdsAddButtonLookFor" inherits="UIPanelButtonTemplate" text="GUILDADS_BUTTON_ADDREQUEST">
-						<Size>
-							<AbsDimension x="100" y="21"/>
-						</Size>
-						<Anchors>
-							<Anchor point="RIGHT" relativeTo="GuildAdsRemoveButton" relativePoint="LEFT">
-								<Offset>
-									<AbsDimension x="-10" y="-10"/>
-								</Offset>		
-							</Anchor>
-						</Anchors>
-						<Scripts>
-							<OnClick>
-								GuildAdsSkill_AddButton_OnClick(GUILDADS_MSG_TYPE_REQUEST);
-							</OnClick>
-						</Scripts>
-					</Button>
-					
-					<Button name="GuildAdsAddButtonAvailable" inherits="UIPanelButtonTemplate" text="GUILDADS_BUTTON_ADDAVAILABLE" hidden="false">
-						<Size>
-							<AbsDimension x="100" y="21"/>
-						</Size>
-						<Anchors>
-							<Anchor point="RIGHT" relativeTo="GuildAdsRemoveButton" relativePoint="LEFT">
-								<Offset>
-									<AbsDimension x="-10" y="15"/>
-								</Offset>
-							</Anchor>
-						</Anchors>
-						<Scripts>
-							<OnClick>
-								GuildAdsSkill_AddButton_OnClick(GUILDADS_MSG_TYPE_AVAILABLE);
-							</OnClick>
-						</Scripts>
-					</Button>-->
-					
 					<Button name="GuildAdsSkillTab" inherits="GuildAdsWindowTabTemplate" text="GUILDADS_HEADER_SKILL" />
 				</Frames>
 			</Frame>
