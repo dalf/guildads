@@ -16,7 +16,6 @@ GuildAdsMainDataType = GuildAdsTableDataType:new({
 		parent = GuildAdsDataType.PROFILE
 	};
 	schema = {
-		id = "String",
 		keys = {
 			[1] = { key="g",  	codec="String" },
 			[2] = { key="gr", 	codec="String" },
@@ -41,7 +40,6 @@ function GuildAdsMainDataType:Initialize()
 	self:set(GuildAds.playerName, self.Race, self:getRaceIdFromName(UnitRace("player")));
 	self:set(GuildAds.playerName, self.Class, self:getClassIdFromName(UnitClass("player")));
 	self:set(GuildAds.playerName, self.Account, GuildAdsDB.account);
-	self:onGuildUpdate();
 	
 	self:RegisterEvent("PLAYER_LEVEL_UP", "onLevelUp");
 	self:RegisterEvent("PLAYER_GUILD_UPDATE", "onGuildUpdate");
@@ -52,7 +50,7 @@ function GuildAdsMainDataType:onLevelUp()
 end
 
 function GuildAdsMainDataType:onGuildUpdate()
-	local guildName, guildRankName, guildRankIndex = GetGuildInfo("player");
+	local guildName, guildRank, guildRankIndex = GetGuildInfo("player");
 	
 	self:set(GuildAds.playerName, self.Guild, guildName);
 	self:set(GuildAds.playerName, self.GuildRank, guildRank);
