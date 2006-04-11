@@ -75,7 +75,7 @@ GuildAdsTrade = {
 		"trade"
 	};
 	
-	currentTab = GuildAds.TAB_REQUEST;
+	currentTab = 1;				-- TAB_REQUEST
 	currentAdType = 0;
 	currentPlayerName = "";
 	currentItem = "";
@@ -135,16 +135,22 @@ GuildAdsTrade = {
 		GuildAdsTrade.filterClass.init();
 		
 		if ReagentData then
-			UIDropDownMenu_Initialize( getglobal("GuildAds_Filter_ZoneDropDown"), GuildAdsTrade.ItemFilter.init);
-			UIDropDownMenu_SetText(FILTER, getglobal("GuildAds_Filter_ZoneDropDown"));
-			UIDropDownMenu_SetWidth(100,  getglobal("GuildAds_Filter_ZoneDropDown"));
+			UIDropDownMenu_Initialize( GuildAds_Filter_ZoneDropDown, GuildAdsTrade.ItemFilter.init);
+			UIDropDownMenu_SetText(FILTER, GuildAds_Filter_ZoneDropDown);
+			UIDropDownMenu_SetWidth(100,  GuildAds_Filter_ZoneDropDown);
+		else
+			GuildAds_Filter_ZoneDropDown:Hide();
 		end
 		
-		-- TODO : todo on first show of the frame, not now
-		GuildAdsTrade.selectTab(GuildAdsTrade.TAB_REQUEST);
+		PanelTemplates_SelectTab(GuildAds_MyTab1);
+		PanelTemplates_DeselectTab(GuildAds_MyTab2);
+		PanelTemplates_DeselectTab(GuildAds_MyTab3);
+	
+		GuildListAdMyAdsFrame:Hide();
+		GuildListAdExchangeListFrame:Show();
+		GuildAdsTradeFilterFrame:Show();
 		
 		-- Init date filter
-		
 		local range = table.getn(GuildAdsTrade.g_DateFilter)+1;
 		GuildAds_DateFilter:SetMinMaxValues(1,range);
 		GuildAds_DateFilter:SetValueStep(1);
@@ -170,14 +176,12 @@ GuildAdsTrade = {
 	end;
 	
 	onChannelJoin = function()
-		GuildAdsTrade.debug("onChannelJoin("..GuildAds.channelName..")");
 		-- Register for events
 		GuildAdsDB.channel[GuildAds.channelName].TradeNeed:registerEvent(GuildAdsTrade.onDBUpdate);
 		GuildAdsDB.channel[GuildAds.channelName].TradeOffer:registerEvent(GuildAdsTrade.onDBUpdate);
 	end;
 	
 	onChannelLeave = function()
-		GuildAdsTrade.debug("onChannelLeave");
 		-- Unregister for events
 		GuildAdsDB.channel[GuildAds.channelName].TradeNeed:unregisterEvent(GuildAdsTrade.onDBUpdate);
 		GuildAdsDB.channel[GuildAds.channelName].TradeOffer:unregisterEvent(GuildAdsTrade.onDBUpdate);
@@ -199,13 +203,26 @@ GuildAdsTrade = {
 		end
 	end;
 	
+	onUpdate = function()
+		if this.update then
+			this.update = this.update - arg1;
+			if this.update<=0 then
+				this.update = nil;
+				GuildAdsTrade.updateCurrentTab();
+			end;
+		end;
+	end;
+	
+	delayedUpdate = function()
+		GuildAdsTradeFrame.update = 1;
+	end;
+	
 	onDBUpdate = function(dataType, playerName, item)
 		GuildAdsTrade.debug("onDBUpdate");
+		
 		-- refresh tabs (offer, need, my ads)
 		GuildAdsTrade.data.resetCache();
-		
-		-- TODO : actuellement 100 nouvelles annonces = 100 refresh de la selection même si la fenêtre est cachée
-		GuildAdsTrade.select(GuildAdsTrade.currentAdType, GuildAdsTrade.currentPlayerName, GuildAdsTrade.currentItem)
+		GuildAdsTrade.delayedUpdate();
 		
 		-- 
 		if playerName ~= GuildAds.playerName then
@@ -240,7 +257,8 @@ GuildAdsTrade = {
  			GuildAds_DateFilterLabel:SetText(GUILDADS_ITEMS.everything);
  			GuildAdsTrade.setProfileValue(nil, "HideAdsOlderThan", nil);
  		end
- 		GuildAdsTrade.exchangeButtonsUpdate(GuildAdsTrade.currentTab, true);
+		GuildAdsTrade.data.resetCache();
+		GuildAdsTrade.updateCurrentTab();
  	end;
 	
 	PrepareSortArrow = function() 
@@ -398,9 +416,9 @@ GuildAdsTrade = {
 			GuildListAdExchangeListFrame:Show();
 			GuildAdsTradeFilterFrame:Show();
 			if (ReagentData) then
-				getglobal("GuildAds_Filter_ZoneDropDown"):Show();
+				GuildAds_Filter_ZoneDropDown:Show();
 			else 
-				getglobal("GuildAds_Filter_ZoneDropDown"):Hide();
+				GuildAds_Filter_ZoneDropDown:Hide();
 			end
 			
 			GuildAdsTrade.exchangeButtonsUpdate(tab,true);
@@ -415,9 +433,9 @@ GuildAdsTrade = {
 			GuildListAdExchangeListFrame:Show();
 			GuildAdsTradeFilterFrame:Show();
 			if (ReagentData) then
-				getglobal("GuildAds_Filter_ZoneDropDown"):Show();
+				GuildAds_Filter_ZoneDropDown:Show();
 			else 
-				getglobal("GuildAds_Filter_ZoneDropDown"):Hide();
+				GuildAds_Filter_ZoneDropDown:Hide();
 			end
 			
 			GuildAdsTrade.exchangeButtonsUpdate(tab,true);
@@ -446,7 +464,7 @@ GuildAdsTrade = {
 		GuildAdsTrade.exchangeButtonsUpdate(GuildAdsTrade.currentAdType,true);
 	end;
 	
-	select = function(adType, playerName, item, count)
+	select = function(adType, playerName, item, quantity, comment)
 		-- choose best adtype if not defined
 		if adType == nil then
 			local channelDB = GuildAdsDB.channel[GuildAds.channelName];
@@ -457,7 +475,7 @@ GuildAdsTrade = {
 			end
 		end
 		
-		GuildAdsTrade.debug("select("..tostring(adType)..","..tostring(playerName)..","..tostring(item)..","..tostring(count)..")");
+		GuildAdsTrade.debug("select("..tostring(adType)..","..tostring(playerName)..","..tostring(item)..","..tostring(quantity)..")");
 		
 		-- set selection
 		GuildAdsTrade.currentPlayerName = playerName;
@@ -465,34 +483,31 @@ GuildAdsTrade = {
 		GuildAdsTrade.currentAdType = adType;
 		
 		-- update edit item
-		GuildAdsTrade.edit(adType, playerName, item, count);
+		GuildAdsTrade.updateCurrentItem(true, quantity, comment);
 		
 		-- update tab
-		if GuildAdsTradeFrame and GuildAdsTradeFrame.IsVisible and GuildAdsTradeFrame:IsVisible() then
-			if GuildAdsTrade.currentTab==GuildAdsTrade.TAB_MY_ADS then
-				GuildAdsTrade.myAds.updateMyAdsFrame();
-			elseif GuildAdsTrade.currentTab==GuildAdsTrade.TAB_REQUEST or GuildAdsTrade.currentTab==GuildAdsTrade.TAB_AVAILABLE then
-				GuildAdsTrade.exchangeButtonsUpdate(GuildAdsTrade.currentTab);
-			end;
-		end;
+		GuildAdsTrade.updateCurrentTab();
 	end;
-	
-	edit = function(adType, playerName, item, count)
+		
+	updateCurrentItem = function(newSelection, quantity, comment)
+		local info = GuildAds_ItemInfo[GuildAdsTrade.currentItem];
+		
 		local datatype;
-		local info = GuildAds_ItemInfo[item];
-		if adType == GUILDADS_MSG_TYPE_AVAILABLE then
+		if GuildAdsTrade.currentAdType == GUILDADS_MSG_TYPE_AVAILABLE then
 			datatype = GuildAdsDB.channel[GuildAds.channelName].TradeOffer;
-		elseif adType == GUILDADS_MSG_TYPE_REQUEST then
+		elseif GuildAdsTrade.currentAdType == GUILDADS_MSG_TYPE_REQUEST then
 			datatype = GuildAdsDB.channel[GuildAds.channelName].TradeNeed;
 		end
+		
 		local data;
 		if datatype then
-			data = datatype:get(GuildAds.playerName, item);
+			data = datatype:get(GuildAds.playerName, GuildAdsTrade.currentItem);
 		end
+		
 		if data then
 			-- existing information
 			GuildAdsTradeHighlight:Show();
-			if adType == GUILDADS_MSG_TYPE_AVAILABLE then
+			if GuildAdsTrade.currentAdType == GUILDADS_MSG_TYPE_AVAILABLE then
 				GuildAdsAddButtonLookFor:Disable();
 				GuildAdsAddButtonAvailable:Enable();
 			else
@@ -506,48 +521,47 @@ GuildAdsTrade = {
 			GuildAdsAddButtonLookFor:Enable();
 			GuildAdsAddButtonAvailable:Enable();
 			GuildAdsRemoveButton:Disable();
-			data = {};
 		end
 		
-		if count or data.c then
-			count = (count or 0) + (data.q or 0);
+		if info then
+			GuildAdsEditTexture:SetNormalTexture(info.texture);
+			local _, _, _, hex = GetItemQualityColor(info.quality or 1)
+			GuildAdsEditTextureName:SetText(hex..info.name.."|r");
 		else
-			count = data.q or count or "";
-		end
-		
-		GuildAdsTrade.setEditItem(item, count, data.c or "", data~=nil);
-	end;
-	
-	setEditItem = function(item, count, text)
-		if text then
-			GuildAdsEditBox:SetText(text);
-		end
-		if count then
-			GuildAdsEditCount:SetText(count);
-		end
-		
-		if item then
-			local info = GuildAds_ItemInfo[item];
-			if info then
-				GuildAdsEditTexture:SetNormalTexture(info.texture);
-				local _, _, _, hex = GetItemQualityColor(info.quality or 1)
-				GuildAdsEditTextureName:SetText(hex..info.name.."|r");
+			if GuildAdsTrade.currentItem~="" then
+				GuildAdsEditTexture:SetNormalTexture("Interface\\Icons\\INV_Misc_QuestionMark");
+				GuildAdsEditTextureName:SetText(GuildAdsTrade.currentItem);
 			else
 				GuildAdsEditTexture:SetNormalTexture("");
-				GuildAdsEditTextureName:SetText(item);
+				GuildAdsEditTextureName:SetText("");
 			end
+		end
+		
+		if newSelection then
+			data = data or {};
+			if quantity or data.c then
+				quantity = (quantity or 0) + (data.q or 0);
+			else
+				quantity = data.q or quantity or "";
+			end
+			
+			GuildAdsEditCount:SetText(quantity);
+			
+			GuildAdsEditBox:SetText(comment or "");
 		end
 	end;
 	
 	updateCurrentTab = function()
-		GuildAdsTrade.debug("onItemInfoReady");
-		if (GuildAdsTrade.currentTab == GuildAdsTrade.TAB_REQUEST or 
-			GuildAdsTrade.currentTab == GuildAdsTrade.TAB_AVAILABLE) then
-			GuildAdsTrade.exchangeButtonsUpdate(GuildAdsTrade.currentTab);
-		else 
-			GuildAdsTrade.myAds.updateMyAdsFrame();
-			GuildAdsTrade.setEditItem(GuildAdsTrade.currentItem);
-		end;
+		GuildAdsTrade.debug("updateCurrentTab");
+		if GuildAdsTradeFrame and GuildAdsTradeFrame.IsVisible and GuildAdsTradeFrame:IsVisible() then
+			if (GuildAdsTrade.currentTab == GuildAdsTrade.TAB_REQUEST or 
+				GuildAdsTrade.currentTab == GuildAdsTrade.TAB_AVAILABLE) then
+				GuildAdsTrade.exchangeButtonsUpdate(GuildAdsTrade.currentTab);
+			else 
+				GuildAdsTrade.myAds.updateMyAdsFrame();
+				GuildAdsTrade.updateCurrentItem();
+			end;
+		end
 	end;
 	
 	myButton = {
@@ -619,7 +633,7 @@ GuildAdsTrade = {
 			if (info.texture) then 
 				getglobal(texture):SetTexture(info.texture);
 			else
-				getglobal(texture):SetTexture("");
+				getglobal(texture):SetTexture("Interface\\Icons\\INV_Misc_QuestionMark");
 			end;
 			
 			-- name with color
@@ -632,14 +646,7 @@ GuildAdsTrade = {
 					getglobal(textField):SetText(info.name);
 				end
 			else
-				--[[
-				if ad.text then
-					getglobal(textField):Show();
-					getglobal(textField):SetText(info.name);
-				else
-					getglobal(textField):Hide();
-				end
-				]]
+				getglobal(textField):SetText(item);
 			end
 				
 			-- quantity
@@ -1371,7 +1378,7 @@ GuildAdsTrade = {
 		local count = GuildAdsEditCount:GetNumber();
 		if (count == 0) then
 			count = nil;
-		end		
+		end
 		
 		local text = GuildAdsEditBox:GetText();
 		if (text == "") then
@@ -1409,10 +1416,24 @@ GuildAdsTrade = {
 		datatype:delete(GuildAds.playerName, GuildAdsTrade.currentItem);
 		
 		-- selection first ad in "my ads"
-		local newSelection = GuildAdsTrade.myAds.cache[1];
+		local currentIndex = table.foreachi(GuildAdsTrade.myAds.cache, 
+			function(k, v)
+				if v.i == GuildAdsTrade.currentItem then 
+					return k;
+				end
+			end
+		);
+		
+		local newSelection;
+		if currentIndex<table.getn(GuildAdsTrade.myAds.cache) then
+			newSelection = GuildAdsTrade.myAds.cache[currentIndex+1];
+		elseif currentIndex>1 then
+			newSelection = GuildAdsTrade.myAds.cache[currentIndex-1];
+		end
+			
 		if newSelection then
 			GuildAdsTrade.select(newSelection.t, GuildAds.playerName, newSelection.i);
-		end;
+		end
 	end;
 
 	----------------------------------------------------------------------------------
@@ -1441,7 +1462,7 @@ GuildAdsTrade = {
 	};
 	
 	
-	};
+};
 
 
 

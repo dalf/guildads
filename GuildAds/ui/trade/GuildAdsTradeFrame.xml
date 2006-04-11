@@ -119,6 +119,7 @@
 			</Anchors>
 		</HighlightText>
 	</Button>
+	
 	<Button name="GuildAdsVirtualAdButtonTemplate" virtual="true">
 		<Size>
 			<AbsDimension x="470" y="16"/>
@@ -143,10 +144,6 @@
 	</Button>
 	
 	<Button name="GuildAdsGlobalAdButtonTemplate" inherits="GuildAdsVirtualAdButtonTemplate" virtual="true">
-		<!--
-			this.idAdType
-			this.idAd
-		-->
 		<Size>
 			<AbsDimension x="490" y="22"/>
 		</Size>
@@ -470,100 +467,99 @@
 				</Scripts>
 			</Button>
 			
-			
-		
 			<Frame name="GuildListAdExchangeListFrame" hidden="false" setAllPoints="true">
 				<Frames>
 					<Button name="GuildAdsTradeColumnHeader1" inherits="GuildAdsTradeColumnHeaderTemplate" text="GUILDADS_TRADE_OBJECT">
-								<Anchors>
-									<Anchor point="TOPLEFT" relativeTo="GuildAdsMainWindowFrame" >
-										<Offset>
-											<AbsDimension x="17" y="-76"/>
-										</Offset>
-									</Anchor>
-								</Anchors>
-								<Scripts>
-									<OnLoad>
-										WhoFrameColumn_SetWidth(253);
-										this.sortType = "item";
-									</OnLoad>
-								</Scripts>
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="GuildAdsMainWindowFrame" >
+								<Offset>
+									<AbsDimension x="17" y="-76"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								WhoFrameColumn_SetWidth(253);
+								this.sortType = "item";
+							</OnLoad>
+						</Scripts>
 					</Button>
 					<Button name="GuildAdsTradeColumnHeader2" inherits="GuildAdsTradeColumnHeaderTemplate" text="GUILDADS_TRADE_NUMBER">
-								<Anchors>
-									<Anchor point="LEFT" relativeTo="GuildAdsTradeColumnHeader1" relativePoint="RIGHT">
-										<Offset>
-											<AbsDimension x="-2" y="0"/>
-										</Offset>
-									</Anchor>
-								</Anchors>
-								<Scripts>
-									<OnLoad>
-										WhoFrameColumn_SetWidth(30);
-										this.sortType = "count";
-									</OnLoad>
-								</Scripts>
-							</Button>
+						<Anchors>
+							<Anchor point="LEFT" relativeTo="GuildAdsTradeColumnHeader1" relativePoint="RIGHT">
+								<Offset>
+									<AbsDimension x="-2" y="0"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								WhoFrameColumn_SetWidth(30);
+								this.sortType = "count";
+							</OnLoad>
+						</Scripts>
+					</Button>
 					<Button name="GuildAdsTradeColumnHeader3" inherits="GuildAdsTradeColumnHeaderTemplate" text="D">
-								<Anchors>
-									<Anchor point="LEFT" relativeTo="GuildAdsTradeColumnHeader2" relativePoint="RIGHT">
-										<Offset>
-											<AbsDimension x="-2" y="0"/>
-										</Offset>
-									</Anchor>
-								</Anchors>
-								<Scripts>
-									<OnLoad>
-										WhoFrameColumn_SetWidth(22);
-										this.sortType = "drop";
-									</OnLoad>
-								</Scripts>
-							</Button>
+						<Anchors>
+							<Anchor point="LEFT" relativeTo="GuildAdsTradeColumnHeader2" relativePoint="RIGHT">
+								<Offset>
+									<AbsDimension x="-2" y="0"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								WhoFrameColumn_SetWidth(22);
+								this.sortType = "drop";
+							</OnLoad>
+						</Scripts>
+					</Button>
 					<Button name="GuildAdsTradeColumnHeader4" inherits="GuildAdsTradeColumnHeaderTemplate" text="U">
-								<Anchors>
-									<Anchor point="LEFT" relativeTo="GuildAdsTradeColumnHeader3" relativePoint="RIGHT">
-										<Offset>
-											<AbsDimension x="-2" y="0"/>
-										</Offset>
-									</Anchor>
-								</Anchors>
-								<Scripts>
-									<OnLoad>
-										WhoFrameColumn_SetWidth(22);
-										this.sortType = "use";
-									</OnLoad>
-								</Scripts>
-							</Button>
+						<Anchors>
+							<Anchor point="LEFT" relativeTo="GuildAdsTradeColumnHeader3" relativePoint="RIGHT">
+								<Offset>
+									<AbsDimension x="-2" y="0"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								WhoFrameColumn_SetWidth(22);
+								this.sortType = "use";
+							</OnLoad>
+						</Scripts>
+					</Button>
 					<Button name="GuildAdsTradeColumnHeader5" inherits="GuildAdsTradeColumnHeaderTemplate" text="GUILDADS_TRADE_PROVIDER">
-								<Anchors>
-									<Anchor point="LEFT" relativeTo="GuildAdsTradeColumnHeader4" relativePoint="RIGHT">
-										<Offset>
-											<AbsDimension x="-2" y="0"/>
-										</Offset>
-									</Anchor>
-								</Anchors>
-								<Scripts>
-									<OnLoad>
-										WhoFrameColumn_SetWidth(113);
-										this.sortType = "owner";
-									</OnLoad>
-								</Scripts>
-							</Button>
+						<Anchors>
+							<Anchor point="LEFT" relativeTo="GuildAdsTradeColumnHeader4" relativePoint="RIGHT">
+								<Offset>
+									<AbsDimension x="-2" y="0"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								WhoFrameColumn_SetWidth(113);
+								this.sortType = "owner";
+							</OnLoad>
+						</Scripts>
+					</Button>
 					<Button name="GuildAdsTradeColumnHeader6" inherits="GuildAdsTradeColumnHeaderTemplate" text="GUILDADS_SIMPLE_SINCE">
-								<Anchors>
-									<Anchor point="LEFT" relativeTo="GuildAdsTradeColumnHeader5" relativePoint="RIGHT">
-										<Offset>
-											<AbsDimension x="-2" y="0"/>
-										</Offset>
-									</Anchor>
-								</Anchors>
-								<Scripts>
-									<OnLoad>
-										WhoFrameColumn_SetWidth(80);
-										this.sortType = "since";
-									</OnLoad>
-								</Scripts>
-							</Button>
+						<Anchors>
+							<Anchor point="LEFT" relativeTo="GuildAdsTradeColumnHeader5" relativePoint="RIGHT">
+								<Offset>
+									<AbsDimension x="-2" y="0"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								WhoFrameColumn_SetWidth(80);
+								this.sortType = "since";
+							</OnLoad>
+						</Scripts>
+					</Button>
+					
 					<Button name="GuildAdsGlobalAdButton1" inherits="GuildAdsGlobalAdButtonTemplate" id="1">
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="GuildAdsTradeColumnHeader1" relativePoint="BOTTOMLEFT">
@@ -573,7 +569,6 @@
 							</Anchor>
 						</Anchors>
 					</Button>
-			
 					<Button name="GuildAdsGlobalAdButton2" inherits="GuildAdsGlobalAdButtonTemplate" id="2">
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="GuildAdsGlobalAdButton1" relativePoint="BOTTOMLEFT">
@@ -583,7 +578,6 @@
 							</Anchor>
 						</Anchors>
 					</Button>
-					
 					<Button name="GuildAdsGlobalAdButton3" inherits="GuildAdsGlobalAdButtonTemplate" id="3">
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="GuildAdsGlobalAdButton2" relativePoint="BOTTOMLEFT">
@@ -593,7 +587,6 @@
 							</Anchor>
 						</Anchors>
 					</Button>
-					
 					<Button name="GuildAdsGlobalAdButton4" inherits="GuildAdsGlobalAdButtonTemplate" id="4">
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="GuildAdsGlobalAdButton3" relativePoint="BOTTOMLEFT">
@@ -603,7 +596,6 @@
 							</Anchor>
 						</Anchors>
 					</Button>
-					
 					<Button name="GuildAdsGlobalAdButton5" inherits="GuildAdsGlobalAdButtonTemplate" id="5">
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="GuildAdsGlobalAdButton4" relativePoint="BOTTOMLEFT">
@@ -613,7 +605,6 @@
 							</Anchor>
 						</Anchors>
 					</Button>
-					
 					<Button name="GuildAdsGlobalAdButton6" inherits="GuildAdsGlobalAdButtonTemplate" id="6">
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="GuildAdsGlobalAdButton5" relativePoint="BOTTOMLEFT">
@@ -623,7 +614,6 @@
 							</Anchor>
 						</Anchors>
 					</Button>
-					
 					<Button name="GuildAdsGlobalAdButton7" inherits="GuildAdsGlobalAdButtonTemplate" id="7">
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="GuildAdsGlobalAdButton6" relativePoint="BOTTOMLEFT">
@@ -633,7 +623,6 @@
 							</Anchor>
 						</Anchors>
 					</Button>
-					
 					<Button name="GuildAdsGlobalAdButton8" inherits="GuildAdsGlobalAdButtonTemplate" id="8">
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="GuildAdsGlobalAdButton7" relativePoint="BOTTOMLEFT">
@@ -643,7 +632,6 @@
 							</Anchor>
 						</Anchors>
 					</Button>
-					
 					<Button name="GuildAdsGlobalAdButton9" inherits="GuildAdsGlobalAdButtonTemplate" id="9">
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="GuildAdsGlobalAdButton8" relativePoint="BOTTOMLEFT">
@@ -653,7 +641,6 @@
 							</Anchor>
 						</Anchors>
 					</Button>
-					
 					<Button name="GuildAdsGlobalAdButton10" inherits="GuildAdsGlobalAdButtonTemplate" id="10">
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="GuildAdsGlobalAdButton9" relativePoint="BOTTOMLEFT">
@@ -663,7 +650,6 @@
 							</Anchor>
 						</Anchors>
 					</Button>
-					
 					<Button name="GuildAdsGlobalAdButton11" inherits="GuildAdsGlobalAdButtonTemplate" id="11">
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="GuildAdsGlobalAdButton10" relativePoint="BOTTOMLEFT">
@@ -673,7 +659,6 @@
 							</Anchor>
 						</Anchors>
 					</Button>
-					
 					<Button name="GuildAdsGlobalAdButton12" inherits="GuildAdsGlobalAdButtonTemplate" id="12">
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="GuildAdsGlobalAdButton11" relativePoint="BOTTOMLEFT">
@@ -692,7 +677,6 @@
 							</Anchor>
 						</Anchors>
 					</Button>
-					
 					<Button name="GuildAdsGlobalAdButton14" inherits="GuildAdsGlobalAdButtonTemplate" id="14">
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="GuildAdsGlobalAdButton13" relativePoint="BOTTOMLEFT">
@@ -702,7 +686,6 @@
 							</Anchor>
 						</Anchors>
 					</Button>
-					
 					<Button name="GuildAdsGlobalAdButton15" inherits="GuildAdsGlobalAdButtonTemplate" id="15">
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="GuildAdsGlobalAdButton14" relativePoint="BOTTOMLEFT">
@@ -712,7 +695,6 @@
 							</Anchor>
 						</Anchors>
 					</Button>
-					
 					<Button name="GuildAdsGlobalAdButton16" inherits="GuildAdsGlobalAdButtonTemplate" id="16">
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="GuildAdsGlobalAdButton15" relativePoint="BOTTOMLEFT">
@@ -722,7 +704,6 @@
 							</Anchor>
 						</Anchors>
 					</Button>
-					
 					<Button name="GuildAdsGlobalAdButton17" inherits="GuildAdsGlobalAdButtonTemplate" id="17">
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="GuildAdsGlobalAdButton16" relativePoint="BOTTOMLEFT">
@@ -732,7 +713,6 @@
 							</Anchor>
 						</Anchors>
 					</Button>
-					
 					<Button name="GuildAdsGlobalAdButton18" inherits="GuildAdsGlobalAdButtonTemplate" id="18">
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="GuildAdsGlobalAdButton17" relativePoint="BOTTOMLEFT">
@@ -742,7 +722,6 @@
 							</Anchor>
 						</Anchors>
 					</Button>
-										
 					<Button name="GuildAdsGlobalAdButton19" inherits="GuildAdsGlobalAdButtonTemplate" id="19">
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="GuildAdsGlobalAdButton18" relativePoint="BOTTOMLEFT">
@@ -752,7 +731,6 @@
 							</Anchor>
 						</Anchors>
 					</Button>
-
 					<Button name="GuildAdsGlobalAdButton20" inherits="GuildAdsGlobalAdButtonTemplate" id="20">
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="GuildAdsGlobalAdButton19" relativePoint="BOTTOMLEFT">
@@ -793,49 +771,49 @@
 				</Anchors>
 				<Frames>
 					<Button name="GuildAdsMyAdsColumnHeader1" inherits="GuildAdsTradeColumnHeaderTemplate" text="GUILDADS_TRADE_ACTIVE">
-								<Anchors>
-									<Anchor point="TOPLEFT" relativeTo="GuildAdsMainWindowFrame" >
-										<Offset>
-											<AbsDimension x="15" y="-78"/>
-										</Offset>
-									</Anchor>
-								</Anchors>
-								<Scripts>
-									<OnLoad>
-										WhoFrameColumn_SetWidth(50);
-										this.sortType = "name";
-									</OnLoad>
-								</Scripts>
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="GuildAdsMainWindowFrame" >
+								<Offset>
+									<AbsDimension x="15" y="-78"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								WhoFrameColumn_SetWidth(50);
+								this.sortType = "name";
+							</OnLoad>
+						</Scripts>
 					</Button>
 					<Button name="GuildAdsMyAdsColumnHeader2" inherits="GuildAdsTradeColumnHeaderTemplate" text="GUILDADS_TRADE_TYPE">
-								<Anchors>
-									<Anchor point="LEFT" relativeTo="GuildAdsMyAdsColumnHeader1" relativePoint="RIGHT">
-										<Offset>
-											<AbsDimension x="-2" y="0"/>
-										</Offset>
-									</Anchor>
-								</Anchors>
-								<Scripts>
-									<OnLoad>
-										WhoFrameColumn_SetWidth(40);
-										this.sortType = "count";
-									</OnLoad>
-								</Scripts>
-							</Button>
+						<Anchors>
+							<Anchor point="LEFT" relativeTo="GuildAdsMyAdsColumnHeader1" relativePoint="RIGHT">
+								<Offset>
+									<AbsDimension x="-2" y="0"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								WhoFrameColumn_SetWidth(40);
+								this.sortType = "count";
+							</OnLoad>
+						</Scripts>
+					</Button>
 					<Button name="GuildAdsMyAdsColumnHeader3" inherits="GuildAdsTradeColumnHeaderTemplate" text="GUILDADS_TRADE_OBJECT">
-								<Anchors>
-									<Anchor point="LEFT" relativeTo="GuildAdsMyAdsColumnHeader2" relativePoint="RIGHT">
-										<Offset>
-											<AbsDimension x="-2" y="0"/>
-										</Offset>
-									</Anchor>
-								</Anchors>
-								<Scripts>
-									<OnLoad>
-										WhoFrameColumn_SetWidth(213);
-										this.sortType = "drop";
-									</OnLoad>
-								</Scripts>
+						<Anchors>
+							<Anchor point="LEFT" relativeTo="GuildAdsMyAdsColumnHeader2" relativePoint="RIGHT">
+								<Offset>
+									<AbsDimension x="-2" y="0"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								WhoFrameColumn_SetWidth(213);
+								this.sortType = "drop";
+							</OnLoad>
+						</Scripts>
 					</Button>
 					<Button name="GuildAdsMyAdsColumnHeader4" inherits="GuildAdsTradeColumnHeaderTemplate" text="GUILDADS_TRADE_NUMBER">
 						<Anchors>
@@ -901,7 +879,6 @@
 							</Anchor>
 						</Anchors>
 					</Button>
-					
 					<Button name="GuildAdsMyAdButton3" inherits="GuildAdsMyAdButtonTemplate" id="3">
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="GuildAdsMyAdButton2" relativePoint="BOTTOMLEFT">
@@ -911,7 +888,6 @@
 							</Anchor>
 						</Anchors>
 					</Button>
-					
 					<Button name="GuildAdsMyAdButton4" inherits="GuildAdsMyAdButtonTemplate" id="4">
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="GuildAdsMyAdButton3" relativePoint="BOTTOMLEFT">
@@ -921,7 +897,6 @@
 							</Anchor>
 						</Anchors>
 					</Button>
-					
 					<Button name="GuildAdsMyAdButton5" inherits="GuildAdsMyAdButtonTemplate" id="5">
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="GuildAdsMyAdButton4" relativePoint="BOTTOMLEFT">
@@ -931,7 +906,6 @@
 							</Anchor>
 						</Anchors>
 					</Button>
-					
 					<Button name="GuildAdsMyAdButton6" inherits="GuildAdsMyAdButtonTemplate" id="6">
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="GuildAdsMyAdButton5" relativePoint="BOTTOMLEFT">
@@ -941,7 +915,6 @@
 							</Anchor>
 						</Anchors>
 					</Button>
-					
 					<Button name="GuildAdsMyAdButton7" inherits="GuildAdsMyAdButtonTemplate" id="7">
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="GuildAdsMyAdButton6" relativePoint="BOTTOMLEFT">
@@ -951,9 +924,8 @@
 							</Anchor>
 						</Anchors>
 					</Button>
-					
 					<Button name="GuildAdsMyAdButton8" inherits="GuildAdsMyAdButtonTemplate" id="8">
-					<Anchors>
+						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="GuildAdsMyAdButton7" relativePoint="BOTTOMLEFT">
 								<Offset>
 									<AbsDimension x="0" y="0"/>
@@ -961,7 +933,6 @@
 							</Anchor>
 						</Anchors>
 					</Button>
-					
 					<Button name="GuildAdsMyAdButton9" inherits="GuildAdsMyAdButtonTemplate" id="9">
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="GuildAdsMyAdButton8" relativePoint="BOTTOMLEFT">
@@ -971,7 +942,6 @@
 							</Anchor>
 						</Anchors>
 					</Button>
-					
 					<Button name="GuildAdsMyAdButton10" inherits="GuildAdsMyAdButtonTemplate" id="10">
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="GuildAdsMyAdButton9" relativePoint="BOTTOMLEFT">
@@ -981,7 +951,6 @@
 							</Anchor>
 						</Anchors>
 					</Button>
-					
 					<Button name="GuildAdsMyAdButton11" inherits="GuildAdsMyAdButtonTemplate" id="11">
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="GuildAdsMyAdButton10" relativePoint="BOTTOMLEFT">
@@ -991,7 +960,6 @@
 							</Anchor>
 						</Anchors>
 					</Button>
-					
 					<Button name="GuildAdsMyAdButton12" inherits="GuildAdsMyAdButtonTemplate" id="12">
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="GuildAdsMyAdButton11" relativePoint="BOTTOMLEFT">
@@ -1001,7 +969,6 @@
 							</Anchor>
 						</Anchors>
 					</Button>
-					
 					<Button name="GuildAdsMyAdButton13" inherits="GuildAdsMyAdButtonTemplate" id="13">
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="GuildAdsMyAdButton12" relativePoint="BOTTOMLEFT">
@@ -1376,13 +1343,18 @@
 					</Frame>
 				</Frames>
 			</Frame>
-			
+		
 		</Frames>
-	<Scripts> 
-		<OnShow>
-			GuildAdsTrade.onShow();
-		</OnShow>
-	</Scripts> 	
+		
+		<Scripts> 
+			<OnShow>
+				GuildAdsTrade.onShow();
+			</OnShow>
+			<OnUpdate>
+				GuildAdsTrade.onUpdate();
+			</OnUpdate>
+		</Scripts> 	
+		
 	</Frame>
 	
 	<Frame name="GuildAdsTradeFilterFrame" parent="GuildAdsTradeFrame" enableMouse="true" hidden="false" >
@@ -1395,193 +1367,192 @@
 					<AbsDimension x="-3" y="-70"/>
 				</Offset>
 			</Anchor>
-			
 		</Anchors>
 		<Layers>
 			<Layer level="BACKGROUND">
 				<Texture file="Interface\QuestFrame\UI-Quest-TopRight">
-				<Size>
-						<AbsDimension x="200" y="200"/>
-				</Size>
+					<Size>
+							<AbsDimension x="200" y="200"/>
+					</Size>
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeTo="GuildAdsTradeFilterFrame" >
+							<Offset>
+								<AbsDimension x="0" y="0"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+					<TexCoords left="0.0" right="1.0" top="0.08" bottom="1.0"/>
+				</Texture>				
+				<Texture file="Interface\QuestFrame\UI-Quest-BotRight">
+					<Size>
+							<AbsDimension x="200" y="250"/>
+					</Size>
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeTo="GuildAdsTradeFilterFrame" >
+							<Offset>
+								<AbsDimension x="0" y="-200"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+					<TexCoords left="0.0" right="1.0" top="0.0" bottom="0.75"/>
+				</Texture>
+			</Layer>
+		</Layers>
+		<Frames>
+			<Button name="FilterTradeButton1" inherits="FilterClassButtonTemplate" id="1">
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="GuildAdsTradeFilterFrame" >
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsTradeFilterFrame"  >
+						<Offset>
+							<AbsDimension x="10" y="-10"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Button>
+			<Button name="FilterTradeButton2" inherits="FilterClassButtonTemplate" id="2">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="FilterTradeButton1" relativePoint="BOTTOMLEFT">
 						<Offset>
 							<AbsDimension x="0" y="0"/>
 						</Offset>
 					</Anchor>
 				</Anchors>
-				<TexCoords left="0.0" right="1.0" top="0.08" bottom="1.0"/>
-				</Texture>
-				
-				<Texture file="Interface\QuestFrame\UI-Quest-BotRight">
-				<Size>
-						<AbsDimension x="200" y="250"/>
-				</Size>
+			</Button>
+			<Button name="FilterTradeButton3" inherits="FilterClassButtonTemplate" id="3">
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="GuildAdsTradeFilterFrame" >
+					<Anchor point="TOPLEFT" relativeTo="FilterTradeButton2" relativePoint="BOTTOMLEFT">
 						<Offset>
-							<AbsDimension x="0" y="-200"/>
+							<AbsDimension x="0" y="0"/>
 						</Offset>
 					</Anchor>
 				</Anchors>
-				<TexCoords left="0.0" right="1.0" top="0.0" bottom="0.75"/>
-				</Texture>
-			</Layer>
-		</Layers>
-			<Frames>
-					<Button name="FilterTradeButton1" inherits="FilterClassButtonTemplate" id="1">
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="GuildAdsTradeFilterFrame"  >
-								<Offset>
-									<AbsDimension x="10" y="-10"/>
-								</Offset>
-							</Anchor>
-						</Anchors>
-					</Button>
-					<Button name="FilterTradeButton2" inherits="FilterClassButtonTemplate" id="2">
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="FilterTradeButton1" relativePoint="BOTTOMLEFT">
-								<Offset>
-									<AbsDimension x="0" y="0"/>
-								</Offset>
-							</Anchor>
-						</Anchors>
-					</Button>
-					<Button name="FilterTradeButton3" inherits="FilterClassButtonTemplate" id="3">
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="FilterTradeButton2" relativePoint="BOTTOMLEFT">
-								<Offset>
-									<AbsDimension x="0" y="0"/>
-								</Offset>
-							</Anchor>
-						</Anchors>
-					</Button>
-					<Button name="FilterTradeButton4" inherits="FilterClassButtonTemplate" id="4">
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="FilterTradeButton3" relativePoint="BOTTOMLEFT">
-								<Offset>
-									<AbsDimension x="0" y="0"/>
-								</Offset>
-							</Anchor>
-						</Anchors>
-					</Button>
-					<Button name="FilterTradeButton5" inherits="FilterClassButtonTemplate" id="5">
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="FilterTradeButton4" relativePoint="BOTTOMLEFT">
-								<Offset>
-									<AbsDimension x="0" y="0"/>
-								</Offset>
-							</Anchor>
-						</Anchors>
-					</Button>
-					<Button name="FilterTradeButton6" inherits="FilterClassButtonTemplate" id="6">
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="FilterTradeButton5" relativePoint="BOTTOMLEFT">
-								<Offset>
-									<AbsDimension x="0" y="0"/>
-								</Offset>
-							</Anchor>
-						</Anchors>
-					</Button>
-					<Button name="FilterTradeButton7" inherits="FilterClassButtonTemplate" id="7">
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="FilterTradeButton6" relativePoint="BOTTOMLEFT">
-								<Offset>
-									<AbsDimension x="0" y="0"/>
-								</Offset>
-							</Anchor>
-						</Anchors>
-					</Button>
-					<Button name="FilterTradeButton8" inherits="FilterClassButtonTemplate" id="8">
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="FilterTradeButton7" relativePoint="BOTTOMLEFT">
-								<Offset>
-									<AbsDimension x="0" y="0"/>
-								</Offset>
-							</Anchor>
-						</Anchors>
-					</Button>
-					<Button name="FilterTradeButton9" inherits="FilterClassButtonTemplate" id="9">
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="FilterTradeButton8" relativePoint="BOTTOMLEFT">
-								<Offset>
-									<AbsDimension x="0" y="0"/>
-								</Offset>
-							</Anchor>
-						</Anchors>
-					</Button>
-					<Button name="FilterTradeButton10" inherits="FilterClassButtonTemplate" id="10">
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="FilterTradeButton9" relativePoint="BOTTOMLEFT">
-								<Offset>
-									<AbsDimension x="0" y="0"/>
-								</Offset>
-							</Anchor>
-						</Anchors>
-					</Button>
-					<Button name="FilterTradeButton11" inherits="FilterClassButtonTemplate" id="11">
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="FilterTradeButton10" relativePoint="BOTTOMLEFT">
-								<Offset>
-									<AbsDimension x="0" y="0"/>
-								</Offset>
-							</Anchor>
-						</Anchors>
-					</Button>
-					<Button name="FilterTradeButton12" inherits="FilterClassButtonTemplate" id="12">
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="FilterTradeButton11" relativePoint="BOTTOMLEFT">
-								<Offset>
-									<AbsDimension x="0" y="0"/>
-								</Offset>
-							</Anchor>
-						</Anchors>
-					</Button>
-					<Button name="FilterTradeButton13" inherits="FilterClassButtonTemplate" id="13">
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="FilterTradeButton12" relativePoint="BOTTOMLEFT">
-								<Offset>
-									<AbsDimension x="0" y="0"/>
-								</Offset>
-							</Anchor>
-						</Anchors>
-					</Button>
-					<Button name="FilterTradeButton14" inherits="FilterClassButtonTemplate" id="14">
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="FilterTradeButton13" relativePoint="BOTTOMLEFT">
-								<Offset>
-									<AbsDimension x="0" y="0"/>
-								</Offset>
-							</Anchor>
-						</Anchors>
-					</Button>
-					<Button name="FilterTradeButton15" inherits="FilterClassButtonTemplate" id="15">
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="FilterTradeButton14" relativePoint="BOTTOMLEFT">
-								<Offset>
-									<AbsDimension x="0" y="0"/>
-								</Offset>
-							</Anchor>
-						</Anchors>
-					</Button>
-					<ScrollFrame name="BrowseFilterTradeScrollFrame" inherits="FauxScrollFrameTemplate">
-						<Size>
-							<AbsDimension x="145" y="300"/>
-						</Size>
-						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="FilterTradeButton1" relativePoint="TOPLEFT">
-								<Offset>
-									<AbsDimension x="5" y="0"/>
-								</Offset>
-							</Anchor>
-						</Anchors>
-						<Scripts>
-							<OnVerticalScroll>
-								FauxScrollFrame_OnVerticalScroll(GuildAdsTrade.filterClass.BROWSE_FILTER_HEIGHT, GuildAdsTrade.filterClass.filterUpdate);
-							</OnVerticalScroll>
-						</Scripts>
-					</ScrollFrame>
-					
+			</Button>
+			<Button name="FilterTradeButton4" inherits="FilterClassButtonTemplate" id="4">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="FilterTradeButton3" relativePoint="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="0" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Button>
+			<Button name="FilterTradeButton5" inherits="FilterClassButtonTemplate" id="5">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="FilterTradeButton4" relativePoint="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="0" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Button>
+			<Button name="FilterTradeButton6" inherits="FilterClassButtonTemplate" id="6">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="FilterTradeButton5" relativePoint="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="0" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Button>
+			<Button name="FilterTradeButton7" inherits="FilterClassButtonTemplate" id="7">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="FilterTradeButton6" relativePoint="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="0" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Button>
+			<Button name="FilterTradeButton8" inherits="FilterClassButtonTemplate" id="8">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="FilterTradeButton7" relativePoint="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="0" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Button>
+			<Button name="FilterTradeButton9" inherits="FilterClassButtonTemplate" id="9">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="FilterTradeButton8" relativePoint="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="0" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Button>
+			<Button name="FilterTradeButton10" inherits="FilterClassButtonTemplate" id="10">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="FilterTradeButton9" relativePoint="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="0" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Button>
+			<Button name="FilterTradeButton11" inherits="FilterClassButtonTemplate" id="11">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="FilterTradeButton10" relativePoint="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="0" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Button>
+			<Button name="FilterTradeButton12" inherits="FilterClassButtonTemplate" id="12">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="FilterTradeButton11" relativePoint="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="0" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Button>
+			<Button name="FilterTradeButton13" inherits="FilterClassButtonTemplate" id="13">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="FilterTradeButton12" relativePoint="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="0" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Button>
+			<Button name="FilterTradeButton14" inherits="FilterClassButtonTemplate" id="14">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="FilterTradeButton13" relativePoint="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="0" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Button>
+			<Button name="FilterTradeButton15" inherits="FilterClassButtonTemplate" id="15">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="FilterTradeButton14" relativePoint="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="0" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Button>
+			
+			<ScrollFrame name="BrowseFilterTradeScrollFrame" inherits="FauxScrollFrameTemplate">
+				<Size>
+					<AbsDimension x="145" y="300"/>
+				</Size>
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="FilterTradeButton1" relativePoint="TOPLEFT">
+						<Offset>
+							<AbsDimension x="5" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnVerticalScroll>
+						FauxScrollFrame_OnVerticalScroll(GuildAdsTrade.filterClass.BROWSE_FILTER_HEIGHT, GuildAdsTrade.filterClass.filterUpdate);
+					</OnVerticalScroll>
+				</Scripts>
+			</ScrollFrame>
+				
 			<Slider name="GuildAds_DateFilter" orientation="HORIZONTAL" enableMouse="true">
 				<Size>
 					<AbsDimension x="100" y="16"/>
@@ -1632,29 +1603,25 @@
 				</Scripts>
 			</Slider>
 			
-			
-			
 			<EditBox name="GuildAds_Filter_BrowseName" autoFocus="false" inherits="InputBoxTemplate">
-						<Size>
-							<AbsDimension x="140" y="16"/>
-						</Size>
-						<Anchors>
-							<Anchor point="TOPRIGHT" relativeTo="GuildAds_DateFilter" >
-								<Offset>
-									<AbsDimension x="10" y="-30"/>
-								</Offset>
-							</Anchor>
-						</Anchors>
-						<Scripts>
-							<OnEnterPressed>
-								GuildAdsTrade.setSearch(this:GetText());
-								this:ClearFocus();
-							</OnEnterPressed>
-						</Scripts>
-						<FontString inherits="ChatFontNormal" bytes="64"/>
+				<Size>
+					<AbsDimension x="140" y="16"/>
+				</Size>
+				<Anchors>
+					<Anchor point="TOPRIGHT" relativeTo="GuildAds_DateFilter" >
+						<Offset>
+							<AbsDimension x="10" y="-30"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnEnterPressed>
+						GuildAdsTrade.setSearch(this:GetText());
+						this:ClearFocus();
+					</OnEnterPressed>
+				</Scripts>
+				<FontString inherits="ChatFontNormal" bytes="64"/>
 			</EditBox>
-			
-			
 			
 			<Frame name="GuildAds_Filter_ZoneDropDown" inherits="UIDropDownMenuTemplate" enableMouse="true" hidden="false">
 				<Anchors>
@@ -1664,23 +1631,24 @@
 						</Offset>
 					</Anchor>
 				</Anchors>
-			</Frame>		
+			</Frame>
+			
 			<Button name="GuildAdsTradeAdminDeleteButton" inherits="UIPanelButtonTemplate" hidden="true" text="Admin del ">
-		<Size>
-			<AbsDimension x="124" y="21"/>
-		</Size>
-		<Anchors>
+				<Size>
+					<AbsDimension x="124" y="21"/>
+				</Size>
+				<Anchors>
 					<Anchor point="TOPRIGHT" relativeTo="GuildAds_DateFilter" >
 						<Offset>
 							<AbsDimension x="-5" y="-90"/>
 						</Offset>
 					</Anchor>
 				</Anchors>
-		<Scripts>
-		</Scripts>
-	</Button>
-			<Button name="GuildAdsTradeTab" inherits="GuildAdsWindowTabTemplate" text="TRADE" />
-			</Frames>
+				<Scripts>
+				</Scripts>
+			</Button>
+			
+		</Frames>
 		<Scripts>
 			<OnMouseUp>
 				if ( this:GetParent():GetParent().isMoving ) then
@@ -1702,6 +1670,8 @@
 			</OnHide>
 		</Scripts>
 	</Frame>
+	
+	<Button name="GuildAdsTradeTab" inherits="GuildAdsWindowTabTemplate" text="TRADE" />
 	
 	<Frame name="GuildAdsTradeContextMenu" inherits="UIDropDownMenuTemplate">
 		<Scripts>
