@@ -30,6 +30,16 @@ function GuildAdsInventoryDataType:Initialize()
 	playerInventory = self:getTableForPlayer(GuildAds.playerName);
 	self:onUpdate();
 	self:RegisterEvent("UNIT_INVENTORY_CHANGED");
+	self:RegisterEvent("PLAYER_ENTERING_WORLD");
+	self:RegisterEvent("PLAYER_LEAVING_WORLD");
+end
+
+function GuildAdsInventoryDataType:PLAYER_ENTERING_WORLD()
+	self:RegisterEvent("UNIT_INVENTORY_CHANGED");
+end
+
+function GuildAdsInventoryDataType:PLAYER_LEAVING_WORLD()
+	self:UnregisterEvent("UNIT_INVENTORY_CHANGED");
 end
 
 function GuildAdsInventoryDataType:UNIT_INVENTORY_CHANGED()
@@ -93,10 +103,13 @@ function GuildAdsInventoryDataType:set(author, id, info)
 			info.q = nil;
 		end
 		if inventory[id]==nil or info.i ~= inventory[id].i or info.q ~= inventory[id].q then
+			local trigger = inventory[id]==nil or info.i ~= inventory[id].i;
 			inventory._u = 1 + (inventory._u or 0);
 			info._u = inventory._u;
 			inventory[id] = info;
-			self:triggerEvent(author, id);
+			if trigger then
+				self:triggerEvent(author, id);
+			end
 			return info;
 		end
 	else
