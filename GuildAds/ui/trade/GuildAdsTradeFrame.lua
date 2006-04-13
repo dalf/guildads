@@ -1075,7 +1075,7 @@ GuildAdsTrade = {
 			end
 			GuildAdsTrade.filterClass.filterUpdate();
 			GuildAdsTrade.data.resetCache();
-			GuildAdsTrade.exchangeButtonsUpdate(GuildAdsTrade.currentAdType);
+			GuildAdsTrade.updateCurrentTab();
 		end;
 		
 		init = function()
