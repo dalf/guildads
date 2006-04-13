@@ -235,7 +235,7 @@ function GuildAds:GetDefaultChannel()
 		-- channel name bases on the raid leader name
 		if not channel and GetNumRaidMembers()>0 then
 			for i=1, GetNumRaidMembers(), 1 do
-				local name, rank = GetRaidRosterInfo(Raid_Member_ID_Number);
+				local name, rank = GetRaidRosterInfo(i);
 				if rank==2 then
 					channel = "GuildAds"..name;
 					source = "raid";
