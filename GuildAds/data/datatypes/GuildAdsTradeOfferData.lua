@@ -48,12 +48,20 @@ function GuildAdsTradeOfferDataType:get(author, id)
 	end
 end
 
-function GuildAdsTradeOfferDataType:setRevision(author, updateTag)
-	self.profile:getRaw(author).items._uo = updateTag;
+function GuildAdsTradeOfferDataType:setRevision(author, revision)
+	local itemsRevision = self.db.itemsRevision;
+	if not itemsRevision[author] then
+		itemsRevision[author] = {};
+	end
+	itemsRevision[author]._uo = revision;
 end
 
 function GuildAdsTradeOfferDataType:getRevision(author)
-	return self.profile:getRaw(author).items._uo or 0;
+	local itemsRevision = self.db.itemsRevision;
+	if itemsRevision[author] then
+		return itemsRevision[author]._uo or 0;
+	end
+	return 0;
 end
 
 function GuildAdsTradeOfferDataType:setRaw(author, id, info, revision)
@@ -85,9 +93,9 @@ function GuildAdsTradeOfferDataType:set(author, id, info)
 		end
 		local items = self.db.items[id].o;
 		if items[author]==nil or info.q~=items[author].q or info.c~=items[author].c then
-			local profileItems = self.profile:getRaw(author).items;
-			profileItems._uo = 1 + (profileItems._uo or 0);
-			info._u = profileItems._uo;
+			local revision = self:getRevision(author)+1;
+			self:setRevision(author, revision);
+			info._u = revision;
 			items[author] = info;
 			self:triggerEvent(author, id);
 			return info;
@@ -96,8 +104,8 @@ function GuildAdsTradeOfferDataType:set(author, id, info)
 		if self.db.items[id] and self.db.items[id].o and self.db.items[id].o[author] then
 			self.db.items[id].o[author] = nil;
 			-- TODO : if next(self.db.items[id].o) == nil then self.db.items[id].o = nil end
-			local profileItems = self.profile:getRaw(author).items;
-			profileItems._uo = 1 + (profileItems._uo or 0);
+			local revision = self:getRevision(author)+1;
+			self:setRevision(author, self:getRevision(author)+1);
 			self:triggerEvent(author, id);
 		end
 	end

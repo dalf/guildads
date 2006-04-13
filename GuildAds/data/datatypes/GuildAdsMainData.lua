@@ -98,16 +98,13 @@ function GuildAdsMainDataType:getRevision(author)
 	return self.profile:getRaw(author).main._u or 0;
 end
 
-function GuildAdsMainDataType:setRevision(author, updateTag)
-	self.profile:getRaw(author).main._u = updateTag;
+function GuildAdsMainDataType:setRevision(author, revision)
+	self.profile:getRaw(author).main._u = revision;
 end
 
-function GuildAdsMainDataType:setRaw(author, id, info, updateTag)
+function GuildAdsMainDataType:setRaw(author, id, info, revision)
 	local main =self.profile:getRaw(author).main;
 	main[id] = info;
-	if info then
-		return true;
-	end;
 end
 
 --[[

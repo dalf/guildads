@@ -43,17 +43,16 @@ function GuildAdsSimpleEventDataType:getRevision(author)
 	return 0;
 end
 
-function GuildAdsSimpleEventDataType:setRevision(author, updateTag)
-	self.db.simpleEvent[author]._u = updateTag;
+function GuildAdsSimpleEventDataType:setRevision(author, revision)
+	self.db.simpleEvent[author]._u = revision;
 end
 
-function GuildAdsSimpleEventDataType:setRaw(author, id, info, updateTag)
+function GuildAdsSimpleEventDataType:setRaw(author, id, info, revision)
 	local events = self.db.simpleEvent[author];
 	events[id] = info;
 	if info then
-		events[id]._u = updateTag;
-		return true;
-	end;
+		events[id]._u = revision;
+	end
 end
 
 function GuildAdsSimpleEventDataType:set(author, id, info)

@@ -88,15 +88,15 @@ function GuildAdsTradeSkillDataType:getRevision(author)
 	return self.profile:getRaw(author).craft._u or 0;
 end
 
-function GuildAdsTradeSkillDataType:setRevision(author, updateTag)
-	self.profile:getRaw(author).craft._u = updateTag;
+function GuildAdsTradeSkillDataType:setRevision(author, revision)
+	self.profile:getRaw(author).craft._u = revision;
 end
 
-function GuildAdsTradeSkillDataType:setRaw(author, id, info, updateTag)
+function GuildAdsTradeSkillDataType:setRaw(author, id, info, revision)
 	local craft = self.profile:getRaw(author).craft;
 	craft[id] = info;
 	if info then
-		craft[id]._u = updateTag;
+		craft[id]._u = revision;
 		return true;
 	end;
 end

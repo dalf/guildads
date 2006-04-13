@@ -72,17 +72,16 @@ function GuildAdsSkillDataType:getRevision(author)
 	return self.profile:getRaw(author).skills._u or 0;
 end
 
-function GuildAdsSkillDataType:setRevision(author, updateTag)
-	self.profile:getRaw(author).skills._u = updateTag;
+function GuildAdsSkillDataType:setRevision(author, revision)
+	self.profile:getRaw(author).skills._u = revision;
 end
 
-function GuildAdsSkillDataType:setRaw(author, id, info, updateTag)
+function GuildAdsSkillDataType:setRaw(author, id, info, revision)
 	local skills = self.profile:getRaw(author).skills;
 	skills[id] = info;
 	if info then
-		skills[id]._u = updateTag;
-		return true;
-	end;
+		skills[id]._u = revision;
+	end
 end
 
 function GuildAdsSkillDataType:set(author, id, info)

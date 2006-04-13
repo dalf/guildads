@@ -46,15 +46,23 @@ function GuildAdsTradeNeedDataType:get(author, id)
 	end
 end
 
-function GuildAdsTradeNeedDataType:setRevision(author, updateTag)
-	self.profile:getRaw(author).items._un = updateTag;
+function GuildAdsTradeNeedDataType:setRevision(author, revision)
+	local itemsRevision = self.db.itemsRevision;
+	if not itemsRevision[author] then
+		itemsRevision[author] = {};
+	end
+	itemsRevision[author]._un = revision;
 end
 
 function GuildAdsTradeNeedDataType:getRevision(author)
-	return self.profile:getRaw(author).items._un or 0;
+	local itemsRevision = self.db.itemsRevision;
+	if itemsRevision[author] then
+		return itemsRevision[author]._un or 0;
+	end
+	return 0;
 end
 
-function GuildAdsTradeNeedDataType:setRaw(author, id, info, updateTag)
+function GuildAdsTradeNeedDataType:setRaw(author, id, info, revision)
 	local items = self.db.items;
 	if info then
 		if (self.db.items[id] == nil) then
@@ -65,7 +73,6 @@ function GuildAdsTradeNeedDataType:setRaw(author, id, info, updateTag)
 		end
 		self.db.items[id].n[author] = info;
 		info._u = revision;
-		return true;
 	else
 		if self.db.items[id] and self.db.items[id].n then
 			self.db.items[id].n[author] = nil;
@@ -83,9 +90,9 @@ function GuildAdsTradeNeedDataType:set(author, id, info)
 		end
 		local items = self.db.items[id].n;
 		if items[author]==nil or info.q~=items[author].q or info.c~=items[author].c then
-			local profileItems = self.profile:getRaw(author).items;
-			profileItems._un = 1 + (profileItems._un or 0);
-			info._u = profileItems._un;
+			local revision = self:getRevision(author)+1;
+			self:setRevision(author, revision);
+			info._u = revision;
 			items[author] = info;
 			self:triggerEvent(author, id);
 			return info;
@@ -93,8 +100,8 @@ function GuildAdsTradeNeedDataType:set(author, id, info)
 	else
 		if self.db.items[id] and self.db.items[id].n and self.db.items[id].n[author] then
 			self.db.items[id].n[author] = nil;
-			local profileItems = self.profile:getRaw(author).items;
-			profileItems._un = 1 + (profileItems._un or 0);
+			local revision = self:getRevision(author)+1;
+			self:setRevision(author, self:getRevision(author)+1);
 			self:triggerEvent(author, id);
 		end
 	end
