@@ -309,8 +309,6 @@ function GuildAdsComm.OnLeave(self)
 		DTS.dataType:unregisterEvent(GuildAdsComm);
 	end
 	
---~ 	self.state = "LEAVE";
---~ 	self:SendMeta();
 	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "[GuildAdsComm.OnLeave] end");
 end
 
@@ -532,7 +530,7 @@ function GuildAdsComm:ParseMessage(playerName, message, channelName)
 			self:SendMeta(playerName);
 			
 			local delay = self.isOnline[GuildAds.playerName].i*10+20;
-			GuildAdsTask:AddNamedSchedule("JoinChannel", delay, nil, nil, self.SendSearchAboutMyData, self);
+			GuildAdsTask:AddNamedSchedule("SendSearchAboutMyData", delay, nil, nil, self.SendSearchAboutMyData, self);
 		end
 		GuildAdsDB.channel[GuildAds.channelName]:addPlayer(playerName);
 	elseif message.command == "CF" then
@@ -546,23 +544,21 @@ function GuildAdsComm:ParseMessage(playerName, message, channelName)
 		DTS:ReceiveRevision(playerName, message.playerName, message.who, message.revision, message.weight, message.worstRevision)
 	elseif message.command == "SR" then
 		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "ReceiveSearchResult("..tostring(DTS)..","..message.playerName..")="..message.who.."("..message.fromRevision.."->"..message.toRevision..")");
-		-- update self.expectedTransactions
+		-- add an expected transaction
 		if (message.who ~= GuildAds.playerName) and (message.fromRevision<message.toRevision) then
-			tinsert(self.expectedTransactions, {
+			tinsert(self.expectedTransactions, {	-- TODO : solve the deadlock problem 
 				t = 40,
 				p = message.playerName,
 				dtn = message.dataTypeName,
 			});
 		end
-		-- update self.updateQueue
-		self:DeleteDuplicateUpdate(DTS, message.playerName, message.who, message.fromRevision, message.toRevision);
 		-- parse message
 		DTS:ReceiveSearchResult(message.playerName, message.who, message.fromRevision, message.toRevision)
 	elseif message.command == "OT" then
 		if self.transactions[playerName] then
 			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "|cffff1e00Duplicate|r OPEN TRANSACTION from "..playerName.." (already open)");
 		end
-		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"ReceiveOpenTransaction("..tostring(DTS)..","..message.playerName..","..message.fromRevision);
+		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"ReceiveOpenTransaction("..tostring(DTS)..","..message.playerName..","..message.fromRevision..")");
 		-- update self.expectedTransactions
 		for k, v in self.expectedTransactions do
 			if (v.p == message.playerName) and (v.dtn == message.dataTypeName) then
@@ -570,7 +566,7 @@ function GuildAdsComm:ParseMessage(playerName, message, channelName)
 			end
 		end
 		-- update self.updateQueue
-		self:DeleteDuplicateUpdate(DTS, self.playerName, GuildAds.playerName, message.fromRevision, message.toRevision)
+		self:DeleteDuplicateUpdate(DTS, message.playerName, message.fromRevision, message.toRevision)
 		-- add transaction
 		self.transactions[playerName] = {
 			playerName = message.playerName,
@@ -581,7 +577,7 @@ function GuildAdsComm:ParseMessage(playerName, message, channelName)
 		}
 		self.transactions[playerName].__index = self.transactions[playerName];
 		-- parse message
-		DTS:ReceiveOpenTransaction(self.transactions[playerName])
+		DTS:ReceiveOpenTransaction(self.transactions[playerName], message.playerName, message.fromRevision, message.toRevision)
 	elseif message.command == "CT" then
 		if self.transactions[playerName] then
 			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"ReceiveCloseTransaction("..tostring(DTS)..","..message.playerName..")");
@@ -633,16 +629,14 @@ function GuildAdsComm:OnDBUpdate(dataType, playerName, id)
 	self:QueueSearch(self.DTS[dataType.metaInformations.name], playerName);
 end
 
-function GuildAdsComm:DeleteDuplicateUpdate(DTS, playerName, who, fromRevision, toRevision)
-	-- TODO : a quoi sert who?
+function GuildAdsComm:DeleteDuplicateUpdate(DTS, playerName, fromRevision, toRevision)
 	local i = 1;
 	while self.updateQueue[i] do
 		local update = self.updateQueue[i];
-		if 		(update.DTS==DTS) 
-			and (update.playerName==playerName) 
-			and (		(update.toRevision<toRevision) 		-- better revision
+		if 		(update.DTS==DTS)
+			and (update.playerName==playerName)
+			and (		(update.toRevision<=toRevision)		-- better revision		-- TODO : attempt to compare two nil values
 					or  (update.fromRevision>fromRevision)	-- start from an older revision
-					or  (GuildAds.playerName==who)			-- already queued
 				) then
 			table.remove(self.updateQueue, i);
 		else
@@ -679,7 +673,7 @@ function GuildAdsComm:FindSearch(DTS, playerName)
 end
 
 function GuildAdsComm:QueueUpdate(DTS, playerName, fromRevision, toRevsion)
-	self:DeleteDuplicateUpdate(DTS, playerName, GuildAds.playerName, fromRevision, toRevision);
+	self:DeleteDuplicateUpdate(DTS, playerName, fromRevision, toRevision);
 	table.insert(self.updateQueue, { DTS=DTS, playerName=playerName, fromRevision=fromRevision, toRevision=toRevision });
 	if not self.updateQueueDelay then
 		self.updateQueueDelay = 2+random(20);

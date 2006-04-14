@@ -57,11 +57,9 @@ end
 function GuildAdsDTS:ReceiveSearch(playerName)
 	if not self.search[playerName] then
 		self.search[playerName] = {
-			best = {
-				playerName = GuildAds.playerName,
-				revision = self.dataType:getRevision(playerName),
-				weight = self:GetWeight()
-			};
+			bestPlayerName = GuildAds.playerName,
+			bestRevision = self.dataType:getRevision(playerName),
+			bestWeight = self:GetWeight(),
 			worstRevision = self.dataType:getRevision(playerName),
 		};
 	else
@@ -79,10 +77,10 @@ function GuildAdsDTS:SendRevision(playerName)
 		local result = self.search[playerName];
 		if GuildAdsComm.isOnline[GuildAds.playerName].p then
 			-- send result to parent in whisper
-			GuildAdsComm:SendSearchResultToParent(GuildAdsComm.isOnline[GuildAds.playerName].p, self.dataType, playerName, result.best.playerName, result.best.revision, result.best.weight, result.worstRevision);
+			GuildAdsComm:SendSearchResultToParent(GuildAdsComm.isOnline[GuildAds.playerName].p, self.dataType, playerName, result.bestPlayerName, result.bestRevision, result.bestWeight, result.worstRevision);
 		else
 			-- send search result to channel
-			GuildAdsComm:SendSearchResult(self.dataType, playerName, result.best.playerName, result.best.revision, result.worstRevision);
+			GuildAdsComm:SendSearchResult(self.dataType, playerName, result.bestPlayerName, result.bestRevision, result.worstRevision);
 		end
 	end
 end
@@ -92,12 +90,11 @@ function GuildAdsDTS:ReceiveRevision(childPlayerName, playerName, who, revision,
 		return;
 	end
 	local result = self.search[playerName];
-	local best = result.best;
-	if  (revision>best.revision) or
-		(best.revision==revision and weight>best.weight) then
-		best.playerName = who;
-		best.revision = revision;
-		best.weight = weight;
+	if  (revision>result.bestRevision) or
+		(result.bestRevision==revision and weight>result.bestWeight) then
+		result.bestPlayerName = who;
+		result.bestRevision = revision;
+		result.bestWeight = weight;
 	end
 	
 	if (worstRevision<result.worstRevision) then
@@ -187,38 +184,48 @@ function GuildAdsDTS:SendUpdateKeys(playerName, fromRevision)
 end
 
 function GuildAdsDTS:ReceiveOpenTransaction(transaction, playerName, fromRevision, toRevision)
-	-- Nothing to do
+	if self.dataType:getRevision(playerName)<toRevision then
+		transaction._valid = true;
+	end
 end
 
 function GuildAdsDTS:ReceiveCloseTransaction(transaction)
-	self.dataType:setRevision(transaction.playerName, transaction.toRevision);
+	if transaction._valid then
+		self.dataType:setRevision(transaction.playerName, transaction.toRevision);
+	end
 end
 
 function GuildAdsDTS:ReceiveNewRevision(transaction, revision, id, data)
-	self.dataType:setRaw(transaction.playerName, id, data, revision);
+	if transaction._valid then
+		self.dataType:setRaw(transaction.playerName, id, data, revision);
+	end
 end
 
 function GuildAdsDTS:ReceiveOldRevisions(transaction, revisions)
-	table.setn(self.deleteTable, 0);
-	
-	-- find which id to delete
-	for id, _, data, revision in self.dataType:iterator(transaction.playerName) do
-		if not revisions[revision] then
-			tinsert(self.deleteTable, id);
+	if transaction._valid then
+		table.setn(self.deleteTable, 0);
+		
+		-- find which id to delete
+		for id, _, data, revision in self.dataType:iterator(transaction.playerName) do
+			if revision<=transaction.fromRevision and not revisions[revision] then
+				tinsert(self.deleteTable, id);
+			end
 		end
+		
+		-- delete them
+		for _, id in self.deleteTable do
+			self.dataType:setRaw(transaction.playerName, id, nil, nil)
+		end
+		
+		table.setn(self.deleteTable, 0);
 	end
-	
-	-- delete them
-	for _, id in self.deleteTable do
-		self.dataType:setRaw(transaction.playerName, id, nil, nil)
-	end
-	
-	table.setn(self.deleteTable, 0);
 end
 
 function GuildAdsDTS:ReceiveKeys(transaction, keys)
-	for key, data in pairs(keys) do
-		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"  - ["..tostring(key).."]="..tostring(data));
-		self.dataType:setRaw(transaction.playerName, key, data);
+	if transaction._valid then
+		for key, data in pairs(keys) do
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"  - ["..tostring(key).."]="..tostring(data));
+			self.dataType:setRaw(transaction.playerName, key, data);
+		end
 	end
 end
