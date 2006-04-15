@@ -10,7 +10,9 @@
 
 GUILDADSSKILL_TAB_PROFESSION = 1;
 GUILDADSSKILL_TAB_SKILL = 2;
- 
+
+GUILDADSSKILL_VALUE = 1;
+GUILDADSSKILL_ITEM = 2;
  
 local GUILDADS_NUM_GLOBAL_AD_BUTTONS = 21;
 local GUILDADS_NUM_MY_AD_BUTTONS = 13;
@@ -22,7 +24,7 @@ local g_GlobalAdSelectedId, g_GlobalAdSelectedType;
 
 --- Index of the title currently selected
 local g_GlobalTitleSelectedId, g_GlobalTitleSelectedType;						
-
+local skilldisplaymode = GUILDADSSKILL_VALUE;
 --- Index of my ad currently selected
 
 --- Local copy of TradeSkillTypeColor (available at load without Blizzard addon)
@@ -174,6 +176,51 @@ GuildAdsSkill = {
 	
 	};
 	
+	
+	tradedata = {
+	
+		cache = nil;
+		
+		resetCache = function()
+			GuildAdsSkill.tradedata.cache = nil;
+		end;
+		
+		get = function(updateData)	
+			if not GuildAdsSkill.tradedata.cache or updateData then
+				GuildAdsSkill.debug("reset cache");
+				local between;
+				
+				GuildAdsSkill.tradedata.cache = {};
+				for playerName, _, data in GuildAdsTradeSkillDataType:iterator(nil, id) do
+							tinsert(GuildAdsSkill.tradedata.cache, {i=id, p=playerName});
+							between = true;
+				end
+				-- for each skill
+--~ 				for id, name in pairs(GUILDADS_SKILLS) do
+--~ 					GuildAdsSkill.debug("salut");
+--~ 					if between then
+--~ 						tinsert(GuildAdsSkill.tradedata.cache, {i=id} );
+--~ 						between = nil;
+--~ 					end
+--~ 					
+--~ 					if GuildAdsSkill.getProfileValue("Filters", id) then
+--~ 						GuildAdsSkill.debug("toi"..id);
+--~ 						-- for each player
+--~ 						for playerName, _, data in GuildAdsTradeSkillDataType:iterator(nil, id) do
+--~ 							tinsert(GuildAdsSkill.tradedata.cache, {i=id, p=playerName});
+--~ 							between = true;
+--~ 						end
+--~ 					end
+--~ 				end
+				
+--~ 				GuildAdsSkill.sorttradeData.doIt(GuildAdsSkill.tradedata.cache);
+			end
+			return GuildAdsSkill.tradedata.cache;
+		end;
+	
+	};
+	
+	
 	sortData = {
 		doIt = function(adTable)
  			table.sort(adTable, GuildAdsSkill.sortData.predicate);
@@ -245,6 +292,77 @@ GuildAdsSkill = {
 		end;
 	};
 	
+	
+	sorttradeData = {
+		doIt = function(adTable)
+ 			table.sort(adTable, GuildAdsSkill.sorttradeData.predicate);
+		end;
+		
+		predicate = function(a, b)
+			--
+			-- nil references are always less than
+			--
+			if (a == nil) then
+				if (b == nil) then
+					-- a==nil, b==nil
+					return false;
+				else
+					-- a==nil, b~=nil
+					return true;
+				end
+			elseif (b == nil) then
+				-- a~=nil, b==nil
+				return false;
+			end
+			
+			if a==false or b==false then
+				return false;
+			end
+		
+			if a.i and b.i then
+				--
+				-- Sort by skill name (ie id)
+				--
+				if (a.i < b.i) then
+					return true;
+				elseif (a.i > b.i) then
+					return false;
+				end
+			end
+			
+			if (a.v and b.v) then
+				--
+				-- Sort by skill rank
+				--		
+				if (a.v < b.v) then
+					return false;
+				elseif (a.v > b.v) then
+					return true;
+				end
+			else
+				if not a.v and b.v then
+					return false;
+				elseif a.v and not b.v then
+					return true;
+				end
+			end
+	
+			--
+			-- Sort by owner next
+			--
+			aowner = a.p or "";
+			bowner = b.p or "";
+		
+			if (aowner < bowner) then
+				return true;
+			elseif (aowner > bowner) then
+				return false;
+			end
+
+			-- These ads are identical
+			return false;
+		end;
+	};
 	
 }
 
@@ -456,7 +574,11 @@ function PrepareProfessionTab()
 			indice = indice + 1;
 		end
 	end
-	GuildAdsSkill_UpdateGlobalAdButtons(true);
+	if (skilldisplaymode==GUILDADSSKILL_VALUE) then
+		GuildAdsSkill_UpdateGlobalAdButtons(true);
+	else
+		GuildAdsSkill_UpdateGlobalAdTradeSkillButtons(true);
+	end
 end
 
 function PrepareSkillTab() 
@@ -494,6 +616,16 @@ function PrepareSkillTab()
 	GuildAdsSkill_UpdateGlobalAdButtons(true);
 end
 
+function GuildSkillToggleButton_OnClick() 
+	if (skilldisplaymode==GUILDADSSKILL_VALUE) then
+		skilldisplaymode = GUILDADSSKILL_ITEM;
+		GuildAdsSkill_UpdateGlobalAdTradeSkillButtons(true);
+	else
+		skilldisplaymode = GUILDADSSKILL_VALUE;
+		GuildAdsSkill_UpdateGlobalAdButtons(true);
+	end
+	
+end
 
 function GuildAdsSkillFrame_SelectTab(tab)
 	g_currentTab = tab;
@@ -502,11 +634,14 @@ function GuildAdsSkillFrame_SelectTab(tab)
 		PanelTemplates_DeselectTab(GuildAds_MySkillTab2);
 		PrepareProfessionTab();
 		GuildListAdProfessionListFrame:Show();
+		GuildAdsSkillAdToggleButton:Show();
 	elseif (tab == GUILDADSSKILL_TAB_SKILL) then 
 		PanelTemplates_SelectTab(GuildAds_MySkillTab2);
 		PanelTemplates_DeselectTab(GuildAds_MySkillTab1);
 		PrepareSkillTab();
 		GuildListAdProfessionListFrame:Show();
+		GuildAdsSkillAdToggleButton:Hide();
+	
 	end
 	g_GlobalAdSelected = 0;
 	g_GlobalTitleSelectedId = 0;
@@ -641,7 +776,55 @@ function GuildAdsSkill_UpdateGlobalAdButtons(updateData)
 	end
 end
 
-
+function GuildAdsSkill_UpdateGlobalAdTradeSkillButtons(updateData)
+	if GuildAdsSkillFrame:IsVisible() then
+		local offset = FauxScrollFrame_GetOffset(GuildAdsSkillAdScrollFrame);
+		
+		local linear = GuildAdsSkill.tradedata.get(updateData);
+		local linearSize = table.getn(linear);
+	
+		-- init
+		local i = 1;
+		local j = i + offset;
+		GuildAdsSkill.debug("GuildAdsSkill_UpdateGlobalAdButtons");
+		-- for each buttons
+		while (i <= GUILDADS_NUM_GLOBAL_AD_BUTTONS) do
+			local button = getglobal("GuildAdsSkillAdButton"..i);
+			
+			if (j <= linearSize) then
+				if (linear[j].p) then
+					-- update internal data
+					button.player = linear[j].p;
+					button.id = linear[j].i;
+					
+					-- create a ads
+					GuildAdsSkillFrame_UpdateGlobalAdButton(button, g_GlobalAdSelectedId==linear[j].i, linear[j]);
+				else
+					-- update internal data
+					button.player = nil;
+					button.id = nil;
+					
+					-- empty line
+					GuildAdsSkillFrame_UpdateAdButtonForTitle(button, false , linear[j]);
+				end
+				button:Show();
+				j = j+1;
+			else
+				button:Hide();
+			end
+		
+			i = i+1;
+		end
+	
+		FauxScrollFrame_Update(GuildAdsSkillAdScrollFrame, linearSize, GUILDADS_NUM_GLOBAL_AD_BUTTONS, GuildAdsSkill.GUILDADS_ADBUTTONSIZEY);
+	else
+		-- update another tab than the visible one
+		if updateData then
+			-- but data needs to be reset
+			GuildAdsSkill.data.resetCache();
+		end
+	end
+end
 
 ---------------------------------------------------------------------------------
 --

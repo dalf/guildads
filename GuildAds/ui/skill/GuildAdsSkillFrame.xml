@@ -277,11 +277,49 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 					<Button name="GuildAdsProfessionButton17" inherits="GuildAdsProfessionTemplate" id="17"/>
 					<Button name="GuildAdsProfessionButton18" inherits="GuildAdsProfessionTemplate" id="18"/>
 					
+					
+					<Button name="GuildAdsSkillAdToggleButton">
+						<Size>
+							<AbsDimension x="32" y="32"/>
+						</Size>
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="GuildAdsMainWindowFrame">
+								<Offset>
+									<AbsDimension x="250" y="-75"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnClick>
+								GuildSkillToggleButton_OnClick();
+								PlaySound("igMainMenuOptionCheckBoxOn");
+							</OnClick>
+						</Scripts>
+						<NormalTexture file="Interface\Buttons\UI-SpellbookIcon-NextPage-Up"/>
+						<PushedTexture file="Interface\Buttons\UI-SpellbookIcon-NextPage-Down"/>
+						<DisabledTexture file="Interface\Buttons\UI-SpellbookIcon-NextPage-Disabled"/>
+						<HighlightTexture file="Interface\Buttons\UI-Common-MouseHilight" alphaMode="ADD"/>
+						<NormalText inherits="GameFontNormalSmall">
+							<Anchors>
+								<Anchor point="RIGHT">
+									<Offset>
+										<AbsDimension x="-32" y="0"/>
+									</Offset>
+								</Anchor>
+							</Anchors>
+						</NormalText>
+						<PushedTextOffset>
+							<AbsDimension x="0" y="0"/>
+						</PushedTextOffset>
+					</Button>
+					
+					
+					
 					<Button name="GuildAdsSkillAdButton1" inherits="GuildAdsSkillAdButtonTemplate" id="1">
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="GuildAdsMainWindowFrame">
 								<Offset>
-									<AbsDimension x="220" y="-75"/>
+									<AbsDimension x="220" y="-100"/>
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -504,7 +542,7 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 							</OnVerticalScroll>
 						</Scripts>
 					</ScrollFrame>
-					<Button name="GuildAdsSkillRemoveButton" inherits="UIPanelButtonTemplate" text="--Clear">
+					<Button name="GuildAdsSkillRemoveButton" inherits="UIPanelButtonTemplate" text="--Deselect">
 						<Size>
 							<AbsDimension x="100" y="21"/>
 						</Size>
@@ -521,7 +559,7 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 							</OnClick>
 						</Scripts>
 					</Button>
-					<Button name="GuildAdsAllButton" inherits="UIPanelButtonTemplate" text="--All">
+					<Button name="GuildAdsAllButton" inherits="UIPanelButtonTemplate" text="--Select All">
 						<Size>
 							<AbsDimension x="100" y="21"/>
 						</Size>
