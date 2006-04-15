@@ -46,7 +46,8 @@ GuildAds = AceAddon:new({
 	channelPassword		= "",
 	channelNameFrom		= "",				-- channel name from : guild, party, raid, player
 	playerName 			= false,
-	windows				= {}
+	guildName			= false,
+	windows				= {},
 })
 
 function GuildAds:Initialize()
@@ -59,9 +60,15 @@ function GuildAds:Initialize()
 	self.playerName = UnitName("player");
 	self.factionName = UnitFactionGroup("player");
 	self.realmName = GetCVar("realmName");
+	if IsInGuild() then
+		self.guildName = GetGuildInfo("player");
+		if not self.guildName then
+			GuildAdsTask:AddNamedSchedule("GetGuildName", 4, nil, nil, self.PLAYER_GUILD_UPDATE, self)
+		end
+	end
 	
 	-- RegisterEvent
-	self:RegisterEvent("PLAYER_GUILD_UPDATE", "CheckChannelName");
+	self:RegisterEvent("PLAYER_GUILD_UPDATE");
 	self:RegisterEvent("RAID_ROSTER_UPDATE", "CheckChannelName");
 	self:RegisterEvent("PARTY_MEMBERS_CHANGED", "CheckChannelName");
 	
@@ -183,7 +190,8 @@ end
 function GuildAds:DisplayDebugInfo()
 	self.cmd:report({
 		{text="version ", val=GUILDADS_VERSION },
-		{text="playerName", val=tostring(self.playerName) },
+		{text="player name", val=tostring(self.playerName) },
+		{text="guild name", val=tostring(self.guildName) },
 		{text="account", val=tostring(GuildAdsDB.account) },
 		{text="faction", val=tostring(self.factionName) },
 		{text="realm", val=tostring(self.realmName) },
@@ -205,6 +213,11 @@ end
 function GuildAds:ResetOthers()
 end
 
+function GuildAds:PLAYER_GUILD_UPDATE()
+	self.guildName = GetGuildInfo("player");
+	self:CheckChannelName();
+end
+
 function GuildAds:CheckChannelName()
 	if self.channelJoined and self:GetDefaultChannel() ~= self.channelName then
 		GuildAds:ChangeChannel()
@@ -214,22 +227,28 @@ end
 function GuildAds:GetDefaultChannel()
 	local source;
 	local channel = GuildAdsDB:GetConfigValue(GuildAdsDB.PROFILE_PATH, "ChannelName");
+	local password = GuildAdsDB:GetConfigValue(GuildAdsDB.PROFILE_PATH, "ChannelPassword");
 	if channel then
 		source="config";
 	else
 		-- If in a guild
-		local go_guildName, go_GuildRankName, go_guildRankIndex = GetGuildInfo("player");
-		if go_guildName then			
-			-- channel name bases on the guild name
-			name = "GuildAds";
-			for word in string.gfind(go_guildName,"[^ ]+") do
-				name = name..word;
+		if self.guildName then
+			--
+			local startIndex, endIndex;
+			startIndex, endIndex, channel, password = string.find(GetGuildInfoText() or "", "%[GA:([^,%]]+)([^%]]*)%]");
+			if startIndex then
+				if password=="" then
+					password=nil;
+				end
+				source = "guildInfo"
+			else
+				-- channel name bases on the guild name
+				channel = "GuildAds"..string.gsub(self.guildName, "\ ", "");
+				if (strlen(channel) > 31) then
+					channel = string.sub(channel, 0, 31);
+				end
+				source = "guildName";
 			end
-			if (strlen(name) > 31) then
-				name = string.sub(name, 0, 31);
-			end
-			channel = name;
-			source = "guild";
 		end
 		
 		-- channel name bases on the raid leader name
@@ -260,7 +279,7 @@ function GuildAds:GetDefaultChannel()
 			source = "player";
 		end
 	end
-	return channel, GuildAdsDB:GetConfigValue(GuildAdsDB.PROFILE_PATH, "ChannelPassword"), source;
+	return channel, password, source;
 end
 
 function GuildAds:SetDefaultChannel(name, password)
