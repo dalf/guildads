@@ -9,7 +9,6 @@
 ----------------------------------------------------------------------------------
 
 local g_AdFilters = {};
-local g_guildName;
 
 GuildAdsGuild = {
 
@@ -47,7 +46,7 @@ GuildAdsGuild = {
 		
 		-- show connected status except for my guild
 		local gowner = GuildAdsDB.profile.Main:get(playerName, GuildAdsDB.profile.Main.Guild);
-		if (playerName ~= GuildAds.playerName and (gowner == nil or gowner ~= GetGuildInfo("player"))) then
+		if (playerName ~= GuildAds.playerName and (gowner == nil or gowner ~= GuildAds.guildName)) then
 			local msg;
 			if (status) then
 				msg = string.format(ERR_FRIEND_ONLINE_SS, playerName, playerName);
@@ -88,14 +87,14 @@ GuildAdsGuild = {
 	end;
 	
 	onChannelJoin = function()
-		if not GuildAdsGuild.initialized then
-			GuildAdsGuild.initialized = true;
-			GuildAdsGuild.onInit();
-		end
+		GuildAdsDB.profile.Main:registerEvent(GuildAdsGuild.onDBUpdate);
+		GuildAdsDB.channel[GuildAds.channelName]:registerEvent(GuildAdsGuild.onPlayerListUpdate);
 		GuildAdsGuild.delayedUpdate();
 	end;
 	
 	onChannelLeave = function()
+		GuildAdsDB.profile.Main:unregisterEvent(GuildAdsGuild.onDBUpdate);
+		GuildAdsDB.channel[GuildAds.channelName]:unregisterEvent(GuildAdsGuild.onPlayerListUpdate);
 		GuildAdsGuild.delayedUpdate();
 	end;
 	
@@ -119,18 +118,6 @@ GuildAdsGuild = {
 	--
 	---------------------------------------------------------------------------------
 	onInit = function()
-		g_guildName = GetGuildInfo("player");
-		
-		GuildAdsDB.profile.Main:registerEvent(GuildAdsGuild.onDBUpdate);
-		GuildAdsDB.channel[GuildAds.channelName]:registerEvent(GuildAdsGuild.onPlayerListUpdate);
-		
-		-- No selection
-		GuildAdsGuild.debug("InitGuild");
-		g_GlobalAdSelectedId = 0;
-		g_GlobalAdSelectedType = 0;
-		g_GlobalTitleSelectedId = 0;
-		g_GlobalTitleSelectedType = 0;
-		
 		UIDropDownMenu_Initialize(GuildAds_Filter_ClassDropDown, GuildAdsGuild.classFilter.init);
 		UIDropDownMenu_SetText(FILTER, GuildAds_Filter_ClassDropDown);
 		UIDropDownMenu_SetWidth(100, GuildAds_Filter_ClassDropDown);
@@ -146,8 +133,6 @@ GuildAdsGuild = {
 		else
 			GuildAdsGuildShowOfflinesCheckButton:SetChecked(0);
 		end
-		
-		GuildAdsGuild.peopleCountUpdate();
 		
 		-- Init g_AdFilters
 		g_AdFilters = {};
@@ -178,11 +163,10 @@ GuildAdsGuild = {
 		for id, info in linear do
 			if info==playerName then
 				--
-				g_GlobalAdSelected = info.adId;
-				g_GlobalTitleSelected = 0;
+				GuildAdsGuild.currentPlayerName = info;
 				--[[
 				local offset = FauxScrollFrame_GetOffset(GuildAdsPeopleGlobalAdScrollFrame);
-				if g_GlobalAdSelected<offset or g_GlobalAdSelected>(offset+GuildAdsGuild.GUILDADS_NUM_GLOBAL_AD_BUTTONS) then
+				if id<offset or id>(offset+GuildAdsGuild.GUILDADS_NUM_GLOBAL_AD_BUTTONS) then
 					local offset = min(id, table.getn(linear)-GuildAdsGuild.GUILDADS_NUM_GLOBAL_AD_BUTTONS);
 					GuildAdsGuild.debug("offset="..tostring(offset));
 					GuildAdsPeopleGlobalAdScrollFrame:SetVerticalScroll(offset)
@@ -195,8 +179,7 @@ GuildAdsGuild = {
 				return true;
 			end
 		end
-		g_GlobalAdSelected = 0;
-		g_GlobalTitleSelected = 0;
+		GuildAdsGuild.currentPlayerName = 0;
 		GuildAdsGuild.peopleButtonsUpdate();
 		return false;
 	end;
@@ -257,7 +240,7 @@ GuildAdsGuild = {
 						button.owner = linear[j];
 						
 						-- create a ads
-						GuildAdsGuild.peopleButton.update(button, g_GlobalAdSelected == linear[j], linear[j]);
+						GuildAdsGuild.peopleButton.update(button, GuildAdsGuild.currentPlayerName == linear[j], linear[j]);
 					elseif type(linear[j]) == "table" then
 						-- update internal data
 						button.groupId = linear[j].groupId;
@@ -294,20 +277,16 @@ GuildAdsGuild = {
 	---------------------------------------------------------------------------------	
 	peopleButton = {
 		
-		onClick = function(button)
+		onClick = function()
 			if this.owner then
 				-- an player name was clicked
-				if (this.owner ~= g_GlobalAdSelected) then
-					g_GlobalAdSelected = this.owner;
-					g_GlobalTitleSelected = 0;
+				if (this.owner ~= GuildAdsGuild.currentPlayerName) then
+					GuildAdsGuild.currentPlayerName = this.owner;
 					GuildAdsGuild.peopleButtonsUpdate();
 				end
-				if button == "RightButton" then
+				if arg1 == "RightButton" then
 					GuildAdsGuild.contextMenu.show(this.owner);
 				end
-			elseif this.groupId then
-				-- a title was clicked
-				-- do nothing
 			end
 		end;
 		
@@ -322,7 +301,6 @@ GuildAdsGuild = {
 			
 			-- Add player name
 			local ocolor = GuildAdsUITools.onlineColor[GuildAdsGuild.isOnline(owner)];
-			GuildAdsGuild.debug(owner..":"..tostring(GuildAdsComm:IsOnLine(owner))..","..tostring(GuildAdsGuild.onlineCache[owner])..":"..type(ocolor));
 			GameTooltip:AddLine(owner, ocolor.r, ocolor.g, ocolor.b);
 			
 			-- Add guild name
@@ -342,7 +320,6 @@ GuildAdsGuild = {
 			GameTooltip:Show();
 		end;
 		
-		-- where ne sert à rien : se baser sur l'information .guild
 		update =  function(button, selected, playerName)
 			local buttonName= button:GetName();
 			
@@ -362,8 +339,7 @@ GuildAdsGuild = {
 			
 			-- icon will be nicer
 			local prefix;
-			
-			if g_guildName and GuildAdsDB.profile.Main:get(playerName, GuildAdsDB.profile.Main.Guild) == g_guildName then
+			if GuildAds.guildName and GuildAdsDB.profile.Main:get(playerName, GuildAdsDB.profile.Main.Guild) == GuildAds.guildName then
 				prefix = "G";
 			else
 				prefix = "A";
@@ -617,24 +593,28 @@ GuildAdsGuild = {
 				if (IsInGuild()) then
 					GuildRoster();
 					-- TODO should wait for the GUILD_ROSTER_UPDATE event
+					local guildName = GetGuildInfo("player");
 					local numAllGuildMembers = GetNumGuildMembers(true);
 					if (numAllGuildMembers>=0) then 
 						for currentplayer = 1,numAllGuildMembers do
 							local name, rank, rankIndex, level, class, zone, note, officernote, online, status = GetGuildRosterInfo(currentplayer);
-							if name then
-								if not players[name] then
-									GuildAdsDB.profile.Main:set(name, GuildAdsDB.profile.Main.Guild, g_guildName);
-									GuildAdsDB.profile.Main:set(name, GuildAdsDB.profile.Main.Class, GuildAdsDB.profile.Main:getClassIdFromName(class));
-									if online then
-										GuildAdsGuild.onlineCache[name] = true;
-									else
-										GuildAdsGuild.onlineCache[name] = false;
-									end
-									tinsert(workingTable, name);
+							
+							if name and GuildAdsDB.profile.Main:getRevision(name)==0 then
+								-- update profile only it doesn't exist
+								GuildAdsDB.profile.Main:setRaw(name, GuildAdsDB.profile.Main.Guild, guildName);
+								GuildAdsDB.profile.Main:setRaw(name, GuildAdsDB.profile.Main.Class, GuildAdsDB.profile.Main:getClassIdFromName(class));
+								GuildAdsDB.profile.Main:setRaw(name, GuildAdsDB.profile.Main.GuildRank, rank);
+								GuildAdsDB.profile.Main:setRaw(name, GuildAdsDB.profile.Main.GuildRankIndex, rankIndex);
+								GuildAdsDB.profile.Main:setRaw(name, GuildAdsDB.profile.Main.Level, level);
+							end
+							
+							if name and not players[name] then
+								if online then
+									GuildAdsGuild.onlineCache[name] = true;
+								else
+									GuildAdsGuild.onlineCache[name] = false;
 								end
-								GuildAdsDB.profile.Main:set(name, GuildAdsDB.profile.Main.GuildRank, rank);
-								GuildAdsDB.profile.Main:set(name, GuildAdsDB.profile.Main.GuildRankIndex, rankIndex);
-								GuildAdsDB.profile.Main:set(name, GuildAdsDB.profile.Main.Level, level);
+								tinsert(workingTable, name);
 							end
 						end
 					end

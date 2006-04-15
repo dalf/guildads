@@ -130,10 +130,10 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 				this:RegisterForClicks("LeftButtonDown", "RightButtonDown");
 			</OnLoad>
 			<OnClick>
-				GuildAdsGuild.peopleButton.onClick(arg1);
+				GuildAdsGuild.peopleButton.onClick();
 			</OnClick>
 			<OnEnter>
-				GuildAdsGuild.peopleButton.onEnter(arg1);
+				GuildAdsGuild.peopleButton.onEnter();
 			</OnEnter>
 			<OnLeave>
 				GameTooltip:Hide();
