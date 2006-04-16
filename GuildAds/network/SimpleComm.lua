@@ -11,7 +11,7 @@
 SIMPLECOMM_DEBUG = false;				-- output debug information
 
 SIMPLECOMM_CHARACTERSPERTICK_MAX = 512;	-- char per tick
-SIMPLECOMM_OUTBOUND_TICK_DELAY = 1;		-- delay in second between tick
+SIMPLECOMM_OUTBOUND_TICK_DELAY = 1.5;	-- delay in second between tick
 
 SIMPLECOMM_INBOUND_TICK_DELAY = 0.125;	-- TODO : change from 0.125 to 0.5 according to FPS
 
@@ -25,9 +25,8 @@ SimpleComm_JoinHandler = nil;
 SimpleComm_LeaveHandler = nil;
 
 local SimpleComm_Handler = nil;
-local SimpleComm_Serialize = nil;
-local SimpleComm_Unserialize = nil;
 local SimpleComm_FilterText = nil;
+local SimpleComm_FilterMessage = nil;
 
 local SimpleComm_oldChatFrame_OnEvent = nil;
 
@@ -41,7 +40,7 @@ local SimpleComm_messageQueueHeader = {};
 local SimpleComm_messageQueueLast = SimpleComm_messageQueueHeader;
 	-- .delay
 	-- .to
-	-- .serialized
+	-- .text
 	-- .next
 	
 local SimpleComm_inboundMessageQueue = {};
@@ -90,8 +89,10 @@ end
 -- Init
 -- 
 ---------------------------------------------------------------------------------
-local function SimpleComm_joinChannel()
-	DEBUG_MSG("[SimpleComm_joinChannel] begin");
+local function SimpleComm_initChannel()
+	DEBUG_MSG("[SimpleComm_initChannel] begin");
+	SimpleComm_messageQueue = { };
+	SimpleCommFrame.outbound = SIMPLECOMM_OUTBOUND_TICK_DELAY;
 	if ( GetChannelName(SimpleComm_Channel) == 0) then
 		local zoneChannel, channelName = JoinChannelByName(SimpleComm_Channel, SimpleComm_Password, SimpleComm_ChatFrame:GetID());
 		
@@ -108,33 +109,23 @@ local function SimpleComm_joinChannel()
 			SimpleComm_ChatFrame.channelList[i] = name;
 			SimpleComm_ChatFrame.zoneChannelList[i] = zoneChannel;
 		end
-		DEBUG_MSG("[SimpleComm_joinChannel] end - has to wait");
+		DEBUG_MSG("[SimpleComm_initChannel] end - has to wait");
 		return false;
 	else
-		DEBUG_MSG("[SimpleComm_joinChannel] end - already joined");
+		DEBUG_MSG("[SimpleComm_initChannel] end - already joined");
 		return true;
 	end
 end
 
-local function SimpleComm_leaveChannel()
+local function SimpleComm_doneChannel()
+	DEBUG_MSG("[SimpleComm_doneChannel] begin");
+	SimpleCommFrame.outbound = nil;
 	if ( GetChannelName(SimpleComm_Channel) ~= 0) then
 		LeaveChannelByName(SimpleComm_Channel);
 		SimpleComm_Channel = nil;
 		SimpleComm_Password = nil;
 	end
-end
-
-local function SimpleComm_initChannel()
-	DEBUG_MSG("[SimpleComm_initChannel] begin");
-	SimpleComm_messageQueue = { };
-	SimpleCommFrame.outbound = SIMPLECOMM_OUTBOUND_TICK_DELAY;
-	DEBUG_MSG("[SimpleComm_initChannel] end");
-	return SimpleComm_joinChannel();
-end
-
-local function SimpleComm_doneChannel()
-	SimpleCommFrame.outbound = nil;
-	SimpleComm_leaveChannel();
+	DEBUG_MSG("[SimpleComm_doneChannel] end");
 end
 
 ---------------------------------------------------------------------------------
@@ -192,7 +183,7 @@ function SimpleComm_newSendChatMessage(msg, sys, lang, name)
 	else
 		return SimpleComm_oldSendChatMessage(msg, sys, lang, name);
 	end
-end;
+end
 
 function SimpleComm_test()
 	DEBUG_MSG("ok");
@@ -220,8 +211,6 @@ end
 function SimpleComm_GetFlag(player)
 	if SimpleComm_Flags[player] then
 		return SimpleComm_Flags[player].flag, SimpleComm_Flags[player].message;
-	else
-		return nil;
 	end
 end
 
@@ -278,9 +267,9 @@ local function SimpleComm_SendQueue(elapsed)
 			message = message.next;
 		else
 			-- check chat traffic
-			SimpleComm_sentBytes = SimpleComm_sentBytes + string.len(message.serialized);
+			SimpleComm_sentBytes = SimpleComm_sentBytes + string.len(message.text);
 			if SimpleComm_sentBytes > SIMPLECOMM_CHARACTERSPERTICK_MAX then
-				SimpleComm_sentBytes = SimpleComm_sentBytes - string.len(message.serialized);
+				SimpleComm_sentBytes = SimpleComm_sentBytes - string.len(message.text);
 				previousMessage = SimpleComm_messageQueueLast;
 				break;
 			end
@@ -288,16 +277,16 @@ local function SimpleComm_SendQueue(elapsed)
 			-- send message
 			if message.to then
 				if not SimpleComm_Disconnected[message.to] then
-					-- DEBUG_MSG("Envois a("..message.to..") de("..message.serialized..")");
-					SendChatMessage(message.serialized, "WHISPER", nil, message.to);
+					-- DEBUG_MSG("Envois a("..message.to..") de("..message.text..")");
+					SendChatMessage(message.text, "WHISPER", nil, message.to);
 					SimpleComm_AddWhisper(message.to);
 				else
 					-- Ignore the message since the player is offline.
-					SimpleComm_sentBytes = SimpleComm_sentBytes - string.len(message.serialized);
+					SimpleComm_sentBytes = SimpleComm_sentBytes - string.len(message.text);
 				end
 			else
-				-- DEBUG_MSG("Envois a tous de("..message.serialized..")");
-				SendChatMessage(message.serialized, "CHANNEL", nil, SimpleComm_channelId);
+				-- DEBUG_MSG("Envois a tous de("..message.text..")");
+				SendChatMessage(message.text, "CHANNEL", nil, SimpleComm_channelId);
 			end
 			
 			-- delete current message in queue
@@ -315,30 +304,6 @@ local function SimpleComm_SendQueue(elapsed)
 	if (SimpleComm_sentBytes > 0) then
 		DEBUG_MSG(SimpleComm_sentBytes.." bytes sent", true);
 	end
-end
-
-local function SimpleComm_AddMessage(packet)
-	if strlen(packet.serialized)<240 then
-		SimpleComm_messageQueueLast.next = packet;
-		SimpleComm_messageQueueLast = packet;
-	else
-		local text = packet.serialized;
-		local packetNumber = 1;
-		while text~="" do
-			-- take first 240 char
-			local tmp = string.sub(text, 1, 240);
-			text = string.sub(text, 240);
-			-- add a packet
-			SimpleComm_messageQueueLast.next = {
-				to = packet.who;
-				serialized = SimpleComm_SplitSerialize(packetNumber, text=="", tmp);
-				delay = packet.delay;
-			};
-			SimpleComm_messageQueueLast = SimpleComm_messageQueueLast.next;
-			-- next packet
-			packetNumber = packetNumber + 1;
-		end
-	end;
 end
 
 ---------------------------------------------------------------------------------
@@ -379,14 +344,12 @@ local function SimpleComm_ParseMessage(author, text, channel)
 			packet = nil;
 		end
 	end
+	
 	-- unserialize message from the packet.
-	if packet then
-		local message = SimpleComm_Unserialize(packet);
-		if message and SimpleComm_Handler then
-			tinsert(SimpleComm_inboundMessageQueue, { author, message, channel });
-			if not SimpleCommFrame.inbound then
-				SimpleCommFrame.inbound = SIMPLECOMM_INBOUND_TICK_DELAY;
-			end
+	if packet and SimpleComm_FilterMessage(packet) then
+		tinsert(SimpleComm_inboundMessageQueue, { author, packet, channel });
+		if not SimpleCommFrame.inbound then
+			SimpleCommFrame.inbound = SIMPLECOMM_INBOUND_TICK_DELAY;
 		end
 	end
 end
@@ -397,12 +360,10 @@ function SimpleComm_ParseEvent(event)
 		
 		-- event=CHAT_MSG_CHANNEL; arg1=chat message; arg2=author; arg3=language; arg4=channel name with number; arg8=channel number; arg9=channel name without number
 		if ((event == "CHAT_MSG_CHANNEL") and (arg8 == SimpleComm_channelId)) then
-			-- DEBUG_MSG("Reception depuis le channel:"..arg1);
 			SimpleComm_Disconnected[arg2] = nil;
 			SimpleComm_ParseMessage(arg2, arg1, arg9);
 		
 		elseif (event == "CHAT_MSG_WHISPER") then
-			-- DEBUG_MSG("Reception de "..arg2..":"..arg1);
 			SimpleComm_Disconnected[arg2] = nil;
 			SimpleComm_ParseMessage(arg2, arg1, nil);
 		
@@ -424,6 +385,8 @@ function SimpleComm_ParseEvent(event)
 				if (SimpleComm_LeaveHandler) then
 					SimpleComm_LeaveHandler();
 				end
+			elseif (arg1 == "WRONG_PASSWORD") then
+				-- TODO : leave the channel, and rejoin, or just the wrong password
 			end
 		end
 		
@@ -502,6 +465,7 @@ function SimpleComm_newChatFrame_OnEvent(event)
 				while getglobal("DRUNK_MESSAGE_SELF"..i) do
 					if arg1==getglobal("DRUNK_MESSAGE_SELF"..i) then
 						SimpleComm_YouAreDrunk = true;
+						break;
 					end
 					i = i +1;
 				end
@@ -521,6 +485,7 @@ function SimpleComm_newChatFrame_OnEvent(event)
 		end
 		
 		if (event == "CHAT_MSG_CHANNEL_JOIN") and (arg8 == SimpleComm_channelId) then
+			DEBUG_MSG("CHAT_MSG_CHANNEL_JOIN");
 			SimpleComm_Disconnected[arg2] = nil;
 			return;
 		end
@@ -559,10 +524,6 @@ function SimpleComm_newChatFrame_OnEvent(event)
 		end
 	end
 	
-	-- to avoid bug #1340973 (Can no longer see or type in /ga) 
-	-- In normal situation event is a local variable, but some mods make a wrong hook
-	-- declare the local variable "event" as a global to avoid bugs.
-	setglobal("event", event);
 	SimpleComm_oldChatFrame_OnEvent(event);
 end
 SimpleComm_oldChatFrame_OnEvent = ChatFrame_OnEvent;
@@ -648,22 +609,35 @@ end
 -- Fonctions publiques
 -- 
 ---------------------------------------------------------------------------------
-function SimpleComm_SendMessage(who, msg, delay)
+function SimpleComm_SendMessage(who, text, delay)
 	if not(who and SimpleComm_Disconnected[who]) then
-		SimpleComm_AddMessage({to=who; serialized=SimpleComm_Serialize(msg); delay=delay });
+		if strlen(text)<240 then
+			SimpleComm_messageQueueLast.next = {to=who; text=text; delay=delay };
+			SimpleComm_messageQueueLast = SimpleComm_messageQueueLast.next;
+		else
+			local packetNumber = 1;
+			while text~="" do
+				-- take first 240 char
+				local tmp = string.sub(text, 1, 240);
+				text = string.sub(text, 240);
+				-- add a packet
+				SimpleComm_messageQueueLast.next = {
+					to = packet.who;
+					text = SimpleComm_SplitSerialize(packetNumber, text=="", tmp);
+					delay = packet.delay;
+				};
+				SimpleComm_messageQueueLast = SimpleComm_messageQueueLast.next;
+				-- next packet
+				packetNumber = packetNumber + 1;
+			end
+		end
 	end
 end
 
-function SimpleComm_SendRawMessage(who, message, delay)
-	if not(who and SimpleComm_Disconnected[who]) then
-		SimpleComm_AddMessage({to=who; serialized=message; delay=delay });
-	end
-end
-
-function SimpleComm_PreInit(FilterText, Serialize, Unserialize, SplitSerialize, UnsplitSerialize, OnJoin, OnLeave, OnMessage)
+function SimpleComm_PreInit(FilterText, FilterMessage, SplitSerialize, UnsplitSerialize, OnJoin, OnLeave, OnMessage)
 	SimpleComm_FilterText = FilterText;
-	SimpleComm_Serialize =  Serialize;
-	SimpleComm_Unserialize =  Unserialize;
+	SimpleComm_FilterMessage = FilterMessage;
+	
 	SimpleComm_SplitSerialize = SplitSerialize;
 	SimpleComm_UnsplitSerialize = UnsplitSerialize;
 	

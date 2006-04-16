@@ -66,7 +66,7 @@ function GuildAdsDTS:ReceiveSearch(playerName)
 		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"  - Search already in progress");
 	end
 	
-	if not (GuildAdsComm.isOnline[GuildAds.playerName].c1 or GuildAdsComm.isOnline[GuildAds.playerName].c2) then
+	if not (GuildAdsComm.playerTree[GuildAds.playerName].c1 or GuildAdsComm.playerTree[GuildAds.playerName].c2) then
 		-- I'm a leaf : don't wait, send my revision information to my parent
 		self:SendRevision(playerName);
 	end
@@ -75,9 +75,9 @@ end
 function GuildAdsDTS:SendRevision(playerName)
 	if self.search[playerName] then
 		local result = self.search[playerName];
-		if GuildAdsComm.isOnline[GuildAds.playerName].p then
+		if GuildAdsComm.playerTree[GuildAds.playerName].p then
 			-- send result to parent in whisper
-			GuildAdsComm:SendSearchResultToParent(GuildAdsComm.isOnline[GuildAds.playerName].p, self.dataType, playerName, result.bestPlayerName, result.bestRevision, result.bestWeight, result.worstRevision);
+			GuildAdsComm:SendSearchResultToParent(GuildAdsComm.playerTree[GuildAds.playerName].p, self.dataType, playerName, result.bestPlayerName, result.bestRevision, result.bestWeight, result.worstRevision);
 		else
 			-- send search result to channel
 			GuildAdsComm:SendSearchResult(self.dataType, playerName, result.bestPlayerName, result.bestRevision, result.worstRevision);
@@ -101,22 +101,22 @@ function GuildAdsDTS:ReceiveRevision(childPlayerName, playerName, who, revision,
 		result.worstRevision = worstRevision;		
 	end
 	
-	if childPlayerName == GuildAdsComm.isOnline[GuildAds.playerName].c1 then
+	if childPlayerName == GuildAdsComm.playerTree[GuildAds.playerName].c1 then
 		result.c1 = true;
 	end
 	
-	if childPlayerName == GuildAdsComm.isOnline[GuildAds.playerName].c2 then
+	if childPlayerName == GuildAdsComm.playerTree[GuildAds.playerName].c2 then
 		result.c2 = true;
 	end
 	
-	if (	GuildAdsComm.isOnline[GuildAds.playerName].c1
+	if (	GuildAdsComm.playerTree[GuildAds.playerName].c1
 		and result.c1
-		and GuildAdsComm.isOnline[GuildAds.playerName].c2 
+		and GuildAdsComm.playerTree[GuildAds.playerName].c2 
 		and result.c2)
 	   or
-	   (	GuildAdsComm.isOnline[GuildAds.playerName].c1
+	   (	GuildAdsComm.playerTree[GuildAds.playerName].c1
 		and result.c1
-		and not GuildAdsComm.isOnline[GuildAds.playerName].c2
+		and not GuildAdsComm.playerTree[GuildAds.playerName].c2
 		and not result.c2
 	   )
 	then

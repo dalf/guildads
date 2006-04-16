@@ -17,30 +17,8 @@ GUILDADS_MSG_PREFIX = GUILDADS_MSG_PREFIX1..">";
 	
 GUILDADS_MSG_PREFIX_REGEX_UNSPLIT = GUILDADS_MSG_PREFIX.."([0-9]+)([\.|\:])(.*)";
 
-GUILDADS_MSG_TYPE_ANNONCE = 0;
 GUILDADS_MSG_TYPE_REQUEST = 1;
 GUILDADS_MSG_TYPE_AVAILABLE = 2;
-GUILDADS_MSG_TYPE_SKILL = 3;
-GUILDADS_MSG_TYPE_EVENT = 4;
-GUILDADS_MSG_TYPE_INVENTORY = 5;
-GUILDADS_MSG_TYPE_EVENT_SUBSCRIPTION = 7;
-
-GUILDADS_STATE_UNKNOW       = "unknow";
-GUILDADS_STATE_SYNC_ONLINE  = "s_online";
-GUILDADS_STATE_SYNC_OFFLINE = "s_offline";
-GUILDADS_STATE_OK   	     = "ok";
-
-local function GAC_GetGuildChatFrame()
-	for i=1,NUM_CHAT_WINDOWS,1 do
-		local DefaultMessages = { GetChatWindowMessages(i) };
-		for k, channel in DefaultMessages do
-			if channel == "GUILD" then
-				return getglobal("ChatFrame"..i);
-			end
-		end
-	end
-	return DEFAULT_CHAT_FRAME;
-end
 
 --------------------------------------------------------------------------------
 --
@@ -54,8 +32,7 @@ local SerializeMeta = {
 local SerializeCommand = {
 	M= {
 		[1] = { key="version", 		codec="String" },
-		[2] = { key="startTime",	codec="Integer" },
-		[3] = { key="state",		codec="String" }
+		[2] = { key="startTime",	codec="Integer" }
 	};
 	
 	CF= {
@@ -110,85 +87,11 @@ local SerializeCommand = {
 	}
 };
 
-local serializeResult = { GUILDADS_MSG_PREFIX };
-function GuildAds_Serialize(o)
-	o.currenttime = GuildAdsDB:GetCurrentTime();
-	table.setn(serializeResult, 1);
-	table.insert(serializeResult, SerializeTable(SerializeMeta, o));
-	if SerializeCommand[o.command] then
-		table.insert(serializeResult, SerializeTable(SerializeCommand[o.command], o));
-		if o.command == "N" then
-			table.insert(serializeResult, SerializeTable(GuildAdsComm.DTS[o.dataTypeName].schema, o));
-		end
-	end
-	return table.concat(serializeResult);
-end
-
-function GuildAds_Unserialize(text)
-	local o;
-	
-	local j=0;
-	local s;
-	local i=1;
-	local m=1;
-	
-	for str in string.gfind(text, GUILDADS_MSG_REGEX_UNSERIALIZE) do
-		if j>0 then
-			o = o or {}; -- TODO : idée : cache des messages avec les key déjà créer en fonction de .command
-			local d = s[i];
---~ 			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "  -'"..str.."'");
-			o[d.key] = GuildAdsCodecs[d.codec].decode(str);
-		else
-			if str~=GUILDADS_MSG_PREFIX1 then
-				return;
-			end
-		end
-		
-		i = i + 1;
-		if i>m then
-			j=j+1;
-			if j==1 then
---~ 				GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "1");
-				s=SerializeMeta;
-			elseif j==2 and o.command and SerializeCommand[o.command] then
---~ 				GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "2");
-				s=SerializeCommand[o.command];
-			else
-				break;
-			end
-			i=1;
-			m=table.getn(s);
-		end
-	end
-	
---~ 	if o then
---~ 		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "[GuildAds_Unserialize]"..text);
---~ 	end
-	
-	return o;
-end
-
-function GuildAds_SplitSerialize(packetNumber, last, obj)
-	if last then
-		return GUILDADS_MSG_PREFIX .. packetNumber ..":".. obj;
-	else
-		return GUILDADS_MSG_PREFIX .. packetNumber ..".".. obj;
-	end
-end
-
-function GuildAds_UnsplitSerialize(str)
-	local iStart, _ , packetNumber, last, packet = string.find(str, GUILDADS_MSG_PREFIX_REGEX_UNSPLIT);
-	if iStart then
-		return packet, tonumber(packetNumber), last==":";
-	end
-	return str;
-end
-
-function GuildAds_FilterText(text)
-	return string.sub(text, 1, string.len(GUILDADS_MSG_PREFIX_NOVERSION)) == GUILDADS_MSG_PREFIX_NOVERSION;
-end
-
-------------------------------------
+--------------------------------------------------------------------------------
+--
+-- GuildAdsComm
+-- 
+---------------------------------------------------------------------------------
 GuildAdsComm = AceModule:new({
 	IGNOREMYMESSAGE = {
 		M=true,
@@ -201,15 +104,14 @@ GuildAdsComm = AceModule:new({
 	},
 	
 	hasJoined = {},
-	isOnline = {},
+	playerTree = {},
 	playerList = {},
-	playerInfo = {},
+	playerMeta = {},
 	channelName = "",
 	channelPassword = "",
 	
 	DTS = {},
 	
-	expectedTransactions = {},		-- except my transactions
 	transactions = {},
 	updateQueue = {},
 	searchQueue = {},
@@ -219,11 +121,10 @@ function GuildAdsComm:Initialize()
 	self.startTime = GuildAdsDB:GetCurrentTime();
 
 	SimpleComm_PreInit(
-		GuildAds_FilterText,
-		GuildAds_Serialize,
-		GuildAds_Unserialize,
-		GuildAds_SplitSerialize,
-		GuildAds_UnsplitSerialize,
+		GuildAdsComm.FilterText,
+		GuildAdsComm.FilterMessage,
+		GuildAdsComm.SplitSerialize,
+		GuildAdsComm.UnsplitSerialize,
 		GuildAdsComm.OnJoin,
 		GuildAdsComm.OnLeave,
 		GuildAdsComm.OnMessage
@@ -231,9 +132,20 @@ function GuildAdsComm:Initialize()
 	
 	self:RegisterEvent("CHAT_MSG_CHANNEL_JOIN");
 	self:RegisterEvent("CHAT_MSG_CHANNEL_LEAVE");
-	self.state = "UNKNOW";
 	
 	SimpleComm_SetFlagListener(self.SendChatFlag);
+end
+
+function GuildAdsComm:GetGuildChatFrame()
+	for i=1,NUM_CHAT_WINDOWS,1 do
+		local DefaultMessages = { GetChatWindowMessages(i) };
+		for k, channel in DefaultMessages do
+			if channel == "GUILD" then
+				return getglobal("ChatFrame"..i);
+			end
+		end
+	end
+	return DEFAULT_CHAT_FRAME;
 end
 
 function GuildAdsComm:JoinChannel(channel, password)
@@ -245,12 +157,90 @@ function GuildAdsComm:JoinChannel(channel, password)
 	if self.alreadyJoined then
 		SimpleComm_SetChannel(channel, password);
 	else
-		SimpleComm_Init(channel, password, GAC_GetGuildChatFrame());
+		SimpleComm_Init(channel, password, self:GetGuildChatFrame());
 		self.alreadyJoined = true;
 	end
 
 	local command, alias = GuildAds:GetDefaultChannelAlias();
 	SimpleComm_InitAlias(command, alias);
+end
+
+local serializeResult = { GUILDADS_MSG_PREFIX };
+function GuildAdsComm:Serialize(o)
+	table.setn(serializeResult, 1);
+	table.insert(serializeResult, SerializeTable(SerializeMeta, o));
+	if SerializeCommand[o.command] then
+		table.insert(serializeResult, SerializeTable(SerializeCommand[o.command], o));
+	end
+	return table.concat(serializeResult);
+end
+
+local unserializeResult = {};
+function GuildAdsComm:Unserialize(text)
+	-- clear unserializeResult
+	for i in pairs(unserializeResult) do
+		unserializeResult[i] = nil
+	end
+	
+	-- unserialize
+	local o;
+	
+	local j=0;
+	local s;
+	local i=1;
+	local m=1;
+	
+	for str in string.gfind(text, GUILDADS_MSG_REGEX_UNSERIALIZE) do
+		if j>0 then
+			o = o or unserializeResult;	-- always reuse unserializeResult
+			local d = s[i];
+			o[d.key] = GuildAdsCodecs[d.codec].decode(str);
+		else
+			if str~=GUILDADS_MSG_PREFIX1 then
+				return;
+			end
+		end
+		
+		i = i + 1;
+		if i>m then
+			j=j+1;
+			if j==1 then
+				s=SerializeMeta;
+			elseif j==2 and o.command and SerializeCommand[o.command] then
+				s=SerializeCommand[o.command];
+			else
+				break;
+			end
+			i=1;
+			m=table.getn(s);
+		end
+	end
+	
+	return o;
+end
+
+function GuildAdsComm.FilterText(text)
+	return string.sub(text, 1, string.len(GUILDADS_MSG_PREFIX_NOVERSION)) == GUILDADS_MSG_PREFIX_NOVERSION;
+end
+
+function GuildAdsComm.FilterMessage(text)
+	return string.sub(text, 1, string.len(GUILDADS_MSG_PREFIX)) == GUILDADS_MSG_PREFIX;
+end
+
+function GuildAdsComm.SplitSerialize(packetNumber, last, obj)
+	if last then
+		return GUILDADS_MSG_PREFIX .. packetNumber ..":".. obj;
+	else
+		return GUILDADS_MSG_PREFIX .. packetNumber ..".".. obj;
+	end
+end
+
+function GuildAdsComm.UnsplitSerialize(str)
+	local iStart, _ , packetNumber, last, packet = string.find(str, GUILDADS_MSG_PREFIX_REGEX_UNSPLIT);
+	if iStart then
+		return packet, tonumber(packetNumber), last==":";
+	end
+	return str;
 end
 
 function GuildAdsComm.OnJoin(self)
@@ -313,7 +303,6 @@ function GuildAdsComm.OnLeave(self)
 end
 
 function GuildAdsComm:CHAT_MSG_CHANNEL_JOIN()
-	-- TODO : Un joueur vient d'arrive sur le channel
 	if string.lower(self.channelName)==string.lower(arg9) then
 		self.hasJoined[arg2] = GuildAdsDB:GetCurrentTime()
 	end
@@ -335,19 +324,6 @@ end
 --------------------------------------------------------------------------------
 function GuildAdsComm:SendSearchAboutMyData()
 	self:SendSearchAboutPlayer(GuildAds.playerName);
-	
-	-- TODO : a task
---~ 	local players = GuildAdsDB.channel[GuildAds.channelName]:getPlayers();
---~ 	for playerName in pairs(players) do
---~ 		if not self.isOnline(playerName) then
---~ 			self:SendSearchAboutPlayer(playerName);
---~ 		end
---~ 	end
-	
---~ 	self:QueueSearch(self.DTS.Main, GuildAds.playerName);
---~ 	self:QueueSearch(self.DTS.TradeOffer, GuildAds.playerName);
---~ 	self.DTS.TradeOffer.dataType:registerEvent(GuildAdsComm, "OnDBUpdate");
---~ 	self:QueueSearch(self.DTS.TradeNeed, GuildAds.playerName);
 end
 
 --------------------------------------------------------------------------------
@@ -367,11 +343,7 @@ end
 -- 
 --------------------------------------------------------------------------------
 function GuildAdsComm:IsOnLine(playerName)
-	if self.isOnline[playerName] then
-		return true;
-	else
-		return false;
-	end
+	return self.playerTree[playerName] and true or false;
 end
 
 --------------------------------------------------------------------------------
@@ -386,12 +358,13 @@ end
 --------------------------------------------------------------------------------
 --
 -- Get tree info about a player (parent player, and child players)
+-- index  : .i
 -- parent : .p
 -- childs : .c1, .c2
 -- 
 --------------------------------------------------------------------------------
 function GuildAdsComm:GetTreeInfo(playerName)
-	return self.isOnline[playerName];
+	return self.playerTree[playerName];
 end
 
 --------------------------------------------------------------------------------
@@ -405,13 +378,13 @@ function GuildAdsComm:_UpdateTree()
 	for i, playerName in ipairs(self.playerList) do
 		p = i>1 and bit.rshift(i, 1);
 		c = bit.lshift(i, 1);
-		if type(self.isOnline[playerName]) == "table" then
-			self.isOnline[playerName].i = i;
-			self.isOnline[playerName].p = self.playerList[p];
-			self.isOnline[playerName].c1 = self.playerList[c];
-			self.isOnline[playerName].c2 = self.playerList[c+1];
+		if type(self.playerTree[playerName]) == "table" then
+			self.playerTree[playerName].i = i;
+			self.playerTree[playerName].p = self.playerList[p];
+			self.playerTree[playerName].c1 = self.playerList[c];
+			self.playerTree[playerName].c2 = self.playerList[c+1];
 		else
-			self.isOnline[playerName] = { 
+			self.playerTree[playerName] = { 
 				i=i, 
 				p=self.playerList[p], 
 				c1=self.playerList[c], 
@@ -428,7 +401,7 @@ end
 --------------------------------------------------------------------------------
 function GuildAdsComm:SetOnlineStatus(playerName, status)
 	if status then
-		if (not self.isOnline[playerName]) then
+		if (not self.playerTree[playerName]) then
 			table.insert(self.playerList, playerName);
 			self:_UpdateTree();
 			if self.hasJoined[playerName] then
@@ -438,8 +411,8 @@ function GuildAdsComm:SetOnlineStatus(playerName, status)
 			GuildAdsPlugin_OnEvent(GAS_EVENT_ONLINE, playerName, true);
 		end
 	else
-		if (self.isOnline[playerName]) then
-			self.isOnline[playerName] = nil;
+		if (self.playerTree[playerName]) then
+			self.playerTree[playerName] = nil;
 			local f = function(i, p) 
 				if p==playerName then 
 					return i 
@@ -453,58 +426,69 @@ function GuildAdsComm:SetOnlineStatus(playerName, status)
 	end
 end
 
+--------------------------------------------------------------------------------
+--
+-- Send outbound messages
+-- 
+--------------------------------------------------------------------------------
 function GuildAdsComm:SendMeta(toPlayerName)
 	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendMeta");
-	SimpleComm_SendRawMessage(toPlayerName, GUILDADS_MSG_PREFIX.."M>"..GUILDADS_VERSION..">"..self.startTime..">"..self.state..">");
+	SimpleComm_SendMessage(toPlayerName, GUILDADS_MSG_PREFIX.."M>"..GUILDADS_VERSION..">"..self.startTime..">");
 end
 
 function GuildAdsComm:SendChatFlag()
 	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendChatFlag");
 	local flag, message = SimpleComm_GetFlag(GuildAds.playerName);
-	SimpleComm_SendRawMessage(nil, GUILDADS_MSG_PREFIX.."CF>"..(flag or "")..">"..(message or "")..">");
+	SimpleComm_SendMessage(nil, GUILDADS_MSG_PREFIX.."CF>"..(flag or "")..">"..(message or "")..">");
 end
 
 function GuildAdsComm:SendSearch(dataType, playerName)
 	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendSearch("..dataType.metaInformations.name..","..playerName..")");
-	SimpleComm_SendRawMessage(nil, GUILDADS_MSG_PREFIX.."S>"..dataType.metaInformations.name..">"..playerName..">");
+	SimpleComm_SendMessage(nil, GUILDADS_MSG_PREFIX.."S>"..dataType.metaInformations.name..">"..playerName..">");
 end
 
 function GuildAdsComm:SendSearchResultToParent(parentPlayerName, dataType, playerName, who, revision, weight, worstRevision)
 	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendRevisionWhisper["..parentPlayerName.."]("..dataType.metaInformations.name..","..playerName..")");
-	SimpleComm_SendRawMessage(parentPlayerName, GUILDADS_MSG_PREFIX.."R>"..dataType.metaInformations.name..">"..playerName..">"..who..">"..revision..">"..weight..">"..worstRevision..">");
+	SimpleComm_SendMessage(parentPlayerName, GUILDADS_MSG_PREFIX.."R>"..dataType.metaInformations.name..">"..playerName..">"..who..">"..revision..">"..weight..">"..worstRevision..">");
 end
 
 function GuildAdsComm:SendSearchResult(dataType, playerName, who, revision, worstRevision)
 	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendSearchResult("..dataType.metaInformations.name..","..playerName..")");
-	SimpleComm_SendRawMessage(nil, GUILDADS_MSG_PREFIX.."SR>"..dataType.metaInformations.name..">"..playerName..">"..who..">"..revision..">"..worstRevision..">");
+	SimpleComm_SendMessage(nil, GUILDADS_MSG_PREFIX.."SR>"..dataType.metaInformations.name..">"..playerName..">"..who..">"..revision..">"..worstRevision..">");
 end
 
 function GuildAdsComm:SendOpenTransaction(dataType, playerName, fromRevision, toRevision)
 	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendOpenTransaction("..dataType.metaInformations.name..","..playerName..")");
-	SimpleComm_SendRawMessage(nil, GUILDADS_MSG_PREFIX.."OT>"..dataType.metaInformations.name..">"..playerName..">"..fromRevision..">"..toRevision..">");
+	SimpleComm_SendMessage(nil, GUILDADS_MSG_PREFIX.."OT>"..dataType.metaInformations.name..">"..playerName..">"..fromRevision..">"..toRevision..">");
 end
 
 function GuildAdsComm:SendRevision(dataType, playerName, revision, id, data)
 	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendNewRevision("..dataType.metaInformations.name..","..playerName..","..tostring(id)..")");
-	SimpleComm_SendRawMessage(nil, GUILDADS_MSG_PREFIX.."N>"..revision..">"..GuildAdsCodecs[dataType.schema.id].encode(id)..">"..GuildAdsCodecs[dataType.metaInformations.name.."Data"].encode(data)..">");
+	SimpleComm_SendMessage(nil, GUILDADS_MSG_PREFIX.."N>"..revision..">"..GuildAdsCodecs[dataType.schema.id].encode(id)..">"..GuildAdsCodecs[dataType.metaInformations.name.."Data"].encode(data)..">");
 end
 
 function GuildAdsComm:SendKeys(dataType, playerName, keys)
 	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendKeys("..dataType.metaInformations.name..","..playerName..")");
-	SimpleComm_SendRawMessage(nil, GUILDADS_MSG_PREFIX.."K>"..GuildAdsCodecs[dataType.metaInformations.name.."Keys"].encode(keys)..">");
+	SimpleComm_SendMessage(nil, GUILDADS_MSG_PREFIX.."K>"..GuildAdsCodecs[dataType.metaInformations.name.."Keys"].encode(keys)..">");
 end
 
 function GuildAdsComm:SendOldRevision(dataType, playerName, revisions)
 	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendOldRevision("..dataType.metaInformations.name..","..playerName..")");
-	SimpleComm_SendRawMessage(nil, GUILDADS_MSG_PREFIX.."O>"..table.concat(revisions, "/")..">");
+	SimpleComm_SendMessage(nil, GUILDADS_MSG_PREFIX.."O>"..table.concat(revisions, "/")..">");
 end
 
 function GuildAdsComm:SendCloseTransaction(dataType, playerName)
 	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendCloseTransaction("..dataType.metaInformations.name..","..playerName..")");
-	SimpleComm_SendRawMessage(nil, GUILDADS_MSG_PREFIX.."CT>");
+	SimpleComm_SendMessage(nil, GUILDADS_MSG_PREFIX.."CT>");
 end
 
-function GuildAdsComm.OnMessage(playerName, message, channel)
+--------------------------------------------------------------------------------
+--
+-- Parse inbound messages
+-- 
+--------------------------------------------------------------------------------
+function GuildAdsComm.OnMessage(playerName, text, channel)
+	local message = GuildAdsComm:Unserialize(text);
 	-- ignore update from myself
  	if playerName ~= GuildAds.playerName or not GuildAdsComm.IGNOREMYMESSAGE[message.command] then
 		GuildAdsComm:ParseMessage(playerName, message, channel)
@@ -520,16 +504,18 @@ function GuildAdsComm:ParseMessage(playerName, message, channelName)
 	local DTS = self.DTS[message.dataTypeName];
 	if message.command == "M" then
 		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "ReceiveMeta("..playerName..")");
-		self.playerInfo[playerName] = {
-			state = message.state;
+		self.playerMeta[playerName] = {
 			onlineSince = message.onlineSince;
 			version = message.version
 		}
 		self:SetOnlineStatus(playerName, true);
 		if channelName then
-			self:SendMeta(playerName);
-			
-			local delay = self.isOnline[GuildAds.playerName].i*10+20;
+			-- someone has joined, and he is building the player tree : stop search/update during this period
+			self:Standby(10);
+			-- send my information
+			GuildAdsTask:AddNamedSchedule("SendMeta", random(8), nil, nil, self.SendMeta, self, playerName);
+			-- send my search about my data
+			local delay = self.playerTree[GuildAds.playerName].i*10+20;
 			GuildAdsTask:AddNamedSchedule("SendSearchAboutMyData", delay, nil, nil, self.SendSearchAboutMyData, self);
 		end
 		GuildAdsDB.channel[GuildAds.channelName]:addPlayer(playerName);
@@ -546,11 +532,10 @@ function GuildAdsComm:ParseMessage(playerName, message, channelName)
 		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "ReceiveSearchResult("..tostring(DTS)..","..message.playerName..")="..message.who.."("..message.fromRevision.."->"..message.toRevision..")");
 		-- add an expected transaction
 		if (message.who ~= GuildAds.playerName) and (message.fromRevision<message.toRevision) then
-			tinsert(self.expectedTransactions, {	-- TODO : solve the deadlock problem 
-				t = 40,
-				p = message.playerName,
-				dtn = message.dataTypeName,
-			});
+			-- TODO : solve the deadlock problem : 
+			-- two search result, one say me to send an update, another say John will send an update
+			-- me and John are waiting each others.
+			self:Standby(30);	
 		end
 		-- parse message
 		DTS:ReceiveSearchResult(message.playerName, message.who, message.fromRevision, message.toRevision)
@@ -559,12 +544,6 @@ function GuildAdsComm:ParseMessage(playerName, message, channelName)
 			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "|cffff1e00Duplicate|r OPEN TRANSACTION from "..playerName.." (already open)");
 		end
 		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"ReceiveOpenTransaction("..tostring(DTS)..","..message.playerName..","..message.fromRevision..")");
-		-- update self.expectedTransactions
-		for k, v in self.expectedTransactions do
-			if (v.p == message.playerName) and (v.dtn == message.dataTypeName) then
-				table.remove(self.expectedTransactions, k);
-			end
-		end
 		-- update self.updateQueue
 		self:DeleteDuplicateUpdate(DTS, message.playerName, message.fromRevision, message.toRevision)
 		-- add transaction
@@ -624,11 +603,21 @@ function GuildAdsComm:ParseMessage(playerName, message, channelName)
 	end
 end
 
+--------------------------------------------------------------------------------
+--
+-- When database is updated
+-- 
+--------------------------------------------------------------------------------
 function GuildAdsComm:OnDBUpdate(dataType, playerName, id)
 	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"[GuildAdsComm:OnDBUpdate]"..dataType.metaInformations.name..","..playerName);
 	self:QueueSearch(self.DTS[dataType.metaInformations.name], playerName);
 end
 
+--------------------------------------------------------------------------------
+--
+-- About search/update queues
+-- 
+--------------------------------------------------------------------------------
 function GuildAdsComm:DeleteDuplicateUpdate(DTS, playerName, fromRevision, toRevision)
 	local i = 1;
 	while self.updateQueue[i] do
@@ -689,9 +678,25 @@ function GuildAdsComm:QueueSearch(DTS, playerName)
 	end
 end
 
+function GuildAdsComm:Standby(delay)
+	if delay>(self.standbyDelay or 0) then
+		self.standbyDelay = delay - (self.standbyDelay or 0) 
+	end
+end
+
 function GuildAdsComm:ProcessQueues(elapsed)
 	if elapsed>0.75 then
 		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"|cffff1e00Lag !!!|r");
+	end
+	
+	-- Standby (expected transaction, someone has joined the channel etc)
+	if self.standbyDelay then
+		self.standbyDelay = self.standbyDelay - elapsed;
+		if self.standbyDelay<0 then
+			self.standbyDelay = nil
+		else
+			return;
+		end
 	end
 	
 	-- Is there some opened transactions ?
@@ -704,21 +709,6 @@ function GuildAdsComm:ProcessQueues(elapsed)
 			if v.lmt+20<t then
 				self.transactions[k] = nil;
 				GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"|cffff1e00Timeout|r opened transaction from "..k);
-			end
-		end
-		
-		-- don't flood the channel with my update/search
-		return;
-	end
-	
-	-- Is there some expected transactions ?
-	if next(self.expectedTransactions) then
-		-- timeout about expected transactions
-		for k, v in self.expectedTransactions do
-			v.t = v.t - elapsed;
-			if v.t<=0 then
-				GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"|cffff1e00Timeout|r expected transaction : "..tostring(v.p)..","..tostring(v.dtn));
-				table.remove(self.expectedTransactions, k);
 			end
 		end
 		
