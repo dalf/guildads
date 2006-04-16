@@ -51,7 +51,12 @@ end
 
 function GuildAdsUITools:AddChatMessage(message)
 	local info = ChatTypeInfo["CHANNEL"..GetChannelName( SimpleComm_Channel )];
-	SimpleComm_ChatFrame:AddMessage(message, info.r, info.g, info.b);
+	SimpleComm_ChatFrame:AddMessage(message, info.r, info.g, info.b, info.id);
+end
+
+function GuildAdsUITools:AddSystemMessage(message)
+	local info = ChatTypeInfo["SYSTEM"];
+	SimpleComm_ChatFrame:AddMessage(message, info.r, info.g, info.b, info.id);
 end
 
 function GuildAdsUITools:HexaToRGBColor(hexaColor)
