@@ -599,22 +599,25 @@ GuildAdsGuild = {
 						for currentplayer = 1,numAllGuildMembers do
 							local name, rank, rankIndex, level, class, zone, note, officernote, online, status = GetGuildRosterInfo(currentplayer);
 							
-							if name and GuildAdsDB.profile.Main:getRevision(name)==0 then
-								-- update profile only it doesn't exist
-								GuildAdsDB.profile.Main:setRaw(name, GuildAdsDB.profile.Main.Guild, guildName);
-								GuildAdsDB.profile.Main:setRaw(name, GuildAdsDB.profile.Main.Class, GuildAdsDB.profile.Main:getClassIdFromName(class));
-								GuildAdsDB.profile.Main:setRaw(name, GuildAdsDB.profile.Main.GuildRank, rank);
-								GuildAdsDB.profile.Main:setRaw(name, GuildAdsDB.profile.Main.GuildRankIndex, rankIndex);
-								GuildAdsDB.profile.Main:setRaw(name, GuildAdsDB.profile.Main.Level, level);
-							end
+							if name then
+								if GuildAdsDB.profile.Main:getRevision(name)==0 then
+									-- update profile only it doesn't exist
+									GuildAdsDB.profile.Main:setRaw(name, GuildAdsDB.profile.Main.Guild, guildName);
+									GuildAdsDB.profile.Main:setRaw(name, GuildAdsDB.profile.Main.Class, GuildAdsDB.profile.Main:getClassIdFromName(class));
+									GuildAdsDB.profile.Main:setRaw(name, GuildAdsDB.profile.Main.GuildRank, rank);
+									GuildAdsDB.profile.Main:setRaw(name, GuildAdsDB.profile.Main.GuildRankIndex, rankIndex);
+									GuildAdsDB.profile.Main:setRaw(name, GuildAdsDB.profile.Main.Level, level);
+								end
 							
-							if name and not players[name] then
+								if not players[name] then
+									tinsert(workingTable, name);
+								end
+								
 								if online then
 									GuildAdsGuild.onlineCache[name] = true;
 								else
 									GuildAdsGuild.onlineCache[name] = false;
 								end
-								tinsert(workingTable, name);
 							end
 						end
 					end
