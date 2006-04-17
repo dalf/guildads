@@ -622,9 +622,9 @@ function SimpleComm_SendMessage(who, text, delay)
 				text = string.sub(text, 240);
 				-- add a packet
 				SimpleComm_messageQueueLast.next = {
-					to = packet.who;
+					to = who;
 					text = SimpleComm_SplitSerialize(packetNumber, text=="", tmp);
-					delay = packet.delay;
+					delay = delay;
 				};
 				SimpleComm_messageQueueLast = SimpleComm_messageQueueLast.next;
 				-- next packet
