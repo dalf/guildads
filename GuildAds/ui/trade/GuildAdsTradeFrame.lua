@@ -48,7 +48,9 @@ GuildAdsTrade = {
 	
 	TAB_REQUEST = 1;
 	TAB_AVAILABLE = 2;
-	TAB_MY_ADS = 3;
+	TAB_CRAFTABLE = 3;
+	
+	TAB_MY_ADS = 4;
 	
 	GUILDADS_NUM_GLOBAL_AD_BUTTONS = 20;
 	GUILDADS_ADBUTTONSIZEY = 22;
@@ -83,6 +85,7 @@ GuildAdsTrade = {
 	TabToAdType = {
 		[1] = GUILDADS_MSG_TYPE_REQUEST;
 		[2] = GUILDADS_MSG_TYPE_AVAILABLE;
+		[3] = 3;
 	};
 	g_sortBySubType = true;
 	
@@ -145,7 +148,8 @@ GuildAdsTrade = {
 		PanelTemplates_SelectTab(GuildAds_MyTab1);
 		PanelTemplates_DeselectTab(GuildAds_MyTab2);
 		PanelTemplates_DeselectTab(GuildAds_MyTab3);
-	
+		PanelTemplates_DeselectTab(GuildAds_MyTab4);
+		
 		GuildListAdMyAdsFrame:Hide();
 		GuildListAdExchangeListFrame:Show();
 		GuildAdsTradeFilterFrame:Show();
@@ -411,7 +415,7 @@ GuildAdsTrade = {
 			PanelTemplates_SelectTab(GuildAds_MyTab1);
 			PanelTemplates_DeselectTab(GuildAds_MyTab2);
 			PanelTemplates_DeselectTab(GuildAds_MyTab3);
-		
+			PanelTemplates_DeselectTab(GuildAds_MyTab4);
 			GuildListAdMyAdsFrame:Hide();
 			GuildListAdExchangeListFrame:Show();
 			GuildAdsTradeFilterFrame:Show();
@@ -428,7 +432,23 @@ GuildAdsTrade = {
 			PanelTemplates_SelectTab(GuildAds_MyTab2);
 			PanelTemplates_DeselectTab(GuildAds_MyTab1);
 			PanelTemplates_DeselectTab(GuildAds_MyTab3);
-
+			PanelTemplates_DeselectTab(GuildAds_MyTab4);
+			GuildListAdMyAdsFrame:Hide();
+			GuildListAdExchangeListFrame:Show();
+			GuildAdsTradeFilterFrame:Show();
+			if (ReagentData) then
+				GuildAds_Filter_ZoneDropDown:Show();
+			else 
+				GuildAds_Filter_ZoneDropDown:Hide();
+			end
+			
+			GuildAdsTrade.exchangeButtonsUpdate(tab,true);
+		elseif (tab == GuildAdsTrade.TAB_CRAFTABLE) then 
+			GuildAdsTrade.debug("craftable");
+			PanelTemplates_SelectTab(GuildAds_MyTab3);
+			PanelTemplates_DeselectTab(GuildAds_MyTab1);
+			PanelTemplates_DeselectTab(GuildAds_MyTab2);
+			PanelTemplates_DeselectTab(GuildAds_MyTab4);
 			GuildListAdMyAdsFrame:Hide();
 			GuildListAdExchangeListFrame:Show();
 			GuildAdsTradeFilterFrame:Show();
@@ -442,10 +462,10 @@ GuildAdsTrade = {
 
 		elseif (tab == GuildAdsTrade.TAB_MY_ADS) then
 			GuildAdsTrade.debug("my");
-			PanelTemplates_SelectTab(GuildAds_MyTab3);
+			PanelTemplates_SelectTab(GuildAds_MyTab4);
 			PanelTemplates_DeselectTab(GuildAds_MyTab1);
 			PanelTemplates_DeselectTab(GuildAds_MyTab2);
-			
+			PanelTemplates_DeselectTab(GuildAds_MyTab3);
 			GuildListAdExchangeListFrame:Hide();
 			GuildAdsTradeFilterFrame:Hide();
 			getglobal("GuildAds_Filter_ZoneDropDown"):Hide();
@@ -555,7 +575,8 @@ GuildAdsTrade = {
 		GuildAdsTrade.debug("updateCurrentTab");
 		if GuildAdsTradeFrame and GuildAdsTradeFrame.IsVisible and GuildAdsTradeFrame:IsVisible() then
 			if (GuildAdsTrade.currentTab == GuildAdsTrade.TAB_REQUEST or 
-				GuildAdsTrade.currentTab == GuildAdsTrade.TAB_AVAILABLE) then
+				GuildAdsTrade.currentTab == GuildAdsTrade.TAB_AVAILABLE or
+				GuildAdsTrade.currentTab == GuildAdsTrade.TAB_CRAFTABLE ) then
 				GuildAdsTrade.exchangeButtonsUpdate(GuildAdsTrade.currentTab);
 			else 
 				GuildAdsTrade.myAds.updateMyAdsFrame();
@@ -885,6 +906,8 @@ GuildAdsTrade = {
 					datatype = GuildAdsDB.channel[GuildAds.channelName].TradeNeed;
 				elseif tab == GuildAdsTrade.TAB_AVAILABLE then
 					datatype = GuildAdsDB.channel[GuildAds.channelName].TradeOffer;
+				elseif tab == GuildAdsTrade.TAB_CRAFTABLE then
+					datatype = GuildAdsDB.profile.TradeSkill;
 				else
 					error("bad tab for GuildAdsTrade.data.get("..tostring(tab)..")", 3);
 				end

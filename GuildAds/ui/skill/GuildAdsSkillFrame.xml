@@ -277,7 +277,7 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 					<Button name="GuildAdsProfessionButton17" inherits="GuildAdsProfessionTemplate" id="17"/>
 					<Button name="GuildAdsProfessionButton18" inherits="GuildAdsProfessionTemplate" id="18"/>
 					
-					
+					<!--
 					<Button name="GuildAdsSkillAdToggleButton">
 						<Size>
 							<AbsDimension x="32" y="32"/>
@@ -312,7 +312,7 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 							<AbsDimension x="0" y="0"/>
 						</PushedTextOffset>
 					</Button>
-					
+					-->
 					
 					
 					<Button name="GuildAdsSkillAdButton1" inherits="GuildAdsSkillAdButtonTemplate" id="1">

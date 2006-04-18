@@ -452,9 +452,23 @@
 					</OnClick>
 				</Scripts>
 			</Button>
-			<Button name="GuildAds_MyTab3" inherits="TabButtonTemplate" text="GUILDADS_MYADS" id="3" hidden="false">
+			<Button name="GuildAds_MyTab3" inherits="TabButtonTemplate" text="--PROFESSIOn" id="3" hidden="false">
 				<Anchors>
 					<Anchor point="LEFT" relativeTo="GuildAds_MyTab2" relativePoint="RIGHT">
+						<Offset>
+							<AbsDimension x="0" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						GuildAdsTrade.selectTab(GuildAdsTrade.TAB_CRAFTABLE);
+					</OnClick>
+				</Scripts>
+			</Button>
+			<Button name="GuildAds_MyTab4" inherits="TabButtonTemplate" text="GUILDADS_MYADS" id="4" hidden="false">
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="GuildAds_MyTab3" relativePoint="RIGHT">
 						<Offset>
 							<AbsDimension x="0" y="0"/>
 						</Offset>

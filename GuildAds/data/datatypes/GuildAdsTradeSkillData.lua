@@ -74,6 +74,9 @@ function GuildAdsTradeSkillDataType:onUpdate()
 end
 
 function GuildAdsTradeSkillDataType:getTableForPlayer(author)
+	if not author then
+		error("author is nil", 2);
+	end
 	return self.profile:getRaw(author).craft;
 end
 
@@ -100,6 +103,11 @@ function GuildAdsTradeSkillDataType:setRaw(author, id, info, revision)
 		return true;
 	end;
 end
+-- patch 
+
+
+
+
 
 function GuildAdsTradeSkillDataType:set(author, id, info)
 	local craft = self.profile:getRaw(author).craft;

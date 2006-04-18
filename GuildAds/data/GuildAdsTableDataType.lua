@@ -31,9 +31,49 @@ GuildAdsTableDataType.iteratorId = function(state, id)
 		end
 	end
 end
+
+function GuildAdsTableDataType:nextId(playerName, id)
+	local id, data = next(self:getTableForPlayer(playerName), id)
+	if id~="_u" then
+		return id, data;
+	end
+	return next(self:getTableForPlayer(playerName), id);
+end
 	
-GuildAdsTableDataType.iteratorAll = function(state, current)
-	error("GuildAdsTableDataType.iteratorAll not impletemented", 2);
+GuildAdsTableDataType.iteratorAll = function(self, current)
+local players;
+if self.channel then
+players = self.channel:getPlayers();
+else
+players = GuildAdsDB.channel[GuildAds.channelName]:getPlayers();
+end
+
+-- current[1] = playerName
+-- current[2] = id
+
+local data;
+
+-- first call : no playerName
+if not current[1] then
+current[1] = next(players);
+end
+
+-- next id
+current[2], data = self:nextId(current[1], current[2])
+
+if not current[2] then
+-- end of table for this player current[1], so try the next player
+current[1] = next(players, current[1]);
+if current[1] then
+-- there is one : get this first id
+current[2], data = nextId(current[1], current[2]);
+end
+end;
+
+-- if there is a playerName and an Id
+if current[2] and current[1] then
+return current, current[2], current[1], data, data._u;
+end
 end
 
 function GuildAdsTableDataType:getTableForPlayer(author)

@@ -189,12 +189,26 @@ GuildAdsSkill = {
 			if not GuildAdsSkill.tradedata.cache or updateData then
 				GuildAdsSkill.debug("reset cache");
 				local between;
-				
+--~ 				GuildAdsDB.profile.dataType;
 				GuildAdsSkill.tradedata.cache = {};
-				for playerName, _, data in GuildAdsTradeSkillDataType:iterator(nil, id) do
+				
+				for id, name in pairs(GUILDADS_SKILLS) do
+					if between then
+						tinsert(GuildAdsSkill.tradedata.cache, {i=id} );
+						between = nil;
+					end
+					if GuildAdsSkill.getProfileValue("Filters", id) then
+						-- for each player
+						GuildAdsSkill.debug("current Filter"..id);
+						for playerName, _, data in GuildAdsDB.profile.TradeSkill:iterator(nil,id) do
 							tinsert(GuildAdsSkill.tradedata.cache, {i=id, p=playerName});
 							between = true;
+						end
+					end
 				end
+				
+				
+				
 				-- for each skill
 --~ 				for id, name in pairs(GUILDADS_SKILLS) do
 --~ 					GuildAdsSkill.debug("salut");
@@ -634,13 +648,13 @@ function GuildAdsSkillFrame_SelectTab(tab)
 		PanelTemplates_DeselectTab(GuildAds_MySkillTab2);
 		PrepareProfessionTab();
 		GuildListAdProfessionListFrame:Show();
-		GuildAdsSkillAdToggleButton:Show();
+--~ 		GuildAdsSkillAdToggleButton:Show();
 	elseif (tab == GUILDADSSKILL_TAB_SKILL) then 
 		PanelTemplates_SelectTab(GuildAds_MySkillTab2);
 		PanelTemplates_DeselectTab(GuildAds_MySkillTab1);
 		PrepareSkillTab();
 		GuildListAdProfessionListFrame:Show();
-		GuildAdsSkillAdToggleButton:Hide();
+--~ 		GuildAdsSkillAdToggleButton:Hide();
 	
 	end
 	g_GlobalAdSelected = 0;
