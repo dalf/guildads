@@ -37,10 +37,23 @@ function GuildAdsDTS:__tostring()
 	return self.dataType.metaInformations.name;
 end
 
+function GuildAdsDTS:predicate(other)
+	local a = self.dataType.metaInformations.priority;
+	if a then
+		local b = other.dataType.metaInformations.priority or a+1;
+		return a<b;
+	end
+	return other.dataType.metaInformations.priority and true or false;
+end
+
+function GuildAdsDTS:__lt(other)
+	return self:predicate(other);
+end
+
 
 --------------------------------------------------------------------------------
 --
--- Return the weight on this player (higher = better to send update)
+-- Return the weight on this player (higher = better to send transaction)
 -- 
 --------------------------------------------------------------------------------
 function GuildAdsDTS:GetWeight()
@@ -49,8 +62,21 @@ function GuildAdsDTS:GetWeight()
 	return math.floor(fps*(1000-lag));
 end
 
+--------------------------------------------------------------------------------
+--
+-- About search the higher/lower revision for a (self.datatype, playerName)
+-- 
+--------------------------------------------------------------------------------
+
+function GuildAdsDTS:RestartAllSearches()
+	for playerName in pairs(self.search) do
+		self.search[playerName] = nil;
+		GuildAdsComm:QueueSearch(self, playerName);
+	end
+end
+
 function GuildAdsDTS:SendSearch(playerName)
-	-- envoyer la demande de recherche sur le canal (playerName)
+	-- send search to everyone
 	GuildAdsComm:SendSearch(self.dataType, playerName);
 end
 
@@ -128,60 +154,74 @@ function GuildAdsDTS:ReceiveSearchResult(playerName, who, fromRevision, toRevisi
 	if self.search[playerName] then
 		
 		if (GuildAds.playerName==who) and (fromRevision<toRevision) then
-			GuildAdsComm:QueueUpdate(self, playerName, fromRevision, self.dataType:getRevision(playerName));
+			GuildAdsComm:QueueTransaction(self, playerName, fromRevision, self.dataType:getRevision(playerName));
 		end
 		
 		self.search[playerName] = nil;
 	end
 end
 
-function GuildAdsDTS:SendUpdate(playerName, fromRevision)
+--------------------------------------------------------------------------------
+--
+-- send a transaction
+-- 
+--------------------------------------------------------------------------------
+
+function GuildAdsDTS:SendTransaction(playerName, fromRevision)
 	-- send open transaction
 	GuildAdsComm:SendOpenTransaction(self.dataType, playerName, fromRevision, self.dataType:getRevision(playerName));
 	
 	if self.dataType.schema.data then
 		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"data");
-		self:SendUpdateData(playerName, fromRevision);
+		self:SendTransactionData(playerName, fromRevision);
 	elseif self.dataType.schema.keys then
 		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"keys");
-		self:SendUpdateKeys(playerName, fromRevision);
+		self:SendTransactionKeys(playerName, fromRevision);
 	end
 
 	-- send close transaction with the current revision number
 	GuildAdsComm:SendCloseTransaction(self.dataType, playerName);
 end
 
-function GuildAdsDTS:SendUpdateData(playerName, fromRevision)
+function GuildAdsDTS:SendTransactionData(playerName, fromRevision)
 	local currentRevision = self.dataType:getRevision(playerName);
 	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"currentRevision="..currentRevision);
 	local t = {};
 	local newEntries = 0;
 	-- send new entries >r1
 	for id, _, data, revision in self.dataType:iterator(playerName) do
-		if (revision>fromRevision) then
-			newEntries = newEntries + 1;
-			-- send this revision
-			GuildAdsComm:SendRevision(self.dataType, playerName, revision, id, data);
-		else
-			table.insert(t, revision);
+		-- revision<=currentRevision : if an transaction wasn't closed, player can have higher revisions than currentRevision
+		if (revision<=currentRevision) then
+			-- revision>fromRevision : new revision fromRevision
+			if (revision>fromRevision)  then
+				newEntries = newEntries + 1;
+				-- send this revision
+				GuildAdsComm:SendRevision(self.dataType, playerName, revision, id, data);
+			else
+				table.insert(t, revision);
+			end
 		end
 	end
 
 	if currentRevision-fromRevision~=newEntries then
 		-- idealement : 1-10, 12-15, 17-30 au lieu de la liste complete
-		table.sort(t);
 		GuildAdsComm:SendOldRevision(self.dataType, playerName, t)
 	end
 end
 
-function GuildAdsDTS:SendUpdateKeys(playerName, fromRevision)
-	-- TODO : stupide : recopie de la table deja en mémoire
+function GuildAdsDTS:SendTransactionKeys(playerName, fromRevision)
 	keys = {};
 	for id, _, data in self.dataType:iterator(playerName) do
 		keys[id] = data;
 	end
 	GuildAdsComm:SendKeys(self.dataType, playerName, keys)
 end
+
+--------------------------------------------------------------------------------
+--
+-- receive a transaction
+-- 
+--------------------------------------------------------------------------------
 
 function GuildAdsDTS:ReceiveOpenTransaction(transaction, playerName, fromRevision, toRevision)
 	if self.dataType:getRevision(playerName)<toRevision then
@@ -198,6 +238,9 @@ end
 function GuildAdsDTS:ReceiveNewRevision(transaction, revision, id, data)
 	if transaction._valid then
 		self.dataType:setRaw(transaction.playerName, id, data, revision);
+		if revision>transaction.toRevision then
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "|cffff1e00Invalid new revision|r "..tostring(revision).." >"..tostring(transaction.toRevision));
+		end
 	end
 end
 
