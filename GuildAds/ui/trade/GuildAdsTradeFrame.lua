@@ -888,14 +888,15 @@ GuildAdsTrade = {
 				return false;
 			end
 				
-			if GuildAdsTrade.filterClass.selectedSubclass and HIGHLIGHT_FONT_COLOR_CODE..info.subtype..FONT_COLOR_CODE_CLOSE ~= GuildAdsTrade.filterClass.selectedSubclass then
-				return false;
+			if GuildAdsTrade.filterClass.selectedSubclass then
+				GuildAdsTrade.debug("slot="..info.subtype..GuildAdsTrade.filterClass.selectedSubclass);	
+				if HIGHLIGHT_FONT_COLOR_CODE..info.subtype..FONT_COLOR_CODE_CLOSE ~= GuildAdsTrade.filterClass.selectedSubclass then
+					return false;
+				end
 			end
 					
-			-- TODO : bug here
 			if GuildAdsTrade.filterClass.selectedInvtype then
-				GuildAdsTrade.debug("slot="..tostring(HIGHLIGHT_FONT_COLOR_CODE..info.slot..FONT_COLOR_CODE_CLOSE).."//"..tostring(GuildAdsTrade.filterClass.selectedInvtype));
-				if HIGHLIGHT_FONT_COLOR_CODE..info.slot..FONT_COLOR_CODE_CLOSE ~= GuildAdsTrade.filterClass.selectedInvtype then
+				if (HIGHLIGHT_FONT_COLOR_CODE..info.slot..FONT_COLOR_CODE_CLOSE ~= GuildAdsTrade.filterClass.selectedInvtype) then
 					return false;
 				end
 			end
@@ -929,9 +930,28 @@ GuildAdsTrade = {
 					error("bad tab for GuildAdsTrade.data.get("..tostring(tab)..")", 3);
 				end
 				GuildAdsTrade.data.cache[tab] = {};
-				for _, item, playerName, data in datatype:iterator() do
-					if GuildAdsTrade.data.adIsVisible(adtype, playerName, item, data) then
-						tinsert(GuildAdsTrade.data.cache[tab], { i=item, p=playerName, d=data, t=adtype });
+				if (tab == GuildAdsTrade.TAB_CRAFTABLE) then
+					local already=nil;
+					for _, item, playerName, data in datatype:iterator() do
+						for key,value in GuildAdsTrade.data.cache[tab] do
+							--GuildAdsTrade.debug("value"..GuildAdsTrade.data.cache[tab][key]["i"].." key ".. key);
+							if (GuildAdsTrade.data.cache[tab][key]["i"]==item) then 
+								already=true;
+								GuildAdsTrade.data.cache[tab][key]["p"]=GuildAdsTrade.data.cache[tab][key]["p"]..", "..playerName;
+							end
+						end
+						if (not already) then
+							if GuildAdsTrade.data.adIsVisible(adtype, playerName, item, data) then
+								tinsert(GuildAdsTrade.data.cache[tab], { i=item, p=playerName, d=data, t=adtype });
+							end
+						end
+						already=nil;
+					end
+				else
+					for _, item, playerName, data in datatype:iterator() do
+						if GuildAdsTrade.data.adIsVisible(adtype, playerName, item, data) then
+							tinsert(GuildAdsTrade.data.cache[tab], { i=item, p=playerName, d=data, t=adtype });
+						end
 					end
 				end
 				GuildAdsTrade.sortData.doIt(GuildAdsTrade.data.cache[adtype]);
@@ -1111,6 +1131,7 @@ GuildAdsTrade = {
 				
 			elseif ( this.type == "invtype" ) then
 				GuildAdsTrade.filterClass.selectedInvtype = this:GetText();
+				GuildAdsTrade.debug("ttt"..this:GetText());
 				GuildAdsTrade.filterClass.selectedInvtypeIndex = this.index;
 			end
 			GuildAdsTrade.filterClass.filterUpdate();
@@ -1152,9 +1173,9 @@ GuildAdsTrade = {
 					isLast = 1;
 				end
 				if ( GuildAdsTrade.filterClass.selectedInvtypeIndex and GuildAdsTrade.filterClass.selectedInvtypeIndex == i ) then
-					tinsert(GuildAdsTrade.filterClass.OPEN_FILTER_LIST, {invType, "invtype", i, 1, isLast});
+					tinsert(GuildAdsTrade.filterClass.OPEN_FILTER_LIST, {TEXT(getglobal(arg[i])), "invtype", i, 1, isLast});
 				else
-					tinsert(GuildAdsTrade.filterClass.OPEN_FILTER_LIST, {invType, "invtype", i, nil, isLast});
+					tinsert(GuildAdsTrade.filterClass.OPEN_FILTER_LIST, {TEXT(getglobal(arg[i])), "invtype", i, nil, isLast});
 				end
 			end
 		end;
@@ -1184,7 +1205,7 @@ GuildAdsTrade = {
 				normalTexture:SetAlpha(0.8);
 				line:Hide();
 			elseif ( type == "invtype" ) then
-				button:SetText(HIGHLIGHT_FONT_COLOR_CODE..text..FONT_COLOR_CODE_CLOSE);
+				button:SetText(HIGHLIGHT_FONT_COLOR_CODE..text..FONT_COLOR_CODE_CLOSE); 
 				normalText:SetPoint("LEFT", button:GetName(), "LEFT", 28, 0);
 				highlightText:SetPoint("LEFT", button:GetName(), "LEFT", 28, 0);
 				normalTexture:SetAlpha(0.8);	
