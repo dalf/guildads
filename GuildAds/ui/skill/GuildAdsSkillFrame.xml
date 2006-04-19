@@ -542,7 +542,7 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 							</OnVerticalScroll>
 						</Scripts>
 					</ScrollFrame>
-					<Button name="GuildAdsSkillRemoveButton" inherits="UIPanelButtonTemplate" text="--Deselect">
+					<Button name="GuildAdsSkillRemoveButton" inherits="UIPanelButtonTemplate" text="NONE">
 						<Size>
 							<AbsDimension x="100" y="21"/>
 						</Size>
@@ -559,14 +559,14 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 							</OnClick>
 						</Scripts>
 					</Button>
-					<Button name="GuildAdsAllButton" inherits="UIPanelButtonTemplate" text="--Select All">
+					<Button name="GuildAdsAllButton" inherits="UIPanelButtonTemplate" text="ALL">
 						<Size>
 							<AbsDimension x="100" y="21"/>
 						</Size>
 						<Anchors>
-							<Anchor point="TOPRIGHT" relativeTo="GuildAdsSkillRemoveButton" relativePoint="TOPRIGHT">
+							<Anchor point="TOPRIGHT" relativeTo="GuildAdsSkillRemoveButton" relativePoint="TOPLEFT">
 								<Offset>
-									<AbsDimension x="-150" y="0"/>
+									<AbsDimension x="-50" y="0"/>
 								</Offset>
 							</Anchor>
 						</Anchors>
