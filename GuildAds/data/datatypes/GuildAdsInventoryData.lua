@@ -15,7 +15,8 @@ GuildAdsInventoryDataType = GuildAdsTableDataType:new({
 		name = "Inventory",
 		version = 1,
         guildadsCompatible = 200,
-		parent = GuildAdsDataType.PROFILE
+		parent = GuildAdsDataType.PROFILE,
+		priority = 300
 	};
 	schema = {
 		id = "Integer";
@@ -80,6 +81,9 @@ function GuildAdsInventoryDataType:get(author, id)
 end
 
 function GuildAdsInventoryDataType:getRevision(author)
+	if not author then
+		error("author is nil", 2);
+	end
 	return self.profile:getRaw(author).inventory._u or 0;
 end
 

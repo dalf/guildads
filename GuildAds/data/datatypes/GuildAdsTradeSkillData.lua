@@ -13,7 +13,8 @@ GuildAdsTradeSkillDataType = GuildAdsTableDataType:new({
 		name = "TradeSkill",
 		version = 1,
         guildadsCompatible = 200,
-		parent = GuildAdsDataType.PROFILE
+		parent = GuildAdsDataType.PROFILE,
+		priority = 600
 	};
 	schema = {
 		id = "ItemRef",
@@ -26,7 +27,7 @@ GuildAdsTradeSkillDataType = GuildAdsTableDataType:new({
 function GuildAdsTradeSkillDataType:Initialize()
 	-- TODO : le cas "j'oublie une profession" n'est pas gérer
 	--[[
-		idée : enregistrer tous les professions associées
+		idée : enregistrer toutes les professions associées
 	]]
 	self:RegisterEvent("CRAFT_SHOW", "onUpdateSpecial");
 	self:RegisterEvent("CRAFT_UPDATE", "onUpdateSpecial");

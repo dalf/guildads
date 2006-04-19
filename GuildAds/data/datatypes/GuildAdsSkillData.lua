@@ -13,7 +13,8 @@ GuildAdsSkillDataType = GuildAdsTableDataType:new({
 		name = "Skill",
 		version = 1,
         guildadsCompatible = 200,
-		parent = GuildAdsDataType.PROFILE
+		parent = GuildAdsDataType.PROFILE,
+		priority = 300
 	};
 	schema = {
 		id = "Integer",

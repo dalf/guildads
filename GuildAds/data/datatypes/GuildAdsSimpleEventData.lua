@@ -13,7 +13,8 @@ GuildAdsSimpleEventDataType = GuildAdsTableDataType:new({
 		name = "SimpleEvent",
 		version = 1,
         guildadsCompatible = 200,
-		parent = GuildAdsDataType.CHANNEL
+		parent = GuildAdsDataType.CHANNEL,
+		priority = 1000
 	};
 	schema = {
 		id = "String",

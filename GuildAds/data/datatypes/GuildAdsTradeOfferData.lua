@@ -15,7 +15,8 @@ GuildAdsTradeOfferDataType = GuildAdsDataType:new({
 		name = "TradeOffer",
 		version = 1,
         guildadsCompatible = 200,
-		parent = GuildAdsDataType.CHANNEL
+		parent = GuildAdsDataType.CHANNEL,
+		priority = 500
 	};
 	schema = {
 		id = "ItemRef",
@@ -104,7 +105,6 @@ function GuildAdsTradeOfferDataType:set(author, id, info)
 		if self.db.items[id] and self.db.items[id].o and self.db.items[id].o[author] then
 			self.db.items[id].o[author] = nil;
 			-- TODO : if next(self.db.items[id].o) == nil then self.db.items[id].o = nil end
-			local revision = self:getRevision(author)+1;
 			self:setRevision(author, self:getRevision(author)+1);
 			self:triggerEvent(author, id);
 		end

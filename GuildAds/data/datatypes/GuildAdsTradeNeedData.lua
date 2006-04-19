@@ -13,7 +13,8 @@ GuildAdsTradeNeedDataType = GuildAdsDataType:new({
 		name = "TradeNeed",
 		version = 1,
         guildadsCompatible = 200,
-		parent = GuildAdsDataType.CHANNEL
+		parent = GuildAdsDataType.CHANNEL,
+		priority = 400
 	};
 	schema = {
 		id = "ItemRef",
@@ -100,7 +101,6 @@ function GuildAdsTradeNeedDataType:set(author, id, info)
 	else
 		if self.db.items[id] and self.db.items[id].n and self.db.items[id].n[author] then
 			self.db.items[id].n[author] = nil;
-			local revision = self:getRevision(author)+1;
 			self:setRevision(author, self:getRevision(author)+1);
 			self:triggerEvent(author, id);
 		end
