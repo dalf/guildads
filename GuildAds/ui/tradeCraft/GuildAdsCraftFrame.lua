@@ -67,14 +67,23 @@ GuildAdsCraftFrame = {
     end;
 	
 	askItem = function(item)
-		if item and item.name then
-			GuildAdsPlugin.addMyAd(GUILDADS_MSG_TYPE_REQUEST, "", item.color, item.ref, item.name, item.texture, item.count);
+		if item and item.ref then
+			local data = GuildAdsDB.channel[GuildAds.channelName].TradeNeed:get(GuildAds.playerName, item.ref);
+			if data then
+				data.q = data.q + item.count;
+			else
+				data = { q=item.count, _t=GuildAdsDB:GetCurrentTime() };
+			end
+			GuildAdsDB.channel[GuildAds.channelName].TradeNeed:set(GuildAds.playerName, item.ref, data);
 		end
 	end;
 	
 	onClickHave = function()
 		local item = this.value;
-		GuildAdsPlugin.addMyAd(GUILDADS_MSG_TYPE_AVAILABLE, item.text, item.color, item.ref, item.name, item.texture, item.count);
+		local data = GuildAdsDB.channel[GuildAds.channelName].TradeOffer:get(GuildAds.playerName, item.ref);
+		if not data then
+			GuildAdsDB.channel[GuildAds.channelName].TradeOffer:set(GuildAds.playerName, item.ref, { _t=GuildAdsDB:GetCurrentTime() });
+		end
 	end;
 	
 	onClickAskItem = function()
@@ -116,13 +125,10 @@ GuildAdsCraftFrame = {
 				local info = {
 					notCheckable = 1;
 					func = GuildAdsCraftFrame.onClickAskItem;
-					tooltipTitle = info.text;
 					tooltipText = GUILDADS_TS_ASKITEMS_TT;
 					value = {
-						color = itemColor; 
 						ref = itemRef;
-						name = itemName;
-						texture = reagentTexture;
+						count = reagentCount
 					}
 				};
 				if (count > 1) then
@@ -146,11 +152,8 @@ GuildAdsCraftFrame = {
 				notCheckable = 1;
 				func = GuildAdsCraftFrame.onClickHave;
 				value = { 
-					color=itemColor; 
-					ref=itemRef; 
-					name=itemName; 
-					count=count; 
-					texture=GetTradeSkillIcon(id)
+					ref=itemRef;
+					count=count;
 				};
 			};
 			UIDropDownMenu_AddButton(info, 1);
@@ -193,37 +196,27 @@ GuildAdsCraftFrame = {
 				
 				local info = {
 					value = { 
-						color = itemColor;
 						ref = itemRef;
-						name = itemName;
-						count = reagentCount; 
-						texture=reagentTexture 
+						count = reagentCount;
 					};
 					text = GUILDADS_BUTTON_ADDREQUEST.." "..reagentCount.." "..reagentName;
 					notCheckable = 1;
 					func = GuildAdsCraftFrame.onClickAskItem;
-					tooltipTitle = info.text;
 				};
 				
 				tinsert(composants, info.value);
 				tinsert(menu, info);
 			end
 			
-			---- Propose
-			---- GetCraftItemLink(id) ne marche pas : 
-			----    cas1: le link est invalide pour des objets comme "Cuir enchanté" ou "Baguettes" (...)
-			----    cas2: le link est nil pour des enchantements (...) 
+			
+			local link = GetCraftItemLink(id);
+			local itemColor, itemRef, itemName = GuildAds_ExplodeItemRef(link);
 			info = {
 				text = GUILDADS_BUTTON_ADDAVAILABLE.." "..craftName.." "..craftSubSpellName;
 				notCheckable = 1;
 				func = GuildAdsCraftFrame.onClickHave;
 				value = { 
-					color="ffffffff"; 
-					ref=nil;  -- GetCraftItemLink(id);
-					name=craftName; 
-					texture=GetCraftIcon(id); 
-					-- quelques enchants n'ont pas de description ("Thorium enchanté"...)
-					text=craftDesc
+					ref = itemRef
 				};
 			};
 			UIDropDownMenu_AddButton(info, 1);
