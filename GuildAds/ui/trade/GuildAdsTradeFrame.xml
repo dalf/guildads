@@ -452,7 +452,7 @@
 					</OnClick>
 				</Scripts>
 			</Button>
-			<Button name="GuildAds_MyTab3" inherits="TabButtonTemplate" text="--PROFESSIOn" id="3" hidden="false">
+			<Button name="GuildAds_MyTab3" inherits="TabButtonTemplate" text="TRADE_SKILLS" id="3" hidden="false">
 				<Anchors>
 					<Anchor point="LEFT" relativeTo="GuildAds_MyTab2" relativePoint="RIGHT">
 						<Offset>
