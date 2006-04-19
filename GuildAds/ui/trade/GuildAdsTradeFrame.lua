@@ -289,7 +289,24 @@ GuildAdsTrade = {
 			GuildAdsTrade.sortData.currentWay[sortValue]="normal";
 		end
 		GuildAdsTrade.sortAdsArrow(this,GuildAdsTrade.sortData.currentWay[sortValue]);
-		GuildAdsTrade.exchangeButtonsUpdate(GuildAdsTrade.currentTab,true);
+		if (GuildAdsTrade.currentTab == GuildAdsTrade.TAB_REQUEST or 
+			GuildAdsTrade.currentTab == GuildAdsTrade.TAB_AVAILABLE or 
+			GuildAdsTrade.currentTab == GuildAdsTrade.TAB_CRAFTABLE ) then
+			GuildAdsTrade.exchangeButtonsUpdate(GuildAdsTrade.currentTab,true);
+		else 
+			GuildAdsTrade.myAds.updateMyAdsFrame(true);
+		end
+	end;
+	
+	sortMyAdsTrade = function(sortValue)
+		GuildAdsTrade.sortData.current = sortValue;
+		if (GuildAdsTrade.sortData.currentWay[sortValue]=="normal") then 
+			GuildAdsTrade.sortData.currentWay[sortValue]="up";
+		else 
+			GuildAdsTrade.sortData.currentWay[sortValue]="normal";
+		end
+		GuildAdsTrade.sortAdsArrow(this,GuildAdsTrade.sortData.currentWay[sortValue]);
+		GuildAdsTrade.myAds.updateMyAdsFrame(true);
 	end;
 	
 	ItemFilter = {
@@ -1273,6 +1290,8 @@ GuildAdsTrade = {
 		for item, author, data in GuildAdsDB.channel[GuildAds.channelName].TradeOffer:iterator(GuildAds.playerName) do
 			table.insert(GuildAdsTrade.myAds.cache, {t=GUILDADS_MSG_TYPE_AVAILABLE, i=item, d=data});
 		end
+		
+		GuildAdsTrade.sortData.doIt(GuildAdsTrade.myAds.cache);
 		
 		local offset = FauxScrollFrame_GetOffset(GuildAdsMyAdScrollFrame);
 		local j;
