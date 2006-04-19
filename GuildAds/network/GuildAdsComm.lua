@@ -610,6 +610,8 @@ function GuildAdsComm:ParseMessage(playerName, message, channelName)
 		if playerName~=GuildAds.playerName then
 			self:Standby(self.delay.SearchDelay)
 		end
+		-- Add this player to the current channel
+		GuildAdsDB.channel[GuildAds.channelName]:addPlayer(message.playerName);
 	elseif message.command == "R" then
 		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "ReceiveRevision("..tostring(DTS)..","..message.playerName..")="..message.who.."("..message.worstRevision.."->"..message.revision..")");
 		DTS:ReceiveRevision(playerName, message.playerName, message.who, message.revision, message.weight, message.worstRevision)
