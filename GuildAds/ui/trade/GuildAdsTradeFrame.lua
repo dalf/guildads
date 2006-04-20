@@ -8,10 +8,6 @@
 -- Licence: GPL version 2 (General Public License)
 ----------------------------------------------------------------------------------
 
--- --  pour le menu contextuel dans "Echange"
--- flamentalexandre: j'ai proposition :
--- flamentalexandre: Sélectioner l'auteur dans l'onglet Guilde
--- flamentalexandre: Créer une annonce à partir de celle çi
 local g_AdFilters = {}; 
 
 GuildAdsTrade = {
@@ -43,8 +39,7 @@ GuildAdsTrade = {
 		24*60*30
 	};
 	
-	ADMAXLENGTH = 59;
-	MaxTradeColumnHeader = 6;
+--~ 	MaxTradeColumnHeader = 6;
 	
 	TAB_REQUEST = 1;
 	TAB_AVAILABLE = 2;
@@ -436,6 +431,7 @@ GuildAdsTrade = {
 			GuildListAdMyAdsFrame:Hide();
 			GuildListAdExchangeListFrame:Show();
 			GuildAdsTradeFilterFrame:Show();
+			GuildAds_DateFilter:Show();
 			if (ReagentData) then
 				GuildAds_Filter_ZoneDropDown:Show();
 			else 
@@ -453,6 +449,7 @@ GuildAdsTrade = {
 			GuildListAdMyAdsFrame:Hide();
 			GuildListAdExchangeListFrame:Show();
 			GuildAdsTradeFilterFrame:Show();
+			GuildAds_DateFilter:Show();
 			if (ReagentData) then
 				GuildAds_Filter_ZoneDropDown:Show();
 			else 
@@ -469,6 +466,7 @@ GuildAdsTrade = {
 			GuildListAdMyAdsFrame:Hide();
 			GuildListAdExchangeListFrame:Show();
 			GuildAdsTradeFilterFrame:Show();
+			GuildAds_DateFilter:Hide();
 			if (ReagentData) then
 				GuildAds_Filter_ZoneDropDown:Show();
 			else 
@@ -498,7 +496,7 @@ GuildAdsTrade = {
 	setSearch = function(text) 
 		GuildAdsTrade.searchText = text;
 		GuildAdsTrade.data.resetCache();
-		GuildAdsTrade.exchangeButtonsUpdate(GuildAdsTrade.currentAdType,true);
+		GuildAdsTrade.updateCurrentTab();
 	end;
 	
 	select = function(adType, playerName, item, quantity, comment)
@@ -622,6 +620,7 @@ GuildAdsTrade = {
 	};
 	
 	exchangeButton = {
+		t = {};
 	
 		onClick = function(button)
 			GuildAdsTrade.select(this.adType, this.playerName, this.item);
@@ -644,7 +643,7 @@ GuildAdsTrade = {
 			local textField = buttonName.."Text";
 			local countField = buttonName.."Count";
 			local sinceField =  buttonName.."Since";
-			local ownerColor = GuildAdsUITools.onlineColor[GuildAdsComm:IsOnLine(playerName)];
+			local ownerColor;
 			
 			local texture = buttonName.."ItemIconTexture";
 			if (GuildAdsTrade.administrator) then
@@ -659,7 +658,22 @@ GuildAdsTrade = {
 			end
 			
 			-- online/offline highlight
-			getglobal(ownerField):SetText(playerName);
+			if type(playerName)=="string" then
+				ownerColor = GuildAdsUITools.onlineColor[GuildAdsComm:IsOnLine(playerName)];
+				getglobal(ownerField):SetText(playerName);
+				
+			else
+				table.setn(GuildAdsTrade.exchangeButton.t, 0);
+				local online;
+				local atLeastOneOnline;
+				for _, name in playerName do
+					online = GuildAdsComm:IsOnLine(name);
+					atLeastOneOnline = atLeastOneOnline or online;
+					tinsert(GuildAdsTrade.exchangeButton.t, GuildAdsUITools.onlineColorHex[online]..name.."|r");
+				end
+				ownerColor = GuildAdsUITools.onlineColor[atLeastOneOnline];
+				getglobal(ownerField):SetText(table.concat(GuildAdsTrade.exchangeButton.t, ", "));
+			end
 			getglobal(ownerField):SetTextColor(ownerColor.r, ownerColor.g, ownerColor.b);
 			getglobal(ownerField):Show();
 			getglobal(buttonName.."Highlight"):SetVertexColor(ownerColor.r, ownerColor.g, ownerColor.b);
@@ -767,9 +781,11 @@ GuildAdsTrade = {
 			end
 			
 			-- update hightlight
-			if playerName then
+			if type(playerName)=="string" then
 				local ownerColor = GuildAdsUITools.onlineColor[GuildAdsComm:IsOnLine(playerName)];
 				getglobal(obj:GetName().."Highlight"):SetVertexColor(ownerColor.r, ownerColor.g, ownerColor.b);
+			elseif type(playerName)=="table" then
+				-- TODO ...
 			end
 		end
 	};
@@ -931,21 +947,24 @@ GuildAdsTrade = {
 				end
 				GuildAdsTrade.data.cache[tab] = {};
 				if (tab == GuildAdsTrade.TAB_CRAFTABLE) then
-					local already=nil;
+					local already;
 					for _, item, playerName, data in datatype:iterator() do
 						for key,value in GuildAdsTrade.data.cache[tab] do
-							--GuildAdsTrade.debug("value"..GuildAdsTrade.data.cache[tab][key]["i"].." key ".. key);
-							if (GuildAdsTrade.data.cache[tab][key]["i"]==item) then 
+							if (GuildAdsTrade.data.cache[tab][key].i==item) then 
 								already=true;
-								GuildAdsTrade.data.cache[tab][key]["p"]=GuildAdsTrade.data.cache[tab][key]["p"]..", "..playerName;
+								tinsert(GuildAdsTrade.data.cache[tab][key].p, playerName);
+								break;
 							end
 						end
 						if (not already) then
 							if GuildAdsTrade.data.adIsVisible(adtype, playerName, item, data) then
-								tinsert(GuildAdsTrade.data.cache[tab], { i=item, p=playerName, d=data, t=adtype });
+								tinsert(GuildAdsTrade.data.cache[tab], { i=item, p={playerName}, d=data, t=adtype });
 							end
 						end
 						already=nil;
+					end
+					for _, data in GuildAdsTrade.data.cache[tab] do
+						table.sort(data.p, GuildAdsTrade.sortData.predicateFunctions.crafter);
 					end
 				else
 					for _, item, playerName, data in datatype:iterator() do
@@ -982,7 +1001,18 @@ GuildAdsTrade = {
 		end;
 		
 		predicateFunctions = {
+			
+			-- to sort crafter
+			crafter = function(a, b)
+				local oa = GuildAdsComm:IsOnLine(a);
+				local ob = GuildAdsComm:IsOnLine(b);
+				if oa~=ob then
+					return oa and not ob;
+				end
+				return a<b;
+			end;
 		
+			-- to sort items
 			item = function(a, b)
 				local an=(GuildAds_ItemInfo[a.i] or {}).name or "";
 				local bn=(GuildAds_ItemInfo[b.i] or {}).name or "";
@@ -1016,10 +1046,21 @@ GuildAdsTrade = {
 			
 			owner = function(a, b)
 				if a.p and b.p then
-					if (a.p < b.p) then
-						return false;
-					elseif (a.p > b.p) then
-						return true;
+					if type(a)=="table" then
+						-- TODO : patch this dirty code...
+						local ap = table.concat(a.p,", ");
+						local bp = table.concat(b.p,", ");
+						if ap<bp then
+							return false;
+						elseif ap>bp then
+							return true;
+						end
+					elseif (type(a)=="string") then
+						if (a.p < b.p) then
+							return false;
+						elseif (a.p > b.p) then
+							return true;
+						end
 					end
 				end
 				return nil;
@@ -1092,6 +1133,8 @@ GuildAdsTrade = {
 		NUM_FILTERS_TO_DISPLAY = 15;
 		MAXACTIONITEM = 1;
 		BROWSE_FILTER_HEIGHT = 20;
+		GA_CLASS_FILTERS = "guildadsclass";
+		ENCHANT = GUILDADS_SKILLS[9];
 		
 		onClick = function()
 			if ( this.type == "class" ) then
@@ -1141,7 +1184,7 @@ GuildAdsTrade = {
 		
 		init = function()
 			GuildAdsTrade.filterClass.GA_CLASS_FILTERS = { GetAuctionItemClasses() };
-			table.insert(GuildAdsTrade.filterClass.GA_CLASS_FILTERS, LABEL_NOTE);
+			table.insert(GuildAdsTrade.filterClass.GA_CLASS_FILTERS, GuildAdsTrade.filterClass.ENCHANT);
 			GuildAdsTrade.filterClass.filterUpdateClasses();
 		end;
 	
@@ -1233,12 +1276,10 @@ GuildAdsTrade = {
 				end
 				index = i;
 			end
-			if ( GuildAdsTrade.filterClass.selectedClass and GuildAdsTrade.filterClass.selectedClass == LABEL_NOTE) then
-			tinsert(GuildAdsTrade.filterClass.OPEN_FILTER_LIST, {LABEL_NOTE, "guildadsclass", index+1, 1});
-			
+			if ( GuildAdsTrade.filterClass.selectedClass and GuildAdsTrade.filterClass.selectedClass == GuildAdsTrade.filterClass.ENCHANT) then
+				tinsert(GuildAdsTrade.filterClass.OPEN_FILTER_LIST, {GuildAdsTrade.filterClass.ENCHANT, "guildadsclass", index+1, 1});
 			else
-			tinsert(GuildAdsTrade.filterClass.OPEN_FILTER_LIST, {LABEL_NOTE, "guildadsclass", index+1, nil});
-			
+				tinsert(GuildAdsTrade.filterClass.OPEN_FILTER_LIST, {GuildAdsTrade.filterClass.ENCHANT, "guildadsclass", index+1, nil});
 			end
  			--for i=1, GuildAdsTrade.filterClass.MAXACTIONITEM  do 
 			--	tinsert(GuildAdsTrade.filterClass.OPEN_FILTER_LIST, {GuildAdsTrade.filterClass.GA_CLASS_FILTERS[getn(GuildAdsTrade.filterClass.GA_CLASS_FILTERS)+i], "class", getn(GuildAdsTrade.filterClass.GA_CLASS_FILTERS)+i, nil});
@@ -1282,12 +1323,22 @@ GuildAdsTrade = {
 			ToggleDropDownMenu(1, nil, GuildAdsTradeContextMenu, "cursor");			
 		end;
 		
-		initialize = function()
-			info = { };
-			info.text =  GuildAdsTrade.currentPlayerName;
+		addPlayer = function(playerName)
+			local info = { };
+			info.text =  playerName;
 			info.isTitle = true;
 			info.notCheckable = 1;
-			UIDropDownMenu_AddButton(info, 1);
+			UIDropDownMenu_AddButton(info, 1);			
+		end;
+		
+		initialize = function(level)
+			if type(GuildAdsTrade.currentPlayerName)=="string" then
+				GuildAdsTrade.contextMenu.addPlayer(GuildAdsTrade.currentPlayerName);
+			elseif type(GuildAdsTrade.currentPlayerName)=="table" then
+				for _, name in GuildAdsTrade.currentPlayerName do
+					GuildAdsTrade.contextMenu.addPlayer(name);
+				end
+			end
 		end
 	};
 	
