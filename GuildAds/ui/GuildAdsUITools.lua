@@ -15,6 +15,11 @@ GuildAdsUITools.onlineColor = {
 	[false]				= { ["r"] = 0.5,  ["g"] = 0.5,  ["b"] = 0.5 },
 }
 
+GuildAdsUITools.onlineColorHex = {
+	[true]				= string.format("|cff%02x%02x%02x", GuildAdsUITools.onlineColor[true].r*255, GuildAdsUITools.onlineColor[true].g*255, GuildAdsUITools.onlineColor[true].b*255),
+	[false]				= string.format("|cff%02x%02x%02x", GuildAdsUITools.onlineColor[false].r*255, GuildAdsUITools.onlineColor[false].g*255, GuildAdsUITools.onlineColor[false].b*255)
+}
+
 GuildAdsUITools.noteColor = { ["r"] = 0.3,    ["g"] = 0.6, ["b"] = 1.0 };
 
 GuildAdsUITools.MAX_LINE_SIZE = 60;
