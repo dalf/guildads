@@ -39,6 +39,14 @@ function GuildAdsTableDataType:nextId(playerName, id)
 	end
 	return next(self:getTableForPlayer(playerName), id);
 end
+
+function GuildAdsTableDataType:nextPlayerName(players, playerName)
+	playerName = next(players, playerName);
+	while playerName and next(self:getTableForPlayer(playerName))==nil do
+		playerName = next(players, playerName);
+	end
+	return playerName;
+end
 	
 GuildAdsTableDataType.iteratorAll = function(self, current)
 	local players;
@@ -53,7 +61,7 @@ GuildAdsTableDataType.iteratorAll = function(self, current)
 
 	-- first call : no playerName
 	if not current[1] then
-		current[1] = next(players);
+		current[1] = self:nextPlayerName(players);
 	end
 
 	-- next id
@@ -61,7 +69,7 @@ GuildAdsTableDataType.iteratorAll = function(self, current)
 
 	if not current[2] then
 		-- end of table for this player current[1], so try the next player
-		current[1] = next(players, current[1]);
+		current[1] = self:nextPlayerName(players, current[1]);
 		if current[1] then
 			-- there is one : get this first id
 			current[2], data = self:nextId(current[1], current[2]);
