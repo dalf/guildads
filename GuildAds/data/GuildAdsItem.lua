@@ -104,11 +104,20 @@ end
 function GuildAdsInternalTooltip_SetItem(itemRef)
 	GuildAds_ChatDebug(GA_DEBUG_STORAGE, "  - SetItem:"..itemRef);
 	GuildAdsITT.currentItemRef = itemRef;
-	GameTooltip_SetDefaultAnchor(GuildAdsITT, UIParent);
 	GuildAdsITT:ClearLines();
-	GuildAdsITT:SetOwner(UIParent, "ANCHOR_NONE");
+	GuildAdsITT:SetOwner(WorldFrame, "ANCHOR_NONE"); 
 	GuildAdsITT:SetPoint("BOTTOMRIGHT", "UIParent", "BOTTOMRIGHT", -13, 80);
+	
 	GuildAdsITT:SetHyperlink(itemRef);
+	GuildAdsTask:AddNamedSchedule("GuildAdsInternalTooltip_Timeout", 2, nil, nil, GuildAdsInternalTooltip_Timeout);
+end
+
+function GuildAdsInternalTooltip_Timeout()
+	if next(GuildAdsITT.itemRefs) then
+		GuildAds_ChatDebug(GA_DEBUG_STORAGE, "  - Timeout:"..GuildAdsITT.currentItemRef);
+		local itemRef = next(GuildAdsITT.itemRefs);
+		GuildAdsInternalTooltip_SetItem(itemRef);
+	end
 end
 
 function GuildAdsInternalTooltip_AddItem(itemRef)
@@ -153,6 +162,7 @@ function GuildAdsInternalTooltip_ItemReady()
 	-- next item if there is one
 	local itemRef = next(GuildAdsITT.itemRefs);
 	if itemRef then
+--~ 		GuildAdsTask:AddNamedSchedule("GuildAdsInternalTooltip_SetItem", 2, nil, nil, GuildAdsInternalTooltip_SetItem, itemRef);
 		GuildAdsInternalTooltip_SetItem(itemRef);
 	else
 		GuildAdsPlugin_OnEvent(GAS_EVENT_ITEMINFOREADY);
