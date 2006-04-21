@@ -422,10 +422,12 @@ function SimpleComm_newChatFrame_OnEvent(event)
 			-- unpack PIPE_ENTITIE
 			arg1 = string.gsub(arg1, PIPE_ENTITIE, "|")
 			
-			-- except for GEM messages, change CHAT_MSG_CHANNEL into CHAT_MSG_GA (if the short is /ga)
-			if (SimpleComm_chanSlashCmdUpper) and (not string.find(arg1,"^<GEM")) then
-				event = "CHAT_MSG_"..SimpleComm_chanSlashCmdUpper;
-				arg4 = "";   --  channel name with number
+			-- Hack to change the channel name :
+			-- ChatFrame_OnEvent shows "["..gsub(arg4, "%s%-%s.*", "").."] "..body
+			-- channelLength = strlen(arg4) is used to find if the channel is shown in this ChatFrame (as above)
+			-- -> arg4 is set to name we want to show concatenate with " - " which will delete by the gsub call
+			if (SimpleComm_chanSlashCmdUpper) then
+				arg4 = SimpleComm_chanAlias.." - ";   
 			end
 		end
 		
@@ -485,7 +487,6 @@ function SimpleComm_newChatFrame_OnEvent(event)
 		end
 		
 		if (event == "CHAT_MSG_CHANNEL_JOIN") and (arg8 == SimpleComm_channelId) then
-			DEBUG_MSG("CHAT_MSG_CHANNEL_JOIN");
 			SimpleComm_Disconnected[arg2] = nil;
 			return;
 		end
