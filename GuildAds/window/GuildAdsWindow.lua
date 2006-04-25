@@ -37,8 +37,8 @@ function GuildAdsWindow:Create()
 	-- Escape hide the window
 	tinsert(UISpecialFrames,self.frame);
 
-	-- Initialize tab 
-	self:UpdateTab();
+	-- Initialize tabs
+	self:InitializeTabs();
 end
 
 ---------------------------------------------------------------------------------
@@ -46,30 +46,36 @@ end
 -- Choose a tab (Available, Request, Event, ...)
 -- 
 ---------------------------------------------------------------------------------
-function GuildAdsWindow:UpdateTab()
+function GuildAdsWindow:InitializeTabs()
 	local currTab, previousTab;
 	
 	self.tabDescription = GuildAdsPlugin_GetUI(self.name);
 
 	for id, info in self.tabDescription do
 		currTab = getglobal(info.tab);
-		currTab:SetID(id);
-		currTab:ClearAllPoints();
-		currTab:SetParent(self.frame);
-		if (previousTab == nil) then
-			currTab:SetPoint("CENTER", self.frame, "BOTTOMLEFT", 65, -14);
-			getglobal(info.frame):Show();
-			self:SelectTab(currTab);
-		else
-			currTab:SetPoint("LEFT", previousTab:GetName(), "RIGHT", -14, 0);
-			getglobal(info.frame):Hide()
-			self:DeselectTab(currTab);
-		end
+
 		if info.tooltip then
 			currTab.tooltip = info.tooltip;
 		end
-		currTab.window = self;
+		currTab.window = self;		
+		self:InitializeTab(currTab, id, info, previousTab);
+		
 		previousTab = currTab;
+	end
+end
+
+function GuildAdsWindow:InitializeTab(currTab, id, info, previousTab)
+	currTab:SetID(id);
+	currTab:ClearAllPoints();
+	currTab:SetParent(self.frame);
+	if (previousTab == nil) then
+		currTab:SetPoint("CENTER", self.frame, "BOTTOMLEFT", 65, -13);
+		getglobal(info.frame):Show();
+		self:SelectTab(currTab);
+	else
+		currTab:SetPoint("LEFT", previousTab:GetName(), "RIGHT", -13, 0);
+		getglobal(info.frame):Hide()
+		self:DeselectTab(currTab);
 	end
 end
 
