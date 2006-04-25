@@ -65,16 +65,18 @@ GuildAdsTableDataType.iteratorAll = function(self, current)
 	end
 
 	-- next id
-	current[2], data = self:nextId(current[1], current[2])
+	if current[1] then
+		current[2], data = self:nextId(current[1], current[2])
 
-	if not current[2] then
-		-- end of table for this player current[1], so try the next player
-		current[1] = self:nextPlayerName(players, current[1]);
-		if current[1] then
-			-- there is one : get this first id
-			current[2], data = self:nextId(current[1], current[2]);
+		if not current[2] then
+			-- end of table for this player current[1], so try the next player
+			current[1] = self:nextPlayerName(players, current[1]);
+			if current[1] then
+				-- there is one : get this first id
+				current[2], data = self:nextId(current[1], current[2]);
+			end
 		end
-	end;
+	end
 
 	-- if there is a playerName and an Id
 	if current[2] and current[1] then
