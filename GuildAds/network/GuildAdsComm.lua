@@ -32,7 +32,7 @@ local SerializeMeta = {
 local SerializeCommand = {
 	M= {	-- Meta
 		[1] = { key="version", 		codec="String" },
-		[2] = { key="startTime",	codec="Integer" },
+		[2] = { key="startTime",	codec="Integer" },	-- BigInteger
 		[3] = { key="playerCount",	codec="Integer" }
 	};
 	
@@ -175,6 +175,17 @@ function GuildAdsComm:JoinChannel(channel, password)
 
 	local command, alias = GuildAds:GetDefaultChannelAlias();
 	SimpleComm_InitAlias(command, alias);
+end
+
+function GuildAdsComm:LeaveChannel()
+	LoggingChat(false);
+	
+	if self.channelName then
+		LeaveChannelByName(self.channelName);
+	
+		self.channelName = nil
+		self.channelPassword = nil
+	end
 end
 
 local serializeResult = { GUILDADS_MSG_PREFIX };
@@ -563,7 +574,7 @@ function GuildAdsComm.OnMessage(playerName, text, channel)
  	if playerName ~= GuildAds.playerName or not GuildAdsComm.IGNOREMYMESSAGE[message.command] then
 		GuildAdsComm:ParseMessage(playerName, message, channel)
 	else
-		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"Ignore message from my self, command="..tostring(message.command));
+		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "Ignore message from my self, command="..tostring(message.command));
 	end
 end
 

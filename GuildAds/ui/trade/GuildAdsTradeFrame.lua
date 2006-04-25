@@ -39,8 +39,6 @@ GuildAdsTrade = {
 		24*60*30
 	};
 	
---~ 	MaxTradeColumnHeader = 6;
-	
 	TAB_REQUEST = 1;
 	TAB_AVAILABLE = 2;
 	TAB_CRAFTABLE = 3;
@@ -86,13 +84,7 @@ GuildAdsTrade = {
 	
 	administrator = false;
 	
-	onShowOptions = function()
-		if GuildAdsTrade.getProfileValue(nil, "PublishMyAds", true) then
-			GuildAds_PublishMyAdsCheckButton:SetChecked(1);
-		else
-			GuildAds_PublishMyAdsCheckButton:SetChecked(0);
-		end
-		
+	onShowOptions = function()	
 		if GuildAdsTrade.getProfileValue(nil, "HideOfflinePlayer") then
 			GuildAds_ShowOfflinePlayerCheckButton:SetChecked(0);
 		else
@@ -104,12 +96,25 @@ GuildAdsTrade = {
 		else
 			GuildAds_ShowMyAdsCheckButton:SetChecked(1);
 		end
+		
+		if (GuildAdsTrade.getProfileValue(nil, "ShowNewAsk")) then
+			GuildAds_ChatShowNewAskCheckButton:SetChecked(1);
+		else
+			GuildAds_ChatShowNewAskCheckButton:SetChecked(0);
+		end
+	
+		if (GuildAdsTrade.getProfileValue(nil, "ShowNewHave")) then
+			GuildAds_ChatShowNewHaveCheckButton:SetChecked(1);
+		else
+			GuildAds_ChatShowNewHaveCheckButton:SetChecked(0);
+		end
 	end;
 	
 	saveOptions = function()
-		GuildAdsTrade.setProfileValue(nil, "PublishMyAds", GuildAds_PublishMyAdsCheckButton:GetChecked());
-		GuildAdsTrade.setProfileValue(nil, "HideOfflinePlayer", not GuildAds_ShowOfflinePlayerCheckButton:GetChecked());
-		GuildAdsTrade.setProfileValue(nil, "HideMyAds", not GuildAds_ShowMyAdsCheckButton:GetChecked());
+		GuildAdsTrade.setProfileValue(nil, "HideOfflinePlayer", not GuildAds_ShowOfflinePlayerCheckButton:GetChecked() or nil);
+		GuildAdsTrade.setProfileValue(nil, "HideMyAds", not GuildAds_ShowMyAdsCheckButton:GetChecked() or nil);
+		GuildAdsTrade.setProfileValue(nil, "ShowNewAsk", GuildAds_ChatShowNewAskCheckButton:GetChecked() and true);
+		GuildAdsTrade.setProfileValue(nil, "ShowNewHave", GuildAds_ChatShowNewHaveCheckButton:GetChecked() and true);
 	end;
 	
 	defaultsOptions = function()
@@ -682,7 +687,7 @@ GuildAdsTrade = {
 			local info = GuildAds_ItemInfo[item] or {};
 			
 			-- texture
-			if (info.texture) then 
+			if info.texture then 
 				getglobal(texture):SetTexture(info.texture);
 			else
 				getglobal(texture):SetTexture("Interface\\Icons\\INV_Misc_QuestionMark");
@@ -702,7 +707,7 @@ GuildAdsTrade = {
 			end
 				
 			-- quantity
-			if (data.q) then 
+			if data.q then 
 				getglobal(countField):Show();
 				getglobal(countField):SetText(data.q);
 			else
@@ -745,12 +750,7 @@ GuildAdsTrade = {
 				end
 			else 
 				getglobal(dropField):Hide();
-				-- getglobal(dropField):SetText("D");
-				-- getglobal(dropField):SetTextColor(filter_color["everything"]["r"],filter_color["everything"]["g"], filter_color["everything"]["b"]);
-				
 				getglobal(useField):Hide();
-				-- getglobal(useField):SetText("U");
-				-- getglobal(useField):SetTextColor(filter_color["everything"]["r"],filter_color["everything"]["g"], filter_color["everything"]["b"]);
 			end
 		end;	
 		
@@ -764,9 +764,8 @@ GuildAdsTrade = {
 			-- set tooltip
 			if item then
 				GameTooltip:SetOwner(obj, "ANCHOR_BOTTOMRIGHT");
-				if item then
-					GameTooltip:SetHyperlink(item);
-				end
+				GameTooltip:SetHyperlink(item);
+				
 				if data.c then
 					GuildAdsUITools:TooltipAddText(GameTooltip, LABEL_NOTE..": "..data.c);
 				end
@@ -1326,18 +1325,28 @@ GuildAdsTrade = {
 		addPlayer = function(playerName)
 			local info = { };
 			info.text =  playerName;
-			info.isTitle = true;
 			info.notCheckable = 1;
+			info.notClickable = 1;
+			info.hasArrow = 1;
+			info.func = ToggleDropDownMenu;
+			info.arg1 = 2;
 			UIDropDownMenu_AddButton(info, 1);			
 		end;
 		
 		initialize = function(level)
-			if type(GuildAdsTrade.currentPlayerName)=="string" then
-				GuildAdsTrade.contextMenu.addPlayer(GuildAdsTrade.currentPlayerName);
-			elseif type(GuildAdsTrade.currentPlayerName)=="table" then
-				for _, name in GuildAdsTrade.currentPlayerName do
-					GuildAdsTrade.contextMenu.addPlayer(name);
+			if level==1 then
+				if type(GuildAdsTrade.currentPlayerName)=="string" then
+					GuildAdsTrade.contextMenu.addPlayer(GuildAdsTrade.currentPlayerName);
+				elseif type(GuildAdsTrade.currentPlayerName)=="table" then
+					for _, name in GuildAdsTrade.currentPlayerName do
+						GuildAdsTrade.contextMenu.addPlayer(name);
+					end
 				end
+			else
+				local info = {};
+				info.text = "Joueur"..UIDROPDOWNMENU_MENU_VALUE;
+				info.notCheckable = 1;
+				UIDropDownMenu_AddButton(info, 2);
 			end
 		end
 	};

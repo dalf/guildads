@@ -24,27 +24,36 @@ GuildAdsChannelOptions = {
 	};
 	
 	defaultsOptions = function()
-		GuildAds_ChatUseThisCheckButton:SetChecked(false);
+		GuildAds_ChatAutoChannelConfig:SetChecked(true);
+		GuildAds_ChatManualChannelConfig:SetChecked(false);
 		GuildAds_ChannelCommandEditBox:SetText("ga");
 		GuildAds_ChannelAliasEditBox:SetText("GuildAds");
 	end;
 	
 	saveOptions = function()
-		if ( GuildAds_ChatUseThisCheckButton:GetChecked() ) then
+		if GuildAds_ChatAutoChannelConfig:GetChecked() then
+			GuildAdsDB:SetConfigValue(GuildAdsDB.PROFILE_PATH, "ChannelConfig", nil);
+			GuildAdsDB:SetConfigValue(GuildAdsDB.PROFILE_PATH, "ChannelName", nil);
+			GuildAdsDB:SetConfigValue(GuildAdsDB.PROFILE_PATH, "ChannelPassword", nil);
+		elseif ( GuildAds_ChatManualChannelConfig:GetChecked() ) then
 			local name = GuildAds_ChannelEditBox:GetText();
 			local password = GuildAds_ChannelPasswordEditBox:GetText();
 			if (name == "") then
-				name = nil;
-				password = nil;
+				GuildAdsDB:SetConfigValue(GuildAdsDB.PROFILE_PATH, "ChannelConfig", "none");
 			else
+				GuildAdsDB:SetConfigValue(GuildAdsDB.PROFILE_PATH, "ChannelConfig", "manual");
 				if (password == "") then
 					password = nil;
 				end
+				GuildAdsDB:SetConfigValue(GuildAdsDB.PROFILE_PATH, "ChannelName", name);
+				GuildAdsDB:SetConfigValue(GuildAdsDB.PROFILE_PATH, "ChannelPassword", password);
 			end
-			GuildAds:SetDefaultChannel(name, password);
 		else
-			GuildAds:SetDefaultChannel(nil, nil);
+			GuildAdsDB:SetConfigValue(GuildAdsDB.PROFILE_PATH, "ChannelConfig", "none");
+			GuildAdsDB:SetConfigValue(GuildAdsDB.PROFILE_PATH, "ChannelName", nil);
+			GuildAdsDB:SetConfigValue(GuildAdsDB.PROFILE_PATH, "ChannelPassword", nil);
 		end
+		GuildAds:CheckChannelConfig();
 	
 		local channelCommand = GuildAds_ChannelCommandEditBox:GetText();
 		local channelAlias = GuildAds_ChannelAliasEditBox:GetText();
@@ -52,31 +61,37 @@ GuildAdsChannelOptions = {
 	end;
 	
 	onShowOptions = function()
-		-- TODO : ShowNewAsk/ShowNewHave : dépend de trade, rien à faire la
-		if (GuildAdsTrade.getProfileValue(nil, "ShowNewAsk")) then
-			GuildAds_ChatShowNewAskCheckButton:SetChecked(1);
+		local configType = GuildAdsDB:GetConfigValue(GuildAdsDB.PROFILE_PATH, "ChannelConfig") or (IsInGuild() and "automatic") or "none";
+		
+		if IsInGuild() then
+			GuildAds_ChatAutoChannelConfig:Enable();
+			GuildAds_ChatAutoChannelConfigLabel:SetFontObject(GameFontNormalSmall);
+			
 		else
-			GuildAds_ChatShowNewAskCheckButton:SetChecked(0);
+			GuildAds_ChatAutoChannelConfig:Disable();
+			GuildAds_ChatAutoChannelConfigLabel:SetFontObject(GameFontDisableSmall);
 		end
-	
-		if (GuildAdsTrade.getProfileValue(nil, "ShowNewHave")) then
-			GuildAds_ChatShowNewHaveCheckButton:SetChecked(1);
-		else
-			GuildAds_ChatShowNewHaveCheckButton:SetChecked(0);
-		end
-	
-		local channelName = GuildAdsDB:GetConfigValue(GuildAdsDB.PROFILE_PATH, "ChannelName");
-		if (channelName) then
-			GuildAds_ChatUseThisCheckButton:SetChecked(1);
-			GuildAds_ChannelEditBox:Show();
-			GuildAds_ChannelPasswordEditBox:Show();
-			GuildAds_ChannelEditBox:SetText(channelName);
-			local password = GuildAdsDB:GetConfigValue(GuildAdsDB.PROFILE_PATH, "ChannelPassword") or "";
-			GuildAds_ChannelPasswordEditBox:SetText(password);
-		else
-			GuildAds_ChatUseThisCheckButton:SetChecked(0);
+		
+		if configType=="none" then
+			GuildAds_ChatAutoChannelConfig:SetChecked(0);
+			GuildAds_ChatManualChannelConfig:SetChecked(0);
 			GuildAds_ChannelEditBox:Hide();
 			GuildAds_ChannelPasswordEditBox:Hide();
+		elseif configType=="automatic" then
+			GuildAds_ChatAutoChannelConfig:SetChecked(1);
+			GuildAds_ChatManualChannelConfig:SetChecked(0);
+			GuildAds_ChannelEditBox:Hide();
+			GuildAds_ChannelPasswordEditBox:Hide();
+		elseif configType=="manual" then
+			local channelName = GuildAdsDB:GetConfigValue(GuildAdsDB.PROFILE_PATH, "ChannelName") or "";
+			local channelPassword = GuildAdsDB:GetConfigValue(GuildAdsDB.PROFILE_PATH, "ChannelPassword") or "";
+			
+			GuildAds_ChatAutoChannelConfig:SetChecked(0);
+			GuildAds_ChatManualChannelConfig:SetChecked(1);
+			GuildAds_ChannelEditBox:SetText(channelName);
+			GuildAds_ChannelEditBox:Show();
+			GuildAds_ChannelPasswordEditBox:SetText(channelPassword);
+			GuildAds_ChannelPasswordEditBox:Show();
 		end
 
 		local channelCommand, channelAlias = GuildAds:GetDefaultChannelAlias();

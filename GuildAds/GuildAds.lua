@@ -20,11 +20,6 @@ GA_DEBUG_STORAGE = 5;
 GA_DEBUG_GUI = 6;
 GA_DEBUG_PLUGIN = 8;
 
-GUILDADS_MAPBOOLEAN = {
-	[true] = "Yes",
-	[false] = "No"
-}
-
 GuildAds = AceAddon:new({
 	name          = GUILDADS_TITLE,
     description   = GUILDADS_TITLE,
@@ -44,7 +39,7 @@ GuildAds = AceAddon:new({
 	joinChannelAttempts = 0,
 	channelName			= "",
 	channelPassword		= "",
-	channelNameFrom		= "",				-- channel name from : guild, party, raid, player
+	channelNameFrom		= "",				-- channel name from : user, guildInfo, guildName
 	playerName 			= false,
 	guildName			= false,
 	windows				= {},
@@ -69,8 +64,7 @@ function GuildAds:Initialize()
 	
 	-- RegisterEvent
 	self:RegisterEvent("PLAYER_GUILD_UPDATE");
-	self:RegisterEvent("RAID_ROSTER_UPDATE", "CheckChannelName");
-	self:RegisterEvent("PARTY_MEMBERS_CHANGED", "CheckChannelName");
+	self:RegisterEvent("GUILD_ROSTER_UPDATE");
 	
 	-- Initialize database
 	GuildAdsDB:Initialize(); 
@@ -124,20 +118,19 @@ function GuildAds:JoinChannel()
 	-- Init du channel
 	self.channelName, self.channelPassword, self.channelNameFrom = self:GetDefaultChannel();
 	
-	-- GuildAdsComm : init
-	GuildAdsComm:JoinChannel(self.channelName, self.channelPassword)
+	if self.channelName then
+		-- GuildAdsComm : init
+		GuildAdsComm:JoinChannel(self.channelName, self.channelPassword)
 	
-	-- Init first step done
-	GuildAds.channelJoined = true;
+		-- Init first step done
+		GuildAds.channelJoined = true;
+	end
 	
 	GuildAds_ChatDebug(GA_DEBUG_GLOBAL,"[GuildAds:JoinChannel] end");
 end
 
-function GuildAds:ChangeChannel()
-	GuildAds_ChatDebug(GA_DEBUG_GLOBAL,"[GuildAds:ChangeChannel]");
-	
-	GuildAds.channelJoined = false;
-	GuildAdsTask:AddNamedSchedule("JoinChannel", 2, nil, nil, self.JoinChannel, self);
+function GuildAds:LeaveChannel()
+	GuildAdsComm:LeaveChannel();
 end
 
 function GuildAds:ToggleMainWindow()
@@ -157,7 +150,7 @@ function GuildAds:ToggleWindow(name)
 			frame:Show();
 		end
 	else
-		self.cmd:error("GuildAds is not initialized.");
+		self.cmd:error(GUILDADS_ERROR_CHANNELNOTJOIN);
 	end
 end
 
@@ -165,7 +158,7 @@ function GuildAds:ShowWindow(name)
 	if (self.channelJoined) then
 		getglobal(self.windows[name].frame):Show();
 	else
-		self.cmd:error("GuildAds is not initialized.");
+		self.cmd:error(GUILDADS_ERROR_CHANNELNOTJOIN);
 	end
 end
 
@@ -173,7 +166,7 @@ function GuildAds:HideWindow(name)
 	if (self.channelJoined) then
 		getglobal(self.windows[name].frame):Hide();
 	else
-		self.cmd:error("GuildAds is not initialized.");
+		self.cmd:error(GUILDADS_ERROR_CHANNELNOTJOIN);
 	end
 end
 
@@ -189,13 +182,13 @@ end
 
 function GuildAds:DisplayDebugInfo()
 	self.cmd:report({
-		{text="version ", val=GUILDADS_VERSION },
+		{text="version", val=GUILDADS_VERSION },
 		{text="player name", val=tostring(self.playerName) },
 		{text="guild name", val=tostring(self.guildName) },
 		{text="account", val=tostring(GuildAdsDB.account) },
 		{text="faction", val=tostring(self.factionName) },
 		{text="realm", val=tostring(self.realmName) },
-		{text="channelJoined", val=self.channelJoined, map=GUILDADS_MAPBOOLEAN},
+		{text="channelJoined", val=self.channelJoined and TRUE or FALSE, map=ACEG_MAP_ONOFF},
 		{text="channel", val=tostring(self.channelName) },
 		{text="joinChannelAttempts", val=tostring(self.joinChannelAttempts) }
 	});
@@ -215,27 +208,40 @@ end
 
 function GuildAds:PLAYER_GUILD_UPDATE()
 	self.guildName = GetGuildInfo("player");
-	self:CheckChannelName();
+	self:CheckChannelConfig();
 end
 
-function GuildAds:CheckChannelName()
-	if self.channelJoined and self:GetDefaultChannel() ~= self.channelName then
-		GuildAds:ChangeChannel()
+function GuildAds:GUILD_ROSTER_UPDATE()
+	self.guildName = GetGuildInfo("player");
+	self:CheckChannelConfig();
+end
+
+function GuildAds:CheckChannelConfig()
+	local channelName, channelPassword = self:GetDefaultChannel();
+	if 		self.channelJoined 
+		and (channelName ~= self.channelName or	channelPassword ~= self.channelPassword) then
+		GuildAds.channelJoined = false;
+		if channelName then
+			self:JoinChannel();
+		else
+			self:LeaveChannel();
+		end
 	end
 end
 
 function GuildAds:GetDefaultChannel()
-	local source;
-	local channel = GuildAdsDB:GetConfigValue(GuildAdsDB.PROFILE_PATH, "ChannelName");
-	local password = GuildAdsDB:GetConfigValue(GuildAdsDB.PROFILE_PATH, "ChannelPassword");
-	if channel then
-		source="config";
-	else
+	local configType = GuildAdsDB:GetConfigValue(GuildAdsDB.PROFILE_PATH, "ChannelConfig") or "automatic";
+	local source, channel, password;
+	if configType=="manual" then
+		source="user"
+		channel = GuildAdsDB:GetConfigValue(GuildAdsDB.PROFILE_PATH, "ChannelName");
+		password = GuildAdsDB:GetConfigValue(GuildAdsDB.PROFILE_PATH, "ChannelPassword");		
+	elseif configType=="automatic" then
 		-- If in a guild
 		if self.guildName then
-			--
-			local startIndex, endIndex;
-			startIndex, endIndex, channel, password = string.find(GetGuildInfoText() or "", "%[GA:([^,%]]+)([^%]]*)%]");
+			-- channel name bases on the guild info text
+			local startIndex;
+			startIndex, _, channel, password = string.find(GetGuildInfoText() or "", "%[GA:([^,%]]+)([^%]]*)%]");
 			if startIndex then
 				if password=="" then
 					password=nil;
@@ -250,43 +256,14 @@ function GuildAds:GetDefaultChannel()
 				source = "guildName";
 			end
 		end
-		
-		-- channel name bases on the raid leader name
-		if not channel and GetNumRaidMembers()>0 then
-			for i=1, GetNumRaidMembers(), 1 do
-				local name, rank = GetRaidRosterInfo(i);
-				if rank==2 then
-					channel = "GuildAds"..name;
-					source = "raid";
-				end
-			end
-		end
-		
-		-- channel name bases on the group leader name 
-		if not channel and ( GetNumPartyMembers() > 0 ) then
-			for groupindex = 1,GetNumPartyMembers() do
-				local unit = "party"..groupindex;
-				if UnitIsPartyLeader(unit) then
-					channel = "GuildAds"..UnitName(unit);
-					source = "party";
-				end
-			end
-		end
-		
-		-- channel name bases on the player name
-		if not channel then
-			channel = "GuildAds"..GuildAds.playerName;
-			source = "player";
-		end
 	end
+	
+	-- For now, GuildAds doesn't work if there is no channel at all, so define a default one
+	if not channel then
+		channel = "GuildAds"..self.playerName;
+	end
+	
 	return channel, password, source;
-end
-
-function GuildAds:SetDefaultChannel(name, password)
-	if 		GuildAdsDB:SetConfigValue(GuildAdsDB.PROFILE_PATH, "ChannelName", name) 
-		or  GuildAdsDB:SetConfigValue(GuildAdsDB.PROFILE_PATH, "ChannelPassword", password) then
-		GuildAds:ChangeChannel()
-	end
 end
 
 function GuildAds:GetDefaultChannelAlias()

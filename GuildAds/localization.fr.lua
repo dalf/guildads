@@ -1,6 +1,3 @@
--- Version : French
--- Last Update : 08/27/2005
-
 if ( GetLocale() == "frFR" ) then
 
 GUILDADS_TITLE				= "GuildAds";
@@ -26,11 +23,14 @@ GUILDADS_ICON 				= "Ic\195\180ne de la Minimap";
 GUILDADS_ADJUST_ANGLE 		= "Adjuster l\'Angle";
 GUILDADS_ADJUST_RADIUS 		= "Adjuster le Rayon";
 
+GUILDADS_AUTOCHANNELCONFIG  = "Configuration de canal automatique";
+GUILDADS_MANUALCHANNELCONFIG= "Configuration du canal manuelle";
+
 -- Main frame
 GUILDADS_MYADS				= "Mes Annonces";
 GUILDADS_BUTTON_INVITE		= "Invite Groupe";
 GUILDADS_BUTTON_ADDREQUEST	= "Demander";
-GUILDADS_BUTTON_ADDAVAILABLE	= "Proposer";
+GUILDADS_BUTTON_ADDAVAILABLE= "Proposer";
 GUILDADS_BUTTON_ADDEVENT	= "Participer";
 GUILDADS_QUANTITY			= "Quantité";
 GUILDADS_SINCE				= "Depuis %s";
@@ -56,37 +56,6 @@ GUILDADS_EQUIPMENT             = "Equipement";
 
 -- Tooltip requests
 GUILDADS_ASKTOOLTIP		= "%s demande(s)";
-
--- Event
-GUILDADS_EVENTS_TITLE		= "Instances";
-GUILDADS_EVENTS			= {	"Gouffre de Ragefeu",
-					"Les Mortemines",
-					"Cavernes des lamentations",
-					"Donjon d'Ombrecroc",
-					"Profondeurs de Brassenoire",
-					"Gnomeregan",
-					"Kraal de Tranchebauge",
-					"Monastère écarlate",
-					"Souilles de Tranchebauche",
-					"Uldaman",
-					"Maraudon",
-					"Zul'Farrak",
-					"Le temple englouti",
-					"Profondeurs de Blackrock",
-					"Pic de Blackrock",
-					"Stratholme",
-					"Hache-Tripes",
-					"Scholomance",
-					"Pic de Blackrock (niveau supérieur)",
-					"Repaire d'Onyxia",
-					"Coeur du Magma",
-					"Zul'Gurub",
-					"Blackwing Lair",
-					"Le repaire de l'Aile Noire",
-					"BG Alterac",
-					"BG Arathi",
-					"BG Warsong"
-				};
 				
 -- Race
 GUILDADS_RACES			= {

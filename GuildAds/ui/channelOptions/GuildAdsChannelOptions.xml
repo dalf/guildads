@@ -82,7 +82,7 @@
 			</Layers>
 		</EditBox>
 		
-		<CheckButton name="GuildAds_ChatUseThisCheckButton" inherits="GuildAdsConfig_CheckButton">
+		<CheckButton name="GuildAds_ChatAutoChannelConfig" inherits="GuildAdsConfig_CheckButton">
 			<Anchors>
 				<Anchor point="TOPLEFT" relativeTo="GuildAds_ChannelCommandEditBox" relativePoint="BOTTOMLEFT">
 					<Offset>
@@ -92,7 +92,42 @@
 			</Anchors>
 			<Layers>
 				<Layer level="ARTWORK">
-					<FontString name="$parentLabel" inherits="GameFontNormalSmall" text="GUILDADS_CHAT_USETHIS">
+					<FontString name="$parentLabel" inherits="GameFontNormalSmall" text="GUILDADS_AUTOCHANNELCONFIG">
+						<Anchors>
+							<Anchor point="LEFT" relativePoint="RIGHT">
+								<Offset>
+									<AbsDimension x="5" y="1"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</FontString>
+				</Layer>
+			</Layers>
+			<Scripts>
+				<OnClick>
+					if this:GetChecked() then
+						PlaySound("igMainMenuOptionCheckBoxOn");
+						GuildAds_ChatManualChannelConfig:SetChecked(0);
+						GuildAds_ChannelEditBox:Hide();
+						GuildAds_ChannelPasswordEditBox:Hide();
+					else
+						PlaySound("igMainMenuOptionCheckBoxOff");
+					end
+				</OnClick>
+			</Scripts>
+		</CheckButton>
+		
+		<CheckButton name="GuildAds_ChatManualChannelConfig" inherits="GuildAdsConfig_CheckButton">
+			<Anchors>
+				<Anchor point="TOPLEFT" relativeTo="GuildAds_ChatAutoChannelConfig" relativePoint="BOTTOMLEFT">
+					<Offset>
+						<AbsDimension x="0" y="0" />
+					</Offset>
+				</Anchor>
+			</Anchors>
+			<Layers>
+				<Layer level="ARTWORK">
+					<FontString name="$parentLabel" inherits="GameFontNormalSmall" text="GUILDADS_MANUALCHANNELCONFIG">
 						<Anchors>
 							<Anchor point="LEFT" relativePoint="RIGHT">
 								<Offset>
@@ -106,13 +141,12 @@
 			<Scripts>
 				<OnClick>
 					if ( this:GetChecked() ) then
-						PlaySound("igMainMenuOptionCheckBoxOff");
-						GuildAds_ChatUseThisCheckButton:SetChecked(1);
+						PlaySound("igMainMenuOptionCheckBoxOn");
+						GuildAds_ChatAutoChannelConfig:SetChecked(0);
 						GuildAds_ChannelEditBox:Show();
 						GuildAds_ChannelPasswordEditBox:Show();
 					else
-						PlaySound("igMainMenuOptionCheckBoxOn");
-						GuildAds_ChatUseThisCheckButton:SetChecked(0);
+						PlaySound("igMainMenuOptionCheckBoxOff");
 						GuildAds_ChannelEditBox:Hide();
 						GuildAds_ChannelPasswordEditBox:Hide();
 					end
@@ -125,7 +159,7 @@
 				<AbsDimension x="200" y="26"/>
 			</Size>
 			<Anchors>
-				<Anchor point="TOPLEFT" relativeTo="GuildAds_ChatUseThisCheckButton" relativePoint="BOTTOMLEFT">
+				<Anchor point="TOPLEFT" relativeTo="GuildAds_ChatManualChannelConfig" relativePoint="BOTTOMLEFT">
 					<Offset>
 						<AbsDimension x="110" y="0"/>
 					</Offset>
@@ -151,7 +185,7 @@
 				<AbsDimension x="200" y="26"/>
 			</Size>
 			<Anchors>
-				<Anchor point="TOPLEFT" relativeTo="GuildAds_ChatUseThisCheckButton" relativePoint="BOTTOMLEFT">
+				<Anchor point="TOPLEFT" relativeTo="GuildAds_ChatManualChannelConfig" relativePoint="BOTTOMLEFT">
 					<Offset>
 						<AbsDimension x="110" y="-30"/>
 					</Offset>
@@ -171,74 +205,6 @@
 				</Layer>
 			</Layers>
 		</EditBox>
-
-		<CheckButton name="GuildAds_ChatShowNewAskCheckButton" inherits="GuildAdsConfig_CheckButton">
-			<Anchors>
-				<Anchor point="TOPLEFT" relativeTo="GuildAds_ChannelPasswordEditBox" relativePoint="BOTTOMLEFT">
-					<Offset>
-						<AbsDimension x="-110" y="-12" />
-					</Offset>
-				</Anchor>
-			</Anchors>
-			<Layers>
-				<Layer level="ARTWORK">
-					<FontString name="$parentLabel" inherits="GameFontNormalSmall" text="GUILDADS_CHAT_SHOW_NEWASK">
-						<Anchors>
-							<Anchor point="LEFT" relativePoint="RIGHT">
-								<Offset>
-									<AbsDimension x="5" y="1"/>
-								</Offset>
-							</Anchor>
-						</Anchors>
-					</FontString>
-				</Layer>
-			</Layers>
-			<Scripts>
-				<OnClick>
-					if ( this:GetChecked() ) then
-						GuildAdsTrade.setProfileValue(nil, "ShowNewAsk", true);
-						PlaySound("igMainMenuOptionCheckBoxOn");
-					else
-						GuildAdsTrade.setProfileValue(nil, "ShowNewAsk", nil);
-						PlaySound("igMainMenuOptionCheckBoxOff");
-					end
-				</OnClick>
-			</Scripts>
-		</CheckButton>
-
-		<CheckButton name="GuildAds_ChatShowNewHaveCheckButton" inherits="GuildAdsConfig_CheckButton">
-			<Anchors>
-				<Anchor point="TOPLEFT" relativeTo="GuildAds_ChatShowNewAskCheckButton" relativePoint="BOTTOMLEFT">
-					<Offset>
-						<AbsDimension x="0" y="0" />
-					</Offset>
-				</Anchor>
-			</Anchors>
-			<Layers>
-				<Layer level="ARTWORK">
-					<FontString name="$parentLabel" inherits="GameFontNormalSmall" text="GUILDADS_CHAT_SHOW_NEWHAVE">
-						<Anchors>
-							<Anchor point="LEFT" relativePoint="RIGHT">
-								<Offset>
-									<AbsDimension x="5" y="1"/>
-								</Offset>
-							</Anchor>
-						</Anchors>
-					</FontString>
-				</Layer>
-			</Layers>
-			<Scripts>
-				<OnClick>
-					if ( this:GetChecked() ) then
-						GuildAdsTrade.setProfileValue(nil, "ShowNewHave", true);
-						PlaySound("igMainMenuOptionCheckBoxOn");
-					else
-						GuildAdsTrade.setProfileValue(nil, "ShowNewHave", nil);
-						PlaySound("igMainMenuOptionCheckBoxOff");
-					end
-				</OnClick>
-			</Scripts>
-		</CheckButton>
 
 		</Frames>
 		<Scripts>

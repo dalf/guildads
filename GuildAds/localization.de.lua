@@ -1,10 +1,3 @@
--- German translation by Cloudernia of Alleria
--- Smilyman patch
--- 02/09/2005 : Poison
--- 02/09/2005 : Graurock 
--- 28/09/2005 : Add Zul'gurrub, Blackwing Lair, Arathi instance
--- 15/10/2005 : Replace "Ork" by "Orc"
-
 if ( GetLocale() == "deDE" ) then
 
 GUILDADS_TITLE = "GuildAds";
@@ -13,22 +6,25 @@ GUILDADS_TITLE = "GuildAds";
 GUILDADS_BUTTON_TIP = "Klicken um Guildads zu \195\182ffnen.";
 
 -- Config
-GUILDADS_CHAT_OPTIONS = "Chat Optionen"; -- tt
-GUILDADS_CHAT_USETHIS = "Benutze diesen Kanal :"; -- this
+GUILDADS_CHAT_OPTIONS = "Chat Optionen";
+GUILDADS_CHAT_USETHIS = "Benutze diesen Kanal :";
 GUILDADS_CHAT_CHANNEL = "Name";
-GUILDADS_CHAT_PASSWORD = "Passwort"; --this
-GUILDADS_CHAT_COMMAND = "Slash Befehl"; -- tt
-GUILDADS_CHAT_ALIAS = "Kanal Alias"; -- tt
-GUILDADS_CHAT_SHOW_NEWEVENT = "Zeige Aktualisierungen bei 'Event'"; -- tt
-GUILDADS_CHAT_SHOW_NEWASK = "Zeige Aktualisierungen bei 'Anfrage'"; -- tt
-GUILDADS_CHAT_SHOW_NEWHAVE = "Zeige Aktualisierungen bei 'Angebote'"; -- tt
-GUILDADS_ADS_OPTIONS = "Ads Optionen"; -- tt
+GUILDADS_CHAT_PASSWORD = "Passwort";
+GUILDADS_CHAT_COMMAND = "Slash Befehl";
+GUILDADS_CHAT_ALIAS = "Kanal Alias";
+GUILDADS_CHAT_SHOW_NEWEVENT = "Zeige Aktualisierungen bei 'Event'";
+GUILDADS_CHAT_SHOW_NEWASK = "Zeige Aktualisierungen bei 'Anfrage'";
+GUILDADS_CHAT_SHOW_NEWHAVE = "Zeige Aktualisierungen bei 'Angebote'";
+GUILDADS_ADS_OPTIONS = "Ads Optionen";
 GUILDADS_PUBLISH = "Ver\195\182ffentliche meine Anzeigen";
 GUILDADS_VIEWMYADS = "Zeige eigene Anzeigen";
-GUILDADS_ICON_OPTIONS = "Minikartensymbol Optionen"; -- tt
+GUILDADS_ICON_OPTIONS = "Minikartensymbol Optionen";
 GUILDADS_ICON = "Minikartensymbol";
 GUILDADS_ADJUST_ANGLE = "Winkel anpassen";
 GUILDADS_ADJUST_RADIUS = "Radius anpassen";
+
+GUILDADS_AUTOCHANNELCONFIG = "Automatische Channel Konfiguration";
+GUILDADS_MANUALCHANNELCONFIG = "Manuelle Channel Konfiguration";
 
 -- Main frame
 GUILDADS_MYADS = "Meine Anfragen";
@@ -39,8 +35,8 @@ GUILDADS_BUTTON_REMOVE = REMOVE;
 GUILDADS_QUANTITY = "Anzahl";
 GUILDADS_SINCE = "Seit %s";
 GUILDADS_SIMPLE_SINCE = "Seit";
-GUILDADS_ACCOUNT_NA = "Informationen nicht verf\195\188gbar"; -- tt
-GUILDADS_GROUPBYACCOUNT = "Nach Accounts gruppieren"; -- tt
+GUILDADS_ACCOUNT_NA = "Informationen nicht verf\195\188gbar";
+GUILDADS_GROUPBYACCOUNT = "Nach Accounts gruppieren";
 
 GUILDADS_TRADE_PROVIDER = "By";
 GUILDADS_TRADE_NUMBER="Nb";
@@ -133,36 +129,6 @@ GUILDADS_EQUIPMENT = "Ausr\195\188stung";
 
 -- Tooltip requests
 GUILDADS_ASKTOOLTIP = "Anfragen: %i";
---
-GUILDADS_EVENTS_TITLE = "Instanzen";
-GUILDADS_EVENTS = {
-	"Burg Shadowfang",
-	"Das Scharlachrotes Kloster",
-	"Der geschmolzene Kern",
-	"Der Kraal von Razorfen ",
-	"Der Ragefire Abgrund",
-	"Der Versunkene Tempel",
-	"Die Blackfeathom Tiefen",
-	"Die Todesminen",
-	"Die Blackrock Tiefen",
-	"Die H\195\182hlen des Wehklagens",
-	"Die H\195\188gel von Razorfen",
-	"Die Obere Blackrock Spitze",
-	"Die Untere Blackrock Spitze",
-	"Die Scholomance",
-	"D\195\188sterbruch",
-	"Gnomeregan",
-	"Maraudon",
-	"Onyxias Hort",
-	"Stratholme",
-	"Uldaman",
-	"Zul'Gurub",
-	"Pechschwingenhort",
-	"Zul'Farrak",
-	"PvP Alteractal",
-	"PvP Arathibecken",
-	"PvP Warsongschlucht"
-};
 
 -- GuildAds
 GUILDADS_TS_LINK = GUILDADS_TITLE;

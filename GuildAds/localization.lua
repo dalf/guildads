@@ -1,6 +1,3 @@
--- Version : English
--- 28/09/2005 : Add Zul'gurrub, Blackwing Lair, Arathi instance
-
 GUILDADS_TITLE				= "GuildAds";
 
 -- Minimap button
@@ -25,10 +22,15 @@ GUILDADS_ICON				= "Minimap icon";
 GUILDADS_ADJUST_ANGLE		= "Adjust angle";
 GUILDADS_ADJUST_RADIUS		= "Adjust radius";
 
+GUILDADS_AUTOCHANNELCONFIG  = "Automatic channel configuration";
+GUILDADS_MANUALCHANNELCONFIG= "Manual channel configuration";
+
+GUILDADS_ERROR_CHANNELNOTJOIN = "The GuildAds channel is not joined."
+
 -- Main frame
 GUILDADS_MYADS				= "My Ads";
 GUILDADS_BUTTON_ADDREQUEST	= "Ask";
-GUILDADS_BUTTON_ADDAVAILABLE	= "Have";
+GUILDADS_BUTTON_ADDAVAILABLE= "Have";
 GUILDADS_BUTTON_ADDEVENT	= "Participate";
 GUILDADS_BUTTON_REMOVE		= REMOVE;
 GUILDADS_QUANTITY			= "Quantity";
@@ -38,11 +40,12 @@ GUILDADS_ACCOUNT_NA			= "Information not available";
 GUILDADS_GROUPBYACCOUNT		= "Group by account";
 
 
-GUILDADS_TRADE_PROVIDER = "By";
-GUILDADS_TRADE_NUMBER="Nb";
-GUILDADS_TRADE_OBJECT="Item";
-GUILDADS_TRADE_ACTIVE="Active";
-GUILDADS_TRADE_TYPE="Type";
+GUILDADS_TRADE_PROVIDER 	= "By";
+GUILDADS_TRADE_NUMBER		= "Nb";
+GUILDADS_TRADE_OBJECT		= "Item";
+GUILDADS_TRADE_ACTIVE		= "Active";
+GUILDADS_TRADE_TYPE			= "Type";
+
 -- Column headers
 GUILDADS_HEADER_REQUEST		= "Ask";
 GUILDADS_HEADER_AVAILABLE	= "Have";
@@ -150,37 +153,6 @@ GUILDADS_EQUIPMENT = "Equipment";
 
 -- Tooltip requests
 GUILDADS_ASKTOOLTIP	= "%i request(s)";
-
--- Instances
-GUILDADS_EVENTS_TITLE = "Instances";
-GUILDADS_EVENTS		= {
-					"Ragefire Chasm",
-					"Deadmines",
-					"Wailing Caverns",
-					"Shadowfang Keep",
-					"Blackfeathom Deeps",
-					"Gnomeregan",
-					"Razorfen Kraul",
-					"The Scarlet Monastery",
-					"Razorfen Downs",
-					"Uldaman",
-					"Maraudon",
-					"Zul'Farrak",
-					"The Sunken Temple",
-					"Blackrock Depths",
-					"Blackrock Spire",
-					"Stratholme",
-					"Dire Maul",
-					"Scholomance",
-					"Upper Blackrock Spire",
-					"Onyxia Lair",
-					"Molten Core",
-					"Zul'Gurub",
-					"Blackwing Lair",
-					"BG Alterac",
-					"BG Arathi",
-					"BG Warsong"
-				};
 				
 -- GuildAds
 GUILDADS_TS_LINK			= GUILDADS_TITLE;
@@ -195,14 +167,14 @@ BINDING_NAME_SHOW_CONFIG	= "Show GuildAds configuration"
 GUILDADS_CMD = { "/guildads" }
 GUILDADS_CMD_OPTIONS = {
 	{
-			option = "toggle",
-			desc = BINDING_NAME_SHOW,
-			method = "ToggleMainWindow"
+		option = "toggle",
+		desc = BINDING_NAME_SHOW,
+		method = "ToggleMainWindow"
 	},
 	{
-			option = "options",
-			desc = BINDING_NAME_SHOW_CONFIG,
-			method = "ToggleOptionsWindow"
+		option = "options",
+		desc = BINDING_NAME_SHOW_CONFIG,
+		method = "ToggleOptionsWindow"
 	},
 	{
 		option = "debug",
