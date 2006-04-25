@@ -10,8 +10,8 @@
 
 SIMPLECOMM_DEBUG = false;				-- output debug information
 
-SIMPLECOMM_CHARACTERSPERTICK_MAX = 512;	-- char per tick
-SIMPLECOMM_OUTBOUND_TICK_DELAY = 1.5;	-- delay in second between tick
+SIMPLECOMM_CHARACTERSPERTICK_MAX = 300;	-- char per tick
+SIMPLECOMM_OUTBOUND_TICK_DELAY = 1;		-- delay in second between tick
 
 SIMPLECOMM_INBOUND_TICK_DELAY = 0.125;	-- TODO : change from 0.125 to 0.5 according to FPS
 
@@ -401,6 +401,7 @@ function SimpleComm_newChatFrame_OnEvent(event)
 			if SimpleComm_FilterText(arg1) then
 				return;
 			end
+			
 			-- the message is shown in this ChatFrame ?
 			local info;
 			local found = 0;
@@ -425,9 +426,9 @@ function SimpleComm_newChatFrame_OnEvent(event)
 			-- Hack to change the channel name :
 			-- ChatFrame_OnEvent shows "["..gsub(arg4, "%s%-%s.*", "").."] "..body
 			-- channelLength = strlen(arg4) is used to find if the channel is shown in this ChatFrame (as above)
-			-- -> arg4 is set to name we want to show concatenate with " - " which will delete by the gsub call
+			-- -> arg4 is set to name we want to show concatenate with " -" and many spaces which will delete by the gsub call
 			if (SimpleComm_chanSlashCmdUpper) then
-				arg4 = SimpleComm_chanAlias.." - ";   
+				arg4 = SimpleComm_chanAlias.." -                                ";
 			end
 		end
 		
