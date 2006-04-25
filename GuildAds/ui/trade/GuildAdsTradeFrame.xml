@@ -1596,9 +1596,9 @@
 					<AbsDimension x="100" y="16"/>
 				</Size>
 				<Anchors>
-					<Anchor point="TOPRIGHT" relativeTo="FilterTradeButton15" relativeFrom="TOPLEFT">
+					<Anchor point="TOPRIGHT" relativeTo="GuildAdsTradeFilterFrame" relativeFrom="BOTTOMRIGHT">
 						<Offset>
-							<AbsDimension x="-10" y="-30"/>
+							<AbsDimension x="-30" y="-345"/>
 						</Offset>
 					</Anchor>
 				</Anchors>

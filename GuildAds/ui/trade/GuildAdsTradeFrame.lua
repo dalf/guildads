@@ -1556,21 +1556,21 @@ GuildAdsTrade = {
 	-- 
 	---------------------------------------------------------------------------------
 	myAdCheckButton_OnClick =function()
-		local datatype;
-		local channelDB = GuildAdsDB.channel[GuildAds.channelName];
-		if adtype == GUILDADS_MSG_TYPE_AVAILABLE then
-			datatype = channelDB.TradeOffer;
-		elseif adtype == GUILDADS_MSG_TYPE_REQUEST then
-			datatype = channelDB.TradeNeed;
-		end
-		
-		local data = datatype:get(this.playerName, this.item);
-		if this:GetChecked() then
-			data._h = nil;
-		else
-			data._h = true;
-		end;
-		datatype:set(this.playerName, this.item, data);
+--~ 		local datatype;
+--~ 		local channelDB = GuildAdsDB.channel[GuildAds.channelName];
+--~ 		if adtype == GUILDADS_MSG_TYPE_AVAILABLE then
+--~ 			datatype = channelDB.TradeOffer;
+--~ 		elseif adtype == GUILDADS_MSG_TYPE_REQUEST then
+--~ 			datatype = channelDB.TradeNeed;
+--~ 		end
+--~ 		-- bug here 25 04 2006
+--~ 		local data = datatype:get(this.playerName, this.item);
+--~ 		if this:GetChecked() then
+--~ 			data._h = nil;
+--~ 		else
+--~ 			data._h = true;
+--~ 		end;
+--~ 		datatype:set(this.playerName, this.item, data);
 	end;
 	
 	};
