@@ -68,6 +68,7 @@ local SerializeCommand = {
 		[2] = { key="playerName",	codec="String" },
 		[3] = { key="fromRevision",	codec="Integer" },
 		[4] = { key="toRevision",	codec="Integer" },
+		[5] = { key="version",		codec="String" },
 	};
 	
 	N= {	-- New revision
@@ -515,12 +516,13 @@ end
 function GuildAdsComm:SendMeta(toPlayerName)
 	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendMeta");
 	SimpleComm_SendMessage(toPlayerName, GUILDADS_MSG_PREFIX.."M>"..GUILDADS_VERSION..">"..self.startTime..">"..table.getn(self.playerList)..">");
+	self:SendChatFlag(toPlayerName);
 end
 
-function GuildAdsComm:SendChatFlag()
+function GuildAdsComm:SendChatFlag(toPlayerName)
 	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendChatFlag");
 	local flag, message = SimpleComm_GetFlag(GuildAds.playerName);
-	SimpleComm_SendMessage(nil, GUILDADS_MSG_PREFIX.."CF>"..(flag or "")..">"..(message or "")..">");
+	SimpleComm_SendMessage(toPlayerName, GUILDADS_MSG_PREFIX.."CF>"..(flag or "")..">"..(message or "")..">");
 end
 
 function GuildAdsComm:SendSearch(dataType, playerName)
@@ -540,7 +542,7 @@ end
 
 function GuildAdsComm:SendOpenTransaction(dataType, playerName, fromRevision, toRevision)
 	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendOpenTransaction("..dataType.metaInformations.name..","..playerName..")");
-	SimpleComm_SendMessage(nil, GUILDADS_MSG_PREFIX.."OT>"..dataType.metaInformations.name..">"..playerName..">"..fromRevision..">"..toRevision..">");
+	SimpleComm_SendMessage(nil, GUILDADS_MSG_PREFIX.."OT>"..dataType.metaInformations.name..">"..playerName..">"..fromRevision..">"..toRevision..">"..dataType.metaInformations.version..">");
 end
 
 function GuildAdsComm:SendRevision(dataType, playerName, revision, id, data)
@@ -600,7 +602,7 @@ function GuildAdsComm:ParseMessage(playerName, message, channelName)
 				self:Standby(self.delay.Init);
 				-- send my information
 				GuildAdsTask:AddNamedSchedule("SendMeta", random(self.delay.AnswerMeta), nil, nil, self.SendMeta, self, playerName);
-				-- delete and queue again all search
+				-- delete and queue again all searchs
 				for _, DTS in self.DTS do
 					DTS:RestartAllSearches()
 				end
