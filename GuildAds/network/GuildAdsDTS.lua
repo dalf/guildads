@@ -116,6 +116,7 @@ function GuildAdsDTS:ReceiveRevision(childPlayerName, playerName, who, revision,
 		return;
 	end
 	local result = self.search[playerName];
+	-- TODO : handle the case, playerName has reset, so he has a lower revision but we must update to this one.
 	if  (revision>result.bestRevision) or
 		(result.bestRevision==revision and weight>result.bestWeight) then
 		result.bestPlayerName = who;
@@ -154,7 +155,7 @@ function GuildAdsDTS:ReceiveSearchResult(playerName, who, fromRevision, toRevisi
 	if self.search[playerName] then
 		
 		if (GuildAds.playerName==who) and (fromRevision<toRevision) then
-			GuildAdsComm:QueueTransaction(self, playerName, fromRevision, self.dataType:getRevision(playerName));
+			GuildAdsComm:QueueTransaction(self, playerName, fromRevision, self.dataType:getRevision(playerName) or 0);
 		end
 		
 		self.search[playerName] = nil;
@@ -169,7 +170,7 @@ end
 
 function GuildAdsDTS:SendTransaction(playerName, fromRevision)
 	-- send open transaction
-	GuildAdsComm:SendOpenTransaction(self.dataType, playerName, fromRevision, self.dataType:getRevision(playerName));
+	GuildAdsComm:SendOpenTransaction(self.dataType, playerName, fromRevision, self.dataType:getRevision(playerName) or 0);
 	
 	if self.dataType.schema.data then
 		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"data");
@@ -224,6 +225,8 @@ end
 --------------------------------------------------------------------------------
 
 function GuildAdsDTS:ReceiveOpenTransaction(transaction, playerName, fromRevision, toRevision)
+	-- TODO : don't accept transaction about myself(me and reroll) from other player
+	-- TODO : handle the case fromRevision is lower than toRevision
 	if self.dataType:getRevision(playerName)<toRevision then
 		transaction._valid = true;
 	end
