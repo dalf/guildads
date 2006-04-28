@@ -719,6 +719,10 @@ end
 -- 
 --------------------------------------------------------------------------------
 function GuildAdsComm:DeleteDuplicateTransaction(DTS, playerName, fromRevision, toRevision)
+	-- TODO : delete this, and find the bug
+	toRevision = toRevison or 0;
+	fromRevision = fromRevision or 0;
+	-- 
 	local i = 1;
 	while self.transactionQueue[i] do
 		local transaction = self.transactionQueue[i];
@@ -762,6 +766,10 @@ function GuildAdsComm:FindSearch(DTS, playerName)
 end
 
 function GuildAdsComm:QueueTransaction(DTS, playerName, fromRevision, toRevsion)
+	-- TODO : delete this, and find the bug
+	toRevision = toRevison or 0;
+	fromRevision = fromRevision or 0;
+	-- 
 	self:DeleteDuplicateTransaction(DTS, playerName, fromRevision, toRevision);
 	table.insert(self.transactionQueue, { DTS=DTS, playerName=playerName, fromRevision=fromRevision, toRevision=toRevision });
 	if not self.transactionQueueDelay then
