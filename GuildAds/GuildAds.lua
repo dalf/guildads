@@ -221,10 +221,9 @@ function GuildAds:CheckChannelConfig()
 	if 		self.channelJoined 
 		and (channelName ~= self.channelName or	channelPassword ~= self.channelPassword) then
 		GuildAds.channelJoined = false;
+		GuildAdsComm:LeaveChannel()
 		if channelName then
 			self:JoinChannel();
-		else
-			self:LeaveChannel();
 		end
 	end
 end
@@ -241,7 +240,7 @@ function GuildAds:GetDefaultChannel()
 		if self.guildName then
 			-- channel name bases on the guild info text
 			local startIndex;
-			startIndex, _, channel, password = string.find(GetGuildInfoText() or "", "%[GA:([^,%]]+)([^%]]*)%]");
+			startIndex, _, channel, password = string.find(GetGuildInfoText() or "", "%[GA:([^,%]]+),?([^%]]*)%]");
 			if startIndex then
 				if password=="" then
 					password=nil;

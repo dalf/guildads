@@ -134,31 +134,18 @@ function GuildAdsComm:Initialize()
 	self.startTime = GuildAdsDB:GetCurrentTime();
 
 	SimpleComm_PreInit(
-		GuildAdsComm.FilterText,
-		GuildAdsComm.FilterMessage,
-		GuildAdsComm.SplitSerialize,
-		GuildAdsComm.UnsplitSerialize,
-		GuildAdsComm.OnJoin,
-		GuildAdsComm.OnLeave,
-		GuildAdsComm.OnMessage
+		self.FilterText,
+		self.FilterMessage,
+		self.SplitSerialize,
+		self.UnsplitSerialize,
+		self.OnJoin,
+		self.OnLeave,
+		self.OnMessage,
+		self.ChatFlagListener
 	);
 	
 	self:RegisterEvent("CHAT_MSG_CHANNEL_JOIN");
 	self:RegisterEvent("CHAT_MSG_CHANNEL_LEAVE");
-	
-	SimpleComm_SetFlagListener(self.SendChatFlag);
-end
-
-function GuildAdsComm:GetGuildChatFrame()
-	for i=1,NUM_CHAT_WINDOWS,1 do
-		local DefaultMessages = { GetChatWindowMessages(i) };
-		for k, channel in DefaultMessages do
-			if channel == "GUILD" then
-				return getglobal("ChatFrame"..i);
-			end
-		end
-	end
-	return DEFAULT_CHAT_FRAME;
 end
 
 function GuildAdsComm:JoinChannel(channel, password)
@@ -168,21 +155,21 @@ function GuildAdsComm:JoinChannel(channel, password)
 	self.channelPassword = password
 	
 	if self.alreadyJoined then
-		SimpleComm_SetChannel(channel, password);
+		SimpleComm_JoinNew(channel, password);
 	else
-		SimpleComm_Init(channel, password, self:GetGuildChatFrame());
+		SimpleComm_Join(channel, password);
 		self.alreadyJoined = true;
 	end
 
 	local command, alias = GuildAds:GetDefaultChannelAlias();
-	SimpleComm_InitAlias(command, alias);
+	SimpleComm_SetAlias(command, alias);
 end
 
 function GuildAdsComm:LeaveChannel()
 	LoggingChat(false);
 	
 	if self.channelName then
-		LeaveChannelByName(self.channelName);
+		SimpleComm_Leave();
 	
 		self.channelName = nil
 		self.channelPassword = nil
@@ -337,6 +324,10 @@ function GuildAdsComm.OnLeave(self)
 	end
 	
 	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "[GuildAdsComm.OnLeave] end");
+end
+
+function GuildAdsComm.ChatFlagListener(flag, message)
+	GuildAdsComm:SendChatFlag();
 end
 
 function GuildAdsComm:CHAT_MSG_CHANNEL_JOIN()

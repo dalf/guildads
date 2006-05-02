@@ -117,17 +117,6 @@ local function SimpleComm_initChannel()
 	end
 end
 
-local function SimpleComm_doneChannel()
-	DEBUG_MSG("[SimpleComm_doneChannel] begin");
-	SimpleCommFrame.outbound = nil;
-	if ( GetChannelName(SimpleComm_Channel) ~= 0) then
-		LeaveChannelByName(SimpleComm_Channel);
-		SimpleComm_Channel = nil;
-		SimpleComm_Password = nil;
-	end
-	DEBUG_MSG("[SimpleComm_doneChannel] end");
-end
-
 ---------------------------------------------------------------------------------
 --
 -- Alias
@@ -636,7 +625,7 @@ function SimpleComm_SendMessage(who, text, delay)
 	end
 end
 
-function SimpleComm_PreInit(FilterText, FilterMessage, SplitSerialize, UnsplitSerialize, OnJoin, OnLeave, OnMessage)
+function SimpleComm_PreInit(FilterText, FilterMessage, SplitSerialize, UnsplitSerialize, OnJoin, OnLeave, OnMessage, FlagListener)
 	SimpleComm_FilterText = FilterText;
 	SimpleComm_FilterMessage = FilterMessage;
 	
@@ -646,12 +635,14 @@ function SimpleComm_PreInit(FilterText, FilterMessage, SplitSerialize, UnsplitSe
 	SimpleComm_Handler = OnMessage;
 	SimpleComm_JoinHandler = OnJoin;
 	SimpleComm_LeaveHandler = OnLeave;
+	
+	SimpleComm_FlagListener = FlagListener;
+	
+	SimpleComm_ChatFrame = DEFAULT_CHAT_FRAME;
 end
 
-function SimpleComm_Init(Channel, Password, ChatFrame)
-	DEBUG_MSG("[SimpleComm_Init] begin");
-	-- Pour la reception
-	SimpleComm_ChatFrame = ChatFrame;
+function SimpleComm_Join(Channel, Password)
+	DEBUG_MSG("[SimpleComm_Join] begin");
 	
 	-- Init Channel
 	SimpleComm_Channel = Channel;
@@ -672,11 +663,58 @@ function SimpleComm_Init(Channel, Password, ChatFrame)
 	-- Set timer
 	SimpleCommFrame:Show();
 	
-	DEBUG_MSG("[SimpleComm_Init] end");
+	DEBUG_MSG("[SimpleComm_Join] end");
 end
 
-function SimpleComm_InitAlias(chanSlashCmd, chanAlias)
-	DEBUG_MSG("[SimpleComm_InitAlias] begin");
+function SimpleComm_JoinNew(Channel, Password)
+	DEBUG_MSG("[SimpleComm_JoinNew] begin");
+	if (Channel ~= SimpleComm_Channel) then
+		
+		-- set channel
+		SimpleComm_Channel = Channel;
+		SimpleComm_Password = Password;
+		
+		-- init alias / joinHandler
+		local onChannelNow = (GetChannelName(SimpleComm_Channel) ~= 0);
+		if (onChannelNow) then
+			SimpleComm_JoinHandler();
+			if (SimpleComm_chanSlashCmd) then
+				SimpleComm_SetAliasChannel();
+			end
+		else
+			-- call SimpleComm_initChannel in 2 seconds
+			SimpleCommFrame.initChannel = 2;
+		end
+	end
+	DEBUG_MSG("[SimpleComm_JoinNew] end");
+end
+
+function SimpleComm_Leave()
+	DEBUG_MSG("[SimpleComm_Leave] begin");
+	-- unset alias
+	if (SimpleComm_chanSlashCmd) then
+		SimpleComm_UnsetAliasChannel();
+	end
+	
+	-- call to SimpleComm_LeaveHandler
+	if (SimpleComm_LeaveHandler) then
+		SimpleComm_LeaveHandler();
+	end
+	
+	-- leave channel
+	SimpleCommFrame.outbound = nil;
+	if ( GetChannelName(SimpleComm_Channel) ~= 0) then
+		LeaveChannelByName(SimpleComm_Channel);
+	end
+	
+	-- set channel
+	SimpleComm_Channel = nil;
+	SimpleComm_Password = nil;
+	DEBUG_MSG("[SimpleComm_Leave] end");
+end
+
+function SimpleComm_SetAlias(chanSlashCmd, chanAlias)
+	DEBUG_MSG("[SimpleComm_SetAlias] begin");
 	-- unset previous alias
 	if (SimpleComm_chanSlashCmd) then
 		SimpleComm_UnsetAliasChannel();
@@ -689,32 +727,5 @@ function SimpleComm_InitAlias(chanSlashCmd, chanAlias)
 	
 	SimpleComm_aliasMustBeSet = true;
 	SimpleComm_SetAliasChannel();
-	DEBUG_MSG("[SimpleComm_InitAlias] end");
-end
-
-function SimpleComm_SetChannel(Channel, Password)
-	if (Channel ~= SimpleComm_Channel) then
-		-- done
-		if (SimpleComm_chanSlashCmd) then
-			SimpleComm_UnsetAliasChannel();
-		end
-		SimpleComm_doneChannel();
-		-- set channel
-		SimpleComm_Channel = Channel;
-		SimpleComm_Password = Password;
-		-- init alias / joinHandler
-		local onChannelNow = (GetChannelName(SimpleComm_Channel) ~= 0);
-		if (onChannelNow) then
-			SimpleComm_JoinHandler();
-			if (SimpleComm_chanSlashCmd) then
-				SimpleComm_SetAliasChannel();
-			end
-		end
-		-- call SimpleComm_initChannel in 2 seconds
-		SimpleCommFrame.initChannel = 2;
-	end
-end
-
-function SimpleComm_SetFlagListener(flagListener)	
-	SimpleComm_FlagListener = flagListener;
+	DEBUG_MSG("[SimpleComm_SetAlias] end");
 end
