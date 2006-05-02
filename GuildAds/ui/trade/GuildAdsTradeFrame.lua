@@ -1045,16 +1045,15 @@ GuildAdsTrade = {
 			
 			owner = function(a, b)
 				if a.p and b.p then
-					if type(a)=="table" then
-						-- TODO : patch this dirty code...
-						local ap = table.concat(a.p,", ");
+					if type(a.p)=="table" then
+						local ap = table.concat(a.p,", ");	-- BUG : string/table problem
 						local bp = table.concat(b.p,", ");
 						if ap<bp then
 							return false;
 						elseif ap>bp then
 							return true;
 						end
-					elseif (type(a)=="string") then
+					elseif (type(a.p)=="string") then
 						if (a.p < b.p) then
 							return false;
 						elseif (a.p > b.p) then
