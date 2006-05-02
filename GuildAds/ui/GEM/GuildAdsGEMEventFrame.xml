@@ -60,9 +60,6 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 						</Offset>
 					</Anchor>
 				</Anchors>
-				<Frames>
-					<Button name="GuildAdsGEMEventTab" inherits="GuildAdsWindowTabTemplate" text="GUILDADS_HEADER_EVENT" />
-			</Frames>
 			</Frame>
 			
 		</Frames>
@@ -75,5 +72,8 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 			</OnShow>
 		</Scripts>
 	</Frame>
+	
+	<Button name="GuildAdsGEMEventTab" inherits="GuildAdsWindowTabTemplate" text="GUILDADS_HEADER_EVENT" />
+	<Button name="GuildAdsGEMOptionTab" inherits="GuildAdsWindowTabTemplate" text="GUILDADS_HEADER_EVENT" />
 	
 </Ui>

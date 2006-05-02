@@ -22,6 +22,11 @@ GuildAdsGEMEvent = {
 				tab = "GuildAdsGEMEventTab",
 				tooltip = "Event tab",
 				priority = 3
+			},
+			options = {
+				frame = "GEMOptionsFrame",
+				tab = "GuildAdsGEMOptionTab",
+				priority = 3
 			}
 		}
 	
@@ -54,6 +59,20 @@ GuildAdsGEMEvent = {
 			GEMNewFrame:SetPoint("TOPLEFT","GuildAdsMainWindowFrame","TOPLEFT",22,-58);
 			GEMNewFrame:SetFrameLevel(2);
 			
+			GEMOptionsFrame:SetParent("GuildAdsOptionsWindowFrame");
+			GEMOptionsFrame:ClearAllPoints();
+			GEMOptionsFrame:SetPoint("TOPLEFT","GuildAdsOptionsWindowFrame","TOPLEFT",-42, -30);
+			GEM_MinimapArcSlider:Hide();
+			GEM_MinimapRadiusSlider:Hide();
+			i = 1;
+			while getglobal("GEMOptions_Icon"..i) do
+				getglobal("GEMOptions_Icon"..i):Hide();
+				i=i+1;
+			end
+			GEMOptions_Validate:Hide();
+			GEMOptionsFrame_IconChoice:Hide();
+			GEMOptionsFrame:SetFrameLevel(2);
+			
 			-- init tab in GA
 			PanelTemplates_SelectTab(GuildAds_GEMEventTab1);
 			PanelTemplates_DeselectTab(GuildAds_GEMEventTab2);
@@ -74,6 +93,14 @@ GuildAdsGEMEvent = {
 			GEMMain_SelectTab = GuildAdsGEMEvent.GEMSelectTab;
 		end;
 	end;
+	
+	saveOptions = function()
+		GEMOptions_Click_Validate();
+		GEM_Toggle();
+	end;
+	
+	defaultsOptions = function()
+	end;
 		
 	onShow = function() 
 		if firstShow then
@@ -83,26 +110,26 @@ GuildAdsGEMEvent = {
 	end;
 	
 	onChannelJoin = function()
-		-- simple integration : one channel
-		local alias = ""; -- GEM_COM_Channels[GEM_DefaultSendChannel].alias;
-		local slash = ""; -- GEM_COM_Channels[GEM_DefaultSendChannel].slash;
+		local ChannelAddedByGA;
+		local channelName, password = GuildAds:GetDefaultChannel();
 		
-		local channel, password = GuildAds:GetDefaultChannel();
-		
-		if strupper(channel) ~= strupper(GEM_DefaultSendChannel) then
-			-- leave default channel
-			GuildAdsGEMEvent.debug("Remove channel :"..GEM_DefaultSendChannel);
-			GEMOptions_RemoveChannel(GEM_DefaultSendChannel);	
-			-- join GuildAds channel
-			GuildAdsGEMEvent.debug("Add channel :"..channel);
-			GEMOptions_AddChannel(channel,password,alias,slash);
+		-- add GA channel to the GEM channel list
+		if not GEM_IsChannelInList(string.lower(channelName)) then
+			GEMOptions_AddChannel(channelName, password or "", "", "");	-- channelName, password, alias, slash
+			ChannelAddedByGA = channelName;
 		end
+		-- update ChannelAddedByGA
+		GuildAdsGEMEvent.setProfileValue(nil, "ChannelAddedByGA", ChannelAddedByGA);
 	end;
 	
 	onChannelLeave = function()
-		local channel = GuildAds:GetDefaultChannel();
-		GuildAdsGEMEvent.debug("Remove channel :"..channel);
-		GEMOptions_RemoveChannel(channel);
+		GuildAdsGEMEvent.debug("onChannelLeave");
+--~ 		-- delete previous GA channel from the the GEM channel list
+--~ 		if GuildAdsGEMEvent.getProfileValue(nil, "ChannelAddedByGA") then
+--~ 			local channelName = GuildAdsGEMEvent.getProfileValue(nil, "ChannelAddedByGA");
+--~ 			GuildAdsGEMEvent.debug("   - leave : "..channelName..","..tostring(GEM_COM_Channels[channelName]));
+--~ 			GEMOptions_RemoveChannel(GuildAdsGEMEvent.getProfileValue(nil, "ChannelAddedByGA"));
+--~ 		end
 	end;
 	
 	GEMSelectTab = function(tab)
@@ -129,6 +156,6 @@ GuildAdsGEMEvent = {
 			GEMListFrame:Hide();
 			GuildListAdCustomEventFrame:Show();
 			GEMNewFrame:Show();
-		end;
+		end
 	end;
 }
