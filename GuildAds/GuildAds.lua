@@ -72,6 +72,10 @@ function GuildAds:Initialize()
 	-- Initialize network
 	GuildAdsComm:Initialize()
 	
+	-- LoadGuildRosterTask
+	self:LoadGuildRosterTask();
+	GuildAdsTask:AddNamedSchedule("LoadGuildRosterTask", 240, true, nil, self.LoadGuildRosterTask, self);
+	
 	-- Register plugins
 	GuildAds_ChatDebug(GA_DEBUG_GLOBAL,"[GuildAdsPlugin_RegisterPlugins] begin");
 	GuildAdsPlugin_RegisterPlugins();
@@ -206,8 +210,17 @@ end
 function GuildAds:ResetOthers()
 end
 
+function GuildAds:LoadGuildRosterTask()
+	if IsInGuild() then
+		GuildRoster();
+	end
+end
+
 function GuildAds:PLAYER_GUILD_UPDATE()
-	self.guildName = GetGuildInfo("player");
+	local guildName = GetGuildInfo("player");
+	if guildName ~= self.guildName then
+		self:LoadGuildRosterTask();
+	end
 	self:CheckChannelConfig();
 end
 
