@@ -35,11 +35,9 @@ GuildAds = AceAddon:new({
     defaults      = DEFAULT_OPTIONS,
     cmd           = AceChatCmd:new(GUILDADS_CMD, GUILDADS_CMD_OPTIONS),
 	
-	channelJoined   	= false,			--- Is GuildAds channelJoined?
-	joinChannelAttempts = 0,
-	channelName			= "",
-	channelPassword		= "",
-	channelNameFrom		= "",				-- channel name from : user, guildInfo, guildName
+	channelName			= nil,
+	channelPassword		= nil,
+	channelNameFrom		= nil,				-- channel name from : user, guildInfo, guildName
 	playerName 			= false,
 	guildName			= false,
 	windows				= {},
@@ -47,9 +45,6 @@ GuildAds = AceAddon:new({
 
 function GuildAds:Initialize()
 	GuildAds_ChatDebug(GA_DEBUG_GLOBAL,"[GuildAds:Initialize] begin");
-	
-	-- Start uninitialized
-	GuildAds.channelJoined = false;
 	
 	-- Init player name, faction name, realm name
 	self.playerName = UnitName("player");
@@ -102,32 +97,13 @@ end
 
 function GuildAds:JoinChannel()
 	GuildAds_ChatDebug(GA_DEBUG_GLOBAL,"[GuildAds:JoinChannel] begin");
-
-	-- already init ?
-	if GuildAds.channelJoined then
-		return;
-	end
-	
-	-- does general channels exists ? if not delayed init
-	local firstChannelNumber = GetChannelList();
-	if (firstChannelNumber == nil) then
-		GuildAds_ChatDebug(GA_DEBUG_GLOBAL,"[GuildAds:JoinChannel] delay 2 seconds");
-		self.joinChannelAttempts = self.joinChannelAttempts +1;
-		if (self.joinChannelAttempts <= GUILDADS_MAX_CHANNEL_JOIN_ATTEMPTS) then
-			GuildAdsTask:AddNamedSchedule("JoinChannel", 2, nil, nil, self.JoinChannel, self);
-			return;
-		end
-	end
 	
 	-- Init du channel
 	self.channelName, self.channelPassword, self.channelNameFrom = self:GetDefaultChannel();
 	
 	if self.channelName then
-		-- GuildAdsComm : init
-		GuildAdsComm:JoinChannel(self.channelName, self.channelPassword)
-	
-		-- Init first step done
-		GuildAds.channelJoined = true;
+		local command, alias = GuildAds:GetDefaultChannelAlias();
+		GuildAdsComm:JoinChannel(self.channelName, self.channelPassword, command, alias);
 	end
 	
 	GuildAds_ChatDebug(GA_DEBUG_GLOBAL,"[GuildAds:JoinChannel] end");
@@ -146,7 +122,7 @@ function GuildAds:ToggleOptionsWindow()
 end
 
 function GuildAds:ToggleWindow(name)
-	if (self.channelJoined) then
+	if (self.channelName) then
 		local frame = getglobal(self.windows[name].frame)
 		if frame:IsVisible() then
 			frame:Hide();
@@ -154,23 +130,23 @@ function GuildAds:ToggleWindow(name)
 			frame:Show();
 		end
 	else
-		self.cmd:error(GUILDADS_ERROR_CHANNELNOTJOIN);
+		self.cmd:error(GUILDADS_ERROR_NOTINITIALIZED);
 	end
 end
 
 function GuildAds:ShowWindow(name)
-	if (self.channelJoined) then
+	if (self.channelName) then
 		getglobal(self.windows[name].frame):Show();
 	else
-		self.cmd:error(GUILDADS_ERROR_CHANNELNOTJOIN);
+		self.cmd:error(GUILDADS_ERROR_NOTINITIALIZED);
 	end
 end
 
 function GuildAds:HideWindow(name)
-	if (self.channelJoined) then
+	if (self.channelName) then
 		getglobal(self.windows[name].frame):Hide();
 	else
-		self.cmd:error(GUILDADS_ERROR_CHANNELNOTJOIN);
+		self.cmd:error(GUILDADS_ERROR_NOTINITIALIZED);
 	end
 end
 
@@ -185,6 +161,8 @@ function GuildAds:ToggleDebugOff()
 end
 
 function GuildAds:DisplayDebugInfo()
+	local status, message = GuildAdsComm:GetChannelStatus();
+	message = message and status.."("..message..")" or status;
 	self.cmd:report({
 		{text="version", val=GUILDADS_VERSION },
 		{text="player name", val=tostring(self.playerName) },
@@ -192,14 +170,12 @@ function GuildAds:DisplayDebugInfo()
 		{text="account", val=tostring(GuildAdsDB.account) },
 		{text="faction", val=tostring(self.factionName) },
 		{text="realm", val=tostring(self.realmName) },
-		{text="channelJoined", val=self.channelJoined and TRUE or FALSE, map=ACEG_MAP_ONOFF},
 		{text="channel", val=tostring(self.channelName) },
-		{text="joinChannelAttempts", val=tostring(self.joinChannelAttempts) }
+		{text="channel status", val=tostring(message) }
 	});
 end
 
 function GuildAds:ResetAll()
-	self.channelJoined = false;
 	GuildAdsDatabase.Version = "reset";
 	ReloadUI();
 end
@@ -231,12 +207,11 @@ end
 
 function GuildAds:CheckChannelConfig()
 	local channelName, channelPassword = self:GetDefaultChannel();
-	if 		self.channelJoined 
+	if 		self.channelName 
 		and (channelName ~= self.channelName or	channelPassword ~= self.channelPassword) then
-		GuildAds.channelJoined = false;
 		GuildAdsComm:LeaveChannel()
 		if channelName then
-			self:JoinChannel();
+			GuildAdsTask:AddNamedSchedule("JoinChannel", 2, nil, nil, self.JoinChannel, self)
 		end
 	end
 end

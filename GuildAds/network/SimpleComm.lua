@@ -24,17 +24,22 @@ SimpleComm_ChatFrame = nil;
 SimpleComm_JoinHandler = nil;
 SimpleComm_LeaveHandler = nil;
 
-local SimpleComm_Handler = nil;
-local SimpleComm_FilterText = nil;
-local SimpleComm_FilterMessage = nil;
+local SimpleComm_FirstJoin = true;
 
-local SimpleComm_oldChatFrame_OnEvent = nil;
+local SimpleComm_Handler;
+local SimpleComm_FilterText;
+local SimpleComm_FilterMessage;
+
+local SimpleComm_Status = "Starting";
+local SimpleComm_StatusMessage;
+
+local SimpleComm_oldChatFrame_OnEvent;
 
 SimpleComm_oldSendChatMessage = nil;
-local SimpleComm_chanSlashCmd = nil;
-local SimpleComm_chanSlashCmdUpper = nil;
+local SimpleComm_chanSlashCmd;
+local SimpleComm_chanSlashCmdUpper;
 
-local SimpleComm_FlagListener = nil;
+local SimpleComm_FlagListener;
 
 local SimpleComm_messageQueueHeader = {};
 local SimpleComm_messageQueueLast = SimpleComm_messageQueueHeader;
@@ -46,7 +51,7 @@ local SimpleComm_messageQueueLast = SimpleComm_messageQueueHeader;
 local SimpleComm_inboundMessageQueue = {};
 	
 local SimpleComm_sentBytes = 0;
-local SimpleComm_channelId = nil;
+local SimpleComm_channelId;
 SimpleComm_YouAreDrunk = false;
 
 SimpleComm_Disconnected = {};
@@ -59,6 +64,8 @@ SimpleComm_FlagTestMessage = "-= SimpleComm test message =-";
 SimpleComm_WaitingForFlagTest = false;
 
 local SimpleComm_messageStack = {};
+
+local dataChannelLib = DataChannelLib:GetInstance("1");
 
 ---------------------------------------------------------------------------------
 --
@@ -81,40 +88,6 @@ end
 function SimpleComm_OnLoad()
 	this:RegisterEvent("CHAT_MSG_WHISPER");
 	this:RegisterEvent("CHAT_MSG_CHANNEL");
-	this:RegisterEvent("CHAT_MSG_CHANNEL_NOTICE");
-end
-
----------------------------------------------------------------------------------
---
--- Init
--- 
----------------------------------------------------------------------------------
-local function SimpleComm_initChannel()
-	DEBUG_MSG("[SimpleComm_initChannel] begin");
-	SimpleComm_messageQueue = { };
-	SimpleCommFrame.outbound = SIMPLECOMM_OUTBOUND_TICK_DELAY;
-	if ( GetChannelName(SimpleComm_Channel) == 0) then
-		local zoneChannel, channelName = JoinChannelByName(SimpleComm_Channel, SimpleComm_Password, SimpleComm_ChatFrame:GetID());
-		
-		if (zoneChannel ~= 0) then
-			local name = SimpleComm_Channel;
-			if ( channelName ) then
-				name = channelName;
-			end
-			
-			local i = 1;
-			while ( SimpleComm_ChatFrame.channelList[i] ) do
-				i = i + 1;
-			end
-			SimpleComm_ChatFrame.channelList[i] = name;
-			SimpleComm_ChatFrame.zoneChannelList[i] = zoneChannel;
-		end
-		DEBUG_MSG("[SimpleComm_initChannel] end - has to wait");
-		return false;
-	else
-		DEBUG_MSG("[SimpleComm_initChannel] end - already joined");
-		return true;
-	end
 end
 
 ---------------------------------------------------------------------------------
@@ -355,28 +328,6 @@ function SimpleComm_ParseEvent(event)
 		elseif (event == "CHAT_MSG_WHISPER") then
 			SimpleComm_Disconnected[arg2] = nil;
 			SimpleComm_ParseMessage(arg2, arg1, nil);
-		
-		elseif ((event == "CHAT_MSG_CHANNEL_NOTICE") and (arg8 == SimpleComm_channelId)) then
-			if (arg1 == "YOU_JOINED") then
-				if (SimpleComm_Password) then
-					SetChannelPassword(SimpleComm_Channel, SimpleComm_Password);
-				end
-				if (SimpleComm_chanSlashCmd) then
-					SimpleComm_SetAliasChannel();
-				end
-				if (SimpleComm_JoinHandler) then
-					SimpleComm_JoinHandler();
-				end
-			elseif (arg1 == "YOU_LEFT") then
-				if (SimpleComm_chanSlashCmd) then
-					SimpleComm_UnsetAliasChannel();
-				end
-				if (SimpleComm_LeaveHandler) then
-					SimpleComm_LeaveHandler();
-				end
-			elseif (arg1 == "WRONG_PASSWORD") then
-				-- TODO : leave the channel, and rejoin, or just the wrong password
-			end
 		end
 		
 	end
@@ -522,6 +473,41 @@ ChatFrame_OnEvent = SimpleComm_newChatFrame_OnEvent;
 
 ---------------------------------------------------------------------------------
 --
+-- DataChannelLib callback
+-- 
+---------------------------------------------------------------------------------
+function SimpleComm_Callback(event, channelName, a1)
+	if event==dataChannelLib.YOU_JOINED then
+		if (SimpleComm_chanSlashCmd) then
+			SimpleComm_SetAliasChannel();
+		end
+		if (SimpleComm_JoinHandler) then
+			SimpleComm_JoinHandler();
+		end
+		SimpleCommFrame.outbound = SIMPLECOMM_OUTBOUND_TICK_DELAY;
+		SimpleComm_channelId = a1;
+		SimpleComm_SetChannelStatus("Connected");
+	elseif event==dataChannelLib.YOU_LEFT then
+		if (SimpleComm_chanSlashCmd) then
+			SimpleComm_UnsetAliasChannel();
+		end
+		if (SimpleComm_LeaveHandler) then
+			SimpleComm_LeaveHandler();
+		end
+		SimpleComm_SetChannelStatus("Disconnected");
+	elseif event==dataChannelLib.TOO_MANY_CHANNELS then
+		SimpleComm_SetChannelStatus("Error", GUILDADS_ERROR_TOOMANYCHANNELS)
+	elseif event==dataChannelLib.WRONG_NAME then
+		SimpleComm_SetChannelStatus("Error", GUILDADS_ERROR_JOINCHANNELFAILED)
+	elseif event==dataChannelLib.WRONG_PASSWORD then
+		SimpleComm_SetChannelStatus("Error", GUILDADS_ERROR_WRONGPASSWORD)
+	elseif event==dataChannelLib.PASSWORD_CHANGED then
+		SimpleComm_Password = a1;
+	end
+end
+
+---------------------------------------------------------------------------------
+--
 -- Timer
 -- 
 ---------------------------------------------------------------------------------
@@ -545,14 +531,6 @@ function SimpleComm_OnUpdate(elapsed)
 				this.inbound = nil;
 			end
 			SimpleComm_Handler(message[1], message[2], message[3]);
-		end
-	end
-	
-	if (this.initChannel) then
-		this.initChannel = this.initChannel - elapsed;
-		if (this.initChannel <= 0) then
-			SimpleComm_initChannel();
-			this.initChannel = nil;
 		end
 	end
 end
@@ -597,7 +575,7 @@ end
 
 ---------------------------------------------------------------------------------
 --
--- Fonctions publiques
+-- Public functions
 -- 
 ---------------------------------------------------------------------------------
 function SimpleComm_SendMessage(who, text, delay)
@@ -625,7 +603,19 @@ function SimpleComm_SendMessage(who, text, delay)
 	end
 end
 
-function SimpleComm_PreInit(FilterText, FilterMessage, SplitSerialize, UnsplitSerialize, OnJoin, OnLeave, OnMessage, FlagListener)
+function SimpleComm_SetChannelStatus(status, message)
+	SimpleComm_Status = status;
+	SimpleComm_StatusMessage = message;
+	if SimpleComm_StatusListener then
+		SimpleComm_StatusListener(SimpleComm_Status, SimpleComm_StatusMessage);
+	end
+end
+
+function SimpleComm_GetChannelStatus()
+	return SimpleComm_Status, SimpleComm_StatusMessage;
+end
+
+function SimpleComm_Initialize(FilterText, FilterMessage, SplitSerialize, UnsplitSerialize, OnJoin, OnLeave, OnMessage, FlagListener, StatusListener)
 	SimpleComm_FilterText = FilterText;
 	SimpleComm_FilterMessage = FilterMessage;
 	
@@ -637,8 +627,12 @@ function SimpleComm_PreInit(FilterText, FilterMessage, SplitSerialize, UnsplitSe
 	SimpleComm_LeaveHandler = OnLeave;
 	
 	SimpleComm_FlagListener = FlagListener;
+	SimpleComm_StatusListener = StatusListener;
 	
 	SimpleComm_ChatFrame = DEFAULT_CHAT_FRAME;
+	
+	dataChannelLib:RegisterAddon("GuildAds", SimpleComm_Callback);
+	SimpleComm_SetChannelStatus("Initializing");
 end
 
 function SimpleComm_Join(Channel, Password)
@@ -647,65 +641,32 @@ function SimpleComm_Join(Channel, Password)
 	-- Init Channel
 	SimpleComm_Channel = Channel;
 	SimpleComm_Password = Password;
-	local onChannelNow = SimpleComm_initChannel();
 	
-	-- Init hook into Ephemeral
-	initEphemeralHook();
+	local result = dataChannelLib:OpenChannel("GuildAds", SimpleComm_Channel, SimpleComm_Password, SimpleComm_ChatFrame);
 	
-	-- AFK/DND test for myself
-	SimpleComm_SendFlagTest();
+	if SimpleComm_FirstJoin then
+		SimpleComm_FirstJoin = nil;
+		-- Init hook into Ephemeral
+		initEphemeralHook();
 	
-	-- 
-	if (onChannelNow) then
-		SimpleComm_JoinHandler();
+		-- AFK/DND test for myself
+		SimpleComm_SendFlagTest();
+	
+		-- Set timer
+		SimpleCommFrame:Show();
 	end
-	
-	-- Set timer
-	SimpleCommFrame:Show();
 	
 	DEBUG_MSG("[SimpleComm_Join] end");
-end
-
-function SimpleComm_JoinNew(Channel, Password)
-	DEBUG_MSG("[SimpleComm_JoinNew] begin");
-	if (Channel ~= SimpleComm_Channel) then
-		
-		-- set channel
-		SimpleComm_Channel = Channel;
-		SimpleComm_Password = Password;
-		
-		-- init alias / joinHandler
-		local onChannelNow = (GetChannelName(SimpleComm_Channel) ~= 0);
-		if (onChannelNow) then
-			SimpleComm_JoinHandler();
-			if (SimpleComm_chanSlashCmd) then
-				SimpleComm_SetAliasChannel();
-			end
-		else
-			-- call SimpleComm_initChannel in 2 seconds
-			SimpleCommFrame.initChannel = 2;
-		end
-	end
-	DEBUG_MSG("[SimpleComm_JoinNew] end");
+	
+	return result;
 end
 
 function SimpleComm_Leave()
 	DEBUG_MSG("[SimpleComm_Leave] begin");
-	-- unset alias
-	if (SimpleComm_chanSlashCmd) then
-		SimpleComm_UnsetAliasChannel();
-	end
-	
-	-- call to SimpleComm_LeaveHandler
-	if (SimpleComm_LeaveHandler) then
-		SimpleComm_LeaveHandler();
-	end
-	
 	-- leave channel
 	SimpleCommFrame.outbound = nil;
-	if ( GetChannelName(SimpleComm_Channel) ~= 0) then
-		LeaveChannelByName(SimpleComm_Channel);
-	end
+	
+	dataChannelLib:CloseChannel("GuildAds", SimpleComm_Channel);
 	
 	-- set channel
 	SimpleComm_Channel = nil;

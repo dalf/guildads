@@ -96,8 +96,16 @@ GuildAdsChannelOptions = {
 
 		local channelCommand, channelAlias = GuildAds:GetDefaultChannelAlias();
 		GuildAds_ChannelAliasEditBox:SetText(channelAlias);
-		GuildAds_ChannelCommandEditBox:SetText(channelCommand);		
+		GuildAds_ChannelCommandEditBox:SetText(channelCommand);
+		
+		GuildAdsChannelOptions.onStatusChannelChange();
 	end;
+	
+	onStatusChannelChange = function()
+		local status, message = GuildAdsComm:GetChannelStatus();
+		message = message and status.."("..message..")" or status;
+		GuildAdsChannelOptionsFrameStatus:SetText(((GuildAdsComm.channelName and GuildAdsComm.channelName..": ") or "")..message);
+	end
 	
 }
 

@@ -1,4 +1,4 @@
-<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="httponLoad://www.blizzard.com/wow/ui/
 C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 
 	<Script file="GuildAdsMinimapButton.lua"/>
@@ -9,20 +9,23 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 		</Size>
 		<Scripts>
 			<OnLoad>
-				this:RegisterForClicks("LeftButtonDown", "RightButtonDown");
+				GuildAdsMinimapButtonCore.onLoad();
 			</OnLoad>
 			<OnClick>
 				if (arg1 == "LeftButton") then
-					if GuildAds.channelJoined then
-						GuildAds:ToggleMainWindow()
-					end
+					GuildAds:ToggleMainWindow()
 				else
 					GuildAds:ToggleOptionsWindow()
 				end
 			</OnClick>
 			<OnEnter>
 				GameTooltip:SetOwner(this, "ANCHOR_LEFT");
-				GameTooltip:SetText(GUILDADS_TITLE); 
+				GameTooltip:SetText(GUILDADS_TITLE);
+				local status, message = GuildAdsComm:GetChannelStatus();
+				if status=="Error" then
+					GameTooltip:AddLine(message);
+					GameTooltip:Show();
+				end
 			</OnEnter>
 			<OnLeave>
 				GameTooltip:Hide();

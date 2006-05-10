@@ -6,7 +6,7 @@
 		
 	<Frame name="GuildAdsChannelOptionsFrame" inherits="GuildAdsConfig_OptionFrameBoxTemplate" parent="GuildAdsOptionsWindowFrame">
 		<Size>
-			<AbsDimension x="380" y="235"/>
+			<AbsDimension x="380" y="230"/>
 		</Size>
 		<Anchors>
 			<Anchor point="TOP">
@@ -22,6 +22,15 @@
 						<Anchor point="TOP" relativePoint="TOP">
 							<Offset>
 								<AbsDimension x="0" y="-10"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+				<FontString name="$parentStatus" inherits="GameFontNormalSmall" text="GUILDADS_CHAT_OPTIONS">
+					<Anchors>
+						<Anchor point="BOTTOM" relativePoint="BOTTOM">
+							<Offset>
+								<AbsDimension x="0" y="-20"/>
 							</Offset>
 						</Anchor>
 					</Anchors>

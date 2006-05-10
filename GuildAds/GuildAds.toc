@@ -30,6 +30,7 @@ data\datatypes\GuildAdsTradeOfferData.lua
 data\datatypes\GuildAdsInventoryData.lua
 data\datatypes\GuildAdsTradeSkillData.lua
 data\datatypes\GuildAdsSimpleEventData.lua
+network\DataChannelLib.lua
 network\SimpleComm.xml
 network\GuildAdsCodecs.lua
 network\GuildAdsDTS.lua

@@ -133,7 +133,7 @@ GuildAdsComm = AceModule:new({
 function GuildAdsComm:Initialize()
 	self.startTime = GuildAdsDB:GetCurrentTime();
 
-	SimpleComm_PreInit(
+	SimpleComm_Initialize(
 		self.FilterText,
 		self.FilterMessage,
 		self.SplitSerialize,
@@ -141,28 +141,23 @@ function GuildAdsComm:Initialize()
 		self.OnJoin,
 		self.OnLeave,
 		self.OnMessage,
-		self.ChatFlagListener
+		self.ChatFlagListener,
+		self.ChannelStatusListener
 	);
 	
 	self:RegisterEvent("CHAT_MSG_CHANNEL_JOIN");
 	self:RegisterEvent("CHAT_MSG_CHANNEL_LEAVE");
 end
 
-function GuildAdsComm:JoinChannel(channel, password)
+function GuildAdsComm:JoinChannel(channel, password, command, alias)
 	LoggingChat(true);
 	
 	self.channelName = channel
 	self.channelPassword = password
 	
-	if self.alreadyJoined then
-		SimpleComm_JoinNew(channel, password);
-	else
-		SimpleComm_Join(channel, password);
-		self.alreadyJoined = true;
+	if SimpleComm_Join(channel, password) then
+		SimpleComm_SetAlias(command, alias)
 	end
-
-	local command, alias = GuildAds:GetDefaultChannelAlias();
-	SimpleComm_SetAlias(command, alias);
 end
 
 function GuildAdsComm:LeaveChannel()
@@ -174,6 +169,10 @@ function GuildAdsComm:LeaveChannel()
 		self.channelName = nil
 		self.channelPassword = nil
 	end
+end
+
+function GuildAdsComm:GetChannelStatus()
+	return SimpleComm_GetChannelStatus();
 end
 
 local serializeResult = { GUILDADS_MSG_PREFIX };
@@ -265,9 +264,6 @@ function GuildAdsComm.OnJoin(self)
 	self:SetOnlineStatus(GuildAds.playerName, true);
 	
 	-- create self.DTS and self.DTSPriority
---~ 	for k,v in self.DTSPriority do
---~ 		self.DTSPriority[k] = nil;
---~ 	end
 	table.setn(self.DTSPriority, 0);
 	
 	for name, profileDT in GuildAdsDB.profile do
@@ -328,6 +324,10 @@ end
 
 function GuildAdsComm.ChatFlagListener(flag, message)
 	GuildAdsComm:SendChatFlag();
+end
+
+function GuildAdsComm.ChannelStatusListener(status, message)
+	GuildAdsPlugin_OnEvent(GAS_EVENT_CHANNELSTATUSCHANGED, status, message);
 end
 
 function GuildAdsComm:CHAT_MSG_CHANNEL_JOIN()

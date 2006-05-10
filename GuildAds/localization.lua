@@ -25,7 +25,11 @@ GUILDADS_ADJUST_RADIUS		= "Adjust radius";
 GUILDADS_AUTOCHANNELCONFIG  = "Automatic channel configuration";
 GUILDADS_MANUALCHANNELCONFIG= "Manual channel configuration";
 
-GUILDADS_ERROR_CHANNELNOTJOIN = "The GuildAds channel is not joined."
+GUILDADS_ERROR_NOTINITIALIZED 		= "GuildAds is not initialized."
+
+GUILDADS_ERROR_TOOMANYCHANNELS		= "You have already joined the maximum number of channels"; 
+GUILDADS_ERROR_JOINCHANNELFAILED 	= "Failed to join the channel for an unknown reason";
+GUILDADS_ERROR_WRONGPASSWORD 		= "The password is incorrect";
 
 -- Main frame
 GUILDADS_MYADS				= "My Ads";

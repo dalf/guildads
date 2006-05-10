@@ -37,9 +37,10 @@ Plugin = {
 }
 ]]
 
-GAS_EVENT_ITEMINFOREADY = 7;	-- TODO : Event associé à data\GuildAdsItem
-GAS_EVENT_ONLINE = 6;			-- TODO : Event associé à network\GuildAdsComm
-GAS_EVENT_CONNECTION = 8;		-- TODO : Event associé à network\GuildAdsComm
+GAS_EVENT_ITEMINFOREADY = 7;		-- TODO : Event associé à data\GuildAdsItem
+GAS_EVENT_ONLINE = 6;				-- TODO : Event associé à network\GuildAdsComm
+GAS_EVENT_CONNECTION = 8;			-- TODO : Event associé à network\GuildAdsComm
+GAS_EVENT_CHANNELSTATUSCHANGED = 9;	-- TODO : Event associé à network\GuildAdsComm
 
 local pluginsToRegister = {};
 
@@ -246,6 +247,7 @@ local EventIdToMethod = {
 	[GAS_EVENT_ONLINE] = "onOnline";
 	[GAS_EVENT_CONNECTION] = "onConnection";
 	[GAS_EVENT_ITEMINFOREADY] = "onItemInfoReady";
+	[GAS_EVENT_CHANNELSTATUSCHANGED] = "onStatusChannelChange";
 }
 
 local function pluginToRealCommand(command)

@@ -26,6 +26,10 @@ GUILDADS_ADJUST_RADIUS 		= "Adjuster le Rayon";
 GUILDADS_AUTOCHANNELCONFIG  = "Configuration de canal automatique";
 GUILDADS_MANUALCHANNELCONFIG= "Configuration du canal manuelle";
 
+GUILDADS_ERROR_TOOMANYCHANNELS		= "Vous avez d\195\169j\195\160 rejoint le nombre maximum de canaux (10)"; 
+GUILDADS_ERROR_JOINCHANNELFAILED 	= "N'a pas joint le canal pour une raison inconnue";
+GUILDADS_ERROR_WRONGPASSWORD 		= "Le mot de passe est incorrect";
+
 -- Main frame
 GUILDADS_MYADS				= "Mes Annonces";
 GUILDADS_BUTTON_INVITE		= "Invite Groupe";

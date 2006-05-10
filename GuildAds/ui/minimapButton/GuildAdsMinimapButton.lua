@@ -34,7 +34,10 @@ GuildAdsMinimapButtonCore = {
 				buttonFrame="GuildAdsMinimapButton",
 				updateFunction="GuildAdsMinimapButton_Update"
 			});
-		end	
+		end
+		
+		GuildAdsMinimapButton:SetAlpha(0.6);
+		this:RegisterForClicks("LeftButtonDown", "RightButtonDown");
 	end;
 	
 	onInit = function()
@@ -42,14 +45,20 @@ GuildAdsMinimapButtonCore = {
 		if not GuildAdsMinimapButtonCore.getConfigValue(nil, "RadiusOffset") then
 			GuildAdsMinimapButtonCore.defaultsOptions();
 		end
+		
+		if not ButtonHole then
+			GuildAdsMinimapButtonCore.update();
+			-- has GuildAds object : wait 8 seconds before initialization...
+			GuildAdsTask:AddNamedSchedule("GuildAdsMinimapButtonShow", 8, nil, nil, GuildAdsMinimapButton.Show, GuildAdsMinimapButton)
+		end
 	end;
 	
 	onChannelJoin = function()
-		-- Show button
-		if not ButtonHole then
-			GuildAdsMinimapButtonCore.update();
-			GuildAdsMinimapButton:Show();
-		end
+		GuildAdsMinimapButton:SetAlpha(1);
+	end;
+	
+	onChannelLeave = function()
+		GuildAdsMinimapButton:SetAlpha(0.6);
 	end;
 	
 	onConfigChanged = function(path, key, value)

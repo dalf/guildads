@@ -26,6 +26,10 @@ GUILDADS_ADJUST_RADIUS = "Radius anpassen";
 GUILDADS_AUTOCHANNELCONFIG = "Automatische Channel Konfiguration";
 GUILDADS_MANUALCHANNELCONFIG = "Manuelle Channel Konfiguration";
 
+GUILDADS_ERROR_TOOMANYCHANNELS		= "Man kann immer nur in h\195\182chstens 10 Channels gleichzeitig sein"; 
+GUILDADS_ERROR_JOINCHANNELFAILED 	= "Fehler beim Betreten des Channels";
+GUILDADS_ERROR_WRONGPASSWORD 		= "Falsches Passwort";
+
 -- Main frame
 GUILDADS_MYADS = "Meine Anfragen";
 GUILDADS_BUTTON_ADDREQUEST = "Anfragen";
