@@ -260,7 +260,7 @@ end
 function GuildAds:SetDefaultChannelAlias(command, alias)
 	if 		GuildAdsDB:SetConfigValue(GuildAdsDB.PROFILE_PATH, "ChannelCommand", command) 
 		 or GuildAdsDB:SetConfigValue(GuildAdsDB.PROFILE_PATH, "ChannelAlias", alias) then
-		SimpleComm_InitAlias(command, alias);
+		SimpleComm_SetAlias(command, alias);
 	end
 end
 
