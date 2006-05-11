@@ -31,6 +31,7 @@ GuildAdsGCEvent = {
 	GUILDADSEVENT_TAB_NEW = 2;
 	
 	onLoad = function()
+		--[[
 	    if (GroupCalendarFrame) then 
 			GuildAdsPlugin.setDebug(true);
 			GuildAdsPlugin.UIregister(GuildAdsGCEvent);
@@ -59,6 +60,7 @@ GuildAdsGCEvent = {
 			PanelTemplates_SelectTab(GuildAds_GCEventTab1);
 			PanelTemplates_DeselectTab(GuildAds_GCEventTab2);
 		end;
+		]]
 	end;
 		
 	onShow = function() 
