@@ -34,7 +34,7 @@ GuildAdsGuild = {
 		if key=="GroupByAccount" then
 			GuildAdsGuild.peopleButtonsUpdate(true);
 			GuildAdsGuild.peopleCountUpdate();
-		elseif key=="ShowOfflines" then
+		elseif key=="HideOfflines" then
 			GuildAdsGuild.peopleButtonsUpdate(true);
 			GuildAdsGuild.peopleCountUpdate();
 		end
@@ -128,10 +128,10 @@ GuildAdsGuild = {
 			GuildAdsGroupByAccountCheckButton:SetChecked(0);
 		end
 		
-		if (GuildAdsGuild.getProfileValue(nil, "ShowOfflines")) then
-			GuildAdsGuildShowOfflinesCheckButton:SetChecked(1);
-		else
+		if (GuildAdsGuild.getProfileValue(nil, "HideOfflines")) then
 			GuildAdsGuildShowOfflinesCheckButton:SetChecked(0);
+		else
+			GuildAdsGuildShowOfflinesCheckButton:SetChecked(1);
 		end
 		
 		-- Init g_AdFilters
@@ -565,7 +565,7 @@ GuildAdsGuild = {
 		end;
 		
 		adIsVisible = function(playerName)
-			if not (GuildAdsGuild.getProfileValue(nil, "ShowOfflines") or GuildAdsGuild.isOnline(playerName)) then
+			if GuildAdsGuild.getProfileValue(nil, "HideOfflines") and not GuildAdsGuild.isOnline(playerName) then
 				return false;
 			end
 			local class = GuildAdsDB.profile.Main:get(playerName, GuildAdsDB.profile.Main.Class);

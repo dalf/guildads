@@ -613,10 +613,10 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 					<OnClick>
 						if ( this:GetChecked() ) then
 							PlaySound("igMainMenuOptionCheckBoxOn");
-							GuildAdsGuild.setProfileValue(nil, "ShowOfflines", true);
+							GuildAdsGuild.setProfileValue(nil, "HideOfflines", nil);
 						else
 							PlaySound("igMainMenuOptionCheckBoxOff");
-							GuildAdsGuild.setProfileValue(nil, "ShowOfflines", false);
+							GuildAdsGuild.setProfileValue(nil, "HideOfflines", true);
 						end
 					</OnClick>
 				</Scripts>
