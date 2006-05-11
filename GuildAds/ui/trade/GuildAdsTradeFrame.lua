@@ -118,9 +118,11 @@ GuildAdsTrade = {
 	end;
 	
 	defaultsOptions = function()
-		GuildAds_PublishMyAdsCheckButton:SetChecked(1);
 		GuildAds_ShowOfflinePlayerCheckButton:SetChecked(1);
 		GuildAds_ShowMyAdsCheckButton:SetChecked(1);
+		
+		GuildAds_ChatShowNewAskCheckButton:SetChecked(0);
+		GuildAds_ChatShowNewHaveCheckButton:SetChecked(0);
 	end;
 	
 	onShow = function()
