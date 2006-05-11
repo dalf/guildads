@@ -1204,8 +1204,12 @@
 						<Scripts>
 							<OnEnter>
 								GameTooltip:SetOwner(this, "ANCHOR_RIGHT");
-								GameTooltip:SetHyperlink(GuildAdsTrade.currentItem);
-								CursorUpdate();
+								if GuildAdsTrade.currentItem and GuildAdsTrade.currentItem~="" then
+									GameTooltip:SetHyperlink(GuildAdsTrade.currentItem);
+									CursorUpdate();
+								else
+									GameTooltip:SetText(GUILDADS_TRADE_SHIFTCLICKHELP);
+								end
 							</OnEnter>
 							<OnLeave>
 								GameTooltip:Hide();

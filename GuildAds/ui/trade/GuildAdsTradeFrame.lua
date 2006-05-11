@@ -176,9 +176,12 @@ GuildAdsTrade = {
 		if (t3) then 
 			GuildAdsTrade.administrator = true;
 			GuildAdsTradeAdminDeleteButton:Show();
-		
 		end
 		GuildAdsTrade.PrepareSortArrow();
+		
+		GuildAdsAddButtonLookFor:Disable();
+		GuildAdsAddButtonAvailable:Disable();
+		GuildAdsRemoveButton:Disable();
 	end;
 	
 	onChannelJoin = function()
@@ -197,15 +200,6 @@ GuildAdsTrade = {
 		if key=="HideOfflinePlayer" or key=="HideMyAds" then
 			GuildAdsTrade.data.resetCache();
 			GuildAdsTrade.updateCurrentTab();
-		elseif key=="PublishMyAds" then
-			-- TODO : delete or implement this feature
-			if value then
-				-- Broadcast all my ads
-				-- GAC_SendAllAdsType(nil, nil);
-			else
-				-- Broadcast a message to remove all my ads
-				-- GAC_SendRemoveAll(nil);
-			end			
 		end
 	end;
 	
