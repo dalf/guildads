@@ -69,7 +69,7 @@ local SerializeCommand = {
 		[2] = { key="playerName",	codec="String" },
 		[3] = { key="fromRevision",	codec="Integer" },
 		[4] = { key="toRevision",	codec="Integer" },
-		[5] = { key="version",		codec="String" },
+		[5] = { key="version",		codec="Integer" },
 	};
 	
 	N= {	-- New revision
