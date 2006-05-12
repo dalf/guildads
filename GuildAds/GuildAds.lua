@@ -10,8 +10,6 @@
 
 GUILDADS_VERSION          = 200.1;
 
-GUILDADS_MAX_CHANNEL_JOIN_ATTEMPTS = 5;				-- Wait 8 seconds more if no channel are joined
-
 GA_DEBUG_GLOBAL = 1;
 GA_DEBUG_CHANNEL = 2;
 GA_DEBUG_CHANNEL_HIGH = 3;
@@ -45,6 +43,14 @@ GuildAds = AceAddon:new({
 
 function GuildAds:Initialize()
 	GuildAds_ChatDebug(GA_DEBUG_GLOBAL,"[GuildAds:Initialize] begin");
+	
+	-- Check if GuildAds is still GuildAds (not erased by SavedVariables/GuildAds.lua version 1)
+	if GuildAds.aceCompatible then
+		GuildAdsBackup = nil
+	else
+		GuildAds = GuildAdsBackup;
+		self = GuildAds;
+	end
 	
 	-- Init player name, faction name, realm name
 	self.playerName = UnitName("player");
@@ -273,3 +279,14 @@ GuildAds:RegisterForLoad()
 ---------------------------------------------------------------------------------
 function GuildAds_ChatDebug()
 end
+
+---------------------------------------------------------------------------------
+--
+-- Create a copy of GuildAds table (may be erased by SavedVariables/GuildAds.lua version 1)
+-- 
+---------------------------------------------------------------------------------
+GuildAdsBackup = {};
+for k, v in pairs(GuildAds) do
+	GuildAdsBackup[k] = v;
+end
+setmetatable(GuildAdsBackup, getmetatable(GuildAds));
