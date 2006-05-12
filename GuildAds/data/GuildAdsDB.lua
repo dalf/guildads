@@ -195,20 +195,10 @@ GuildAdsDBchannelMT = {
 	-- TODO : gerer le case des noms
 	getChannel = function(channelName)
 		GuildAds_ChatDebug(GA_DEBUG_STORAGE, "Ask channel["..channelName.."]");
-		channelName = (channelName or GuildAds.channelName).."@"..GuildAds.factionName;
+		channelName = GuildAdsDBchannelMT.getChannelKey(channelName);
 		local t = GuildAdsDB.db.channels[channelName];
 		if t == nil then
 			t = {
-				Admin = {
-					whiteList = {
-						players = {};
-						guilds = {};
-					};
-					blackList = {
-						players = {};
-						guilds = {};
-					};
-				};
 				Players = {
 				};
 			};
@@ -220,6 +210,10 @@ GuildAdsDBchannelMT = {
 			});
 		end
 		return t;
+	end;
+	
+	getChannelKey = function(channelName)
+		return (channelName or GuildAds.channelName).."@"..GuildAds.factionName;
 	end
 }
 
@@ -256,7 +250,7 @@ GuildAdsDBprofileMT = {
 GuildAdsDB = { 
 	_load = {};
 	_channelDataTypes = {};
-	VERSION = "20060311";
+	VERSION = "20060512";
 	CONFIG_PATH = { "Config" };
 	PROFILE_PATH = { "Config", "Profile", GetCVar("realmName"), UnitName("player") };
 }
@@ -278,29 +272,43 @@ function GuildAdsDB:CreateAccount()
 	return str;
 end
 
-function GuildAdsDB:Initialize()	
+function GuildAdsDB:Initialize()
+	-- import from the version 20060311
+	if GuildAds.db:get({}, "Version") == "20060311" then
+		GuildAds.db:set({ "Config" }, "Account", GuildAds.db:get({}, "Account"));
+		GuildAds.db:set({}, "Account", nil);
+		GuildAds.db:set({}, "Version", nil);
+		GuildAds.db:set({ "Versions" }, "DB", self.VERSION);
+	end
+	
+	-- import from the version 20060426
+	if GuildAds.db:get({"Metadata" }, "Version") == "20060426" then
+		GuildAds.db:set({ }, "Metadata", nil);
+		GuildAds.db:set({ "Versions" }, "DB", self.VERSION);
+	end
+	
 	-- check version
-	local currentVersion = GuildAds.db:get({}, "Version");
+	local currentVersion = GuildAds.db:get({ "Versions" }, "DB");
 	if currentVersion ~= self.VERSION then
 		if type(GuildAds.db)=="table" then
-			GuildAds.cmd:msg("|cffff1e00All data are deleted|r");
-			for k,v in pairs(GuildAds.db) do
-				if k~= "Version" and k~= "Account" then
-					GuildAds.db:set({}, k, nil);
-				end;
-			end
-		end;
-		GuildAds.db:set({}, "Version", self.VERSION);
+			GuildAds.cmd:msg("|cffff1e00All data are deleted (except account ID)|r");
+			local account = GuildAds.db:get({ "Config" }, "Account");
+			GuildAds.db:set({ }, "Data", nil);
+			GuildAds.db:set({ }, "Config", nil);
+			GuildAds.db:set({ }, "Versions", nil);
+			self.account = GuildAds.db:set({ "Config" }, "Account", account);
+		end
+		GuildAds.db:set({ "Versions" }, "DB", self.VERSION);
 	end;
 
 	-- initialize account
-	self.account = GuildAds.db:get({}, "Account");
+	self.account = GuildAds.db:get({ "Config" }, "Account");
 	if not self.account then
 		-- TODO : not defined : try to get it on the network
-		self.account = GuildAds.db:set({}, "Account", self:CreateAccount());
+		self.account = GuildAds.db:set({ "Config" }, "Account", self:CreateAccount());
 	end
 	
-	-- initialize raw realm
+	-- initialize realm
 	self.db = GuildAds.db:get({"Data"}, GuildAds.realmName);
 	if not self.db then
 		self.db = GuildAds.db:set({"Data"}, GuildAds.realmName, 
@@ -310,13 +318,14 @@ function GuildAdsDB:Initialize()
 		});
 	end
 	
-	-- intialize profile & channel
+	-- initialize profile & channel
 	self.profile = {};
 	self.channel = {};
 	setmetatable(GuildAdsDB.channel, GuildAdsDBchannelMT);
 	setmetatable(GuildAdsDB.profile, GuildAdsDBprofileMT);
 	
 	-- initialize data types
+	local metadataPath = { "Versions", "DataTypes" };
 	for _, dataType in self._load do
 		local name = dataType.metaInformations.name;
 		dataType.profile = self.profile;
@@ -326,13 +335,33 @@ function GuildAdsDB:Initialize()
 		elseif dataType.metaInformations.parent == GuildAdsDataType.CHANNEL then
 			self._channelDataTypes[name] = dataType;
 		end
+		
+		local version = GuildAds.db:get(metadataPath, name);
+		local current = version and version.Current or 0;
+		local mostRecent = version and version.MostRecent or dataType.metaInformations.version;
 		if type(dataType.Initialize)=="function" then
-			dataType:Initialize();
+			dataType:Initialize(current);
 		end
+		GuildAds.db:set(metadataPath, name, {Current=dataType.metaInformations.version, MostRecent=mostRecent});
 	end
 	
 	self._load = nil;
 end
+
+function GuildAdsDB:ResetAll()
+	GuildAds.db:set({ "Versions" }, "DB", "Reset");
+	ReloadUI();
+end
+
+function GuildAdsDB:ResetChannel(channelName)
+	GuildAdsDB.db.channels[GuildAdsDBchannelMT.getChannelKey(channelName)] = nil;
+	ReloadUI();
+end
+
+function GuildAdsDB:ResetOthers()
+	GuildAds.cmd:error("Not implemented");
+end
+
 
 --[[ About config ]]
 function GuildAdsDB:GetConfigValue(path, key, defaultValue)

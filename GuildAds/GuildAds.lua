@@ -182,14 +182,15 @@ function GuildAds:DisplayDebugInfo()
 end
 
 function GuildAds:ResetAll()
-	GuildAdsDatabase.Version = "reset";
-	ReloadUI();
+	GuildAdsDB:ResetAll();
 end
 
 function GuildAds:ResetChannel()
+	GuildAdsDB:ResetChannel(self.channelName);
 end
 
 function GuildAds:ResetOthers()
+	GuildAdsDB:ResetOthers();
 end
 
 function GuildAds:LoadGuildRosterTask()

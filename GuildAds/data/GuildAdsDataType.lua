@@ -124,18 +124,31 @@ GuildAdsDataType.iteratorAuthor = function(state, playerName)
 	end
 end
 
+--[[ about version ]]
+function GuildAdsDataType:getMostRecentVersion()
+	return GuildAds.db:get({ "Versions", "DataTypes", self.metaInformations.name }, "MostRecent");
+end
+
+function GuildAdsDataType:setMostRecentVersion(version)
+	return GuildAds.db:set({ "Versions", "DataTypes", self.metaInformations.name }, "MostRecent", version);
+end
+
 --[[ about events ]]
 function GuildAdsDataType:triggerEvent(playerName, id)
 	if self.eventRegistry then
+		GuildAds_ChatDebug(GA_DEBUG_STORAGE, "["..self.metaInformations.name..","..playerName..","..tostring(id).."] triggerEvent - begin");
 		for obj, method in self.eventRegistry do
 			if method == true then
+				GuildAds_ChatDebug(GA_DEBUG_STORAGE, "  - function");
 				obj(self, playerName, id)
 			else
 				if( obj[method] ) then 
+					GuildAds_ChatDebug(GA_DEBUG_STORAGE, "  - method");
 					obj[method](obj, self, playerName, id);
 				end
 			end
 		end
+		GuildAds_ChatDebug(GA_DEBUG_STORAGE, "triggerEvent - end");
 	end
 end
 

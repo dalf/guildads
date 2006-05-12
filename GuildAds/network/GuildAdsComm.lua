@@ -52,7 +52,8 @@ local SerializeCommand = {
 		[3] = { key="who",			codec="String" },
 		[4] = { key="revision",		codec="Integer" },
 		[5] = { key="weight",		codec="Integer" },
-		[6] = { key="worstRevision",codec="Integer" }
+		[6] = { key="worstRevision",codec="Integer" },
+		[7] = { key="version",		codec="Integer" },
 	};
 	
 	SR= {	-- Search Result
@@ -521,9 +522,9 @@ function GuildAdsComm:SendSearch(dataType, playerName)
 	SimpleComm_SendMessage(nil, GUILDADS_MSG_PREFIX.."S>"..dataType.metaInformations.name..">"..playerName..">");
 end
 
-function GuildAdsComm:SendSearchResultToParent(parentPlayerName, dataType, playerName, who, revision, weight, worstRevision)
+function GuildAdsComm:SendSearchResultToParent(parentPlayerName, dataType, playerName, who, revision, weight, worstRevision, version)
 	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendRevisionWhisper["..parentPlayerName.."]("..dataType.metaInformations.name..","..playerName..")");
-	SimpleComm_SendMessage(parentPlayerName, GUILDADS_MSG_PREFIX.."R>"..dataType.metaInformations.name..">"..playerName..">"..who..">"..revision..">"..weight..">"..worstRevision..">");
+	SimpleComm_SendMessage(parentPlayerName, GUILDADS_MSG_PREFIX.."R>"..dataType.metaInformations.name..">"..playerName..">"..who..">"..revision..">"..weight..">"..worstRevision..">"..version..">");
 end
 
 function GuildAdsComm:SendSearchResult(dataType, playerName, who, revision, worstRevision)
@@ -617,8 +618,8 @@ function GuildAdsComm:ParseMessage(playerName, message, channelName)
 		-- Add this player to the current channel
 		GuildAdsDB.channel[GuildAds.channelName]:addPlayer(message.playerName);
 	elseif message.command == "R" then
-		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "ReceiveRevision("..tostring(DTS)..","..message.playerName..")="..message.who.."("..message.worstRevision.."->"..message.revision..")");
-		DTS:ReceiveRevision(playerName, message.playerName, message.who, message.revision, message.weight, message.worstRevision)
+		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "ReceiveRevision("..tostring(DTS)..","..message.playerName..")="..message.who.."("..message.worstRevision.."->"..message.revision..") v"..tostring(message.version));
+		DTS:ReceiveRevision(playerName, message.playerName, message.who, message.revision, message.weight, message.worstRevision, message.version)
 	elseif message.command == "SR" then
 		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "ReceiveSearchResult("..tostring(DTS)..","..message.playerName..")="..message.who.."("..message.fromRevision.."->"..message.toRevision..")");
 		-- add an expected transaction
@@ -647,7 +648,7 @@ function GuildAdsComm:ParseMessage(playerName, message, channelName)
 		}
 		self.transactions[playerName].__index = self.transactions[playerName];
 		-- parse message
-		DTS:ReceiveOpenTransaction(self.transactions[playerName], message.playerName, message.fromRevision, message.toRevision)
+		DTS:ReceiveOpenTransaction(self.transactions[playerName], message.playerName, message.fromRevision, message.toRevision, message.version or 1)
 	elseif message.command == "CT" then
 		if self.transactions[playerName] then
 			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"ReceiveCloseTransaction("..tostring(DTS)..","..message.playerName..")");
@@ -660,8 +661,11 @@ function GuildAdsComm:ParseMessage(playerName, message, channelName)
 		if self.transactions[playerName] then
 			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"ReceiveNewRevision("..tostring(DTS)..","..message.playerName..","..tostring(id)..")");
 			self.transactions[playerName].lmt = time();
-			local id = GuildAdsCodecs[DTS.dataType.schema.id].decode(message.id);
-			local data = GuildAdsCodecs[message.dataTypeName.."Data"].decode(message.data);
+			local id, data;
+			if self.transactions[playerName]._valid then
+				id = GuildAdsCodecs[DTS.dataType.schema.id].decode(message.id);
+				data = GuildAdsCodecs[message.dataTypeName.."Data"].decode(message.data);
+			end
 			DTS:ReceiveNewRevision(self.transactions[playerName], message.revision, id, data)
 		else
 			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "|cffff1e00Ignore|r NEW from "..playerName.." (no transaction)");

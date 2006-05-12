@@ -87,6 +87,7 @@ function GuildAdsDTS:ReceiveSearch(playerName)
 			bestRevision = self.dataType:getRevision(playerName),
 			bestWeight = self:GetWeight(),
 			worstRevision = self.dataType:getRevision(playerName),
+			version = self.dataType.metaInformations.version
 		};
 	else
 		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"  - Search already in progress");
@@ -103,7 +104,7 @@ function GuildAdsDTS:SendRevision(playerName)
 		local result = self.search[playerName];
 		if GuildAdsComm.playerTree[GuildAds.playerName].p then
 			-- send result to parent in whisper
-			GuildAdsComm:SendSearchResultToParent(GuildAdsComm.playerTree[GuildAds.playerName].p, self.dataType, playerName, result.bestPlayerName, result.bestRevision, result.bestWeight, result.worstRevision);
+			GuildAdsComm:SendSearchResultToParent(GuildAdsComm.playerTree[GuildAds.playerName].p, self.dataType, playerName, result.bestPlayerName, result.bestRevision, result.bestWeight, result.worstRevision, result.version);
 		else
 			-- send search result to channel
 			GuildAdsComm:SendSearchResult(self.dataType, playerName, result.bestPlayerName, result.bestRevision, result.worstRevision);
@@ -111,17 +112,22 @@ function GuildAdsDTS:SendRevision(playerName)
 	end
 end
 
-function GuildAdsDTS:ReceiveRevision(childPlayerName, playerName, who, revision, weight, worstRevision)
+function GuildAdsDTS:ReceiveRevision(childPlayerName, playerName, who, revision, weight, worstRevision, version)
 	if not self.search[playerName] then
 		return;
 	end
+	
+	version = version or 1;
+	
 	local result = self.search[playerName];
 	-- TODO : handle the case, playerName has reset, so he has a lower revision but we must update to this one.
-	if  (revision>result.bestRevision) or
-		(result.bestRevision==revision and weight>result.bestWeight) then
+	if  	(revision>result.bestRevision) 
+		or	(revision==result.bestRevision and weight>result.bestWeight)
+		or	(version>result.version) then
 		result.bestPlayerName = who;
 		result.bestRevision = revision;
 		result.bestWeight = weight;
+		result.version = version;
 	end
 	
 	if (worstRevision<result.worstRevision) then
@@ -224,7 +230,15 @@ end
 -- 
 --------------------------------------------------------------------------------
 
-function GuildAdsDTS:ReceiveOpenTransaction(transaction, playerName, fromRevision, toRevision)
+function GuildAdsDTS:ReceiveOpenTransaction(transaction, playerName, fromRevision, toRevision, version)
+	if self.dataType.metaInformations.version~=version then
+		if self.dataType:getMostRecentVersion()<version then
+			self.dataType:setMostRecentVersion(version);
+			GuildAds.cmd:msg(GUILDADS_NEWDATATYPEVERSION, self.dataType.metaInformations.name, playerName, tostring(version));
+		end
+		return
+	end
+	
 	-- TODO : don't accept transaction about myself(me and reroll) from other player
 	-- TODO : handle the case fromRevision is lower than toRevision
 	if self.dataType:getRevision(playerName)<toRevision then

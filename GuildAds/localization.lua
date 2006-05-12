@@ -31,6 +31,8 @@ GUILDADS_ERROR_TOOMANYCHANNELS		= "You have already joined the maximum number of
 GUILDADS_ERROR_JOINCHANNELFAILED 	= "Failed to join the channel for an unknown reason";
 GUILDADS_ERROR_WRONGPASSWORD 		= "The password is incorrect";
 
+GUILDADS_NEWDATATYPEVERSION = "Data type \"%s\" : %s has the new version %s. Until you upgrade to this version, update are disabled.";
+
 -- Main frame
 GUILDADS_MYADS				= "My Ads";
 GUILDADS_BUTTON_ADDREQUEST	= "Ask";
