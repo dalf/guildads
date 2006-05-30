@@ -36,7 +36,7 @@ GuildAdsGEMEvent = {
 	GUILDADSEVENT_TAB_NEW = 2;
 	
 	onLoad = function()
-	    if (GEMListFrame) then 
+	    if GEMListFrame then 
 			GuildAdsPlugin.setDebug(true);
 			GuildAdsPlugin.UIregister(GuildAdsGEMEvent);
 			
@@ -91,7 +91,18 @@ GuildAdsGEMEvent = {
 			-- hook GEMMain_SelectTab
 			oldGEMMain_SelectTab = GEMMain_SelectTab;
 			GEMMain_SelectTab = GuildAdsGEMEvent.GEMSelectTab;
+		else
+			-- hide GEM messages
+			GuildAdsGEMEvent.oldChatFrame_OnEvent =ChatFrame_OnEvent;
+			ChatFrame_OnEvent = GuildAdsGEMEvent.newChatFrame_OnEvent;
 		end;
+	end;
+	
+	newChatFrame_OnEvent = function(event)
+		if (event == "CHAT_MSG_CHANNEL") and (string.sub(arg1, 1, 4)=="<GEM") then
+			return
+		end
+		GuildAdsGEMEvent.oldChatFrame_OnEvent(event);
 	end;
 	
 	saveOptions = function()
