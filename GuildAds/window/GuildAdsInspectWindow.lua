@@ -14,10 +14,12 @@ function GuildAdsInspectWindow:SetPlayer(playerName)
 	self.playerName = playerName;
 	-- 
 	GuildAdsInspectName:SetText(playerName);
-	local title = LEVEL..
-	              " "..GuildAdsDB.profile.Main:get(playerName, GuildAdsDB.profile.Main.Level)..
+	local title = (GuildAdsDB.profile.Main:getClassNameFromId(GuildAdsDB.profile.Main:get(playerName, GuildAdsDB.profile.Main.Class)) or "")..
 				  " "..(GuildAdsDB.profile.Main:getRaceNameFromId(GuildAdsDB.profile.Main:get(playerName, GuildAdsDB.profile.Main.Race)) or "")..
-				  " "..(GuildAdsDB.profile.Main:getClassNameFromId(GuildAdsDB.profile.Main:get(playerName, GuildAdsDB.profile.Main.Class)) or "")
+				  " "..LEVEL..
+	              " "..GuildAdsDB.profile.Main:get(playerName, GuildAdsDB.profile.Main.Level)
+				  
+				  
 	GuildAdsInspectTitle:SetText(title);
 end
 
