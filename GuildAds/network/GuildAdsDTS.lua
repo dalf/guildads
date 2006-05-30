@@ -241,14 +241,20 @@ function GuildAdsDTS:ReceiveOpenTransaction(transaction, playerName, fromRevisio
 	
 	-- TODO : don't accept transaction about myself(me and reroll) from other player
 	-- TODO : handle the case fromRevision is lower than toRevision
-	if self.dataType:getRevision(playerName)<toRevision then
+	local currentRevision = self.dataType:getRevision(playerName);
+	if currentRevision<toRevision and currentRevision>=fromRevision then
 		transaction._valid = true;
 	end
 end
 
 function GuildAdsDTS:ReceiveCloseTransaction(transaction)
 	if transaction._valid then
-		self.dataType:setRevision(transaction.playerName, transaction.toRevision);
+		if transaction._IntegrityProblem then
+			self.dataType:setRevision(transaction.playerName, 0);
+			self:SendSearch(transaction.playerName);
+		else
+			self.dataType:setRevision(transaction.playerName, transaction.toRevision);
+		end
 	end
 end
 
@@ -270,6 +276,14 @@ function GuildAdsDTS:ReceiveOldRevisions(transaction, revisions)
 			if revision<=transaction.fromRevision and not revisions[revision] then
 				tinsert(self.deleteTable, id);
 			end
+			-- to check integrity after
+			revisions[revision] = nil;
+		end
+		
+		-- check integrity
+		if next(revisions) then
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "|cffff1e00Integrity problem|r with (%s, %s)", self.dataType.metaInformations.name, transaction.playerName, tostring(version));
+			transaction._IntegrityProblem = true;
 		end
 		
 		-- delete them

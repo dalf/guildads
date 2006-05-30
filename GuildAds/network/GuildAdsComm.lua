@@ -131,6 +131,19 @@ GuildAdsComm = AceModule:new({
 	}
 });
 
+local DTSMT = {
+	__index = function(t, DTSName)
+		if DTSName then
+			local mt = getmetatable(t);
+			if not mt[DTSName] then
+				mt[DTSName] = GuildAdsDTS:new(GuildAdsFakeDataType:new(DTSName));
+			end
+			return mt[DTSName];
+		end
+	end
+}
+setmetatable(GuildAdsComm.DTS, DTSMT);
+
 function GuildAdsComm:Initialize()
 	self.startTime = GuildAdsDB:GetCurrentTime();
 
