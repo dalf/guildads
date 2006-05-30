@@ -604,14 +604,7 @@ GuildAdsTrade = {
 	myButton = {
 	
 		onClick = function(button)
-			GuildAdsTrade.select(this.adType, this.playerName, this.item);
-			
-			if button == "RightButton" then
-				GuildAdsTrade.contextMenu.show();
-			end
-			if this.item and button=="LeftButton" and IsControlKeyDown() then 
-				DressUpItemLink(this.item); 
-			end
+			GuildAdsTrade.exchangeButton.onClick(button);
 		end;
 		
 		onEnter = function(obj)
@@ -629,8 +622,19 @@ GuildAdsTrade = {
 			if button == "RightButton" then
 				GuildAdsTrade.contextMenu.show();
 			end
-			if this.item and button=="LeftButton" and IsControlKeyDown() then 
-				DressUpItemLink(this.item); 
+
+			if this.item and button=="LeftButton" then
+				if IsControlKeyDown() then
+					DressUpItemLink(this.item); 
+				elseif IsShiftKeyDown() and ChatFrameEditBox:IsVisible() and strupper(ChatFrameEditBox.chatType)==strupper(GuildAds:GetDefaultChannelAlias()) then 
+					local itemName,itemLink,itemRarity=GetItemInfo(this.item); 
+					if (itemName) then
+						local r, g, b, hex = GetItemQualityColor(itemRarity)
+						local hexcol = string.gsub( hex, "|c(.+)", "%1" )
+						local link = "|c"..hexcol.."|H"..this.item.."|h["..itemName.."]|h|r"
+						ChatFrameEditBox:Insert(link)
+					end
+				end
 			end
 		end;
 		
