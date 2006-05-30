@@ -8,7 +8,6 @@
 -- Licence: GPL version 2 (General Public License)
 ----------------------------------------------------------------------------------
 
-local currentInventory = {};
 local SlotIdText = {
 		[1]  = "HeadSlot",
 		[2]  = "NeckSlot", 
@@ -56,17 +55,21 @@ GuildAdsInventory = {
 		end
 	end;
 	
+	onItemInfoReady = function()
+		GuildAdsInventory.Update();
+	end;
+	
 	SlotOnLoad = function()
 		local slotName = this:GetName();
 		local id, textureName = GetInventorySlotInfo(strsub(slotName,16));
 		this:SetID(id);
 		local texture = getglobal(slotName.."IconTexture");
 		texture:SetTexture(textureName);
-		this.backgroundTextureName = textureName;		
+		this.backgroundTextureName = textureName;
 	end;
 
 	SlotOnUpdate = function(playerName, slot)
-		if playerName == GuildAdsInspectWindow.playerName then
+		if playerName and playerName == GuildAdsInspectWindow.playerName then
 			local data = GuildAdsDB.profile.Inventory:get(playerName, slot);
 			if data then
 				GuildAdsInventory.SlotUpdate(slot,  data.i, data.q);
@@ -77,8 +80,8 @@ GuildAdsInventory = {
 	end;
 	
 	SlotOnEnter = function()
-		if (currentInventory[this:GetID()] ~= nil) then
-			GuildAdsInventory.SetTooltip(currentInventory[this:GetID()]);
+		if this.itemRef then
+			GuildAdsInventory.SetTooltip(this.itemRef);
 		end
 	end;
 	
@@ -86,22 +89,28 @@ GuildAdsInventory = {
 		GameTooltip:Hide();
 	end;
 	
-	SlotOnClick = function()
+	SlotOnClick = function(button)
 		if ( button == "LeftButton" ) then
-			if ( IsShiftKeyDown() ) then
-				if ( ChatFrameEditBox:IsVisible() ) then
-					ChatFrameEditBox:Insert(currentInventory[this:GetID()]);
-				end
+			if IsShiftKeyDown() and ChatFrameEditBox:IsVisible() then
+				local itemName,itemLink,itemRarity=GetItemInfo(this.itemRef); 
+				if (itemName) then
+					local r, g, b, hex = GetItemQualityColor(itemRarity)
+					local hexcol = string.gsub( hex, "|c(.+)", "%1" )
+					local link = "|c"..hexcol.."|H"..this.itemRef.."|h["..itemName.."]|h|r"
+					ChatFrameEditBox:Insert(link)
+				end				
+			elseif IsControlKeyDown() then 
+				DressUpItemLink(this.itemRef); 
 			end
 		end
 	end;
 	
 	SlotUpdate = function(slot, item, count)
 		button = getglobal("GuildAdsInspect"..SlotIdText[slot]);
-		currentInventory[slot]= item;
+		button.itemRef = item;
 		if (item) then
 			info = GuildAds_ItemInfo[item] or {};
-			SetItemButtonTexture(button, info.texture or "");
+			SetItemButtonTexture(button, info.texture or "Interface\\Icons\\INV_Misc_QuestionMark");
 			SetItemButtonCount(button, count);
 		else
 			SetItemButtonTexture(button, button.backgroundTextureName);
@@ -125,20 +134,15 @@ GuildAdsInventory = {
 		end		
 	end;
 	
-	Update = function(sendRequest)
--- 		GuildAdsInspectWindow:SetTime(GuildAdsDB:FormatTime(inventory.creationtime));
+	Update = function()
+		-- GuildAdsInspectWindow:SetTime(GuildAdsDB:FormatTime(inventory.creationtime));
 		for slot=1,19,1 do
 			GuildAdsInventory.SlotOnUpdate(GuildAdsInspectWindow.playerName, slot);
 		end
-		if sendRequest then
-			-- Send inspect request
-			-- GuildAdsInventory.debug("sending request");
-			-- TODO : update on demand
-		end;
 	end;
 	
 	OnShow = function()
-		GuildAdsInventory.Update(false);
+		GuildAdsInventory.Update();
 	end;
 	
 }

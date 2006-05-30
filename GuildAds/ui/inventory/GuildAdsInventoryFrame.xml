@@ -9,11 +9,9 @@
             <OnLoad>
 				GuildAdsInventory.SlotOnLoad();
             </OnLoad>
-	    <!--
             <OnClick>
-				GuildAdsInventory.SlotOnClick();
+				GuildAdsInventory.SlotOnClick(arg1);
             </OnClick>
-	    -->
             <OnEnter>
 				GuildAdsInventory.SlotOnEnter();
             </OnEnter>
