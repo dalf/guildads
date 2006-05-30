@@ -626,7 +626,8 @@ GuildAdsTrade = {
 			if this.item and button=="LeftButton" then
 				if IsControlKeyDown() then
 					DressUpItemLink(this.item); 
-				elseif IsShiftKeyDown() and ChatFrameEditBox:IsVisible() and strupper(ChatFrameEditBox.chatType)==strupper(GuildAds:GetDefaultChannelAlias()) then 
+				-- elseif IsShiftKeyDown() and ChatFrameEditBox:IsVisible() and strupper(ChatFrameEditBox.chatType)==strupper(GuildAds:GetDefaultChannelAlias()) then 
+				elseif IsShiftKeyDown() and ChatFrameEditBox:IsVisible() then 
 					local itemName,itemLink,itemRarity=GetItemInfo(this.item); 
 					if (itemName) then
 						local r, g, b, hex = GetItemQualityColor(itemRarity)
