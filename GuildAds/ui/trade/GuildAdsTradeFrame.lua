@@ -8,7 +8,8 @@
 -- Licence: GPL version 2 (General Public License)
 ----------------------------------------------------------------------------------
 
-local g_AdFilters = {}; 
+local compost = CompostLib:GetInstance("compost-1")
+local g_AdFilters = {};
 
 GuildAdsTrade = {
 	metaInformations = { 
@@ -945,31 +946,42 @@ GuildAdsTrade = {
 				else
 					error("bad tab for GuildAdsTrade.data.get("..tostring(tab)..")", 3);
 				end
-				GuildAdsTrade.data.cache[tab] = {};
-				if (tab == GuildAdsTrade.TAB_CRAFTABLE) then
-					local already;
-					for _, item, playerName, data in datatype:iterator() do
-						for key,value in GuildAdsTrade.data.cache[tab] do
-							if (GuildAdsTrade.data.cache[tab][key].i==item) then 
-								already=true;
-								tinsert(GuildAdsTrade.data.cache[tab][key].p, playerName);
-								break;
-							end
+				
+				-- erase cache
+				if GuildAdsTrade.data.cache[tab] then
+					for key, data in GuildAdsTrade.data.cache[tab] do
+						if type(data.p)=="table" then
+							compost:Reclaim(data.p);
 						end
-						if (not already) then
-							if GuildAdsTrade.data.adIsVisible(adtype, playerName, item, data) then
-								tinsert(GuildAdsTrade.data.cache[tab], { i=item, p={playerName}, d=data, t=adtype });
-							end
-						end
-						already=nil;
+						compost:Reclaim(GuildAdsTrade.data.cache[tab][key]);
 					end
-					for _, data in GuildAdsTrade.data.cache[tab] do
+					compost:Erase(GuildAdsTrade.data.cache[tab]);
+				else
+					GuildAdsTrade.data.cache[tab] = compost:Acquire();
+				end
+				
+				-- create new
+				if (tab == GuildAdsTrade.TAB_CRAFTABLE) then
+					local cache = GuildAdsTrade.data.cache[tab];
+					local itemToIndex = compost:Acquire();
+					
+					for _, item, playerName, data in datatype:iterator() do
+						if itemToIndex[item] then
+							tinsert(cache[itemToIndex[item]].p, playerName);
+						elseif GuildAdsTrade.data.adIsVisible(adtype, playerName, item, data) then
+							tinsert(cache, compost:AcquireHash("i", item, "p", compost:Acquire(playerName), "d", data, "t", adtype ));
+							itemToIndex[item] = table.getn(cache);
+						end
+					end
+					for _, data in cache do
 						table.sort(data.p, GuildAdsTrade.sortData.predicateFunctions.crafter);
 					end
+					
+					compost:Reclaim(itemToIndex);
 				else
 					for _, item, playerName, data in datatype:iterator() do
 						if GuildAdsTrade.data.adIsVisible(adtype, playerName, item, data) then
-							tinsert(GuildAdsTrade.data.cache[tab], { i=item, p=playerName, d=data, t=adtype });
+							tinsert(GuildAdsTrade.data.cache[tab], compost:AcquireHash("i", item, "p", playerName, "d", data, "t", adtype ));
 						end
 					end
 				end
@@ -1343,6 +1355,11 @@ GuildAdsTrade = {
 					end
 				end
 			else
+				-- GuildAdsTrade.debug("Ctx menu:"..UIDROPDOWNMENU_MENU_VALUE);
+				-- GuildAdsTradeContextMenu.owner = UIDROPDOWNMENU_MENU_VALUE;
+				-- GuildAdsGuild.contextMenu.initialize();
+				-- FriendsDropDown.name = UIDROPDOWNMENU_MENU_VALUE;
+				-- FriendsFrameDropDown_Initialize();
 				local info = {};
 				info.text = "Joueur"..UIDROPDOWNMENU_MENU_VALUE;
 				info.notCheckable = 1;
