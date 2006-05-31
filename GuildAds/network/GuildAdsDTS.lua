@@ -282,7 +282,7 @@ function GuildAdsDTS:ReceiveOldRevisions(transaction, revisions)
 		
 		-- check integrity
 		if next(revisions) then
-			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "|cffff1e00Integrity problem|r with (%s, %s)", self.dataType.metaInformations.name, transaction.playerName, tostring(version));
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, string.format("|cffff1e00Integrity problem|r with (%s, %s)", self.dataType.metaInformations.name, transaction.playerName, tostring(version)));
 			transaction._IntegrityProblem = true;
 		end
 		
