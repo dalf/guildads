@@ -1,4 +1,4 @@
-if ( GetLocale() == "frFR" ) then
+﻿if ( GetLocale() == "frFR" ) then
 
 GUILDADS_TITLE				= "GuildAds";
 
@@ -119,7 +119,7 @@ GUILDADS_SKILLS			= {
 					[13] = "Crochetage",
 				-- [14] = "Poisons",
 				
-					[20] = "Arme de poing",
+					[20] = "Armes de pugilat",
 					[21] = "Dagues",
 					[22] = "Epées",
 					[23] = "Epées à deux mains",
