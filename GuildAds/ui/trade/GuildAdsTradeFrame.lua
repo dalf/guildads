@@ -1348,22 +1348,14 @@ GuildAdsTrade = {
 		initialize = function(level)
 			if level==1 then
 				if type(GuildAdsTrade.currentPlayerName)=="string" then
-					GuildAdsTrade.contextMenu.addPlayer(GuildAdsTrade.currentPlayerName);
+					GuildAdsPlayerMenu.initialize(GuildAdsTrade.currentPlayerName, level);
 				elseif type(GuildAdsTrade.currentPlayerName)=="table" then
 					for _, name in GuildAdsTrade.currentPlayerName do
 						GuildAdsTrade.contextMenu.addPlayer(name);
 					end
 				end
 			else
-				-- GuildAdsTrade.debug("Ctx menu:"..UIDROPDOWNMENU_MENU_VALUE);
-				-- GuildAdsTradeContextMenu.owner = UIDROPDOWNMENU_MENU_VALUE;
-				-- GuildAdsGuild.contextMenu.initialize();
-				-- FriendsDropDown.name = UIDROPDOWNMENU_MENU_VALUE;
-				-- FriendsFrameDropDown_Initialize();
-				local info = {};
-				info.text = "Joueur"..UIDROPDOWNMENU_MENU_VALUE;
-				info.notCheckable = 1;
-				UIDropDownMenu_AddButton(info, 2);
+				GuildAdsPlayerMenu.initialize(UIDROPDOWNMENU_MENU_VALUE, level);
 			end
 		end
 	};

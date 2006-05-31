@@ -42,6 +42,7 @@ window\GuildAdsOptionsWindow.xml
 window\GuildAdsInspectWindow.xml
 ui\GuildAdsPlugin.lua
 ui\GuildAdsUITools.lua
+ui\GuildAdsPlayerMenu.lua
 ui\debug\GuildAdsDebug.xml
 ui\channelOptions\GuildAdsChannelOptions.xml
 ui\guild\GuildAdsGuildFrame.xml
