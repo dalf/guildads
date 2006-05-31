@@ -11,6 +11,7 @@
 ## DefaultState: Enabled
 ## LoadOnDemand: 0
 ## SavedVariables: GuildAdsDatabase
+CompostLib.lua
 revision.lua
 localization.lua
 localization.de.lua
