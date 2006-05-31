@@ -8,6 +8,7 @@
 -- Licence: GPL version 2 (General Public License)
 ----------------------------------------------------------------------------------
 
+local compost = CompostLib:GetInstance("compost-1")
 local g_AdFilters = {};
 
 GuildAdsGuild = {
@@ -236,14 +237,12 @@ GuildAdsGuild = {
 				if (j <= linearSize) then
 					if type(linear[j]) == "string" then
 						-- update internal data
-						button.groupId = nil;
 						button.owner = linear[j];
 						
 						-- create a ads
 						GuildAdsGuild.peopleButton.update(button, GuildAdsGuild.currentPlayerName == linear[j], linear[j]);
-					elseif type(linear[j]) == "table" then
+					else
 						-- update internal data
-						button.groupId = linear[j].groupId;
 						button.owner = nil;
 
 						-- create empty a line
@@ -312,7 +311,7 @@ GuildAdsGuild = {
 			
 			-- Add AFK/DND flag
 			local flag, message = GuildAdsComm:GetStatus(owner);
-			if flag then
+			if flag and flag~="" then
 				GameTooltip:AddLine(flag..": "..message, 1.0, 1.0, 1.0);
 			end
 			
@@ -551,14 +550,6 @@ GuildAdsGuild = {
 	data = {
 		cache = nil;
 		
-		getGroup = function(playerName) 
-			if GuildAdsGuild.getProfileValue(nil, "GroupByAccount") then
-				return GuildAdsDB.profile.Main:get(playerName, GuildAdsDB.profile.Main.Account) or playerName;
-			else
-				return nil;
-			end
-		end;
-		
 		resetCache = function()
 			GuildAdsGuild.debug("resetCache");
 			GuildAdsGuild.data.cache = nil;
@@ -569,10 +560,12 @@ GuildAdsGuild = {
 				return false;
 			end
 			local class = GuildAdsDB.profile.Main:get(playerName, GuildAdsDB.profile.Main.Class);
-			local filters = GuildAdsGuild.getProfileValue(nil, "Filters", {});
-			for id, name in filters do
-				if id == class then
-					return true;
+			local filters = GuildAdsGuild.getProfileValue(nil, "Filters");
+			if filters then
+				for id, name in filters do
+					if id == class then
+						return true;
+					end
 				end
 			end
 			return false;
@@ -585,7 +578,7 @@ GuildAdsGuild = {
 				local players = GuildAdsDB.channel[GuildAds.channelName]:getPlayers();
 				
 			    -- in a guild a pseudo ads
-				local workingTable = {};
+				local workingTable = compost:Acquire();
 				for playerName in pairs(players) do
 					tinsert(workingTable, playerName);
 				end
@@ -627,19 +620,24 @@ GuildAdsGuild = {
 				GuildAdsGuild.sortData.doIt(workingTable);
 				
 				-- create GuildAdsGuild.data.cache
-				GuildAdsGuild.data.cache = {};
-
-				local adGroup, currentGroup;
+				GuildAdsGuild.data.cache = compost:Acquire();
+				
+				local currentAccount, playerAccount;
+				local groupByAccount = GuildAdsGuild.getProfileValue(nil, "GroupByAccount");
 				for _, playerName in workingTable do
 					if GuildAdsGuild.data.adIsVisible(playerName) then
-						adGroup = GuildAdsGuild.data.getGroup(playerName);
-						if currentGroup~=adGroup then
-							tinsert(GuildAdsGuild.data.cache, { groupId=adGroup } );
-							currentGroup = adGroup;
+						if groupByAccount then
+							playerAccount = GuildAdsDB.profile.Main:get(playerName, GuildAdsDB.profile.Main.Account) or playerName;
+							if currentAccount~=playerAccount then
+								tinsert(GuildAdsGuild.data.cache, false );
+								currentAccount = playerAccount;
+							end
 						end
 						tinsert(GuildAdsGuild.data.cache, playerName );
 					end
 				end
+				
+				compost:Reclaim(workingTable);
 			end
 			
 			return GuildAdsGuild.data.cache; 
@@ -784,7 +782,7 @@ GuildAdsGuild = {
 		initHigherLevel = function(adTable)
 			GuildAdsGuild.sortData.cacheHigherLevel = {};
 			local higherLevel = GuildAdsGuild.sortData.cacheHigherLevel;
-			local currentLevel = {};
+			local currentLevel = compost:Acquire();
 			for _, playerName in adTable do
 				local account = GuildAdsDB.profile.Main:get(playerName, GuildAdsDB.profile.Main.Account) or playerName;
 				local level = GuildAdsDB.profile.Main:get(playerName, GuildAdsDB.profile.Main.Level);
@@ -797,6 +795,8 @@ GuildAdsGuild = {
 					end
 				end
 			end
+			
+			compost:Reclaim(currentLevel);
 		end;
 		
 		getHigherlevel = function(playerName)
