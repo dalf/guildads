@@ -70,6 +70,52 @@
 		</Scripts>
 	</Button>
 	
+	<Button name="GuildAdsTradeClassButtonTemplate" virtual="true">
+		<Size>
+			<AbsDimension x="136" y="20"/>
+		</Size>
+		<Layers>
+			<Layer level="BACKGROUND">
+				<Texture name="$parentLines" file="Interface\AuctionFrame\UI-AuctionFrame-FilterLines">
+					<Size>
+						<AbsDimension x="7" y="20"/>
+					</Size>
+					<Anchors>
+						<Anchor point="LEFT">
+							<Offset>
+								<AbsDimension x="13" y="0"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+					<TexCoords left="0" right="0.4375" top="0" bottom="0.625"/>
+				</Texture>
+			</Layer>
+		</Layers>
+		<Scripts>
+			<OnClick>
+				GuildAdsTrade.filterClass.onClick();
+			</OnClick>
+		</Scripts>
+		<NormalTexture name="$parentNormalTexture" file="Interface\AuctionFrame\UI-AuctionFrame-FilterBg">
+			<TexCoords left="0" right="0.53125" top="0" bottom="0.625"/>
+		</NormalTexture>
+		<HighlightTexture file="Interface\PaperDollInfoFrame\UI-Character-Tab-Highlight" alphaMode="ADD"/>
+		<ButtonText name="$parentNormalText">
+			<Size>
+				<AbsDimension x="115" y="8"/>
+			</Size>
+			<Anchors>
+				<Anchor point="LEFT">
+					<Offset>
+						<AbsDimension x="4" y="0"/>
+					</Offset>
+				</Anchor>
+			</Anchors>
+		</ButtonText>
+		<NormalFont inherits="GameFontNormalSmall" justifyH="LEFT"/>
+		<HighlightFont inherits="GameFontHighlightSmall" justifyH="LEFT"/>
+	</Button>
+	
 	
 	<Button name="GuildAdsMyAdsColumnHeaderTemplate" inherits="GuildAdsTradeColumnHeaderTemplate" virtual="true">
 		<!--<Scripts>
@@ -1441,7 +1487,7 @@
 			</Layer>
 		</Layers>
 		<Frames>
-			<Button name="FilterTradeButton1" inherits="FilterClassButtonTemplate" id="1">
+			<Button name="FilterTradeButton1" inherits="GuildAdsTradeClassButtonTemplate" id="1">
 				<Anchors>
 					<Anchor point="TOPLEFT" relativeTo="GuildAdsTradeFilterFrame"  >
 						<Offset>
@@ -1450,7 +1496,7 @@
 					</Anchor>
 				</Anchors>
 			</Button>
-			<Button name="FilterTradeButton2" inherits="FilterClassButtonTemplate" id="2">
+			<Button name="FilterTradeButton2" inherits="GuildAdsTradeClassButtonTemplate" id="2">
 				<Anchors>
 					<Anchor point="TOPLEFT" relativeTo="FilterTradeButton1" relativePoint="BOTTOMLEFT">
 						<Offset>
@@ -1459,7 +1505,7 @@
 					</Anchor>
 				</Anchors>
 			</Button>
-			<Button name="FilterTradeButton3" inherits="FilterClassButtonTemplate" id="3">
+			<Button name="FilterTradeButton3" inherits="GuildAdsTradeClassButtonTemplate" id="3">
 				<Anchors>
 					<Anchor point="TOPLEFT" relativeTo="FilterTradeButton2" relativePoint="BOTTOMLEFT">
 						<Offset>
@@ -1468,7 +1514,7 @@
 					</Anchor>
 				</Anchors>
 			</Button>
-			<Button name="FilterTradeButton4" inherits="FilterClassButtonTemplate" id="4">
+			<Button name="FilterTradeButton4" inherits="GuildAdsTradeClassButtonTemplate" id="4">
 				<Anchors>
 					<Anchor point="TOPLEFT" relativeTo="FilterTradeButton3" relativePoint="BOTTOMLEFT">
 						<Offset>
@@ -1477,7 +1523,7 @@
 					</Anchor>
 				</Anchors>
 			</Button>
-			<Button name="FilterTradeButton5" inherits="FilterClassButtonTemplate" id="5">
+			<Button name="FilterTradeButton5" inherits="GuildAdsTradeClassButtonTemplate" id="5">
 				<Anchors>
 					<Anchor point="TOPLEFT" relativeTo="FilterTradeButton4" relativePoint="BOTTOMLEFT">
 						<Offset>
@@ -1486,7 +1532,7 @@
 					</Anchor>
 				</Anchors>
 			</Button>
-			<Button name="FilterTradeButton6" inherits="FilterClassButtonTemplate" id="6">
+			<Button name="FilterTradeButton6" inherits="GuildAdsTradeClassButtonTemplate" id="6">
 				<Anchors>
 					<Anchor point="TOPLEFT" relativeTo="FilterTradeButton5" relativePoint="BOTTOMLEFT">
 						<Offset>
@@ -1495,7 +1541,7 @@
 					</Anchor>
 				</Anchors>
 			</Button>
-			<Button name="FilterTradeButton7" inherits="FilterClassButtonTemplate" id="7">
+			<Button name="FilterTradeButton7" inherits="GuildAdsTradeClassButtonTemplate" id="7">
 				<Anchors>
 					<Anchor point="TOPLEFT" relativeTo="FilterTradeButton6" relativePoint="BOTTOMLEFT">
 						<Offset>
@@ -1504,7 +1550,7 @@
 					</Anchor>
 				</Anchors>
 			</Button>
-			<Button name="FilterTradeButton8" inherits="FilterClassButtonTemplate" id="8">
+			<Button name="FilterTradeButton8" inherits="GuildAdsTradeClassButtonTemplate" id="8">
 				<Anchors>
 					<Anchor point="TOPLEFT" relativeTo="FilterTradeButton7" relativePoint="BOTTOMLEFT">
 						<Offset>
@@ -1513,7 +1559,7 @@
 					</Anchor>
 				</Anchors>
 			</Button>
-			<Button name="FilterTradeButton9" inherits="FilterClassButtonTemplate" id="9">
+			<Button name="FilterTradeButton9" inherits="GuildAdsTradeClassButtonTemplate" id="9">
 				<Anchors>
 					<Anchor point="TOPLEFT" relativeTo="FilterTradeButton8" relativePoint="BOTTOMLEFT">
 						<Offset>
@@ -1522,7 +1568,7 @@
 					</Anchor>
 				</Anchors>
 			</Button>
-			<Button name="FilterTradeButton10" inherits="FilterClassButtonTemplate" id="10">
+			<Button name="FilterTradeButton10" inherits="GuildAdsTradeClassButtonTemplate" id="10">
 				<Anchors>
 					<Anchor point="TOPLEFT" relativeTo="FilterTradeButton9" relativePoint="BOTTOMLEFT">
 						<Offset>
@@ -1531,7 +1577,7 @@
 					</Anchor>
 				</Anchors>
 			</Button>
-			<Button name="FilterTradeButton11" inherits="FilterClassButtonTemplate" id="11">
+			<Button name="FilterTradeButton11" inherits="GuildAdsTradeClassButtonTemplate" id="11">
 				<Anchors>
 					<Anchor point="TOPLEFT" relativeTo="FilterTradeButton10" relativePoint="BOTTOMLEFT">
 						<Offset>
@@ -1540,7 +1586,7 @@
 					</Anchor>
 				</Anchors>
 			</Button>
-			<Button name="FilterTradeButton12" inherits="FilterClassButtonTemplate" id="12">
+			<Button name="FilterTradeButton12" inherits="GuildAdsTradeClassButtonTemplate" id="12">
 				<Anchors>
 					<Anchor point="TOPLEFT" relativeTo="FilterTradeButton11" relativePoint="BOTTOMLEFT">
 						<Offset>
@@ -1549,7 +1595,7 @@
 					</Anchor>
 				</Anchors>
 			</Button>
-			<Button name="FilterTradeButton13" inherits="FilterClassButtonTemplate" id="13">
+			<Button name="FilterTradeButton13" inherits="GuildAdsTradeClassButtonTemplate" id="13">
 				<Anchors>
 					<Anchor point="TOPLEFT" relativeTo="FilterTradeButton12" relativePoint="BOTTOMLEFT">
 						<Offset>
@@ -1558,7 +1604,7 @@
 					</Anchor>
 				</Anchors>
 			</Button>
-			<Button name="FilterTradeButton14" inherits="FilterClassButtonTemplate" id="14">
+			<Button name="FilterTradeButton14" inherits="GuildAdsTradeClassButtonTemplate" id="14">
 				<Anchors>
 					<Anchor point="TOPLEFT" relativeTo="FilterTradeButton13" relativePoint="BOTTOMLEFT">
 						<Offset>
@@ -1567,7 +1613,7 @@
 					</Anchor>
 				</Anchors>
 			</Button>
-			<Button name="FilterTradeButton15" inherits="FilterClassButtonTemplate" id="15">
+			<Button name="FilterTradeButton15" inherits="GuildAdsTradeClassButtonTemplate" id="15">
 				<Anchors>
 					<Anchor point="TOPLEFT" relativeTo="FilterTradeButton14" relativePoint="BOTTOMLEFT">
 						<Offset>
@@ -1662,7 +1708,7 @@
 						this:ClearFocus();
 					</OnEnterPressed>
 				</Scripts>
-				<FontString inherits="ChatFontNormal" bytes="64"/>
+				<!-- <FontString inherits="ChatFontNormal" bytes="64"/> -->
 			</EditBox>
 			
 			<Frame name="GuildAds_Filter_ZoneDropDown" inherits="UIDropDownMenuTemplate" enableMouse="true" hidden="false">

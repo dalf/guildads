@@ -8,8 +8,7 @@
 -- Licence: GPL version 2 (General Public License)
 ----------------------------------------------------------------------------------
 
-local compost = CompostLib:GetInstance("compost-1")
-local g_AdFilters = {};
+local g_AdFilters = {}; 
 
 GuildAdsTrade = {
 	metaInformations = { 
@@ -605,7 +604,14 @@ GuildAdsTrade = {
 	myButton = {
 	
 		onClick = function(button)
-			GuildAdsTrade.exchangeButton.onClick(button);
+			GuildAdsTrade.select(this.adType, this.playerName, this.item);
+			
+			if button == "RightButton" then
+				GuildAdsTrade.contextMenu.show();
+			end
+			if this.item and button=="LeftButton" and IsControlKeyDown() then 
+				DressUpItemLink(this.item); 
+			end
 		end;
 		
 		onEnter = function(obj)
@@ -623,20 +629,8 @@ GuildAdsTrade = {
 			if button == "RightButton" then
 				GuildAdsTrade.contextMenu.show();
 			end
-
-			if this.item and button=="LeftButton" then
-				if IsControlKeyDown() then
-					DressUpItemLink(this.item); 
-				-- elseif IsShiftKeyDown() and ChatFrameEditBox:IsVisible() and strupper(ChatFrameEditBox.chatType)==strupper(GuildAds:GetDefaultChannelAlias()) then 
-				elseif IsShiftKeyDown() and ChatFrameEditBox:IsVisible() then 
-					local itemName,itemLink,itemRarity=GetItemInfo(this.item); 
-					if (itemName) then
-						local r, g, b, hex = GetItemQualityColor(itemRarity)
-						local hexcol = string.gsub( hex, "|c(.+)", "%1" )
-						local link = "|c"..hexcol.."|H"..this.item.."|h["..itemName.."]|h|r"
-						ChatFrameEditBox:Insert(link)
-					end
-				end
+			if this.item and button=="LeftButton" and IsControlKeyDown() then 
+				DressUpItemLink(this.item); 
 			end
 		end;
 		
@@ -946,42 +940,31 @@ GuildAdsTrade = {
 				else
 					error("bad tab for GuildAdsTrade.data.get("..tostring(tab)..")", 3);
 				end
-				
-				-- erase cache
-				if GuildAdsTrade.data.cache[tab] then
-					for key, data in GuildAdsTrade.data.cache[tab] do
-						if type(data.p)=="table" then
-							compost:Reclaim(data.p);
-						end
-						compost:Reclaim(GuildAdsTrade.data.cache[tab][key]);
-					end
-					compost:Erase(GuildAdsTrade.data.cache[tab]);
-				else
-					GuildAdsTrade.data.cache[tab] = compost:Acquire();
-				end
-				
-				-- create new
+				GuildAdsTrade.data.cache[tab] = {};
 				if (tab == GuildAdsTrade.TAB_CRAFTABLE) then
-					local cache = GuildAdsTrade.data.cache[tab];
-					local itemToIndex = compost:Acquire();
-					
+					local already;
 					for _, item, playerName, data in datatype:iterator() do
-						if itemToIndex[item] then
-							tinsert(cache[itemToIndex[item]].p, playerName);
-						elseif GuildAdsTrade.data.adIsVisible(adtype, playerName, item, data) then
-							tinsert(cache, compost:AcquireHash("i", item, "p", compost:Acquire(playerName), "d", data, "t", adtype ));
-							itemToIndex[item] = table.getn(cache);
+						for key,value in GuildAdsTrade.data.cache[tab] do
+							if (GuildAdsTrade.data.cache[tab][key].i==item) then 
+								already=true;
+								tinsert(GuildAdsTrade.data.cache[tab][key].p, playerName);
+								break;
+							end
 						end
+						if (not already) then
+							if GuildAdsTrade.data.adIsVisible(adtype, playerName, item, data) then
+								tinsert(GuildAdsTrade.data.cache[tab], { i=item, p={playerName}, d=data, t=adtype });
+							end
+						end
+						already=nil;
 					end
-					for _, data in cache do
+					for _, data in GuildAdsTrade.data.cache[tab] do
 						table.sort(data.p, GuildAdsTrade.sortData.predicateFunctions.crafter);
 					end
-					
-					compost:Reclaim(itemToIndex);
 				else
 					for _, item, playerName, data in datatype:iterator() do
 						if GuildAdsTrade.data.adIsVisible(adtype, playerName, item, data) then
-							tinsert(GuildAdsTrade.data.cache[tab], compost:AcquireHash("i", item, "p", playerName, "d", data, "t", adtype ));
+							tinsert(GuildAdsTrade.data.cache[tab], { i=item, p=playerName, d=data, t=adtype });
 						end
 					end
 				end
@@ -1243,25 +1226,25 @@ GuildAdsTrade = {
 			if ( type == "guildadsmetaclass" ) then
 				button:SetText(text);
 				normalText:SetPoint("LEFT", button:GetName(), "LEFT", 4, 0);
-				highlightText:SetPoint("LEFT", button:GetName(), "LEFT", 4, 0);
+--~ 				highlightText:SetPoint("LEFT", button:GetName(), "LEFT", 4, 0);
 				normalTexture:SetAlpha(1.0);	
 				line:Hide();
 			elseif ( type == "class" or type =="guildadsclass" ) then
 				button:SetText(text);
 				normalText:SetPoint("LEFT", button:GetName(), "LEFT", 12, 0);
-				highlightText:SetPoint("LEFT", button:GetName(), "LEFT", 12, 0);
+--~ 				highlightText:SetPoint("LEFT", button:GetName(), "LEFT", 12, 0);
 				normalTexture:SetAlpha(1.0);	
 				line:Hide();
 			elseif ( type == "subclass" ) then
 				button:SetText(HIGHLIGHT_FONT_COLOR_CODE..text..FONT_COLOR_CODE_CLOSE);
 				normalText:SetPoint("LEFT", button:GetName(), "LEFT", 20, 0);
-				highlightText:SetPoint("LEFT", button:GetName(), "LEFT", 20, 0);
+--~ 				highlightText:SetPoint("LEFT", button:GetName(), "LEFT", 20, 0);
 				normalTexture:SetAlpha(0.8);
 				line:Hide();
 			elseif ( type == "invtype" ) then
 				button:SetText(HIGHLIGHT_FONT_COLOR_CODE..text..FONT_COLOR_CODE_CLOSE); 
 				normalText:SetPoint("LEFT", button:GetName(), "LEFT", 28, 0);
-				highlightText:SetPoint("LEFT", button:GetName(), "LEFT", 28, 0);
+--~ 				highlightText:SetPoint("LEFT", button:GetName(), "LEFT", 28, 0);
 				normalTexture:SetAlpha(0.8);	
 				if ( isLast ) then
 					line:SetTexCoord(0.4375, 0.875, 0, 0.625);
@@ -1348,14 +1331,17 @@ GuildAdsTrade = {
 		initialize = function(level)
 			if level==1 then
 				if type(GuildAdsTrade.currentPlayerName)=="string" then
-					GuildAdsPlayerMenu.initialize(GuildAdsTrade.currentPlayerName, level);
+					GuildAdsTrade.contextMenu.addPlayer(GuildAdsTrade.currentPlayerName);
 				elseif type(GuildAdsTrade.currentPlayerName)=="table" then
 					for _, name in GuildAdsTrade.currentPlayerName do
 						GuildAdsTrade.contextMenu.addPlayer(name);
 					end
 				end
 			else
-				GuildAdsPlayerMenu.initialize(UIDROPDOWNMENU_MENU_VALUE, level);
+				local info = {};
+				info.text = "Joueur"..UIDROPDOWNMENU_MENU_VALUE;
+				info.notCheckable = 1;
+				UIDropDownMenu_AddButton(info, 2);
 			end
 		end
 	};
