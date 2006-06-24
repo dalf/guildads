@@ -260,9 +260,14 @@ end
 
 function GuildAdsDTS:ReceiveNewRevision(transaction, revision, id, data)
 	if transaction._valid then
-		self.dataType:setRaw(transaction.playerName, id, data, revision);
-		if revision>transaction.toRevision then
-			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "|cffff1e00Invalid new revision|r "..tostring(revision).." >"..tostring(transaction.toRevision));
+		if id then
+			self.dataType:setRaw(transaction.playerName, id, data, revision);
+			if revision>transaction.toRevision then
+				GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "|cffff1e00Invalid new revision|r "..tostring(revision).." >"..tostring(transaction.toRevision));
+			end
+		else
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "|cffff1e00Invalid new revision|r id is nil");
+			transaction._IntegrityProblem = true;
 		end
 	end
 end
