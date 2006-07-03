@@ -69,11 +69,11 @@ function GuildAdsWindow:InitializeTab(currTab, id, info, previousTab)
 	currTab:ClearAllPoints();
 	currTab:SetParent(self.frame);
 	if (previousTab == nil) then
-		currTab:SetPoint("CENTER", self.frame, "BOTTOMLEFT", 65, -13);
+		currTab:SetPoint("CENTER", self.frame, "BOTTOMLEFT", 65, -27);
 		getglobal(info.frame):Show();
 		self:SelectTab(currTab);
 	else
-		currTab:SetPoint("LEFT", previousTab:GetName(), "RIGHT", -13, 0);
+		currTab:SetPoint("LEFT", previousTab:GetName(), "RIGHT", -7, 0);
 		getglobal(info.frame):Hide()
 		self:DeselectTab(currTab);
 	end

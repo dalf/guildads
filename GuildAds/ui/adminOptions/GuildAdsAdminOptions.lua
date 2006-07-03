@@ -1,14 +1,14 @@
-ï»¿----------------------------------------------------------------------------------
+----------------------------------------------------------------------------------
 --
 -- GuildAdsAdminOptions.lua
 --
--- Author: Zarkan, FkaÃ¯ of European Ner'zhul (Horde)
+-- Author: Zarkan, Fkaï of European Ner'zhul (Horde)
 -- URL : http://guildads.sourceforge.net
 -- Email : guildads@gmail.com
 -- Licence: GPL version 2 (General Public License)
 ----------------------------------------------------------------------------------
 
-GuildAdsChannelOptions = {
+GuildAdsAdminOptions = {
 	
 	metaInformations = { 
 		name = "AdminOptions",
@@ -17,16 +17,16 @@ GuildAdsChannelOptions = {
 			options = {
 				frame = "GuildAdsAdminOptionsFrame",
 				tab = "GuildAdsAdminOptionsTab",
-				tooltip = "Configuration du cannal Ã  utiliser",
-				priority = 2
+				tooltip = "Gestion des droits",
+				priority = 3
 			}
 		}
 	};
 	
 	defaultsOptions = function()
 		--[[
-			faire confiance Ã  sa guilde
-			faire confiance Ã  ses amis ?
+			faire confiance à sa guilde
+			faire confiance à ses amis ?
 		]]
 	end;
 	
@@ -38,4 +38,4 @@ GuildAdsChannelOptions = {
 	
 }
 
-GuildAdsPlugin.UIregister(GuildAdsChannelOptions);
+GuildAdsPlugin.UIregister(GuildAdsAdminOptions);

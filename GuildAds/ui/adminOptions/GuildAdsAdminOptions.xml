@@ -4,7 +4,56 @@
 	
 	<Script file="GuildAdsAdminOptions.lua"/>
 		
-	<Frame name="GuildAdsChannelOptionsFrame" inherits="GuildAdsConfig_OptionFrameBoxTemplate" parent="GuildAdsOptionsWindowFrame">
+	<Button name="GuildAdsMyAdminButtonTemplate" inherits="GuildAdsVirtualAdButtonTemplate" virtual="true">
+		<Size>
+			<AbsDimension x="350" y="22"/>
+		</Size>
+		<Layers>
+			<Layer level="ARTWORK">
+				<FontString name="$parentText" inherits="GameFontHighlightSmall" justifyH="LEFT">
+					<Size>
+						<AbsDimension x="185" y="22"/>
+					</Size>
+					<Anchors>
+						<Anchor point="TOPLEFT" >
+							<Offset>
+								<AbsDimension x="110" y="0"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+				<FontString name="$parentComment" inherits="GameFontNormalSmall" justifyH="LEFT">
+					<Size>
+						<AbsDimension x="115" y="22"/>
+					</Size>
+					<Anchors>
+						<Anchor point="LEFT" relativeTo="$parentQuantity" relativePoint="RIGHT">
+							<Offset>
+								<AbsDimension x="2" y="0"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+				
+			</Layer>
+		</Layers>
+		<!--
+		<Scripts>
+			<OnEnter>
+				GuildAdsTrade.myButton.onEnter();
+			</OnEnter>
+			<OnClick>
+				GuildAdsTrade.myButton.onClick(arg1);
+			</OnClick>
+			<OnLeave>
+				GameTooltip:Hide();
+			</OnLeave>
+		</Scripts>
+
+-->
+	</Button>	
+		
+	<Frame name="GuildAdsAdminOptionsFrame" inherits="GuildAdsConfig_OptionFrameBoxTemplate" parent="GuildAdsOptionsWindowFrame">
 		<Size>
 			<AbsDimension x="380" y="235"/>
 		</Size>
@@ -17,7 +66,7 @@
 		</Anchors>
 		<Layers>
 			<Layer level="ARTWORK">
-				<FontString name="$parentTitleLabel" inherits="GameFontHighlightSmall" text="GUILDADS_CHAT_OPTIONS">
+				<FontString name="$parentTitleLabel" inherits="GameFontHighlightSmall" text="--WHITE LIST">
 					<Anchors>
 						<Anchor point="TOP" relativePoint="TOP">
 							<Offset>
@@ -30,215 +79,96 @@
 		</Layers>
 		<Frames>
 		
-		<EditBox name="GuildAds_ChannelAliasEditBox" autoFocus="false" historyLines="0" inherits="GuildAdsConfig_EditBox">
-			<Size>
-				<AbsDimension x="200" y="26"/>
-			</Size>
-			<Anchors>
-				<Anchor point="TOPLEFT">
-					<Offset>
-						<AbsDimension x="130" y="-30" />
-					</Offset>
-				</Anchor>
-			</Anchors>
-			<Layers>
-				<Layer level="ARTWORK">
-					<FontString name="$parentLabel" inherits="GameFontNormalSmall" text="GUILDADS_CHAT_ALIAS">
+		<Button name="GuildAdsMyAdminButton1" inherits="GuildAdsMyAdButtonTemplate" id="1">
 						<Anchors>
-							<Anchor point="RIGHT" relativePoint="LEFT">
+							<Anchor point="TOPLEFT" relativeTo="GuildAdsAdminOptionsFrame" relativePoint="BOTTOMLEFT">
 								<Offset>
-									<AbsDimension x="-5" y="0"/>
+									<AbsDimension x="0" y="0"/>
 								</Offset>
 							</Anchor>
 						</Anchors>
-					</FontString>
-				</Layer>
-			</Layers>
-		</EditBox>
-		
-		<EditBox name="GuildAds_ChannelCommandEditBox" autoFocus="false" historyLines="0" inherits="GuildAdsConfig_EditBox">
-			<Size>
-				<AbsDimension x="200" y="26"/>
-			</Size>
-			<Anchors>
-				<Anchor point="TOPLEFT" relativeTo="GuildAds_ChannelAliasEditBox" relativePoint="BOTTOMLEFT">
-					<Offset>
-						<AbsDimension x="0" y="-5"/>
-					</Offset>
-				</Anchor>
-			</Anchors>
-			<Layers>
-				<Layer level="ARTWORK">
-					<FontString name="$parentLabel" inherits="GameFontNormalSmall" text="GUILDADS_CHAT_COMMAND">
+					</Button>
+					<Button name="GuildAdsMyAdminButton2" inherits="GuildAdsMyAdminButtonTemplate" id="2">
 						<Anchors>
-							<Anchor point="RIGHT" relativePoint="LEFT">
+							<Anchor point="TOPLEFT" relativeTo="GuildAdsMyAdminButton1" relativePoint="BOTTOMLEFT">
 								<Offset>
-									<AbsDimension x="-2" y="0"/>
+									<AbsDimension x="0" y="0"/>
 								</Offset>
 							</Anchor>
 						</Anchors>
-					</FontString>
-				</Layer>
-			</Layers>
-		</EditBox>
-		
-		<CheckButton name="GuildAds_ChatUseThisCheckButton" inherits="GuildAdsConfig_CheckButton">
-			<Anchors>
-				<Anchor point="TOPLEFT" relativeTo="GuildAds_ChannelCommandEditBox" relativePoint="BOTTOMLEFT">
-					<Offset>
-						<AbsDimension x="-110" y="-12" />
-					</Offset>
-				</Anchor>
-			</Anchors>
-			<Layers>
-				<Layer level="ARTWORK">
-					<FontString name="$parentLabel" inherits="GameFontNormalSmall" text="GUILDADS_CHAT_USETHIS">
+					</Button>
+					<Button name="GuildAdsMyAdminButton3" inherits="GuildAdsMyAdminButtonTemplate" id="3">
 						<Anchors>
-							<Anchor point="LEFT" relativePoint="RIGHT">
+							<Anchor point="TOPLEFT" relativeTo="GuildAdsMyAdminButton2" relativePoint="BOTTOMLEFT">
 								<Offset>
-									<AbsDimension x="5" y="1"/>
+									<AbsDimension x="0" y="0"/>
 								</Offset>
 							</Anchor>
 						</Anchors>
-					</FontString>
-				</Layer>
-			</Layers>
-			<Scripts>
-				<OnClick>
-					if ( this:GetChecked() ) then
-						PlaySound("igMainMenuOptionCheckBoxOff");
-						GuildAds_ChatUseThisCheckButton:SetChecked(1);
-						GuildAds_ChannelEditBox:Show();
-						GuildAds_ChannelPasswordEditBox:Show();
-					else
-						PlaySound("igMainMenuOptionCheckBoxOn");
-						GuildAds_ChatUseThisCheckButton:SetChecked(0);
-						GuildAds_ChannelEditBox:Hide();
-						GuildAds_ChannelPasswordEditBox:Hide();
-					end
-				</OnClick>
-			</Scripts>
-		</CheckButton>
-		
-		<EditBox name="GuildAds_ChannelEditBox" autoFocus="false" historyLines="0" inherits="GuildAdsConfig_EditBox">
-			<Size>
-				<AbsDimension x="200" y="26"/>
-			</Size>
-			<Anchors>
-				<Anchor point="TOPLEFT" relativeTo="GuildAds_ChatUseThisCheckButton" relativePoint="BOTTOMLEFT">
-					<Offset>
-						<AbsDimension x="110" y="0"/>
-					</Offset>
-				</Anchor>
-			</Anchors>
-			<Layers>
-				<Layer level="ARTWORK">
-					<FontString name="$parentLabel" inherits="GameFontNormalSmall" text="GUILDADS_CHAT_CHANNEL">
+					</Button>
+					<Button name="GuildAdsMyAdminButton4" inherits="GuildAdsMyAdminButtonTemplate" id="4">
 						<Anchors>
-							<Anchor point="RIGHT" relativePoint="LEFT">
+							<Anchor point="TOPLEFT" relativeTo="GuildAdsMyAdminButton3" relativePoint="BOTTOMLEFT">
 								<Offset>
-									<AbsDimension x="-5" y="0"/>
+									<AbsDimension x="0" y="0"/>
 								</Offset>
 							</Anchor>
 						</Anchors>
-					</FontString>
-				</Layer>
-			</Layers>
-		</EditBox>
-
-		<EditBox name="GuildAds_ChannelPasswordEditBox" autoFocus="false" historyLines="0" password="true" inherits="GuildAdsConfig_EditBox">
-			<Size>
-				<AbsDimension x="200" y="26"/>
-			</Size>
-			<Anchors>
-				<Anchor point="TOPLEFT" relativeTo="GuildAds_ChatUseThisCheckButton" relativePoint="BOTTOMLEFT">
-					<Offset>
-						<AbsDimension x="110" y="-30"/>
-					</Offset>
-				</Anchor>
-			</Anchors>
-			<Layers>
-				<Layer level="ARTWORK">
-					<FontString name="$parentLabel" inherits="GameFontNormalSmall" text="GUILDADS_CHAT_PASSWORD">
+					</Button>
+					<Button name="GuildAdsMyAdminButton5" inherits="GuildAdsMyAdminButtonTemplate" id="5">
 						<Anchors>
-							<Anchor point="RIGHT" relativePoint="LEFT">
+							<Anchor point="TOPLEFT" relativeTo="GuildAdsMyAdminButton4" relativePoint="BOTTOMLEFT">
 								<Offset>
-									<AbsDimension x="-5" y="0"/>
+									<AbsDimension x="0" y="0"/>
 								</Offset>
 							</Anchor>
 						</Anchors>
-					</FontString>
-				</Layer>
-			</Layers>
-		</EditBox>
-
-		<CheckButton name="GuildAds_ChatShowNewAskCheckButton" inherits="GuildAdsConfig_CheckButton">
-			<Anchors>
-				<Anchor point="TOPLEFT" relativeTo="GuildAds_ChannelPasswordEditBox" relativePoint="BOTTOMLEFT">
-					<Offset>
-						<AbsDimension x="-110" y="-12" />
-					</Offset>
-				</Anchor>
-			</Anchors>
-			<Layers>
-				<Layer level="ARTWORK">
-					<FontString name="$parentLabel" inherits="GameFontNormalSmall" text="GUILDADS_CHAT_SHOW_NEWASK">
+					</Button>
+					<Button name="GuildAdsMyAdminButton6" inherits="GuildAdsMyAdminButtonTemplate" id="6">
 						<Anchors>
-							<Anchor point="LEFT" relativePoint="RIGHT">
+							<Anchor point="TOPLEFT" relativeTo="GuildAdsMyAdminButton5" relativePoint="BOTTOMLEFT">
 								<Offset>
-									<AbsDimension x="5" y="1"/>
+									<AbsDimension x="0" y="0"/>
 								</Offset>
 							</Anchor>
 						</Anchors>
-					</FontString>
-				</Layer>
-			</Layers>
-			<Scripts>
-				<OnClick>
-					if ( this:GetChecked() ) then
-						GuildAdsTrade.setProfileValue(nil, "ShowNewAsk", true);
-						PlaySound("igMainMenuOptionCheckBoxOn");
-					else
-						GuildAdsTrade.setProfileValue(nil, "ShowNewAsk", nil);
-						PlaySound("igMainMenuOptionCheckBoxOff");
-					end
-				</OnClick>
-			</Scripts>
-		</CheckButton>
-
-		<CheckButton name="GuildAds_ChatShowNewHaveCheckButton" inherits="GuildAdsConfig_CheckButton">
-			<Anchors>
-				<Anchor point="TOPLEFT" relativeTo="GuildAds_ChatShowNewAskCheckButton" relativePoint="BOTTOMLEFT">
-					<Offset>
-						<AbsDimension x="0" y="0" />
-					</Offset>
-				</Anchor>
-			</Anchors>
-			<Layers>
-				<Layer level="ARTWORK">
-					<FontString name="$parentLabel" inherits="GameFontNormalSmall" text="GUILDADS_CHAT_SHOW_NEWHAVE">
+					</Button>
+					<Button name="GuildAdsMyAdminButton7" inherits="GuildAdsMyAdminButtonTemplate" id="7">
 						<Anchors>
-							<Anchor point="LEFT" relativePoint="RIGHT">
+							<Anchor point="TOPLEFT" relativeTo="GuildAdsMyAdminButton6" relativePoint="BOTTOMLEFT">
 								<Offset>
-									<AbsDimension x="5" y="1"/>
+									<AbsDimension x="0" y="0"/>
 								</Offset>
 							</Anchor>
 						</Anchors>
-					</FontString>
-				</Layer>
-			</Layers>
-			<Scripts>
-				<OnClick>
-					if ( this:GetChecked() ) then
-						GuildAdsTrade.setProfileValue(nil, "ShowNewHave", true);
-						PlaySound("igMainMenuOptionCheckBoxOn");
-					else
-						GuildAdsTrade.setProfileValue(nil, "ShowNewHave", nil);
-						PlaySound("igMainMenuOptionCheckBoxOff");
-					end
-				</OnClick>
-			</Scripts>
-		</CheckButton>
+					</Button>
+					<Button name="GuildAdsMyAdminButton8" inherits="GuildAdsMyAdminButtonTemplate" id="8">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="GuildAdsMyAdminButton7" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</Button>
+					<Button name="GuildAdsMyAdminButton9" inherits="GuildAdsMyAdminButtonTemplate" id="9">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="GuildAdsMyAdminButton8" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</Button>
+					<Button name="GuildAdsMyAdminButton10" inherits="GuildAdsMyAdminButtonTemplate" id="10">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="GuildAdsMyAdminButton9" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</Button>
 
 		</Frames>
 		<Scripts>
@@ -248,6 +178,6 @@
 		</Scripts>
 	</Frame>
 	
-	<Button name="GuildAdsChannelOptionsTab" inherits="GuildAdsWindowTabTemplate" text="--Channels" />
+	<Button name="GuildAdsAdminOptionsTab" inherits="GuildAdsWindowTabTemplate" text="--Admin" />
 	
 </Ui>

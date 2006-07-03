@@ -45,6 +45,7 @@ ui\GuildAdsUITools.lua
 ui\GuildAdsPlayerMenu.lua
 ui\debug\GuildAdsDebug.xml
 ui\channelOptions\GuildAdsChannelOptions.xml
+ui\adminOptions\GuildAdsAdminOptions.xml
 ui\guild\GuildAdsGuildFrame.xml
 ui\trade\GuildAdsTradeFrame.xml
 ui\trade\GuildAdsTradeOptionsFrame.xml

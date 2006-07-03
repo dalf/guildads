@@ -84,24 +84,24 @@
 				<!-- ligne du bas -->
 				<Texture file="Interface\PaperDollInfoFrame\UI-Character-General-BottomLeft">
 					<Size>
-						<AbsDimension x="256" y="256"/>
+						<AbsDimension x="256" y="276"/>
 					</Size>
 					<Anchors>
 						<Anchor point="BOTTOMLEFT">
 							<Offset>
-								<AbsDimension x="0" y="-75"/>
+								<AbsDimension x="0" y="-95"/>
 							</Offset>
 						</Anchor>						
 					</Anchors>
 				</Texture>
 				<Texture file="Interface\PaperDollInfoFrame\UI-Character-General-BottomLeft">
 					<Size>
-						<AbsDimension x="128" y="256"/>
+						<AbsDimension x="128" y="276"/>
 					</Size>
 					<Anchors>
 						<Anchor point="BOTTOMLEFT">
 							<Offset>
-								<AbsDimension x="256" y="-75"/>
+								<AbsDimension x="256" y="-95"/>
 							</Offset>
 						</Anchor>						
 					</Anchors>
@@ -109,12 +109,12 @@
 				</Texture>
 				<Texture file="Interface\PaperDollInfoFrame\UI-Character-General-BottomLeft">
 					<Size>
-						<AbsDimension x="128" y="256"/>
+						<AbsDimension x="128" y="276"/>
 					</Size>
 					<Anchors>
 						<Anchor point="BOTTOMLEFT">
 							<Offset>
-								<AbsDimension x="356" y="-75"/>
+								<AbsDimension x="356" y="-95"/>
 							</Offset>
 						</Anchor>						
 					</Anchors>
@@ -122,12 +122,12 @@
 				</Texture>
 				<Texture file="Interface\PaperDollInfoFrame\UI-Character-General-BottomRight">
 					<Size>
-						<AbsDimension x="128" y="256"/>
+						<AbsDimension x="128" y="276"/>
 					</Size>
 					<Anchors>
 						<Anchor point="BOTTOMRIGHT">
 							<Offset>
-								<AbsDimension x="32" y="-75"/>
+								<AbsDimension x="32" y="-95"/>
 							</Offset>
 						</Anchor>						
 					</Anchors>
