@@ -1,4 +1,4 @@
-## Interface: 11100
+## Interface: 20000
 ## Title: GuildAds
 ## Author: Zarkan, Fkai
 ## Version: 2.0
@@ -11,7 +11,6 @@
 ## DefaultState: Enabled
 ## LoadOnDemand: 0
 ## SavedVariables: GuildAdsDatabase
-CompostLib.lua
 revision.lua
 localization.lua
 localization.de.lua

@@ -51,7 +51,7 @@ function GuildAdsWindow:InitializeTabs()
 	
 	self.tabDescription = GuildAdsPlugin_GetUI(self.name);
 
-	for id, info in self.tabDescription do
+	for id, info in pairs(self.tabDescription) do
 		currTab = getglobal(info.tab);
 
 		if info.tooltip then
@@ -80,7 +80,7 @@ function GuildAdsWindow:InitializeTab(currTab, id, info, previousTab)
 end
 
 function GuildAdsWindow:TabOnClick(tab)	
-    for id, info in self.tabDescription do
+    for id, info in pairs(self.tabDescription) do
 		if id == tab then
 			getglobal(info.frame):Show();
 			self:SelectTab(getglobal(info.tab));

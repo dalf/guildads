@@ -15,7 +15,7 @@ GuildAdsTask = {
 };
 
 function GuildAdsTask:NamedScheduleCheck(n, r)
-    for k, v in self.timerDB do
+    for k, v in pairs(self.timerDB) do
 		if v.n == n then
 			r = r and (v.e or 0) or TRUE return r
 		end
@@ -32,24 +32,24 @@ function GuildAdsTask:AddNamedSchedule(n, t, r, c, f, ...)
         c = tonumber(c),
         e = 0,
         f = f,
-		a = arg
+		a = { select(1, ...) }
 	})
 end
 
 function GuildAdsTask:DeleteNamedSchedule(n, r)
-	for k, v in self.timerDB do
+	for k, v in pairs(self.timerDB) do
 		if v.n == n then tremove(self.timerDB, k) end
 	end
 end
 
 function GuildAdsTask:ChangeDuration(n, t)
-	for k, v in self.timerDB do
+	for k, v in pairs(self.timerDB) do
 		if v.n == n then v.t = t or v.t end
 	end
 end
 
 function GuildAdsTask:Update()
-	for k, v in self.timerDB do
+	for k, v in pairs(self.timerDB) do
 		v.e = v.e + (arg1 or 0.015)
 		local e = v.e
 		if not v.t then elseif v.e >= v.t then v.e = 0

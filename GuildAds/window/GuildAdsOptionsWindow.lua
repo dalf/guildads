@@ -13,7 +13,7 @@ GuildAdsOptionsWindow = GuildAdsWindow:new({ name="options", frame = "GuildAdsOp
 function GuildAdsOptionsWindow:GetPluginInWindow()
 	if not self.pluginInWindow then
 		self.pluginInWindow = {};
-		for pluginName, plugin in GuildAdsPlugin.PluginsList do
+		for pluginName, plugin in pairs(GuildAdsPlugin.PluginsList) do
 			if plugin.metaInformations and plugin.metaInformations.ui and plugin.metaInformations.ui[self.name] then
 				self.pluginInWindow[pluginName] = plugin;
 			end
@@ -23,7 +23,7 @@ function GuildAdsOptionsWindow:GetPluginInWindow()
 end
 
 function GuildAdsOptionsWindow:Save()
-	for pluginName, plugin in self:GetPluginInWindow() do
+	for pluginName, plugin in pairs(self:GetPluginInWindow()) do
 		if plugin.saveOptions then
 			plugin.saveOptions();
 		end
@@ -33,7 +33,7 @@ end
 
 -- TODO : restaure defaults option only for current tab
 function GuildAdsOptionsWindow:Defaults()
-	for pluginName, plugin in self:GetPluginInWindow() do
+	for pluginName, plugin in pairs(self:GetPluginInWindow()) do
 		if plugin.defaultsOptions then
 			plugin.defaultsOptions();
 		end

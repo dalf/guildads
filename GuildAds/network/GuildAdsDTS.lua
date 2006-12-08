@@ -274,7 +274,7 @@ end
 
 function GuildAdsDTS:ReceiveOldRevisions(transaction, revisions)
 	if transaction._valid then
-		table.setn(self.deleteTable, 0);
+		ga_table_erase(self.deleteTable);
 		
 		-- find which id to delete
 		for id, _, data, revision in self.dataType:iterator(transaction.playerName) do
@@ -292,11 +292,11 @@ function GuildAdsDTS:ReceiveOldRevisions(transaction, revisions)
 		end
 		
 		-- delete them
-		for _, id in self.deleteTable do
+		for _, id in pairs(self.deleteTable) do
 			self.dataType:setRaw(transaction.playerName, id, nil, nil)
 		end
 		
-		table.setn(self.deleteTable, 0);
+		ga_table_erase(self.deleteTable);
 	end
 end
 

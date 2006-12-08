@@ -46,7 +46,7 @@ function GuildAdsSkillDataType:onUpdate()
 end
 
 function GuildAdsSkillDataType:getIdFromName(SkillName)
-	for id, name in GUILDADS_SKILLS do
+	for id, name in pairs(GUILDADS_SKILLS) do
 		if (name == SkillName) then
 			return id;
 		end

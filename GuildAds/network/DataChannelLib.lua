@@ -6,7 +6,7 @@
 -- change (And check LibActivate is still valid!)
 ---------------------------------------------------------------------------
 
-local vmajor, vminor = "1", 1
+local vmajor, vminor = "1", 2
 local stubvarname = "DataChannelLibStub"
 local libvarname = "DataChannelLib"
 
@@ -134,7 +134,7 @@ end
 -- Join all waiting channels after the General channel is joined
 local joinWaitingChannels = function()
 	if lib.WaitingChannels then
-		for _, channelName in lib.WaitingChannels do
+		for _, channelName in pairs(lib.WaitingChannels) do
 			if lib.Channels[channelName] and not lib.Channels[channelName].ID then
 				JoinChannelByName(channelName, lib.Channels[channelName].Password, lib.Channels[channelName].ChatFrame and lib.Channels[channelName].ChatFrame:GetID());
 			end

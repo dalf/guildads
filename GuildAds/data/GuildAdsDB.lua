@@ -89,7 +89,7 @@ function GuildAdsDBChannel:unregisterEvent(obj)
 end
 
 function GuildAdsDBChannel:triggerEvent(list, name)
-	for obj, method in self.eventRegistry do
+	for obj, method in pairs(self.eventRegistry) do
 		if method == true then
 			obj(self, list, name)
 		else
@@ -326,7 +326,7 @@ function GuildAdsDB:Initialize()
 	
 	-- initialize data types
 	local metadataPath = { "Versions", "DataTypes" };
-	for _, dataType in self._load do
+	for _, dataType in pairs(self._load) do
 		local name = dataType.metaInformations.name;
 		dataType.profile = self.profile;
 		if dataType.metaInformations.parent == GuildAdsDataType.PROFILE then
@@ -427,13 +427,13 @@ function GuildAdsDB:FormatTime(ref, relative)
 	end
 	
 	month = math.floor(delta / MonthMin);
-	deltamonth = math.mod(delta, MonthMin);
+	deltamonth = math.fmod(delta, MonthMin);
 	
 	day = math.floor(deltamonth / DayMin);
-	deltaday = math.mod(delta, DayMin);
+	deltaday = math.fmod(delta, DayMin);
 	
 	hour = math.floor(deltaday / HourMin);
-	minute = math.mod(delta, HourMin);
+	minute = math.fmod(delta, HourMin);
 	
 	if (month > 0) then
 		return prefix..string.format(GetText("LASTONLINE_MONTHS", nil, month), month);

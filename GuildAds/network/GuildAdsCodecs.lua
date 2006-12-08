@@ -54,7 +54,7 @@ function GuildAdsCodecTable:new(o, id, version)
 	local codec = GuildAdsCodec.new(self, o, id, version);
 	
 	codec.t = {};
-	table.setn(codec.t, table.getn(codec.schema));
+	-- table.setn(codec.t, table.getn(codec.schema));
 	
 	codec.encode = function(o)
 		local t = codec.t;
@@ -77,7 +77,7 @@ function GuildAdsCodecTable:new(o, id, version)
 		local t;
 		
 		o = o.."/";
-		for str in string.gfind(o, "([^\/]*)/") do
+		for str in string.gmatch(o, "([^\/]*)/") do
 			t = t or {};
 			local d = codec.schema[i];
 			if d then

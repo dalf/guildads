@@ -84,7 +84,7 @@ function GuildAds:Initialize()
 	
 	-- Initialize windows (main, options, inspect)
 	GuildAds_ChatDebug(GA_DEBUG_GLOBAL,"[GuildAdsWindow:Create] begin");
-	for _, window in self.windows do
+	for _, window in pairs(self.windows) do
 		window:Create()
 	end
 	GuildAds_ChatDebug(GA_DEBUG_GLOBAL,"[GuildAdsWindow:Create] end");
@@ -291,3 +291,9 @@ for k, v in pairs(GuildAds) do
 	GuildAdsBackup[k] = v;
 end
 setmetatable(GuildAdsBackup, getmetatable(GuildAds));
+
+function ga_table_erase(t)
+	for i in pairs(t) do
+		t[i] = nil
+	end	
+end

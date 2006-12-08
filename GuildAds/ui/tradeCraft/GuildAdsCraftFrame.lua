@@ -92,7 +92,7 @@ GuildAdsCraftFrame = {
 	end;
 	
 	onClickAskEverything = function()
-		for k,item in this.value do
+		for k,item in pairs(this.value) do
 			GuildAdsCraftFrame.askItem(item);
 		end
 	end;
@@ -170,7 +170,7 @@ GuildAdsCraftFrame = {
 			UIDropDownMenu_AddButton(info, 1);
 			
 			---- Demande un composant en particulier
-			for k,info in menu do
+			for k,info in pairs(menu) do
 				UIDropDownMenu_AddButton(info, 1);
 			end
 			
@@ -233,7 +233,7 @@ GuildAdsCraftFrame = {
 			UIDropDownMenu_AddButton(info, 1);
 			
 			---- Demande un composant en particulier
-			for k,info in menu do
+			for k,info in pairs(menu) do
 				UIDropDownMenu_AddButton(info, 1);
 			end
 			

@@ -66,8 +66,8 @@ GuildAdsMinimapButtonCore = {
 	end;
 	
 	update = function()
-		local radius = GuildAdsMinimapButtonCore.getConfigValue(nil, "RadiusOffset");
-		local arc = GuildAdsMinimapButtonCore.getConfigValue(nil, "ArcOffset");
+		local radius = GuildAdsMinimapButtonCore.getConfigValue(nil, "RadiusOffset", 77);
+		local arc = GuildAdsMinimapButtonCore.getConfigValue(nil, "ArcOffset", 296);
 		if radius and arc and not ButtonHole then
 			GuildAdsMinimapButton:SetPoint( "TOPLEFT", "Minimap", "TOPLEFT",
 				55 - ( radius * cos( arc ) ),
@@ -82,8 +82,8 @@ GuildAdsMinimapButtonCore = {
 	end;
 	
 	onShowOptions = function()
-		GuildAds_MinimapArcSlider:SetValue(GuildAdsMinimapButtonCore.getConfigValue(nil, "ArcOffset"));
-		GuildAds_MinimapRadiusSlider:SetValue(GuildAdsMinimapButtonCore.getConfigValue(nil, "RadiusOffset"));
+		GuildAds_MinimapArcSlider:SetValue(GuildAdsMinimapButtonCore.getConfigValue(nil, "ArcOffset", 77));
+		GuildAds_MinimapRadiusSlider:SetValue(GuildAdsMinimapButtonCore.getConfigValue(nil, "RadiusOffset", 296));
 	end
 	
 };

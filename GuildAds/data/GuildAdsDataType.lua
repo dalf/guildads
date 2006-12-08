@@ -137,7 +137,7 @@ end
 function GuildAdsDataType:triggerEvent(playerName, id)
 	if self.eventRegistry then
 		GuildAds_ChatDebug(GA_DEBUG_STORAGE, "["..self.metaInformations.name..","..playerName..","..tostring(id).."] triggerEvent - begin");
-		for obj, method in self.eventRegistry do
+		for obj, method in pairs(self.eventRegistry) do
 			if method == true then
 				GuildAds_ChatDebug(GA_DEBUG_STORAGE, "  - function");
 				obj(self, playerName, id)

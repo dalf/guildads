@@ -561,7 +561,7 @@ GuildAdsShiftClick = {
 			-- normal case (LootLink_CheckItemServerRaw function)
 			if item.s then
 				local index = LootLinkState.ServerNamesToIndices[GetRealmName()];
-				for server in string.gfind(item.s, "(%d+)") do
+				for server in string.gmatch(item.s, "(%d+)") do
 					if tonumber(server) == index then
 						return 1;
 					end

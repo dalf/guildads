@@ -346,7 +346,7 @@ function SimpleComm_newChatFrame_OnEvent(event)
 			local info;
 			local found = 0;
 			local channelLength = strlen(arg4);
-			for index, value in this.channelList do
+			for index, value in pairs(this.channelList) do
 				if ( channelLength > strlen(value) ) then
 					-- arg9 is the channel name without the number in front...
 					if ( ((arg7 > 0) and (this.zoneChannelList[index] == arg7)) or (strupper(value) == strupper(arg9)) ) then
@@ -552,7 +552,7 @@ end
 if ep and not ep.UnregisterForEvent then
 	function ep.UnregisterForEvent(event, callback)
 		if ep.RegisteredEvents[ event ] then
-			for index, currentCB in ep.RegisteredEvents[ event ] do
+			for index, currentCB in pairs(ep.RegisteredEvents[event]) do
 				if currentCB == callback then
 					table.remove( ep.RegisteredEvents[ event ], index);
 				end

@@ -191,7 +191,8 @@ end
 
 local serializeResult = { GUILDADS_MSG_PREFIX };
 function GuildAdsComm:Serialize(o)
-	table.setn(serializeResult, 1);
+	ga_table_erase(serializeResult);
+	serializeResult[1] = GUILDADS_MSG_PREFIX;
 	table.insert(serializeResult, SerializeTable(SerializeMeta, o));
 	if SerializeCommand[o.command] then
 		table.insert(serializeResult, SerializeTable(SerializeCommand[o.command], o));
@@ -214,7 +215,7 @@ function GuildAdsComm:Unserialize(text)
 	local i=1;
 	local m=1;
 	
-	for str in string.gfind(text, GUILDADS_MSG_REGEX_UNSERIALIZE) do
+	for str in string.gmatch(text, GUILDADS_MSG_REGEX_UNSERIALIZE) do
 		if j>0 then
 			o = o or unserializeResult;	-- always reuse unserializeResult
 			local d = s[i];
@@ -278,14 +279,14 @@ function GuildAdsComm.OnJoin(self)
 	self:SetOnlineStatus(GuildAds.playerName, true);
 	
 	-- create self.DTS and self.DTSPriority
-	table.setn(self.DTSPriority, 0);
+	ga_table_erase(self.DTSPriority);
 	
-	for name, profileDT in GuildAdsDB.profile do
+	for name, profileDT in pairs(GuildAdsDB.profile) do
 		self.DTS[name] = GuildAdsDTS:new(profileDT);
 		table.insert(self.DTSPriority, self.DTS[name]);
 	end
 	
-	for name, channelDT in GuildAdsDB.channel[self.channelName] do
+	for name, channelDT in pairs(GuildAdsDB.channel[self.channelName]) do
 		if type(channelDT)=="table" and channelDT.metaInformations and name~="db" then
 			self.DTS[name] = GuildAdsDTS:new(channelDT);
 			table.insert(self.DTSPriority, self.DTS[name]);
@@ -294,7 +295,7 @@ function GuildAdsComm.OnJoin(self)
 	
 	-- sort self.DTSPriority
 	table.sort(self.DTSPriority, GuildAdsDTS.predicate);
-	for _, DTS in self.DTSPriority do
+	for _, DTS in pairs(self.DTSPriority) do
 		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, " - "..DTS.dataType.metaInformations.name);
 	end
 	
@@ -608,7 +609,7 @@ function GuildAdsComm:ParseMessage(playerName, message, channelName)
 				-- send my information
 				GuildAdsTask:AddNamedSchedule("SendMeta", random(self.delay.AnswerMeta), nil, nil, self.SendMeta, self, playerName);
 				-- delete and queue again all searchs
-				for _, DTS in self.DTS do
+				for _, DTS in pairs(self.DTS) do
 					DTS:RestartAllSearches()
 				end
 				-- send my search about my data
@@ -689,7 +690,7 @@ function GuildAdsComm:ParseMessage(playerName, message, channelName)
 			self.transactions[playerName].lmt = time();
 			local revisions = {};
 			local revision;
-			for revision in string.gfind(message.revisions, "([^\/]*)/?$?") do
+			for revision in string.gmatch(message.revisions, "([^\/]*)/?$?") do
 				revision = tonumber(revision);
 				if revision then
 					revisions[tonumber(revision)] = true;

@@ -162,7 +162,7 @@ GuildAdsTrade = {
 		GuildAds_DateFilter:SetValueStep(1);
 		local dateFilter = GuildAdsTrade.getProfileValue(nil, "HideAdsOlderThan", nil);
 		if dateFilter then
-			for value, time in GuildAdsTrade.g_DateFilter do
+			for value, time in pairs(GuildAdsTrade.g_DateFilter) do
 				if dateFilter==time then
 					GuildAds_DateFilter:SetValue(value);
 				end
@@ -263,7 +263,7 @@ GuildAdsTrade = {
 	
 	PrepareSortArrow = function() 
 		local i = 1;
-		for key,value in GuildAdsTrade.sortData.currentWay do
+		for key,value in pairs(GuildAdsTrade.sortData.currentWay) do
 			GuildAdsTrade.sortAdsArrow(getglobal("GuildAdsTradeColumnHeader"..i),GuildAdsTrade.sortData.currentWay[key]);
 			i = i+1;
 		end;
@@ -314,7 +314,7 @@ GuildAdsTrade = {
 			else
 				FilterNames = GUILDADS_ITEMS_SIMPLE;
 			end
-			for i, key in GuildAdsTrade.GuildAds_ItemFilterOrder do
+			for i, key in pairs(GuildAdsTrade.GuildAds_ItemFilterOrder) do
 				if (FilterNames[key]) then
 					tinsert(g_AdFilters, {id = key, name=FilterNames[key] });
 				end
@@ -326,7 +326,7 @@ GuildAdsTrade = {
 	
 			local index = 1;
 			FilterNames = GUILDADS_ITEMS;
-			for k,instance in GuildAdsTrade.GuildAds_ItemFilterOrder do
+			for k,instance in pairs(GuildAdsTrade.GuildAds_ItemFilterOrder) do
 				local info = { };
 				info.text = GUILDADS_ITEMS[instance];
 				if (FilterNames[instance]) then
@@ -664,10 +664,10 @@ GuildAdsTrade = {
 				getglobal(ownerField):SetText(playerName);
 				
 			else
-				table.setn(GuildAdsTrade.exchangeButton.t, 0);
+				ga_table_erase(GuildAdsTrade.exchangeButton.t);
 				local online;
 				local atLeastOneOnline;
-				for _, name in playerName do
+				for _, name in pairs(playerName) do
 					online = GuildAdsComm:IsOnLine(name);
 					atLeastOneOnline = atLeastOneOnline or online;
 					tinsert(GuildAdsTrade.exchangeButton.t, GuildAdsUITools.onlineColorHex[online]..name.."|r");
@@ -915,7 +915,7 @@ GuildAdsTrade = {
 			if ReagentData then
 				-- ReagentData filter
 				local filters = GuildAdsTrade.getProfileValue(nil, "Filters", {});
-				for id, name in filters do
+				for id, name in pairs(filters) do
 					filterFunction =  GuildAdsTrade.itemFilterFunction[id];
 					if filterFunction and filterFunction(info.name) then
 						return true;
@@ -944,7 +944,7 @@ GuildAdsTrade = {
 				if (tab == GuildAdsTrade.TAB_CRAFTABLE) then
 					local already;
 					for _, item, playerName, data in datatype:iterator() do
-						for key,value in GuildAdsTrade.data.cache[tab] do
+						for key,value in pairs(GuildAdsTrade.data.cache[tab]) do
 							if (GuildAdsTrade.data.cache[tab][key].i==item) then 
 								already=true;
 								tinsert(GuildAdsTrade.data.cache[tab][key].p, playerName);
@@ -958,7 +958,7 @@ GuildAdsTrade = {
 						end
 						already=nil;
 					end
-					for _, data in GuildAdsTrade.data.cache[tab] do
+					for _, data in pairs(GuildAdsTrade.data.cache[tab]) do
 						table.sort(data.p, GuildAdsTrade.sortData.predicateFunctions.crafter);
 					end
 				else
@@ -1333,7 +1333,7 @@ GuildAdsTrade = {
 				if type(GuildAdsTrade.currentPlayerName)=="string" then
 					GuildAdsTrade.contextMenu.addPlayer(GuildAdsTrade.currentPlayerName);
 				elseif type(GuildAdsTrade.currentPlayerName)=="table" then
-					for _, name in GuildAdsTrade.currentPlayerName do
+					for _, name in pairs(GuildAdsTrade.currentPlayerName) do
 						GuildAdsTrade.contextMenu.addPlayer(name);
 					end
 				end
@@ -1359,7 +1359,7 @@ GuildAdsTrade = {
 	
 	
 	updateMyAdsFrame = function(updateData)
-		table.setn(GuildAdsTrade.myAds.cache, 0);
+		ga_table_erase(GuildAdsTrade.myAds.cache);
 		for item, author, data in GuildAdsDB.channel[GuildAds.channelName].TradeNeed:iterator(GuildAds.playerName) do
 			table.insert(GuildAdsTrade.myAds.cache, {t=GUILDADS_MSG_TYPE_REQUEST, i=item, d=data});
 		end

@@ -59,7 +59,7 @@ function GuildAdsMainDataType:onGuildUpdate()
 end
 
 function GuildAdsMainDataType:getClassIdFromName(ClassName)
-	for id, name in GUILDADS_CLASSES do
+	for id, name in pairs(GUILDADS_CLASSES) do
 		if (name == ClassName) then
 			return id;
 		end
@@ -72,7 +72,7 @@ function GuildAdsMainDataType:getClassNameFromId(ClassId)
 end
 
 function GuildAdsMainDataType:getRaceIdFromName(RaceName)
-	for id, name in GUILDADS_RACES do
+	for id, name in pairs(GUILDADS_RACES) do
 		if (name == RaceName) then
 			return id;
 		end

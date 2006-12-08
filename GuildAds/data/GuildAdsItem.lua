@@ -74,7 +74,8 @@ function GuildAds_GetItemInfo(itemRef, needTooltipInformation)
 			end
 			return;
 		end
-		itemName, itemLink, itemRarity, itemMinLevel, itemType, itemSubType, itemStackCount, itemSlot, itemTexture = GetItemInfo(itemRef);
+		-- itemName, itemLink, itemRarity, itemMinLevel, itemType, itemSubType, itemStackCount, itemSlot, itemTexture = GetItemInfo(itemRef);
+		itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemSlot, itemTexture = GetItemInfo(itemRef);
 		if (not itemName) or needTooltipInformation then
 			GuildAdsInternalTooltip_AddItem(itemRef);
 		end

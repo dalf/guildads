@@ -96,7 +96,7 @@ GuildAdsPlugin = {
 			-- register commands
 			if type(plugin.getCommands)=="function" then
 				local commands = plugin.getCommands();
-				for command, spec in commands do
+				for command, spec in pairs(commands) do
 					local status, errorMessage = GuildAdsPlugin.registerCommand(command, spec[1], spec[2]);
 					if not status then
 						return false, errorMessage;
@@ -107,7 +107,7 @@ GuildAdsPlugin = {
 			-- register adtypes
 			if type(plugin.getAdTypes)=="function" then
 				local adtypes = plugin.getAdTypes();
-				for adtype, spec in adtypes do
+				for adtype, spec in pairs(adtypes) do
 					local status, errorMessage = GAC_RegisterAdtype(adtype, spec[1], spec[2]);
 					if not status then
 						return false, errorMessage;
@@ -264,7 +264,7 @@ local function realToPluginCommand(command)
 end
 
 local function methodToEventId(method)
-	for ltype, lmethod in EventIdToMethod do
+	for ltype, lmethod in pairs(EventIdToMethod) do
 		if method == lmethod then
 			return ltype;
 		end
@@ -299,7 +299,7 @@ end
 
 function GuildAdsPlugin_OnInit()
 	-- call onInit
-  	for pluginName, plugin in GuildAdsPlugin.PluginsList do
+  	for pluginName, plugin in pairs(GuildAdsPlugin.PluginsList) do
 		if type(plugin.onInit) == "function" then
 			GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "onInit: "..pluginName);
 			plugin.onInit();
@@ -308,7 +308,7 @@ function GuildAdsPlugin_OnInit()
 end
 
 function GuildAdsPlugin_OnChannelJoin()
-	for pluginName, plugin in GuildAdsPlugin.PluginsList do
+	for pluginName, plugin in pairs(GuildAdsPlugin.PluginsList) do
 		if type(plugin.onChannelJoin) == "function" then
 			GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "onChannelJoin: "..pluginName);
 			plugin.onChannelJoin();
@@ -317,7 +317,7 @@ function GuildAdsPlugin_OnChannelJoin()
 end
 
 function GuildAdsPlugin_OnChannelLeave()
-	for pluginName, plugin in GuildAdsPlugin.PluginsList do
+	for pluginName, plugin in pairs(GuildAdsPlugin.PluginsList) do
 		if type(plugin.onChannelLeave) == "function" then
 			GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "onChannelLeave: "..pluginName);
 			plugin.onChannelLeave();
@@ -327,7 +327,7 @@ end
 
 function GuildAdsPlugin_OnEvent(ltype, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)
 	local method = EventIdToMethod[ltype];
-	for pluginName, plugin in GuildAdsPlugin.PluginsList do
+	for pluginName, plugin in pairs(GuildAdsPlugin.PluginsList) do
 		if type(plugin[method]) == "function" then
 			plugin[method](arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
 		end
@@ -371,7 +371,7 @@ end
 
 function GuildAdsPlugin_GetUI(where)
 	local result = {};
-	for pluginName, plugin in GuildAdsPlugin.PluginsList do
+	for pluginName, plugin in pairs(GuildAdsPlugin.PluginsList) do
 		if plugin.metaInformations and plugin.metaInformations.ui and plugin.metaInformations.ui[where] then
 			tinsert(result, plugin.metaInformations.ui[where]);
 		end

@@ -32,7 +32,7 @@ function GuildAdsUITools:TooltipAddText(tooltip, text, r, g, b)
 		b = b or self.noteColor.b;
 		line = "";
 		text = string.gsub(text, "|(%w+)|H([%w:]+)|h([^|]+)|h|r", "%3");
-		for word in string.gfind(text,"[^ ]+") do
+		for word in string.gmatch(text,"[^ ]+") do
 			if (string.len(line) > self.MAX_LINE_SIZE) then
 				GameTooltip:AddLine(line, r, g, b);
 				line = word;

@@ -8,7 +8,6 @@
 -- Licence: GPL version 2 (General Public License)
 ----------------------------------------------------------------------------------
 
-local compost = CompostLib:GetInstance("compost-1")
 local g_AdFilters = {};
 
 GuildAdsGuild = {
@@ -138,7 +137,7 @@ GuildAdsGuild = {
 		-- Init g_AdFilters
 		g_AdFilters = {};
 		local playerFaction = GUILDADS_RACES_TO_FACTION[GuildAdsDB.profile.Main:getRaceIdFromName(UnitRace("player"))];
-		for id, name in GUILDADS_CLASSES do
+		for id, name in pairs(GUILDADS_CLASSES) do
 			if (GUILDADS_CLASS_TO_FACTION[id]==nil or GUILDADS_CLASS_TO_FACTION[id]==playerFaction) then
 				tinsert(g_AdFilters, { id=id, name=name});
 			end
@@ -161,7 +160,7 @@ GuildAdsGuild = {
 	---------------------------------------------------------------------------------		
 	selectPlayer = function(playerName)
 		local linear = GuildAdsGuild.data.get();
-		for id, info in linear do
+		for id, info in pairs(linear) do
 			if info==playerName then
 				--
 				GuildAdsGuild.currentPlayerName = info;
@@ -201,7 +200,7 @@ GuildAdsGuild = {
 		local linear  = GuildAdsGuild.data.get();
 		local count = 0;
 		local countOnline = 0;
-		for _, playerName in linear do
+		for _, playerName in pairs(linear) do
 			if type(playerName)=="string" then
 				count = count + 1;
 				if GuildAdsGuild.isOnline(playerName) then
@@ -414,14 +413,14 @@ GuildAdsGuild = {
 		init = function()
 			-- called only if Reagent is on
 			if not GuildAdsGuild.getProfileValue(nil, "Filters") then
-				for id, _ in GUILDADS_CLASSES do
+				for id, _ in pairs(GUILDADS_CLASSES) do
 					GuildAdsGuild.setProfileValue("Filters", id, true);
 				end
 			end;
 			--local index = 1;
 			FilterNames = GUILDADS_CLASSES;
 			index = 1;
-			for k,filterDesc in g_AdFilters do
+			for k,filterDesc in pairs(g_AdFilters) do
 				local info = { };
 				--if (filters[k]) then
 				--if (FilterNames[k]) then
@@ -476,7 +475,7 @@ GuildAdsGuild = {
 			local class = GuildAdsDB.profile.Main:get(playerName, GuildAdsDB.profile.Main.Class);
 			local filters = GuildAdsGuild.getProfileValue(nil, "Filters");
 			if filters then
-				for id, name in filters do
+				for id, name in pairs(filters) do
 					if id == class then
 						return true;
 					end
@@ -492,7 +491,7 @@ GuildAdsGuild = {
 				local players = GuildAdsDB.channel[GuildAds.channelName]:getPlayers();
 				
 			    -- in a guild a pseudo ads
-				local workingTable = compost:Acquire();
+				local workingTable = {};
 				for playerName in pairs(players) do
 					tinsert(workingTable, playerName);
 				end
@@ -534,11 +533,11 @@ GuildAdsGuild = {
 				GuildAdsGuild.sortData.doIt(workingTable);
 				
 				-- create GuildAdsGuild.data.cache
-				GuildAdsGuild.data.cache = compost:Acquire();
+				GuildAdsGuild.data.cache = {};
 				
 				local currentAccount, playerAccount;
 				local groupByAccount = GuildAdsGuild.getProfileValue(nil, "GroupByAccount");
-				for _, playerName in workingTable do
+				for _, playerName in pairs(workingTable) do
 					if GuildAdsGuild.data.adIsVisible(playerName) then
 						if groupByAccount then
 							playerAccount = GuildAdsDB.profile.Main:get(playerName, GuildAdsDB.profile.Main.Account) or playerName;
@@ -551,7 +550,7 @@ GuildAdsGuild = {
 					end
 				end
 				
-				compost:Reclaim(workingTable);
+				workingTable = nil;
 			end
 			
 			return GuildAdsGuild.data.cache; 
@@ -696,8 +695,8 @@ GuildAdsGuild = {
 		initHigherLevel = function(adTable)
 			GuildAdsGuild.sortData.cacheHigherLevel = {};
 			local higherLevel = GuildAdsGuild.sortData.cacheHigherLevel;
-			local currentLevel = compost:Acquire();
-			for _, playerName in adTable do
+			local currentLevel = {};
+			for _, playerName in pairs(adTable) do
 				local account = GuildAdsDB.profile.Main:get(playerName, GuildAdsDB.profile.Main.Account) or playerName;
 				local level = GuildAdsDB.profile.Main:get(playerName, GuildAdsDB.profile.Main.Level);
 				if account and GuildAdsGuild.data.adIsVisible(playerName) then
@@ -710,7 +709,7 @@ GuildAdsGuild = {
 				end
 			end
 			
-			compost:Reclaim(currentLevel);
+			currentLevel = nil;
 		end;
 		
 		getHigherlevel = function(playerName)
