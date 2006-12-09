@@ -19,11 +19,15 @@ GuildAdsShiftClick = {
 	callHook = {};
 	hookName = {};
 	
-	hook = function(id, hook, new)
+	hook = function(id, hook, new, secure)
 		if getglobal(hook) then
 			GuildAdsShiftClick.hookName[id] = hook;
-			GuildAdsShiftClick.callHook[id] = getglobal(hook);
-			setglobal(hook, new);
+			if secure then
+				hooksecurefunc(hook, new);
+			else
+				GuildAdsShiftClick.callHook[id] = getglobal(hook);
+				setglobal(hook, new);
+			end
 		end
 	end;
 	
@@ -38,19 +42,19 @@ GuildAdsShiftClick = {
 	-- onInit
 	onInit = function()
 		-- Patch in inventory OnClick
-		GuildAdsShiftClick.hook("inventory", "ContainerFrameItemButton_OnClick", GuildAdsShiftClick.inventoryOnClick);
+		GuildAdsShiftClick.hook("inventory", "ContainerFrameItemButton_OnModifiedClick", GuildAdsShiftClick.inventoryOnClick);
 		
 		-- Patch in chat link
 		GuildAdsShiftClick.hook("chatFrameHyperlink", "ChatFrame_OnHyperlinkShow", GuildAdsShiftClick.chatFrameOnHyperlinkShow);
 		
 		-- Patch in bank OnClick
-		GuildAdsShiftClick.hook("bank", "BankFrameItemButtonGeneric_OnClick", GuildAdsShiftClick.bankOnClick);
+		GuildAdsShiftClick.hook("bank", "BankFrameItemButtonGeneric_OnModifiedClick", GuildAdsShiftClick.bankOnClick);
 		
 		-- Patch in paperdoll
-		GuildAdsShiftClick.hook("paperdoll", "PaperDollItemSlotButton_OnClick", GuildAdsShiftClick.paperdollOnClick)
+		GuildAdsShiftClick.hook("paperdoll", "PaperDollItemSlotButton_OnModifiedClick", GuildAdsShiftClick.paperdollOnClick)
 		
 		-- Patch in merchant OnClick
-		GuildAdsShiftClick.hook("merchant", "MerchantItemButton_OnClick", GuildAdsShiftClick.merchantOnClick);
+		GuildAdsShiftClick.hook("merchant", "MerchantItemButton_OnModifiedClick", GuildAdsShiftClick.merchantOnClick);
 		
 		-- Patch in quest item OnClick
 		-- GuildAdsShiftClick.hook("questProgress", "QuestItem_OnClick", GuildAdsShiftClick.quest.progressOnClick);
@@ -65,29 +69,37 @@ GuildAdsShiftClick = {
 		-- Patch in craft : on parse of the LUA file
 		
 		-- Patch in AllInOneInventory item OnClick
+		-- todo : test
 		GuildAdsShiftClick.hook("allInOneInventory", "AllInOneInventoryFrameItemButton_OnClick", GuildAdsShiftClick.allInOneInventoryOnClick)
 
 		-- Patch in MyInventory item OnlLick
+		-- todo : test
 		GuildAdsShiftClick.hook("myInventory", "MyInventoryFrameItemButton_OnClick", GuildAdsShiftClick.myInventoryOnClick);
 		
 		-- Patch in EngInventory
+		-- todo : test
 		GuildAdsShiftClick.hook("engInventory", "EngInventory_ItemButton_OnClick", GuildAdsShiftClick.engInventoryOnClick);
 
 		-- Patch in MyBank
+		-- todo : test
 		GuildAdsShiftClick.hook("myBank", "MyBankFrameItemButton_OnClick", GuildAdsShiftClick.myBankOnClick);
 		
 		-- Patch in BankItems OnClick
+		-- todo : test
 		GuildAdsShiftClick.hook("bankItemsItem", "BankItems_Button_OnClick", GuildAdsShiftClick.bankItems.itemOnClick);
 		GuildAdsShiftClick.hook("bankItemsBag", "BankItems_BagItem_OnClick", GuildAdsShiftClick.bankItems.bagOnClick);
 		
 		-- Patch in BankStatement
+		-- todo : test
 		GuildAdsShiftClick.hook("bankStatementItem", "BankStatementItemButton_OnClick", GuildAdsShiftClick.bankStatement.itemOnClick);
 		GuildAdsShiftClick.hook("bankStatementBag", "BankStatementContainerFrameItemButton_OnClick", GuildAdsShiftClick.bankStatement.bagOnClick);
 		
 		-- Patch in ItemsMatrix item  OnClick
+		-- todo : test
 		GuildAdsShiftClick.hook("itemMatrix", "ItemsMatrixItemButton_OnClick", GuildAdsShiftClick.itemMatrixOnClick);
 		
 		-- Patch in LootLink item OnClick
+		-- todo : test
 		GuildAdsShiftClick.hook("lootLink", "LootLinkItemButton_OnClick", GuildAdsShiftClick.lootLink.onClick);
 	end;
 	

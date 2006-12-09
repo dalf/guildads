@@ -74,7 +74,6 @@ function GuildAds_GetItemInfo(itemRef, needTooltipInformation)
 			end
 			return;
 		end
-		-- itemName, itemLink, itemRarity, itemMinLevel, itemType, itemSubType, itemStackCount, itemSlot, itemTexture = GetItemInfo(itemRef);
 		itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemSlot, itemTexture = GetItemInfo(itemRef);
 		if (not itemName) or needTooltipInformation then
 			GuildAdsInternalTooltip_AddItem(itemRef);
@@ -138,6 +137,7 @@ function GuildAdsInternalTooltip_AddItem(itemRef)
 	end
 end
 
+-- patch 2.0.2 : to be call be OnTooltipSetItem handler
 function GuildAdsInternalTooltip_ItemReady()
 	GuildAds_ChatDebug(GA_DEBUG_STORAGE, "  - ItemReady:"..GuildAdsITT.currentItemRef);
 	
@@ -178,6 +178,7 @@ function GuildAdsInternalTooltip_ParseTooltip(itemRef)
 	end
 	
 	-- use first line of the tooltip to get a name
+	-- patch 2.0.2 : name, link = Tooltip:GetItem()
 	if not GuildAds_ItemInfo[itemRef].name then
 		GuildAds_ItemInfo[itemRef].name = getglobal("GuildAdsITTTextLeft1"):GetText();
 	end

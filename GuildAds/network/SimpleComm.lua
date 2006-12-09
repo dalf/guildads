@@ -60,8 +60,6 @@ SimpleComm_DisconnectedMessage = string.format(ERR_CHAT_PLAYER_NOT_FOUND_S, "(.*
 SimpleComm_AFK_MESSAGE = string.format(MARKED_AFK_MESSAGE, "(.*)");
 SimpleComm_DND_MESSAGE = string.format(MARKED_DND, "(.*)");
 SimpleComm_Flags = {};
-SimpleComm_FlagTestMessage = "-= SimpleComm test message =-";
-SimpleComm_WaitingForFlagTest = false;
 
 local SimpleComm_messageStack = {};
 
@@ -190,11 +188,6 @@ function SimpleComm_DelWhisper(player)
 		end
 	end
 	return false;
-end
-
-function SimpleComm_SendFlagTest()
-	SimpleComm_WaitingForFlagTest = time();
-	SendChatMessage(SimpleComm_FlagTestMessage, "WHISPER", nil, UnitName("player"));
 end
 
 ---------------------------------------------------------------------------------
@@ -415,18 +408,6 @@ function SimpleComm_newChatFrame_OnEvent(event)
 			end
 		end
 		
-		if (event == "CHAT_MSG_WHISPER") then
-			if SimpleComm_FilterText(arg1) or arg1==SimpleComm_FlagTestMessage then
-				return;
-			end
-		end
-		
-		if (event == "CHAT_MSG_WHISPER_INFORM") then
-			if SimpleComm_FilterText(arg1) or arg1==SimpleComm_FlagTestMessage then
-				return;
-			end
-		end
-		
 		if (event == "CHAT_MSG_CHANNEL_JOIN") and (arg8 == SimpleComm_channelId) then
 			SimpleComm_Disconnected[arg2] = nil;
 			return;
@@ -441,21 +422,6 @@ function SimpleComm_newChatFrame_OnEvent(event)
 		if event == "CHAT_MSG_AFK" or event == "CHAT_MSG_DND" then
 			if SimpleComm_DelWhisper(arg2) then
 				return;
-			elseif SimpleComm_WaitingForFlagTest and arg2==UnitName("player") then
-				-- whisper to myself, and SimpleComm is waiting for the AFK/DND status
-				if (SimpleComm_WaitingForFlagTest-time())<10 then
-					-- event before 10 seconds -> the player is AFK/DND
-					if event=="CHAT_MSG_AFK" then
-						SimpleComm_SetFlag(nil, "AFK", arg1);
-					elseif event=="CHAT_MSG_DND" then
-						SimpleComm_SetFlag(nil, "DND", arg1);
-					end
-					SimpleComm_WaitingForFlagTest = false;
-					return
-				else
-					-- event 10 seconds after the init -> the player wrote and sent a whisper to himself while he is AFK/DND.
-					SimpleComm_WaitingForFlagTest = false;
-				end
 			end
 		end
 	else
@@ -650,7 +616,12 @@ function SimpleComm_Join(Channel, Password)
 		initEphemeralHook();
 	
 		-- AFK/DND test for myself
-		SimpleComm_SendFlagTest();
+		if UnitIsAFK("player") then
+			SimpleComm_SetFlag(nil, "AFK", "");
+		end
+		if UnitIsDND("player") then
+			SimpleComm_SetFlag(nil, "DND", "");
+		end
 	
 		-- Set timer
 		SimpleCommFrame:Show();

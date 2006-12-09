@@ -369,13 +369,13 @@ function GuildAdsDB:GetConfigValue(path, key, defaultValue)
 end
 
 function GuildAdsDB:SetConfigValue(...)
+    arg = {...}
 	local path, key, val = GuildAds.db:_GetArgs(arg)
 	local node = GuildAds.db:_GetNode(path, TRUE)
 	if( not key ) then error("No key supplied to AceDatabase:set.", 2) end
-	if node[key] ~= val then
-		node[key] = val
-		return true;
-	end
+	local changed = node[key] ~= val;
+	node[key] = val
+	return changed;
 end
 
 --[[About time]]
