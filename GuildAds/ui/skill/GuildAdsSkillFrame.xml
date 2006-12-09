@@ -12,9 +12,11 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 				</Offset>
 			</Anchor>
 		</Anchors>
-		<Layers>
+		<!--
+        <Layers>
 				<Layer level="BACKGROUND">
-		<FontString name="Underconstruction" inherits="GameFontNormalSmall" text="Skill tab will be rewrited to be more usefull">
+		
+        <FontString name="Underconstruction" inherits="GameFontNormalSmall" text="Skill tab will be rewrited to be more usefull">
 							<Anchors>
 								<Anchor point="TOPLEFT" relativeTo="GuildAdsMainWindowFrame"  relativePoint="BOTTOMLEFT">
 									<Offset>
@@ -24,7 +26,9 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 							</Anchors>
 						</FontString>	
 						</Layer>
+                        
 				</Layers>
+                -->
 		<Frames>
 			<Button name="GuildAds_MySkillTab1" inherits="TabButtonTemplate" text="TRADE_SKILLS" id="1">
 				<Anchors>
