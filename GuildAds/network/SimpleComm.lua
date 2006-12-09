@@ -96,10 +96,8 @@ end
 -- 
 ---------------------------------------------------------------------------------
 local function SimpleComm_SetAliasChannel()
-	id = GetChannelName( SimpleComm_Channel );
-	if (id~=0 and SimpleComm_aliasMustBeSet) then
-		local id = GetChannelName( SimpleComm_Channel );
-		
+	local id = GetChannelName( SimpleComm_Channel );
+	if (id~=0) then
 		ChatTypeInfo[SimpleComm_chanSlashCmdUpper] = ChatTypeInfo["CHANNEL"..id];
 		ChatTypeInfo[SimpleComm_chanSlashCmdUpper].sticky = 1;
 		
@@ -115,8 +113,7 @@ local function SimpleComm_SetAliasChannel()
 			SimpleComm_oldSendChatMessage = SendChatMessage;
 			SendChatMessage = SimpleComm_newSendChatMessage;
 		end
-
-		SimpleComm_aliasMustBeSet = false;
+		
 	end
 end
 
@@ -134,8 +131,6 @@ local function SimpleComm_UnsetAliasChannel()
 		
 		SlashCmdList[SimpleComm_chanSlashCmdUpper] = nil;
 		setglobal("SLASH_"..SimpleComm_chanSlashCmdUpper.."1", nil);
-		
-		SimpleComm_aliasMustBeSet = true;
 	end
 end
 
@@ -453,6 +448,14 @@ function SimpleComm_newChatFrame_OnEvent(event)
 			end
 		end
 		
+		if (event == "CHAT_MSG_WHISPER") and SimpleComm_FilterText(arg1) then
+			return;
+		end
+		
+		if (event == "CHAT_MSG_WHISPER_INFORM") and SimpleComm_FilterText(arg1) then
+			return;
+		end
+		
 		if (event == "CHAT_MSG_CHANNEL_JOIN") and (arg8 == SimpleComm_channelId) then
 			SimpleComm_Disconnected[arg2] = nil;
 			return;
@@ -651,6 +654,13 @@ end
 function SimpleComm_Join(Channel, Password)
 	DEBUG_MSG("[SimpleComm_Join] begin");
 	
+	-- some sanity check
+	local typePassword = type(Password);
+	if not ( type(Channel) == "string" and (typePassword == "string" or typePassword == "nil") ) then
+		DEBUG_MSG("Can't join channel ("..tostring(Channel)..","..tostring(Password)..")", true);
+		error("SimpleComm_Join([channelName], [channelPassword])", 2);
+	end
+	
 	-- Init Channel
 	SimpleComm_Channel = Channel;
 	SimpleComm_Password = Password;
@@ -704,7 +714,6 @@ function SimpleComm_SetAlias(chanSlashCmd, chanAlias)
 	SimpleComm_chanSlashCmdUpper = string.upper(chanSlashCmd);
 	SimpleComm_chanAlias = chanAlias;
 	
-	SimpleComm_aliasMustBeSet = true;
 	SimpleComm_SetAliasChannel();
 	DEBUG_MSG("[SimpleComm_SetAlias] end");
 end
