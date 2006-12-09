@@ -800,7 +800,7 @@ function GuildAdsSkill_UpdateGlobalAdTradeSkillButtons(updateData)
 		-- init
 		local i = 1;
 		local j = i + offset;
-		GuildAdsSkill.debug("GuildAdsSkill_UpdateGlobalAdButtons");
+		GuildAdsSkill.debug("GuildAdsSkill_UpdateGlobalAdTradeSkillButtons");
 		-- for each buttons
 		while (i <= GUILDADS_NUM_GLOBAL_AD_BUTTONS) do
 			local button = getglobal("GuildAdsSkillAdButton"..i);

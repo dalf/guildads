@@ -224,7 +224,7 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 					<Anchor point="TOPLEFT" />
 				</Anchors>
 				<Layers>
-							<Layer level="BACKGROUND">
+							<!--<Layer level="BACKGROUND">
 								<Texture name="ProfessionFrameBranch1" inherits="TalentBranchTemplate"/>
 								<Texture name="ProfessionFrameBranch2" inherits="TalentBranchTemplate"/>
 								<Texture name="ProfessionFrameBranch3" inherits="TalentBranchTemplate"/>
@@ -255,7 +255,7 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 								<Texture name="ProfessionFrameBranch28" inherits="TalentBranchTemplate"/>
 								<Texture name="ProfessionFrameBranch29" inherits="TalentBranchTemplate"/>
 								<Texture name="ProfessionFrameBranch30" inherits="TalentBranchTemplate"/>
-							</Layer>
+							</Layer>-->
 						</Layers>
 				<Frames>
 					<Button name="GuildAdsProfessionButton1" inherits="GuildAdsProfessionTemplate" id="1"/>

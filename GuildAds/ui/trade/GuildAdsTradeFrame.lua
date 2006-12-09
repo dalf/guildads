@@ -1190,29 +1190,29 @@ GuildAdsTrade = {
 	
 		filterUpdateSubClasses = function(...) 
 			local subClass;
-			for i=1, arg.n do
-				subClass = HIGHLIGHT_FONT_COLOR_CODE..arg[i]..FONT_COLOR_CODE_CLOSE; 
+			for i=1, select("#", ...) do
+				subClass = HIGHLIGHT_FONT_COLOR_CODE..select(i, ...)..FONT_COLOR_CODE_CLOSE; 
 				if ( GuildAdsTrade.filterClass.selectedSubclass and GuildAdsTrade.filterClass.selectedSubclass == subClass ) then
-					tinsert(GuildAdsTrade.filterClass.OPEN_FILTER_LIST, {arg[i], "subclass", i, 1});
+					tinsert(GuildAdsTrade.filterClass.OPEN_FILTER_LIST, {select(i, ...), "subclass", i, 1});
 					-- GuildAdsTrade.filterClass.selectedClassIndex-1 : -1 because the first class is "All"
 					GuildAdsTrade.filterClass.filterUpdateInvTypes(GetAuctionInvTypes(GuildAdsTrade.filterClass.selectedClassIndex,i));
 				else
-					tinsert(GuildAdsTrade.filterClass.OPEN_FILTER_LIST, {arg[i], "subclass", i, nil});
+					tinsert(GuildAdsTrade.filterClass.OPEN_FILTER_LIST, {select(i, ...), "subclass", i, nil});
 				end
 			end
 		end;
 		
 		filterUpdateInvTypes = function(...)
 			local invType, isLast;
-			for i=1, arg.n do
-			invType = HIGHLIGHT_FONT_COLOR_CODE..TEXT(getglobal(arg[i]))..FONT_COLOR_CODE_CLOSE; 
-				if ( i == arg.n ) then
+			for i=1, select("#", ...) do
+			invType = HIGHLIGHT_FONT_COLOR_CODE..TEXT(getglobal(select(i, ...)))..FONT_COLOR_CODE_CLOSE; 
+				if ( i == select("#", ...) ) then
 					isLast = 1;
 				end
 				if ( GuildAdsTrade.filterClass.selectedInvtypeIndex and GuildAdsTrade.filterClass.selectedInvtypeIndex == i ) then
-					tinsert(GuildAdsTrade.filterClass.OPEN_FILTER_LIST, {TEXT(getglobal(arg[i])), "invtype", i, 1, isLast});
+					tinsert(GuildAdsTrade.filterClass.OPEN_FILTER_LIST, {TEXT(getglobal(select(i, ...))), "invtype", i, 1, isLast});
 				else
-					tinsert(GuildAdsTrade.filterClass.OPEN_FILTER_LIST, {TEXT(getglobal(arg[i])), "invtype", i, nil, isLast});
+					tinsert(GuildAdsTrade.filterClass.OPEN_FILTER_LIST, {TEXT(getglobal(select(i, ...))), "invtype", i, nil, isLast});
 				end
 			end
 		end;

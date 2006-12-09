@@ -1,4 +1,5 @@
-﻿<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+﻿<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+..\..\FrameXML\UI.xsd">
 	<Script file="GuildAdsTradeFrame.lua"/>
 	<Button name="GuildAdsTradeColumnHeaderTemplate" virtual="true">
 		<Size>
@@ -37,7 +38,7 @@
 			</Layer>
 		</Layers>
 		
-		<NormalText name="$parentText" inherits="GameFontHighlightSmall">
+		<ButtonText name="$parentText" inherits="GameFontHighlightSmall">
 			<Anchors>
 				<Anchor point="LEFT">
 					<Offset>
@@ -45,7 +46,8 @@
 					</Offset>
 				</Anchor>
 			</Anchors>
-		</NormalText>
+		</ButtonText>
+        <NormalFont inherits="GameFontHighlightSmall"/>
 		<NormalTexture name="$parentArrow" file="Interface\Buttons\UI-SortArrow">
 			<Size>
 				<AbsDimension x="9" y="8"/>
