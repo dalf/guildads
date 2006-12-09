@@ -200,7 +200,6 @@ GuildAdsCodecString.SpecialChars = "|>/\31\n";
 
 GuildAdsCodecString.SpecialCharMap =
 {
-	b = "|",		-- item link
 	gt = ">",		-- separator for serialized command
 	s = "/",		-- separator for serialized table
 	ei = "\31",		-- \31 for nil value
@@ -225,20 +224,22 @@ function GuildAdsCodecString.encode(pString)
 	return "\31";
 end
 
+local func = function (pField)
+	local	vChar = GuildAdsCodecString.SpecialCharMap[pField];
+							
+	if vChar ~= nil then
+		return vChar;
+	else
+		return pField;
+	end
+end
+
 function GuildAdsCodecString.decode(pString)
 	if pString ~= "\31" then
 		return string.gsub(
 						pString,
 						"&(%w+);", 
-						function (pField)
-							local	vChar = GuildAdsCodecString.SpecialCharMap[pField];
-							
-							if vChar ~= nil then
-								return vChar;
-							else
-								return pField;
-							end
-						end);
+						func);
 	end
 end
 

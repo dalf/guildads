@@ -209,9 +209,9 @@ GuildAdsPlugin = {
 	end;
 	
 	-- send(who, obj, delay)
-	send = function(who, obj, delay)
+	send = function(who, obj)
 		if obj.command and GAC_IsRegisteredCommand(obj.command) then
-			SimpleComm_SendMessage(who, obj, delay);
+			SimpleComm_SendMessage(who, obj);
 			return true;
 		else
 			return false;

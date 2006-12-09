@@ -8,7 +8,7 @@
 -- Licence: GPL version 2 (General Public License)
 ----------------------------------------------------------------------------------
 
-GUILDADS_VERSION_PROTOCOL = "27";
+GUILDADS_VERSION_PROTOCOL = "28";
 
 GUILDADS_MSG_PREFIX_NOVERSION = "<GA";
 GUILDADS_MSG_REGEX_UNSERIALIZE = "([^\>]*)>";
@@ -237,7 +237,7 @@ function GuildAdsComm:Unserialize(text)
 				break;
 			end
 			i=1;
-			m=table.getn(s);
+			m=#s;
 		end
 	end
 	

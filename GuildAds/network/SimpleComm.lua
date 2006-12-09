@@ -54,12 +54,14 @@ local SimpleComm_sentBytes = 0;
 local SimpleComm_channelId;
 SimpleComm_YouAreDrunk = false;
 
-SimpleComm_Disconnected = {};
-
 SimpleComm_DisconnectedMessage = string.format(ERR_CHAT_PLAYER_NOT_FOUND_S, "(.*)");
+SimpleComm_AmbiguousMessage = string.format(ERR_CHAT_PLAYER_AMBIGUOUS_S, "(.*)");
 SimpleComm_AFK_MESSAGE = string.format(MARKED_AFK_MESSAGE, "(.*)");
 SimpleComm_DND_MESSAGE = string.format(MARKED_DND, "(.*)");
+
 SimpleComm_Flags = {};
+SimpleComm_RecentWhispers = {};
+SimpleComm_Disconnected = {};
 
 local SimpleComm_messageStack = {};
 
@@ -157,14 +159,12 @@ end
 function SimpleComm_SetFlag(player, flag, message)
 	player = player or UnitName("player");
 	if flag then
-		SimpleComm_Flags[player] = { flag=flag; message=message; count = 0 };
+		SimpleComm_Flags[player] = { flag=flag; message=message };
 	else
 		SimpleComm_Flags[player] = nil;
 	end
-	if player==UnitName("player") then
-		if SimpleComm_FlagListener then
-			SimpleComm_FlagListener(flag, message);
-		end
+	if player==UnitName("player") and SimpleComm_FlagListener then
+		SimpleComm_FlagListener(flag, message);
 	end
 end
 
@@ -175,19 +175,74 @@ function SimpleComm_GetFlag(player)
 end
 
 function SimpleComm_AddWhisper(player)
-	if SimpleComm_Flags[player] then
-		SimpleComm_Flags[player].count = SimpleComm_Flags[player].count +1;
-	end
+	SimpleComm_RecentWhispers[string.lower(player)] = GetTime();
 end
 
 function SimpleComm_DelWhisper(player)
-	if SimpleComm_Flags[player] then
-		if SimpleComm_Flags[player].count>0 then
-			SimpleComm_Flags[player].count = SimpleComm_Flags[player].count -1;
-			return true;
+	local t = self.recentWhispers[string.lower(arg2)];
+	return t and GetTime() - t <= 15;
+end
+
+---------------------------------------------------------------------------------
+--
+-- Encode / Decode
+-- 
+---------------------------------------------------------------------------------
+
+-- depuis AceComm-2.0
+local string_gsub = string.gsub
+function SimpleComm_Encode(text, drunk)
+	text = string_gsub(text, "°", "°±")
+	if drunk then
+		text = string_gsub(text, "\020", "°\021")
+		text = string_gsub(text, "\015", "°\016")
+		text = string_gsub(text, "S", "\020")
+		text = string_gsub(text, "s", "\015")
+		-- change S and s to a different set of character bytes.
+	end
+	text = string_gsub(text, "\255", "°\254") -- \255 (this is here because \000 is more common)
+	text = string_gsub(text, "%z", "\255") -- \000
+	text = string_gsub(text, "\010", "°\011") -- \n
+	text = string_gsub(text, "\124", "°\125") -- |
+	text = string_gsub(text, "%%", "°\038") -- %
+	-- encode assorted prohibited characters
+	return text
+end
+
+local func
+-- Clean a received message
+function SimpleComm_Decode(text, drunk)
+	if drunk then
+		text = string_gsub(text, "^(.*)°.-$", "%1")
+		-- get rid of " ...hic!"
+	end
+	if not func then
+		func = function(text)
+			if text == "\016" then
+				return "\015"
+			elseif text == "\021" then
+				return "\020"
+			elseif text == "±" then
+				return "°"
+			elseif text == "\254" then
+				return "\255"
+			elseif text == "\011" then
+				return "\010"
+			elseif text == "\125" then
+				return "\124"
+			elseif text == "\038" then
+				return "\037"
+			end
 		end
 	end
-	return false;
+	text = string_gsub(text, "\255", "\000")
+	if drunk then
+		text = string_gsub(text, "\020", "S")
+		text = string_gsub(text, "\015", "s")
+	end
+	text = string_gsub(text, drunk and "°([\016\021±\254\011\125\038])" or "°([±\254\011\125\038])", func)
+	-- remove the hidden character and refix the prohibited characters.
+	return text
 end
 
 ---------------------------------------------------------------------------------
@@ -208,49 +263,34 @@ local function SimpleComm_SendQueue(elapsed)
 	
 	while message do
 		
-		-- update delay
-		if message.delay then
-			message.delay = message.delay-elapsed;
-			if message.delay<=0 then
-				message.delay = nil;
-			end
+		-- check chat traffic
+		SimpleComm_sentBytes = SimpleComm_sentBytes + string.len(message.text);
+		if SimpleComm_sentBytes > SIMPLECOMM_CHARACTERSPERTICK_MAX then
+			SimpleComm_sentBytes = SimpleComm_sentBytes - string.len(message.text);
+			previousMessage = SimpleComm_messageQueueLast;
+			break;
 		end
 		
-		if message.delay then
-			-- skip the current message
-			previousMessage = message;
-			message = message.next;
-		else
-			-- check chat traffic
-			SimpleComm_sentBytes = SimpleComm_sentBytes + string.len(message.text);
-			if SimpleComm_sentBytes > SIMPLECOMM_CHARACTERSPERTICK_MAX then
-				SimpleComm_sentBytes = SimpleComm_sentBytes - string.len(message.text);
-				previousMessage = SimpleComm_messageQueueLast;
-				break;
-			end
-			
-			-- send message
-			if message.to then
-				if not SimpleComm_Disconnected[message.to] then
-					-- DEBUG_MSG("Envois a("..message.to..") de("..message.text..")");
-					SendChatMessage(message.text, "WHISPER", nil, message.to);
-					SimpleComm_AddWhisper(message.to);
-				else
-					-- Ignore the message since the player is offline.
-					SimpleComm_sentBytes = SimpleComm_sentBytes - string.len(message.text);
-				end
+		-- send message
+		if message.to then
+			if not SimpleComm_Disconnected[message.to] then
+				-- DEBUG_MSG("Envois a("..message.to..") de("..message.text..")");
+				SendChatMessage(message.text, "WHISPER", nil, message.to);
+				SimpleComm_AddWhisper(message.to);
 			else
-				-- DEBUG_MSG("Envois a tous de("..message.text..")");
-				SendChatMessage(message.text, "CHANNEL", nil, SimpleComm_channelId);
+				-- Ignore the message since the player is offline.
+				SimpleComm_sentBytes = SimpleComm_sentBytes - string.len(message.text);
 			end
-			
-			-- delete current message in queue
-			previousMessage.next = message.next;
-			
-			-- go to next message (previousMessage keeps the same value)
-			message = message.next
+		else
+			-- DEBUG_MSG("Envois a tous de("..message.text..")");
+			SendChatMessage(message.text, "CHANNEL", nil, SimpleComm_channelId);
 		end
 		
+		-- delete current message in queue
+		previousMessage.next = message.next;
+		
+		-- go to next message (previousMessage keeps the same value)
+		message = message.next
 	end
 	
 	SimpleComm_messageQueueLast = previousMessage;
@@ -316,11 +356,12 @@ function SimpleComm_ParseEvent(event)
 		-- event=CHAT_MSG_CHANNEL; arg1=chat message; arg2=author; arg3=language; arg4=channel name with number; arg8=channel number; arg9=channel name without number
 		if ((event == "CHAT_MSG_CHANNEL") and (arg8 == SimpleComm_channelId)) then
 			SimpleComm_Disconnected[arg2] = nil;
-			SimpleComm_ParseMessage(arg2, arg1, arg9);
+			SimpleComm_ParseMessage(arg2, SimpleComm_Decode(arg1, true), arg9);
 		
 		elseif (event == "CHAT_MSG_WHISPER") then
 			SimpleComm_Disconnected[arg2] = nil;
-			SimpleComm_ParseMessage(arg2, arg1, nil);
+			SimpleComm_ParseMessage(arg2, SimpleComm_Decode(arg1, true), nil);
+			
 		end
 		
 	end
@@ -366,18 +407,22 @@ function SimpleComm_newChatFrame_OnEvent(event)
 		end
 		
 		if (event == "CHAT_MSG_SYSTEM") then
-			local iStart, iEnd, playerName = string.find(arg1, SimpleComm_DisconnectedMessage);
-			if iStart then
+			local _, _, playerName = string.find(arg1, SimpleComm_DisconnectedMessage);
+			if not playerName then
+				local _, _, playerName = string.find(arg1, SimpleComm_AmbiguousMessage);
+			end
+			if playerName then
+				local t = GetTime();
 				if SimpleComm_Disconnected[playerName] then
-					if time()-SimpleComm_Disconnected[playerName] < 2 then 
+					if t-SimpleComm_Disconnected[playerName] < 2 then 
 						return;
 					end
 				else
-					SimpleComm_Disconnected[playerName] = time();
+					SimpleComm_Disconnected[playerName] = t;
 				end
 			end
 			
-			-- update AFK/DND status
+			-- update my AFK/DND status
 			local iStart, iEnd, message = string.find(arg1, SimpleComm_AFK_MESSAGE);
 			if iStart or arg1==MARKED_AFK then 
 				SimpleComm_SetFlag(nil, "AFK", message);
@@ -544,10 +589,11 @@ end
 -- Public functions
 -- 
 ---------------------------------------------------------------------------------
-function SimpleComm_SendMessage(who, text, delay)
+function SimpleComm_SendMessage(who, text)
 	if not(who and SimpleComm_Disconnected[who]) then
+		text = SimpleComm_Encode(text, true);
 		if strlen(text)<240 then
-			SimpleComm_messageQueueLast.next = {to=who; text=text; delay=delay };
+			SimpleComm_messageQueueLast.next = {to=who; text=text };
 			SimpleComm_messageQueueLast = SimpleComm_messageQueueLast.next;
 		else
 			local packetNumber = 1;
@@ -559,7 +605,6 @@ function SimpleComm_SendMessage(who, text, delay)
 				SimpleComm_messageQueueLast.next = {
 					to = who;
 					text = SimpleComm_SplitSerialize(packetNumber, text=="", tmp);
-					delay = delay;
 				};
 				SimpleComm_messageQueueLast = SimpleComm_messageQueueLast.next;
 				-- next packet
@@ -582,6 +627,8 @@ function SimpleComm_GetChannelStatus()
 end
 
 function SimpleComm_Initialize(FilterText, FilterMessage, SplitSerialize, UnsplitSerialize, OnJoin, OnLeave, OnMessage, FlagListener, StatusListener)
+	SetCVar("spamFilter", 0)
+	
 	SimpleComm_FilterText = FilterText;
 	SimpleComm_FilterMessage = FilterMessage;
 	
