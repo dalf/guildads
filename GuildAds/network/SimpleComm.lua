@@ -25,6 +25,7 @@ SimpleComm_JoinHandler = nil;
 SimpleComm_LeaveHandler = nil;
 
 local SimpleComm_FirstJoin = true;
+SimpleComm_aliasMustBeSet = false;
 
 local SimpleComm_Handler;
 local SimpleComm_FilterText;
@@ -96,8 +97,11 @@ end
 -- 
 ---------------------------------------------------------------------------------
 local function SimpleComm_SetAliasChannel()
+	if not SimpleComm_Channel then
+		return;
+	end
 	local id = GetChannelName( SimpleComm_Channel );
-	if (id~=0) then
+	if (id~=0 and SimpleComm_aliasMustBeSet) then
 		ChatTypeInfo[SimpleComm_chanSlashCmdUpper] = ChatTypeInfo["CHANNEL"..id];
 		ChatTypeInfo[SimpleComm_chanSlashCmdUpper].sticky = 1;
 		
@@ -113,7 +117,7 @@ local function SimpleComm_SetAliasChannel()
 			SimpleComm_oldSendChatMessage = SendChatMessage;
 			SendChatMessage = SimpleComm_newSendChatMessage;
 		end
-		
+		SimpleComm_aliasMustBeSet = false;
 	end
 end
 
@@ -131,6 +135,8 @@ local function SimpleComm_UnsetAliasChannel()
 		
 		SlashCmdList[SimpleComm_chanSlashCmdUpper] = nil;
 		setglobal("SLASH_"..SimpleComm_chanSlashCmdUpper.."1", nil);
+		
+		SimpleComm_aliasMustBeSet = true;
 	end
 end
 
@@ -713,7 +719,8 @@ function SimpleComm_SetAlias(chanSlashCmd, chanAlias)
 	SimpleComm_chanSlashCmd = chanSlashCmd;
 	SimpleComm_chanSlashCmdUpper = string.upper(chanSlashCmd);
 	SimpleComm_chanAlias = chanAlias;
-	
+
+	SimpleComm_aliasMustBeSet = true;
 	SimpleComm_SetAliasChannel();
 	DEBUG_MSG("[SimpleComm_SetAlias] end");
 end
