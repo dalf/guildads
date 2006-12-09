@@ -28,7 +28,7 @@ GuildAdsPlayerMenu = {
 		if GuildAdsInspectWindow then
 			info.func = GuildAdsPlayerMenu.inspect;
 		else
-			info.func = GuildAdsPlayerMenu.inspectDefault;
+--~ 			info.func = GuildAdsPlayerMenu.inspectDefault;
 		end
 		UIDropDownMenu_AddButton(info, level);
 
@@ -40,19 +40,19 @@ GuildAdsPlayerMenu = {
 		info.func = GuildAdsPlayerMenu.invite;
 		UIDropDownMenu_AddButton(info, level);
 		
-		info = { };
-		info.text =  TEXT(TRADE);
-		info.notCheckable = 1;
-		info.value = owner;
-		info.func = GuildAdsPlayerMenu.trade;
-		UIDropDownMenu_AddButton(info, level);
-		
-		info = { };
-		info.text =  TEXT(FOLLOW);
-		info.notCheckable = 1;
-		info.value = owner;
-		info.func = GuildAdsPlayerMenu.follow;
-		UIDropDownMenu_AddButton(info, level);
+--~ 		info = { };
+--~ 		info.text =  TEXT(TRADE);
+--~ 		info.notCheckable = 1;
+--~ 		info.value = owner;
+--~ 		info.func = GuildAdsPlayerMenu.trade;
+--~ 		UIDropDownMenu_AddButton(info, level);
+--~ 		
+--~ 		info = { };
+--~ 		info.text =  TEXT(FOLLOW);
+--~ 		info.notCheckable = 1;
+--~ 		info.value = owner;
+--~ 		info.func = GuildAdsPlayerMenu.follow;
+--~ 		UIDropDownMenu_AddButton(info, level);
 	
 		info = { };
 		info.text =  WHO;
@@ -92,22 +92,22 @@ GuildAdsPlayerMenu = {
 		end
 	end;
 	
-	inspectDefault = function()
-		local owner = this.value;
-		if owner then
-			TargetByName(owner)
-			if UnitName("target")==owner and CheckInteractDistance("target", 2) then
-				InspectUnit("target")
-			else
-				TargetLastTarget()
-			end
-		end
-	end;
+--~ 	inspectDefault = function()
+--~ 		local owner = this.value;
+--~ 		if owner then
+--~ 			TargetByName(owner)
+--~ 			if UnitName("target")==owner and CheckInteractDistance("target", 2) then
+--~ 				InspectUnit("target")
+--~ 			else
+--~ 				TargetLastTarget()
+--~ 			end
+--~ 		end
+--~ 	end;
 	
 	invite = function()
 		local owner = this.value;
 		if owner then
-			InviteByName(owner);
+			InviteUnit(owner);
 		end
 	end;
 	
