@@ -53,13 +53,16 @@ end
 
 --------------------------------------------------------------------------------
 --
--- Return the weight on this player (higher = better to send transaction)
+-- Return the weight on this player (lower = better to send transaction)
 -- 
 --------------------------------------------------------------------------------
-function GuildAdsDTS:GetWeight()
+function GuildAdsDTS:GetWeight(aboutPlayerName)
+	if aboutPlayerName==GuildAds.playerName then
+		return 0;
+	end
 	local fps = GetFramerate()
 	local _, _, lag = GetNetStats();
-	return math.floor(fps*(1000-lag));
+	return math.floor(math.max((200-fps), 1)*lag);
 end
 
 --------------------------------------------------------------------------------
@@ -85,7 +88,7 @@ function GuildAdsDTS:ReceiveSearch(playerName)
 		self.search[playerName] = {
 			bestPlayerName = GuildAds.playerName,
 			bestRevision = self.dataType:getRevision(playerName),
-			bestWeight = self:GetWeight(),
+			bestWeight = self:GetWeight(playerName),
 			worstRevision = self.dataType:getRevision(playerName),
 			version = self.dataType.metaInformations.version
 		};
@@ -122,7 +125,7 @@ function GuildAdsDTS:ReceiveRevision(childPlayerName, playerName, who, revision,
 	local result = self.search[playerName];
 	-- TODO : handle the case, playerName has reset, so he has a lower revision but we must update to this one.
 	if  	(revision>result.bestRevision) 
-		or	(revision==result.bestRevision and weight>result.bestWeight)
+		or	(revision==result.bestRevision and weight<result.bestWeight)
 		or	(version>result.version) then
 		result.bestPlayerName = who;
 		result.bestRevision = revision;
@@ -131,7 +134,7 @@ function GuildAdsDTS:ReceiveRevision(childPlayerName, playerName, who, revision,
 	end
 	
 	if (worstRevision<result.worstRevision) then
-		result.worstRevision = worstRevision;		
+		result.worstRevision = worstRevision;
 	end
 	
 	if childPlayerName == GuildAdsComm.playerTree[GuildAds.playerName].c1 then
