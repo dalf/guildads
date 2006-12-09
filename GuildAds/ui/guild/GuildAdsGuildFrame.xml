@@ -46,7 +46,7 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 				PlaySound("igMainMenuOptionCheckBoxOn");
 			</OnClick>
 		</Scripts>
-		<NormalText inherits="GameFontHighlightSmall">
+		<ButtonText>
 			<Anchors>
 				<Anchor point="LEFT">
 					<Offset>
@@ -54,7 +54,8 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 					</Offset>
 				</Anchor>
 			</Anchors>
-		</NormalText>
+		</ButtonText>
+        <NormalFont inherits="GameFontHighlightSmall"/>
 	</Button>
 	
 	<Button name="GuildAdsGuildAdButtonTemplate" virtual="true">

@@ -161,7 +161,7 @@
 			<TexCoords left="0" right="0.53125" top="0" bottom="0.625"/>
 		</NormalTexture>
 		<HighlightTexture file="Interface\PaperDollInfoFrame\UI-Character-Tab-Highlight" alphaMode="ADD"/>
-		<NormalText name="$parentNormalText" inherits="GameFontNormalSmall" justifyH="LEFT">
+		<ButtonText name="$parentNormalText" justifyH="LEFT">
 			<Anchors>
 				<Anchor point="LEFT">
 					<Offset>
@@ -169,7 +169,8 @@
 					</Offset>
 				</Anchor>
 			</Anchors>
-		</NormalText>
+		</ButtonText>
+        <NormalFont inherits="GameFontHighlightSmall"/>
 		<HighlightText name="$parentHighlightText" inherits="GameFontHighlightSmall" justifyH="LEFT">
 			<Anchors>
 				<Anchor point="LEFT">
