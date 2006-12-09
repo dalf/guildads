@@ -8,6 +8,31 @@
 -- Licence: GPL version 2 (General Public License)
 ----------------------------------------------------------------------------------
 
+local math_floor = math.floor
+local math_mod = math.fmod
+local math_floormod = function(value, m)
+	return math_mod(math_floor(value), m)
+end
+local string_gmatch = string.gmatch
+local string_char = string.char
+local string_len = string.len
+local string_format = string.format
+local string_gsub = string.gsub
+local string_find = string.find
+local string_byte = string.byte
+local string_sub = string.sub
+local table_insert = table.insert
+local table_concat = table.concat
+local table_remove = table.remove
+
+local byte_i = string_byte('i')
+local byte_s = string_byte('s')
+local byte_minus = string_byte('-')
+local byte_question = string_byte('?')
+local byte_exp = string_byte('^')
+
+
+-------------------------------------------
 GuildAdsCodecs = {}
 
 -------------------------------------------
@@ -158,38 +183,64 @@ end
 -- BigInteger : convert integer to base 64
 GuildAdsCodecBigInteger = GuildAdsCodec:new({}, "BigInteger", 1);
 
-GuildAdsCodecBigInteger.e = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ+-";
+GuildAdsCodecBigInteger.e = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ+*";
 GuildAdsCodecBigInteger.d = {};
+setmetatable(GuildAdsCodecBigInteger.d, {
+	__index = function (self, i)
+		return 0;
+	end
+});
 
 for i=1, string.len(GuildAdsCodecBigInteger.e), 1 do
 	GuildAdsCodecBigInteger.d[string.byte(GuildAdsCodecBigInteger.e, i )] = i-1;
 end
 
-function GuildAdsCodecBigInteger.encode(obj)
+function GuildAdsCodecBigInteger.encode(obj, nilEqualZero)
 	if obj then
-		value = "";
+		local value = "";
+		local prefix;
+		if obj<0 then
+			obj = -obj;
+			prefix = "-";
+		end
 		while (obj ~= 0) do
 			value = string.char(string.byte(GuildAdsCodecBigInteger.e, bit.band(obj, 63)+1 ))..value;
 			obj = bit.rshift(obj, 6);
 		end
 		if value=="" then
+			if nilEqualZero then
+				return "";
+			end
 			return "0"
-		else
-			return value;
+		elseif prefix then
+			return prefix..value;
 		end
+		return value;
 	end
 	return "";
 end
 
-function GuildAdsCodecBigInteger.decode(str)
+function GuildAdsCodecBigInteger.decode(str, nilEqualZero)
 	if str == "" then
+		if nilEqualZero then
+			return 0;
+		end
 		return nil;
 	else
-		number = 0;
-		for i=1, string.len(str),1  do
+		local number = 0;
+		local sign;
+		local start;
+		if string.byte(str, 1) == byte_minus then
+			sign = -1;
+			start = 2;
+		else
+			sign = 1;
+			start = 1;
+		end
+		for i=start, string.len(str),1  do
 			number = bit.lshift(number, 6) + GuildAdsCodecBigInteger.d[string.byte(str, i)];
 		end
-		return number;
+		return sign * number;
 	end
 end
 
@@ -266,25 +317,58 @@ end
 GuildAdsCodecItemRef = GuildAdsCodec:new({}, "ItemRef", 1);
 
 function GuildAdsCodecItemRef.encode(obj)
-	if obj then
-		--[[ TODO 
-			- nombre en base 64
-			- @ 	pour 	item:
-			- ?? 	pour 	enchant:
-			- *		pour	:0:0:0 
-		]]
-		return string.gsub(string.gsub(obj, "item\:", "\@"), ":0:0:0", "\*");
+	if obj==nil then
+		return "";
 	end
-	return "";
+	local _,_,A,B,C,D,E,F,G,H = string_find(obj, "^item:(%d+):(%d+):(%d+):(%d+):(%d+):(%d+):(%-?%d+):(%d+)$")
+	local encode = GuildAdsCodecBigInteger.encode;
+	if A then
+		-- item link
+		A = A+0 -- convert to number
+		B = B+0
+		C = C+0
+		D = D+0
+		E = E+0
+		F = F+0
+		G = G+0
+		H = H+0
+		
+		local s =        encode(A, true)..":"..encode(B, true)..":"..encode(C, true)
+				  ..":"..encode(D, true)..":"..encode(E, true)..":"..encode(F, true)
+				  ..":"..encode(G, true)..":"..encode(H, true);
+		return string.gsub(s, ":::", "%.");
+	end
+	local _,_,A = string_find(obj, "^enchant:(%d+)$")
+	if A then
+		A = A+0;
+		return "^"..encode(A, true);
+	end
+	return "?"..obj;
 end
 
 function GuildAdsCodecItemRef.decode(str)
-	if str == "" then
-		return nil;
+	if str==nil or str=="" then
+		return;
+	end
+	local x = string_byte(str, 1);
+	local y = string_sub(str, 2, -1);
+	local decode = GuildAdsCodecBigInteger.decode;
+	if x == byte_question then
+		return y;
+	elseif x == byte_exp then
+		return "enchant:"..decode(y, true);
 	else
-		return string.gsub(string.gsub(str, "\@", "item\:"), "\*", ":0:0:0");
+		y = string.gsub(str, "%.", ":::");
+		local _,_,A,B,C,D,E,F,G,H = string_find(y, "^([^:]*):([^:]*):([^:]*):([^:]*):([^:]*):([^:]*):([^:]*):([^:]*)$")
+		if A then
+			return "item:"..decode(A, true)..":"..decode(B, true)..":"..decode(C, true)..":"
+							..decode(D, true)..":"..decode(E, true)..":"..decode(F, true)..":"
+							..decode(G, true)..":"..decode(H, true)
+		end
+		return y;
 	end
 end
+
 
 -------------------------------------------
 GuildAdsCodecColor = GuildAdsCodec:new({}, "Color", 1);
