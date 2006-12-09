@@ -174,7 +174,7 @@ function SimpleComm_AddWhisper(player)
 end
 
 function SimpleComm_DelWhisper(player)
-	local t = self.recentWhispers[string.lower(arg2)];
+	local t = SimpleComm_RecentWhispers[string.lower(player)];
 	return t and GetTime() - t <= 15;
 end
 
