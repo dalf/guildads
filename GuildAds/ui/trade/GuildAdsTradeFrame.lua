@@ -1338,10 +1338,81 @@ GuildAdsTrade = {
 					end
 				end
 			else
-				local info = {};
-				info.text = "Joueur"..UIDROPDOWNMENU_MENU_VALUE;
-				info.notCheckable = 1;
-				UIDropDownMenu_AddButton(info, 2);
+            info = { };
+		local online = GuildAdsComm:IsOnLine(UIDROPDOWNMENU_MENU_VALUE);
+		
+		info = { };
+		info.text =  UIDROPDOWNMENU_MENU_VALUE;
+		info.notCheckable = 1;
+		info.textR = GuildAdsUITools.onlineColor[online].r;
+		info.textG = GuildAdsUITools.onlineColor[online].g;
+		info.textB = GuildAdsUITools.onlineColor[online].b;
+		UIDropDownMenu_AddButton(info, level);
+        
+		info = { };
+		info.text =  WHISPER_MESSAGE;
+		info.notCheckable = 1;
+		info.value = UIDROPDOWNMENU_MENU_VALUE;
+		info.func = GuildAdsPlayerMenu.whisper;
+		UIDropDownMenu_AddButton(info, level);
+
+		info = { };
+		info.text =  INSPECT;
+		info.notCheckable = 1;
+		info.value = UIDROPDOWNMENU_MENU_VALUE;
+		if GuildAdsInspectWindow then
+			info.func = GuildAdsPlayerMenu.inspect;
+		else
+--~ 			info.func = GuildAdsPlayerMenu.inspectDefault;
+		end
+		UIDropDownMenu_AddButton(info, level);
+
+
+		info = { };
+		info.text =  CHAT_INVITE_SEND;
+		info.notCheckable = 1;
+		info.value = UIDROPDOWNMENU_MENU_VALUE;
+		info.func = GuildAdsPlayerMenu.invite;
+		UIDropDownMenu_AddButton(info, level);
+		
+--~ 		info = { };
+--~ 		info.text =  TEXT(TRADE);
+--~ 		info.notCheckable = 1;
+--~ 		info.value = owner;
+--~ 		info.func = GuildAdsPlayerMenu.trade;
+--~ 		UIDropDownMenu_AddButton(info, level);
+--~ 		
+--~ 		info = { };
+--~ 		info.text =  TEXT(FOLLOW);
+--~ 		info.notCheckable = 1;
+--~ 		info.value = owner;
+--~ 		info.func = GuildAdsPlayerMenu.follow;
+--~ 		UIDropDownMenu_AddButton(info, level);
+	
+		info = { };
+		info.text =  WHO;
+		info.notCheckable = 1;
+		info.value = UIDROPDOWNMENU_MENU_VALUE;
+		info.func = GuildAdsPlayerMenu.who;
+		UIDropDownMenu_AddButton(info, level);
+
+		info = { };
+		info.text = CANCEL;
+		info.notCheckable = 1;
+		info.func = GuildAdsPlayerMenu.cancel;
+		UIDropDownMenu_AddButton(info, level);
+--~ 				local info = {};
+--~ 				info.text = "Joueur"..UIDROPDOWNMENU_MENU_VALUE;
+--~ 				info.notCheckable = 1;
+--~ 				UIDropDownMenu_AddButton(info, 2);
+--~                 GuildAdsGuildContextMenu.initialize = GuildAdsGuild.contextMenu.initialize;
+--~ 			    GuildAdsGuildContextMenu.displayMode = "MENU";
+--~                 UIDropDownMenu_AddButton(GuildAdsGuildContextMenu, 2);
+--~                GuildAdsPlayerMenu.initialize(UIDROPDOWNMENU_MENU_VALUE, 2);
+--~                 HideDropDownMenu(1);
+--~                 GuildAdsGuildContextMenu.name = "Title";
+--~                 GuildAdsGuildContextMenu.owner = owner;
+--~                 ToggleDropDownMenu(1, nil, GuildAdsGuildContextMenu, "cursor");
 			end
 		end
 	};
