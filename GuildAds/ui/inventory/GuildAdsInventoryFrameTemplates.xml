@@ -1,0 +1,34 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xsi:schemaLocation="http://www.blizzard.com/wow/ui/..\FrameXML\UI.xsd">
+	
+	<Button name="GuildAdsInspectItemSlotButtonTemplate" inherits="ItemButtonTemplate" virtual="true">
+        <Scripts>
+            <OnLoad>
+				GuildAdsInventory.SlotOnLoad();
+            </OnLoad>
+            <OnClick>
+				GuildAdsInventory.SlotOnClick(arg1);
+            </OnClick>
+            <OnEnter>
+				GuildAdsInventory.SlotOnEnter();
+            </OnEnter>
+            <OnLeave>
+				GuildAdsInventory.SlotOnLeave();
+            </OnLeave>
+        </Scripts>
+		<NormalTexture file="Interface\Buttons\UI-Quickslot2">
+			<Size>
+				<AbsDimension x="64" y="64"/>
+			</Size>
+			<Anchors>
+				<Anchor point="CENTER">
+					<Offset>
+						<AbsDimension x="0" y="-1"/>
+					</Offset>
+				</Anchor>
+			</Anchors>
+		</NormalTexture>
+    </Button>
+	
+</Ui>

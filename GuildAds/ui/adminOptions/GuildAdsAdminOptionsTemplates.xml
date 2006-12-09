@@ -1,0 +1,79 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.blizzard.com/wow/ui/FrameXML/UI.xsd">
+<Button name="GuildAdsVirtualAdminOptionButtonTemplate" virtual="true">
+		<Size>
+			<AbsDimension x="470" y="16"/>
+		</Size>
+		<HighlightTexture name="$parentHighlight" file="Interface\Buttons\UI-Listbox-Highlight2" alphaMode="ADD">
+			<Size>
+				<AbsDimension x="505" y="22"/>
+			</Size>
+			<Anchors>
+				<Anchor point="LEFT">
+					<Offset>
+						<AbsDimension x="5" y="-2"/>
+					</Offset>
+				</Anchor>
+			</Anchors>
+		</HighlightTexture>
+		<Scripts>
+			<OnLoad>
+				this:RegisterForClicks("LeftButtonDown", "RightButtonDown");
+			</OnLoad>
+		</Scripts>
+	</Button>
+
+
+<Button name="GuildAdsMyAdminButtonTemplate" inherits="GuildAdsVirtualAdminOptionButtonTemplate" virtual="true">
+		<Size>
+			<AbsDimension x="350" y="22"/>
+		</Size>
+		<Layers>
+			<Layer level="ARTWORK">
+				<FontString name="$parentText" inherits="GameFontHighlightSmall" justifyH="LEFT">
+					<Size>
+						<AbsDimension x="185" y="22"/>
+					</Size>
+					<Anchors>
+						<Anchor point="TOPLEFT" >
+							<Offset>
+								<AbsDimension x="110" y="0"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+				<FontString name="$parentComment" inherits="GameFontNormalSmall" justifyH="LEFT">
+					<Size>
+						<AbsDimension x="115" y="22"/>
+					</Size>
+					<Anchors>
+						<Anchor point="LEFT" relativeTo="$parentText" relativePoint="RIGHT">
+							<Offset>
+								<AbsDimension x="2" y="0"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+				
+			</Layer>
+		</Layers>
+		<!--
+		<Scripts>
+			<OnEnter>
+				GuildAdsTrade.myButton.onEnter();
+			</OnEnter>
+			<OnClick>
+				GuildAdsTrade.myButton.onClick(arg1);
+			</OnClick>
+			<OnLeave>
+				GameTooltip:Hide();
+			</OnLeave>
+		</Scripts>
+
+-->
+	</Button>	
+		
+	
+	
+</Ui>
