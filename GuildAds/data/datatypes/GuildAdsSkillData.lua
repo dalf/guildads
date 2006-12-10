@@ -28,11 +28,11 @@ GuildAdsSkillDataType = GuildAdsTableDataType:new({
 function GuildAdsSkillDataType:Initialize()
 	GuildAdsTask:AddNamedSchedule("GuildAdsSkillDataTypeInit", 8, nil, nil, self.onUpdate, self)
 	self:RegisterEvent("CHARACTER_POINTS_CHANGED", "onUpdate");
-	self:RegisterEvent("CHAT_MSG_SKILL", "onUpdate");
-	self:RegisterEvent("PLAYER_LEVEL_UP", "onUpdate");   -- to update the max skill rank
+	self:RegisterEvent("CHAT_MSG_SKILL", "onEvent");
+	self:RegisterEvent("PLAYER_LEVEL_UP", "onEvent");   -- to update the max skill rank
 end
 
-function GuildAdsSkillDataType:onUpdate()
+function GuildAdsSkillDataType:onEvent()
 	local playerName = UnitName("player");
 	for i = 1, GetNumSkillLines(), 1 do	
 		local skillName, header, isExpanded, skillRank, numTempPoints, skillModifier, skillMaxRank, isAbandonable, stepCost, rankCost, minLevel, skillCostType = GetSkillLineInfo(i);
@@ -92,14 +92,14 @@ function GuildAdsSkillDataType:set(author, id, info)
 			skills._u = 1 + (skills._u or 0);
 			info._u = skills._u;
 			skills[id] = info;
-			self:triggerEvent(author, id);
+			self:triggerUpdate(author, id);
 			return info;
 		end
 	else
 		if skills[id] then
 			skills[id] = nil;
 			skills._u = 1 + (skills._u or 0);
-			self:triggerEvent(author, id);
+			self:triggerUpdate(author, id);
 		end
 	end
 end

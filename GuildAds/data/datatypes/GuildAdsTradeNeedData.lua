@@ -95,14 +95,14 @@ function GuildAdsTradeNeedDataType:set(author, id, info)
 			self:setRevision(author, revision);
 			info._u = revision;
 			items[author] = info;
-			self:triggerEvent(author, id);
+			self:triggerUpdate(author, id);
 			return info;
 		end
 	else
 		if self.db.items[id] and self.db.items[id].n and self.db.items[id].n[author] then
 			self.db.items[id].n[author] = nil;
 			self:setRevision(author, self:getRevision(author)+1);
-			self:triggerEvent(author, id);
+			self:triggerUpdate(author, id);
 		end
 	end
 end

@@ -1,6 +1,6 @@
 ----------------------------------------------------------------------------------
 --
--- GuildAdsDataType.lua
+-- GuildAdsFakeDataType.lua
 --
 -- Author: Zarkan, Fkaï of European Ner'zhul (Horde)
 -- URL : http://guildads.sourceforge.net
@@ -52,13 +52,13 @@ end
 
 --[[ about events ]]
 -- nothing will happen
-function GuildAdsDataType:triggerEvent(playerName, id)
+function GuildAdsFakeDataType:triggerUpdate(playerName, id)
 end
 
-function GuildAdsDataType:registerEvent(obj, method)
+function GuildAdsFakeDataType:registerUpdate(obj, method)
 end
 
-function GuildAdsDataType:unregisterEvent(obj)
+function GuildAdsFakeDataType:unregisterUpdate(obj)
 end
 
 --[[ about version ]]

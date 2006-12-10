@@ -87,13 +87,13 @@ GuildAdsGuild = {
 	end;
 	
 	onChannelJoin = function()
-		GuildAdsDB.profile.Main:registerEvent(GuildAdsGuild.onDBUpdate);
+		GuildAdsDB.profile.Main:registerUpdate(GuildAdsGuild.onDBUpdate);
 		GuildAdsDB.channel[GuildAds.channelName]:registerEvent(GuildAdsGuild.onPlayerListUpdate);
 		GuildAdsGuild.delayedUpdate();
 	end;
 	
 	onChannelLeave = function()
-		GuildAdsDB.profile.Main:unregisterEvent(GuildAdsGuild.onDBUpdate);
+		GuildAdsDB.profile.Main:unregisterUpdate(GuildAdsGuild.onDBUpdate);
 		GuildAdsDB.channel[GuildAds.channelName]:unregisterEvent(GuildAdsGuild.onPlayerListUpdate);
 		GuildAdsGuild.delayedUpdate();
 	end;

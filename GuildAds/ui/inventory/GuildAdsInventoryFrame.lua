@@ -46,7 +46,7 @@ GuildAdsInventory = {
 	};
 	
 	onInit = function()
-		GuildAdsDB.profile.Inventory:registerEvent(GuildAdsInventory.onDBUpdate);
+		GuildAdsDB.profile.Inventory:registerUpdate(GuildAdsInventory.onDBUpdate);
 	end;
 	
 	onDBUpdate = function(dataType, playerName, slot)

@@ -98,7 +98,7 @@ function GuildAdsTradeOfferDataType:set(author, id, info)
 			self:setRevision(author, revision);
 			info._u = revision;
 			items[author] = info;
-			self:triggerEvent(author, id);
+			self:triggerUpdate(author, id);
 			return info;
 		end
 	else
@@ -106,7 +106,7 @@ function GuildAdsTradeOfferDataType:set(author, id, info)
 			self.db.items[id].o[author] = nil;
 			-- TODO : if next(self.db.items[id].o) == nil then self.db.items[id].o = nil end
 			self:setRevision(author, self:getRevision(author)+1);
-			self:triggerEvent(author, id);
+			self:triggerUpdate(author, id);
 		end
 	end
 end

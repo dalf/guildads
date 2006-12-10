@@ -104,11 +104,6 @@ function GuildAdsTradeSkillDataType:setRaw(author, id, info, revision)
 		return true;
 	end;
 end
--- patch 
-
-
-
-
 
 function GuildAdsTradeSkillDataType:set(author, id, info)
 	local craft = self.profile:getRaw(author).craft;
@@ -117,14 +112,14 @@ function GuildAdsTradeSkillDataType:set(author, id, info)
 			craft._u = 1 + (craft._u or 0);
 			info._u = craft._u;
 			craft[id] = info;
-			self:triggerEvent(author, id);
+			self:triggerUpdate(author, id);
 			return info;
 		end
 	else
 		if craft[id] then
 			craft[id] = nil;
 			craft._u = 1 + (craft._u or 0);
-			self:triggerEvent(author, id);
+			self:triggerUpdate(author, id);
 		end
 	end
 end

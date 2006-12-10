@@ -301,7 +301,7 @@ function GuildAdsComm.OnJoin(self)
 	
 	-- listeners
 	for name, DTS in pairs(self.DTS) do
-		DTS.dataType:registerEvent(GuildAdsComm, "OnDBUpdate");
+		DTS.dataType:registerUpdate(GuildAdsComm, "OnDBUpdate");
 	end
 	
 	-- for plugins
@@ -331,7 +331,7 @@ function GuildAdsComm.OnLeave(self)
 	for i=1,table.getn(self.transactionQueue) do table.remove(self.transactionQueue) end
 
 	for name, DTS in pairs(self.DTS) do
-		DTS.dataType:unregisterEvent(GuildAdsComm);
+		DTS.dataType:unregisterUpdate(GuildAdsComm);
 	end
 	
 	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "[GuildAdsComm.OnLeave] end");

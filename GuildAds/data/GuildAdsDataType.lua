@@ -134,9 +134,10 @@ function GuildAdsDataType:setMostRecentVersion(version)
 end
 
 --[[ about events ]]
-function GuildAdsDataType:triggerEvent(playerName, id)
+function GuildAdsDataType:triggerUpdate(playerName, id)
+	GuildAds_ChatDebug(GA_DEBUG_STORAGE, "["..self.metaInformations.name..","..playerName..","..tostring(id).."] triggerUpdate");
 	if self.eventRegistry then
-		GuildAds_ChatDebug(GA_DEBUG_STORAGE, "["..self.metaInformations.name..","..playerName..","..tostring(id).."] triggerEvent - begin");
+		GuildAds_ChatDebug(GA_DEBUG_STORAGE, "["..self.metaInformations.name..","..playerName..","..tostring(id).."] triggerUpdate - begin");
 		for obj, method in pairs(self.eventRegistry) do
 			if method == true then
 				GuildAds_ChatDebug(GA_DEBUG_STORAGE, "  - function");
@@ -148,18 +149,18 @@ function GuildAdsDataType:triggerEvent(playerName, id)
 				end
 			end
 		end
-		GuildAds_ChatDebug(GA_DEBUG_STORAGE, "triggerEvent - end");
+		GuildAds_ChatDebug(GA_DEBUG_STORAGE, "["..self.metaInformations.name..","..playerName..","..tostring(id).."] triggerUpdate - end");
 	end
 end
 
-function GuildAdsDataType:registerEvent(obj, method)
+function GuildAdsDataType:registerUpdate(obj, method)
 	if not self.eventRegistry then
 		self.eventRegistry = {};
 	end
 	self.eventRegistry[obj] = method or true;
 end
 
-function GuildAdsDataType:unregisterEvent(obj)
+function GuildAdsDataType:unregisterUpdate(obj)
 	if self.eventRegistry then
 		self.eventRegistry[obj] = nil;
 	end

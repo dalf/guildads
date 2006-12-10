@@ -186,14 +186,14 @@ GuildAdsTrade = {
 	
 	onChannelJoin = function()
 		-- Register for events
-		GuildAdsDB.channel[GuildAds.channelName].TradeNeed:registerEvent(GuildAdsTrade.onDBUpdate);
-		GuildAdsDB.channel[GuildAds.channelName].TradeOffer:registerEvent(GuildAdsTrade.onDBUpdate);
+		GuildAdsDB.channel[GuildAds.channelName].TradeNeed:registerUpdate(GuildAdsTrade.onDBUpdate);
+		GuildAdsDB.channel[GuildAds.channelName].TradeOffer:registerUpdate(GuildAdsTrade.onDBUpdate);
 	end;
 	
 	onChannelLeave = function()
 		-- Unregister for events
-		GuildAdsDB.channel[GuildAds.channelName].TradeNeed:unregisterEvent(GuildAdsTrade.onDBUpdate);
-		GuildAdsDB.channel[GuildAds.channelName].TradeOffer:unregisterEvent(GuildAdsTrade.onDBUpdate);
+		GuildAdsDB.channel[GuildAds.channelName].TradeNeed:unregisterUpdate(GuildAdsTrade.onDBUpdate);
+		GuildAdsDB.channel[GuildAds.channelName].TradeOffer:unregisterUpdate(GuildAdsTrade.onDBUpdate);
 	end;
 	
 	onConfigChanged = function(path, key, value)

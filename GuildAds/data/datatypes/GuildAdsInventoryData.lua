@@ -111,7 +111,7 @@ function GuildAdsInventoryDataType:set(author, id, info)
 			info._u = inventory._u;
 			inventory[id] = info;
 			if trigger then
-				self:triggerEvent(author, id);
+				self:triggerUpdate(author, id);
 			end
 			return info;
 		end
@@ -119,7 +119,7 @@ function GuildAdsInventoryDataType:set(author, id, info)
 		if inventory[id] then
 			inventory[id] = nil;
 			inventory._u = 1 + (inventory._u or 0);
-			self:triggerEvent(author, id);
+			self:triggerUpdate(author, id);
 		end
 	end
 end

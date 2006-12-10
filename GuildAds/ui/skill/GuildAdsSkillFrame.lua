@@ -123,7 +123,7 @@ GuildAdsSkill = {
 			);
 		end
 		
-		GuildAdsDB.profile.Skill:registerEvent(GuildAdsSkill.onDBUpdate);
+		GuildAdsDB.profile.Skill:registerUpdate(GuildAdsSkill.onDBUpdate);
 	end;
 	
 	onDBUpdate = function(dataType, playerName, id)

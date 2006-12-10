@@ -120,14 +120,14 @@ function GuildAdsMainDataType:set(author, id, info)
 		if main[id]==nil or main[id]~=info then
 			main._u = 1 + (main._u or 0);
 			main[id] = info;
-			self:triggerEvent(author, id);
+			self:triggerUpdate(author, id);
 			return info;
 		end
 	else
 		if main[id] then
 			main[id] = nil;
 			main._u = 1 + (main._u or 0);
-			self:triggerEvent(author, id);
+			self:triggerUpdate(author, id);
 		end
 	end
 end
