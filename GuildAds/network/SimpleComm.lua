@@ -407,53 +407,6 @@ function SimpleComm_newChatFrame_OnEvent(event)
 			end
 		end
 		
-		if (event == "CHAT_MSG_SYSTEM") then
-			local _, _, playerName = string.find(arg1, SimpleComm_DisconnectedMessage);
-			if not playerName then
-				local _, _, playerName = string.find(arg1, SimpleComm_AmbiguousMessage);
-			end
-			if playerName then
-				local t = GetTime();
-				if SimpleComm_Disconnected[playerName] then
-					if t-SimpleComm_Disconnected[playerName] < 2 then 
-						return;
-					end
-				else
-					SimpleComm_Disconnected[playerName] = t;
-				end
-			end
-			
-			-- update my AFK/DND status
-			local iStart, iEnd, message = string.find(arg1, SimpleComm_AFK_MESSAGE);
-			if iStart or arg1==MARKED_AFK then 
-				SimpleComm_SetFlag(nil, "AFK", message);
-			end
-			
-			local iStart, iEnd, message = string.find(arg1, SimpleComm_DND_MESSAGE);
-			if iStart then
-				SimpleComm_SetFlag(nil, "DND", message);
-			end
-			
-			if arg1==CLEARED_AFK or arg1==CLEARED_DND then
-				SimpleComm_SetFlag(nil, nil, nil);
-			end
-			
-			-- update Drunk status
-			if arg1==DRUNK_MESSAGE_SELF1 then
-				SimpleComm_YouAreDrunk = false;
-			else
-				local i = 2;
-				
-				while getglobal("DRUNK_MESSAGE_SELF"..i) do
-					if arg1==getglobal("DRUNK_MESSAGE_SELF"..i) then
-						SimpleComm_YouAreDrunk = true;
-						break;
-					end
-					i = i +1;
-				end
-			end
-		end
-		
 		if (event == "CHAT_MSG_WHISPER") and SimpleComm_FilterText(arg1) then
 			return;
 		end
@@ -496,6 +449,55 @@ function SimpleComm_newChatFrame_OnEvent(event)
 		end
 	end
 	
+	-- update DND/AFK/Drunk status
+	if (event == "CHAT_MSG_SYSTEM") then
+		local _, _, playerName = string.find(arg1, SimpleComm_DisconnectedMessage);
+		if not playerName then
+			local _, _, playerName = string.find(arg1, SimpleComm_AmbiguousMessage);
+		end
+		if playerName then
+			local t = GetTime();
+			if SimpleComm_Disconnected[playerName] then
+				if t-SimpleComm_Disconnected[playerName] < 2 then 
+					return;
+				end
+			else
+				SimpleComm_Disconnected[playerName] = t;
+			end
+		end
+		
+		-- update my AFK/DND status
+		local iStart, iEnd, message = string.find(arg1, SimpleComm_AFK_MESSAGE);
+		if iStart or arg1==MARKED_AFK then 
+			SimpleComm_SetFlag(nil, "AFK", message);
+		end
+		
+		local iStart, iEnd, message = string.find(arg1, SimpleComm_DND_MESSAGE);
+		if iStart then
+			SimpleComm_SetFlag(nil, "DND", message);
+		end
+		
+		if arg1==CLEARED_AFK or arg1==CLEARED_DND then
+			SimpleComm_SetFlag(nil, nil, nil);
+		end
+		
+		-- update Drunk status
+		if arg1==DRUNK_MESSAGE_SELF1 then
+			SimpleComm_YouAreDrunk = false;
+		else
+			local i = 2;
+			
+			while getglobal("DRUNK_MESSAGE_SELF"..i) do
+				if arg1==getglobal("DRUNK_MESSAGE_SELF"..i) then
+					SimpleComm_YouAreDrunk = true;
+					break;
+				end
+				i = i +1;
+			end
+		end
+	end
+	
+	-- call default ChatFrame_OnEvent
 	SimpleComm_oldChatFrame_OnEvent(event);
 end
 SimpleComm_oldChatFrame_OnEvent = ChatFrame_OnEvent;
@@ -663,6 +665,16 @@ function SimpleComm_Initialize(FilterText, FilterMessage, SplitSerialize, Unspli
 	
 	SimpleComm_ChatFrame = DEFAULT_CHAT_FRAME;
 	
+	-- AFK/DND test for myself (usefull when the UI was reloaded)
+	if SimpleComm_GetFlag(UnitName("player"))==nil then
+		if UnitIsAFK("player") then
+			SimpleComm_SetFlag(nil, "AFK", "");
+		end
+		if UnitIsDND("player") then
+			SimpleComm_SetFlag(nil, "DND", "");
+		end
+	end
+	
 	dataChannelLib:RegisterAddon("GuildAds", SimpleComm_Callback);
 	SimpleComm_SetChannelStatus("Initializing");
 end
@@ -687,15 +699,7 @@ function SimpleComm_Join(Channel, Password)
 		SimpleComm_FirstJoin = nil;
 		-- Init hook into Ephemeral
 		initEphemeralHook();
-	
-		-- AFK/DND test for myself
-		if UnitIsAFK("player") then
-			SimpleComm_SetFlag(nil, "AFK", "");
-		end
-		if UnitIsDND("player") then
-			SimpleComm_SetFlag(nil, "DND", "");
-		end
-	
+		
 		-- Set timer
 		SimpleCommFrame:Show();
 	end
