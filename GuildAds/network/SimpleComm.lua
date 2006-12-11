@@ -368,7 +368,7 @@ function SimpleComm_ParseEvent(event)
 	end
 end
 
-function SimpleComm_newChatFrame_OnEvent(event)
+function SimpleComm_New_ChatFrame_MessageEventHandler(event)
 	if (SimpleComm_Channel) then
 		SimpleComm_channelId = GetChannelName(SimpleComm_Channel);
 		if ((event == "CHAT_MSG_CHANNEL") and (arg8 == SimpleComm_channelId)) then
@@ -498,10 +498,10 @@ function SimpleComm_newChatFrame_OnEvent(event)
 	end
 	
 	-- call default ChatFrame_OnEvent
-	SimpleComm_oldChatFrame_OnEvent(event);
+	SimpleComm_Old_ChatFrame_MessageEventHandler(event);
 end
-SimpleComm_oldChatFrame_OnEvent = ChatFrame_OnEvent;
-ChatFrame_OnEvent = SimpleComm_newChatFrame_OnEvent;
+SimpleComm_Old_ChatFrame_MessageEventHandler = ChatFrame_MessageEventHandler;
+ChatFrame_MessageEventHandler = SimpleComm_New_ChatFrame_MessageEventHandler;
 
 ---------------------------------------------------------------------------------
 --
@@ -564,44 +564,6 @@ function SimpleComm_OnUpdate(elapsed)
 			end
 			SimpleComm_Handler(message[1], message[2], message[3]);
 		end
-	end
-end
-
----------------------------------------------------------------------------------
---
--- Hook into Ephemeral
--- 
----------------------------------------------------------------------------------
-local function initEphemeralHook()
-	if ep and ep.VERSION_NUMERIC then
-		ep.UnregisterForEvent( "CHAT_MSG_WHISPER", ep.RespondToWhisper )
-		ep.UnregisterForEvent( "CHAT_MSG_WHISPER_INFORM", ep.RespondToWhisperNotice )
-		ep.RegisterForEvent( "CHAT_MSG_WHISPER", SimpleComm_EphemeralRespondToWhisper )
-		ep.RegisterForEvent( "CHAT_MSG_WHISPER_INFORM", SimpleComm_EphemeralRespondToWhisperNotice )
-	end
-end
-
-if ep and not ep.UnregisterForEvent then
-	function ep.UnregisterForEvent(event, callback)
-		if ep.RegisteredEvents[ event ] then
-			for index, currentCB in pairs(ep.RegisteredEvents[event]) do
-				if currentCB == callback then
-					table.remove( ep.RegisteredEvents[ event ], index);
-				end
-			end
-		end
-	end
-end
-
-function SimpleComm_EphemeralRespondToWhisper( event, parameters )
-	if not SimpleComm_FilterText(parameters[1]) then
-		ep.RespondToWhisper(event, parameters);
-	end
-end
-
-function SimpleComm_EphemeralRespondToWhisperNotice( event, parameters )
-	if not SimpleComm_FilterText(parameters[1]) then
-		ep.RespondToWhisperNotice(event, parameters);
 	end
 end
 
@@ -697,8 +659,6 @@ function SimpleComm_Join(Channel, Password)
 	
 	if SimpleComm_FirstJoin then
 		SimpleComm_FirstJoin = nil;
-		-- Init hook into Ephemeral
-		initEphemeralHook();
 		
 		-- Set timer
 		SimpleCommFrame:Show();
