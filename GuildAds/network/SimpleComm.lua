@@ -473,6 +473,16 @@ function SimpleComm_newChatFrame_OnEvent(event)
 			return;
 		end
 		
+		if (event == "CHAT_MSG_CHANNEL_NOTICE") and (arg8 == SimpleComm_channelId) then
+			DEBUG_MSG(arg1, true);
+			return;
+		end
+		
+		if (event == "CHAT_MSG_CHANNEL_NOTICE_USER") and (arg8 == SimpleComm_channelId) then
+			DEBUG_MSG(arg1.."("..arg5..")", true);
+			return;
+		end
+		
 		if event == "CHAT_MSG_AFK" or event == "CHAT_MSG_DND" then
 			if SimpleComm_DelWhisper(arg2) then
 				return;
