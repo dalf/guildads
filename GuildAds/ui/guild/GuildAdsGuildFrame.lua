@@ -138,9 +138,7 @@ GuildAdsGuild = {
 		g_AdFilters = {};
 		local playerFaction = GUILDADS_RACES_TO_FACTION[GuildAdsDB.profile.Main:getRaceIdFromName(UnitRace("player"))];
 		for id, name in pairs(GUILDADS_CLASSES) do
---~ 			if (GUILDADS_CLASS_TO_FACTION[id]==nil or GUILDADS_CLASS_TO_FACTION[id]==playerFaction) then
-				tinsert(g_AdFilters, { id=id, name=name});
---~ 			end
+			tinsert(g_AdFilters, { id=id, name=name});
 		end
 	end;
 	
