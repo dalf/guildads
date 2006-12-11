@@ -100,11 +100,11 @@ GUILDADS_RACES_TO_FACTION = {
 					[7] = GUILDADS_HORDE,
 					[8] = GUILDADS_HORDE
 					};
-					
-GUILDADS_CLASS_TO_FACTION = {
-					[2] = GUILDADS_HORDE,
-					[3] = GUILDADS_ALLIANCE,
-					};
+--~ 					
+--~ GUILDADS_CLASS_TO_FACTION = {
+--~ 					[2] = GUILDADS_HORDE,
+--~ 					[3] = GUILDADS_ALLIANCE,
+--~ 					};
 
 -- Item
 GUILDADS_ITEMS = {
