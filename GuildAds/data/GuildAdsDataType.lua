@@ -135,7 +135,6 @@ end
 
 --[[ about events ]]
 function GuildAdsDataType:triggerUpdate(playerName, id)
-	GuildAds_ChatDebug(GA_DEBUG_STORAGE, "["..self.metaInformations.name..","..playerName..","..tostring(id).."] triggerUpdate");
 	if self.eventRegistry then
 		GuildAds_ChatDebug(GA_DEBUG_STORAGE, "["..self.metaInformations.name..","..playerName..","..tostring(id).."] triggerUpdate - begin");
 		for obj, method in pairs(self.eventRegistry) do
