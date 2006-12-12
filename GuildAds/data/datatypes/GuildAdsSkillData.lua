@@ -26,20 +26,38 @@ GuildAdsSkillDataType = GuildAdsTableDataType:new({
 });
 
 function GuildAdsSkillDataType:Initialize()
-	GuildAdsTask:AddNamedSchedule("GuildAdsSkillDataTypeInit", 8, nil, nil, self.onUpdate, self)
-	self:RegisterEvent("CHARACTER_POINTS_CHANGED", "onUpdate");
+	--[[
+		SKILL_LINES_CHANGED event fires when there is change in skills
+		CHAT_MSG_SYSTEM event with this text ERR_SPELL_UNLEARNED_S fires when a skill is forget
+		CHARACTER_POINTS_CHANGED when player level up or forget/learn a skill
+		CHAT_MSG_SKILL event fires when the player progress
+	]]
+	GuildAdsTask:AddNamedSchedule("GuildAdsSkillDataTypeInit", 8, nil, nil, self.onEvent, self)
+	self:RegisterEvent("CHARACTER_POINTS_CHANGED", "onEvent");
 	self:RegisterEvent("CHAT_MSG_SKILL", "onEvent");
-	self:RegisterEvent("PLAYER_LEVEL_UP", "onEvent");   -- to update the max skill rank
+	self:RegisterEvent("PLAYER_LEVEL_UP", "onEvent");
 end
 
 function GuildAdsSkillDataType:onEvent()
 	local playerName = UnitName("player");
+	local playerSkillIds = {};
+	-- add new skills
 	for i = 1, GetNumSkillLines(), 1 do	
 		local skillName, header, isExpanded, skillRank, numTempPoints, skillModifier, skillMaxRank, isAbandonable, stepCost, rankCost, minLevel, skillCostType = GetSkillLineInfo(i);
 		if (header ~= 1) then
 			local id = self:getIdFromName(skillName);
 			if (id > 0) then
 				self:set(playerName, id, { v=skillRank; m=skillMaxRank });
+				playerSkillIds[id] = true;
+			end
+		end
+	end
+	-- delete skills
+	for id in pairs(self:getTableForPlayer(playerName)) do
+		if not playerSkillIds[id] and id~="_u" then
+			self:set(playerName, id, nil);
+			if GuildAdsTradeSkillDataType and GuildAdsTradeSkillDataType.deleteTradeSkillItems then
+				GuildAdsTradeSkillDataType:deleteTradeSkillItems(id);
 			end
 		end
 	end

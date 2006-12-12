@@ -29,7 +29,7 @@ GuildAdsInventoryDataType = GuildAdsTableDataType:new({
 
 function GuildAdsInventoryDataType:Initialize()
 	playerInventory = self:getTableForPlayer(GuildAds.playerName);
-	self:onUpdate();
+	self:onEvent();
 	self:RegisterEvent("UNIT_INVENTORY_CHANGED");
 	self:RegisterEvent("PLAYER_ENTERING_WORLD");
 	self:RegisterEvent("PLAYER_LEAVING_WORLD");
@@ -45,11 +45,11 @@ end
 
 function GuildAdsInventoryDataType:UNIT_INVENTORY_CHANGED()
 	if arg1 == "player" then
-		self:onUpdate();
+		self:onEvent();
 	end
 end
 
-function GuildAdsInventoryDataType:onUpdate()
+function GuildAdsInventoryDataType:onEvent()
 	for slot = 1,19, 1 do
 		link = GetInventoryItemLink("player", slot);
 		if (link) then

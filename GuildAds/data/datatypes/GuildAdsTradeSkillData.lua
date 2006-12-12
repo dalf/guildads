@@ -25,19 +25,17 @@ GuildAdsTradeSkillDataType = GuildAdsTableDataType:new({
 });
 
 function GuildAdsTradeSkillDataType:Initialize()
-	-- TODO : le cas "j'oublie une profession" n'est pas gérer
-	--[[
-		idée : enregistrer toutes les professions associées
-	]]
-	self:RegisterEvent("CRAFT_SHOW", "onUpdateSpecial");
-	self:RegisterEvent("CRAFT_UPDATE", "onUpdateSpecial");
-	self:RegisterEvent("TRADE_SKILL_SHOW", "onUpdate");
-	self:RegisterEvent("TRADE_SKILL_UPDATE", "onUpdate");
+	self:RegisterEvent("CRAFT_SHOW", "onEventSpecial");
+	self:RegisterEvent("CRAFT_UPDATE", "onEventSpecial");
+	self:RegisterEvent("TRADE_SKILL_SHOW", "onEvent");
+	self:RegisterEvent("TRADE_SKILL_UPDATE", "onEvent");
 end
 
-function GuildAdsTradeSkillDataType:onUpdateSpecial()
+function GuildAdsTradeSkillDataType:onEventSpecial()
 	local item, type;
+	local skillId = GuildAdsSkillDataType:getIdFromName(GetCraftName());
 	local t = self:getTableForPlayer(GuildAds.playerName);
+	
 	for i=1,GetNumCrafts() do
 		_, type = GetCraftInfo(i);
 		if (type ~= "header") then
@@ -45,17 +43,18 @@ function GuildAdsTradeSkillDataType:onUpdateSpecial()
 			if item then
 				_, item = GuildAds_ExplodeItemRef(item);
 				if not t[item] then
-					self:set(GuildAds.playerName, item, {});
+					self:set(GuildAds.playerName, item, { s=skillId });
 				end
 			end
 		end
 	end
 end
 
-function GuildAdsTradeSkillDataType:onUpdate()
+function GuildAdsTradeSkillDataType:onEvent()
 	local item, colddown, type;
+	local skillId = GuildAdsSkillDataType:getIdFromName(GetTradeSkillLine());
 	local t = self:getTableForPlayer(GuildAds.playerName);
-
+	
 	for i=1,GetNumTradeSkills() do
 		_, type = GetTradeSkillInfo(i);
 		if (type ~= "header") then
@@ -67,10 +66,22 @@ function GuildAdsTradeSkillDataType:onUpdate()
 					colddown = colddown / 60 + GuildAdsDB:GetCurrentTime();
 				end;
 				if not (t[item] and t[item].cd==colddown) then
-					self:set(GuildAds.playerName, item, { cd = colddown });
+					self:set(GuildAds.playerName, item, { cd = colddown, s=skillId });
 				end
 			end
 		end
+	end
+end
+
+function GuildAdsTradeSkillDataType:deleteTradeSkillItems(skillId)
+	local t = {};
+	for item, data in pairs(self:getTableForPlayer(GuildAds.playerName)) do
+		if item~="_u" and data.s == skillId then
+			table.insert(t, item);
+		end
+	end
+	for _, item in pairs(t) do
+		self:set(GuildAds.playerName, item, nil);
 	end
 end
 
