@@ -583,7 +583,7 @@ GuildAdsTrade = {
 			
 			GuildAdsEditCount:SetText(quantity);
 			
-			GuildAdsEditBox:SetText(data.c..(comment or ""));
+			GuildAdsEditBox:SetText((data.c or "")..(comment or ""));
 		end
 	end;
 	
