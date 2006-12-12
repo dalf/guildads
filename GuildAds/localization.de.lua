@@ -64,7 +64,9 @@ GUILDADS_RACES = {
 	[5] = "Orc",
 	[6] = "Untoter",
 	[7] = "Tauren",
-	[8] = "Troll"
+	[8] = "Troll",
+    [9] = "Draenei",
+    [10] = "Blutelf"
 };
 
 GUILDADS_CLASSES = {
@@ -109,7 +111,7 @@ GUILDADS_SKILLS = {
 	[11] = "Erste Hilfe",
 	[12] = "Kochkunst",
 	[13] = "Schlossknacken",
-	-- [14] = "Gifte",
+	[14] = "Juwelenschleifen",
 
 	[20] = "Faustwaffen",
 	[21] = "Dolche",

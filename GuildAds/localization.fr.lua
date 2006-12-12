@@ -70,7 +70,9 @@ GUILDADS_RACES			= {
 					[5] = "Orc",
 					[6] = "Mort-vivant",
 					[7] = "Tauren",
-					[8] = "Troll"
+					[8] = "Troll",
+                    [9] = "Draeneï",
+                    [10] = "Elfe de sang"
 				};
 				
 GUILDADS_CLASSES		= {
@@ -117,7 +119,7 @@ GUILDADS_SKILLS			= {
 					[11] = "Secourisme",
 					[12] = "Cuisine",
 					[13] = "Crochetage",
-				-- [14] = "Poisons",
+                    [14] = "Joaillerie",
 				
 					[20] = "Armes de pugilat",
 					[21] = "Dagues",
