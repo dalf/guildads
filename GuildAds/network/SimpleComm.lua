@@ -199,6 +199,7 @@ function SimpleComm_Encode(text, drunk)
 		text = string_gsub(text, "\015", "°\016")
 		text = string_gsub(text, "S", "\020")
 		text = string_gsub(text, "s", "\015")
+		text = string_gsub(text, "`", "``");
 		-- change S and s to a different set of character bytes.
 	end
 	text = string_gsub(text, "\255", "°\254") -- \255 (this is here because \000 is more common)
@@ -240,6 +241,7 @@ function SimpleComm_Decode(text, drunk)
 	if drunk then
 		text = string_gsub(text, "\020", "S")
 		text = string_gsub(text, "\015", "s")
+		text = string_gsub(text, "``", "`");
 	end
 	text = string_gsub(text, drunk and "°([\016\021±\254\011\125\038])" or "°([±\254\011\125\038])", func)
 	-- remove the hidden character and refix the prohibited characters.
