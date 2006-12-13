@@ -193,7 +193,7 @@
 	
 	<Button name="GuildAdsInventoryTab" inherits="GuildAdsWindowTabTemplate" text="-- Equipement" hidden="true">
         <Anchors>
-			<Anchor point="TOPLEFT" relativeTo="GuildAdsInventoryFrame" relativePoint="BOTTOMLEFTT">
+			<Anchor point="TOPLEFT" relativeTo="GuildAdsInventoryFrame" relativePoint="BOTTOMLEFT">
 				<Offset>
 					<AbsDimension x="0" y="-60"/>
 				</Offset>
