@@ -34,7 +34,7 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 			</Layer>
 		</Layers>
 		<Frames>
-			<StatusBar name="$parentSkillBar" hidden="true" drawLayer="BACKGROUND" minValue="0" maxValue="300" defaultValue="0">
+			<StatusBar name="$parentSkillBar" hidden="true" drawLayer="BACKGROUND" minValue="0" maxValue="375" defaultValue="0">
 				<Size>
 					<AbsDimension x="180" y="15"/>
 				</Size>
@@ -144,13 +144,13 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 		</Layers>
 		<Scripts>
 		    <OnClick>
-				GuildAdsSkill_ProfessionAdButton_OnClick(this:GetID());
+				GuildAdsSkill.filterBySkillButton.set(this.skillId, nil, true);
 			</OnClick>
 			<OnEnter>
-				GuildAdsSkill_ProfessionAdButton_OnEnter(this:GetID());
+				GuildAdsSkill.filterBySkillButton.onEnter();
 			</OnEnter>
 			<OnLeave>
-				GameTooltip:Hide();
+				GuildAdsSkill.filterBySkillButton.onLeave();
 			</OnLeave>
 		</Scripts>
 	</Button>

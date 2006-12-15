@@ -45,7 +45,7 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 						getglobal(this:GetName().."HighlightTexture"):SetWidth(this:GetTextWidth() + 31);
 					</OnLoad>
 					<OnClick>
-						GuildAdsSkillFrame_SelectTab(GUILDADSSKILL_TAB_PROFESSION);
+						GuildAdsSkill.selectTab(GUILDADSSKILL_TAB_PROFESSION);
 					</OnClick>
 				</Scripts>
 			</Button>
@@ -59,7 +59,7 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 				</Anchors>
 				<Scripts>
 					<OnClick>
-						GuildAdsSkillFrame_SelectTab(GUILDADSSKILL_TAB_SKILL);
+						GuildAdsSkill.selectTab(GUILDADSSKILL_TAB_SKILL);
 					</OnClick>
 				</Scripts>
 			</Button>
@@ -316,7 +316,7 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 						</Anchors>
 						<Scripts>
 							<OnVerticalScroll>
-								FauxScrollFrame_OnVerticalScroll(GuildAdsSkill.GUILDADS_ADBUTTONSIZEY, GuildAdsSkill_UpdateGlobalAdButtons);
+								FauxScrollFrame_OnVerticalScroll(GuildAdsSkill.GUILDADS_ADBUTTONSIZEY, GuildAdsSkill.skillButton.updateAll);
 							</OnVerticalScroll>
 						</Scripts>
 					</ScrollFrame>
@@ -325,15 +325,15 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 							<AbsDimension x="100" y="21"/>
 						</Size>
 						<Anchors>
-							<Anchor point="TOPRIGHT" relativeTo="GuildAdsMyAdButton13" relativePoint="BOTTOMRIGHT">
+							<Anchor point="TOPRIGHT" relativeTo="GuildAdsProfessionButton18" relativePoint="BOTTOMRIGHT">
 								<Offset>
-									<AbsDimension x="-200" y="-110"/>
+									<AbsDimension x="20" y="-20"/>
 								</Offset>
 							</Anchor>
 						</Anchors>
 						<Scripts>
 							<OnClick>
-								GuildAdsSkill_Clear_OnClick();
+								GuildAdsSkill.filterBySkillButton.set(nil, false);
 							</OnClick>
 						</Scripts>
 					</Button>
@@ -344,13 +344,13 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 						<Anchors>
 							<Anchor point="TOPRIGHT" relativeTo="GuildAdsSkillRemoveButton" relativePoint="TOPLEFT">
 								<Offset>
-									<AbsDimension x="-50" y="0"/>
+									<AbsDimension x="-5" y="0"/>
 								</Offset>
 							</Anchor>
 						</Anchors>
 						<Scripts>
 							<OnClick>
-								GuildAdsSkill_All_OnClick();
+								GuildAdsSkill.filterBySkillButton.set(nil, true);
 							</OnClick>
 						</Scripts>
 					</Button>
