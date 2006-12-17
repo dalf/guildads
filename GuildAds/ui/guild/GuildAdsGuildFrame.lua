@@ -468,7 +468,7 @@ GuildAdsGuild = {
 			getglobal(raceField):SetText(GuildAdsDB.profile.Main:getRaceNameFromId(GuildAdsDB.profile.Main:get(playerName, GuildAdsDB.profile.Main.Race)));
 			getglobal(raceField):SetTextColor(lcolor.r, lcolor.g, lcolor.b);
 			getglobal(raceField):Show();
-			getglobal(infoField):SetText(GuildAdsDB.profile.Main:get(playerName, GuildAdsDB.profile.Main.Guild)..suffixGuild);
+			getglobal(infoField):SetText((GuildAdsDB.profile.Main:get(playerName, GuildAdsDB.profile.Main.Guild) or "")..suffixGuild);
 			getglobal(infoField):SetTextColor(lcolor.r, lcolor.g, lcolor.b);
 			getglobal(infoField):Show();
 			
