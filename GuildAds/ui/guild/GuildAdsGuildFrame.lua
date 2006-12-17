@@ -337,6 +337,7 @@ GuildAdsGuild = {
 						GuildAdsDB.profile.Main:setRaw(playerName, GuildAdsDB.profile.Main.Account, account);
 					end
 					GuildAdsGuild.peopleButtonsUpdate(true);
+					GuildAdsGuild.peopleCountUpdate();
 					
 				elseif this.owner==GuildAdsGuild.currentPlayerName and this.reroll==GuildAdsGuild.currentRerollName and arg1~="RightButton" then
 					-- same player was clicked = unselect
@@ -531,6 +532,7 @@ GuildAdsGuild = {
 			if this.value then
 				GuildAdsDB.profile.Main:setRaw(this.value, GuildAdsDB.profile.Main.Account, nil);
 				GuildAdsGuild.peopleButtonsUpdate(true);
+				GuildAdsGuild.peopleCountUpdate();
 			end
 		end;
 			
