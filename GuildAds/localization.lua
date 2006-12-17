@@ -62,6 +62,9 @@ GUILDADS_HEADER_SKILL 		= SKILLS;
 GUILDADS_HEADER_ANNONCE		= GUILD;
 GUILDADS_HEADER_EVENT		= "Events";
 
+GUILDADS_GUILD_GROUPWITHACCOUNT	= "Group %s with the account of %s";
+GUILDADS_GUILD_DEGROUP			= "Degroup from the account";
+
 -- Race
 GUILDADS_RACES			= {
 					[1] = "Human",
@@ -100,7 +103,9 @@ GUILDADS_RACES_TO_FACTION = {
 					[5] = GUILDADS_HORDE,
 					[6] = GUILDADS_HORDE,
 					[7] = GUILDADS_HORDE,
-					[8] = GUILDADS_HORDE
+					[8] = GUILDADS_HORDE,
+					[9] = GUILDADS_ALLIANCE,
+					[10]= GUILDADS_HORDE
 					};
 
                     

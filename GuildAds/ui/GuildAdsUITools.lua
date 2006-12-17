@@ -15,12 +15,23 @@ GuildAdsUITools.onlineColor = {
 	[false]				= { ["r"] = 0.5,  ["g"] = 0.5,  ["b"] = 0.5 },
 }
 
+GuildAdsUITools.accountOnlineColor = {
+	[true]				= { ["r"] = 0.75, ["g"] = 0.75,	["b"] = 0.90 },
+	[false]				= { ["r"] = 0.5,  ["g"] = 0.5,  ["b"] = 0.5 },
+}
+
 GuildAdsUITools.onlineColorHex = {
 	[true]				= string.format("|cff%02x%02x%02x", GuildAdsUITools.onlineColor[true].r*255, GuildAdsUITools.onlineColor[true].g*255, GuildAdsUITools.onlineColor[true].b*255),
 	[false]				= string.format("|cff%02x%02x%02x", GuildAdsUITools.onlineColor[false].r*255, GuildAdsUITools.onlineColor[false].g*255, GuildAdsUITools.onlineColor[false].b*255)
 }
 
-GuildAdsUITools.noteColor = { ["r"] = 0.3,    ["g"] = 0.6, ["b"] = 1.0 };
+GuildAdsUITools.accountOnlineColorHex = {
+	[true]				= string.format("|cff%02x%02x%02x", GuildAdsUITools.accountOnlineColor[true].r*255, GuildAdsUITools.accountOnlineColor[true].g*255, GuildAdsUITools.accountOnlineColor[true].b*255),
+	[false]				= string.format("|cff%02x%02x%02x", GuildAdsUITools.accountOnlineColor[false].r*255, GuildAdsUITools.accountOnlineColor[false].g*255, GuildAdsUITools.accountOnlineColor[false].b*255)
+}
+
+GuildAdsUITools.noteColor = { ["r"] = 0.3,	["g"] = 0.6,	["b"] = 1.0 };
+GuildAdsUITools.white	  = { ["r"] = 1.0,	["g"] = 1.0, 	["b"] = 1.0 };
 
 GuildAdsUITools.MAX_LINE_SIZE = 60;
 

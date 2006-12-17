@@ -28,7 +28,8 @@ GuildAdsGuild = {
 		}
 	};
 	
-	onlineCache = {},
+	onlineCache = {};
+	accountOnlineCache = {};
 	
 	onConfigChanged = function(path, key, value)
 		if key=="GroupByAccount" then
@@ -53,7 +54,7 @@ GuildAdsGuild = {
 			else
 				msg = string.format(ERR_FRIEND_OFFLINE_S, playerName);
 			end
-			GuildAdsUITools:AddChatMessage(msg);
+			GuildAdsUITools:AddSystemMessage(msg);
 		end		
 	end;
 	
@@ -136,7 +137,6 @@ GuildAdsGuild = {
 		
 		-- Init g_AdFilters
 		g_AdFilters = {};
-		local playerFaction = GUILDADS_RACES_TO_FACTION[GuildAdsDB.profile.Main:getRaceIdFromName(UnitRace("player"))];
 		for id, name in pairs(GUILDADS_CLASSES) do
 			tinsert(g_AdFilters, { id=id, name=name});
 		end
@@ -150,6 +150,10 @@ GuildAdsGuild = {
 	isOnline = function(playerName)
 		return GuildAdsComm:IsOnLine(playerName) or GuildAdsGuild.onlineCache[playerName] or false;
 	end;
+	
+	isAccountOnline = function(account)
+		return GuildAdsGuild.accountOnlineCache[account] or false;
+	end;
 
 	---------------------------------------------------------------------------------
 	--
@@ -162,6 +166,7 @@ GuildAdsGuild = {
 			if info==playerName then
 				--
 				GuildAdsGuild.currentPlayerName = info;
+				GuildAdsGuild.currentRerollName = nil;
 				--[[
 				local offset = FauxScrollFrame_GetOffset(GuildAdsPeopleGlobalAdScrollFrame);
 				if id<offset or id>(offset+GuildAdsGuild.GUILDADS_NUM_GLOBAL_AD_BUTTONS) then
@@ -178,16 +183,10 @@ GuildAdsGuild = {
 			end
 		end
 		GuildAdsGuild.currentPlayerName = 0;
+		GuildAdsGuild.currentRerollName = nil;
 		GuildAdsGuild.peopleButtonsUpdate();
 		return false;
 	end;
-	
-	
-	--[[
-	selectMainPlayer = function(rerollName)
-		
-	end;
-	]]
 
 	---------------------------------------------------------------------------------
 	--
@@ -198,13 +197,26 @@ GuildAdsGuild = {
 		local linear  = GuildAdsGuild.data.get();
 		local count = 0;
 		local countOnline = 0;
-		for _, playerName in pairs(linear) do
-			if type(playerName)=="string" then
-				count = count + 1;
-				if GuildAdsGuild.isOnline(playerName) then
-					countOnline = countOnline+1;
+		local account;
+		if GuildAdsGuild.getProfileValue(nil, "GroupByAccount") then
+			for _, playerName in pairs(linear) do
+				if type(playerName)=="string" then
+					count = count + 1;
+					account = GuildAdsDB.profile.Main:get(playerName, GuildAdsDB.profile.Main.Account) or playerName;
+					if GuildAdsGuild.isAccountOnline(account) then
+						countOnline = countOnline+1;
+					end
 				end
 			end
+		else
+			for _, playerName in pairs(linear) do
+				if type(playerName)=="string" then
+					count = count + 1;
+					if GuildAdsGuild.isOnline(playerName) then
+						countOnline = countOnline+1;
+					end
+				end
+			end			
 		end
 		GuildAdsCountText:SetText(string.format(GetText("GUILD_TOTAL", nil, count),count));
 		GuildAdsCountOnlineText:SetText(string.format(GUILD_TOTALONLINE, countOnline));
@@ -221,35 +233,73 @@ GuildAdsGuild = {
 			local offset = FauxScrollFrame_GetOffset(GuildAdsPeopleGlobalAdScrollFrame);
 		
 			local linear = GuildAdsGuild.data.get(updateData);
-			local linearSize = table.getn(linear);
+			local linearSize = #linear;
+			
+			local linearAccount;
 	
 			-- init
 			local i = 1;
 			local j = i + offset;
+			local k;
+			local currentPlayer, currentAccount, mainPlayer;
 			
 			-- for each buttons
 			while (i <= GuildAdsGuild.GUILDADS_NUM_GLOBAL_AD_BUTTONS) do
 				local button = getglobal("GuildAdsPeopleGlobalAdButton"..i);
 				
-				if (j <= linearSize) then
-					if type(linear[j]) == "string" then
+				-- update currentPlayer from linear or linearAccount
+				currentPlayer = nil;
+				if (linearAccount) then
+					currentPlayer = linearAccount[k];
+					k = k+1;
+					if currentPlayer==GuildAdsGuild.currentPlayerName then
+						currentPlayer = linearAccount[k];
+						k = k+1;
+					end
+					if not currentPlayer  then
+						linearAccount = nil;
+						k = nil;
+						mainPlayer = nil;
+					end
+				end
+				if (not currentPlayer) then
+					currentPlayer = linear[j];
+					j = j +1;
+				end
+				
+				-- update current button with currentPlayer
+				if (currentPlayer ~= nil) then
+					if type(currentPlayer) == "string" then
 						-- update internal data
-						button.owner = linear[j];
+						button.owner = mainPlayer or currentPlayer;
+						button.reroll = mainPlayer and currentPlayer or nil;
 						
 						-- create a ads
-						GuildAdsGuild.peopleButton.update(button, GuildAdsGuild.currentPlayerName == linear[j], linear[j]);
+						currentSelection = GuildAdsGuild.currentRerollName or GuildAdsGuild.currentPlayerName;
+						GuildAdsGuild.peopleButton.update(button, currentSelection==currentPlayer, linearAccount~=nil, currentPlayer);
+						
+						--
+						if not linearAccount and GuildAdsGuild.currentPlayerName==currentPlayer then
+							currentAccount = GuildAdsDB.profile.Main:get(currentPlayer, GuildAdsDB.profile.Main.Account)
+							linearAccount = GuildAdsGuild.data.cacheByAccount[currentAccount]
+							if linearAccount then
+								mainPlayer = currentPlayer;
+								k = 1
+								linearSize = linearSize + #linearAccount;
+							end
+						end						
 					else
 						-- update internal data
 						button.owner = nil;
+						button.reroll = nil;
 
 						-- create empty a line
 						GuildAdsGuild.peopleButton.clear(button);
 					end
 					button:Show();
-					j = j+1;
 				else
-					button.groupId = nil;
 					button.owner = nil;
+					button.reroll= nil;
 					button:Hide();
 				end
 			
@@ -275,20 +325,42 @@ GuildAdsGuild = {
 		
 		onClick = function()
 			if this.owner then
-				-- an player name was clicked
-				if (this.owner ~= GuildAdsGuild.currentPlayerName) then
+				if IsControlKeyDown() and arg1=="LeftButton" and GuildAdsGuild.currentPlayerName then
+					-- ctrl-click = group with an account
+					local playerName = this.owner;
+					local linkToPlayerName = GuildAdsGuild.currentPlayerName;
+					if GuildAdsDB.profile.Main:getRevision(playerName)==0 then
+						local account = GuildAdsDB.profile.Main:get(linkToPlayerName, GuildAdsDB.profile.Main.Account) or GuildAdsDB:CreateAccount();
+						if GuildAdsDB.profile.Main:getRevision(linkToPlayerName)==0 then
+							GuildAdsDB.profile.Main:setRaw(linkToPlayerName, GuildAdsDB.profile.Main.Account, account);
+						end
+						GuildAdsDB.profile.Main:setRaw(playerName, GuildAdsDB.profile.Main.Account, account);
+					end
+					GuildAdsGuild.peopleButtonsUpdate(true);
+					
+				elseif this.owner==GuildAdsGuild.currentPlayerName and this.reroll==GuildAdsGuild.currentRerollName and arg1~="RightButton" then
+					-- same player was clicked = unselect
+					GuildAdsGuild.currentPlayerName = nil;
+					GuildAdsGuild.currentRerollName = nil;
+					GuildAdsGuild.peopleButtonsUpdate();
+				else
+					-- another player was clicked = select
 					GuildAdsGuild.currentPlayerName = this.owner;
+					GuildAdsGuild.currentRerollName = this.reroll;
 					GuildAdsGuild.peopleButtonsUpdate();
 				end
+				
+				SetCursor(nil);
+				
 				if arg1 == "RightButton" then
-					GuildAdsGuild.contextMenu.show(this.owner);
+					GuildAdsGuild.contextMenu.show(GuildAdsGuild.currentRerollName or GuildAdsGuild.currentPlayerName);
 				end
 			end
 		end;
 		
 		onEnter = function(obj)
 			obj = obj or this;
-			local owner = obj.owner;
+			local owner = obj.reroll or obj.owner;
 			if (not owner) then
 				return;
 			end
@@ -297,7 +369,14 @@ GuildAdsGuild = {
 			
 			-- Add player name
 			local ocolor = GuildAdsUITools.onlineColor[GuildAdsGuild.isOnline(owner)];
-			GameTooltip:AddLine(owner, ocolor.r, ocolor.g, ocolor.b);
+			if IsControlKeyDown() and GuildAdsGuild.currentPlayerName then
+				GameTooltip:AddLine(string.format(GUILDADS_GUILD_GROUPWITHACCOUNT, owner, GuildAdsGuild.currentPlayerName), 1, 1, 1);
+				GameTooltip:AddLine(owner, ocolor.r, ocolor.g, ocolor.b);
+				SetCursor("CAST_CURSOR");
+			else
+				GameTooltip:AddLine(owner, ocolor.r, ocolor.g, ocolor.b);
+				SetCursor(nil);
+			end;
 			
 			-- Add guild name
 			local guild = GuildAdsDB.profile.Main:get(owner, GuildAdsDB.profile.Main.Guild);
@@ -312,17 +391,31 @@ GuildAdsGuild = {
 				GameTooltip:AddLine(flag..": "..message, 1.0, 1.0, 1.0);
 			end
 			
+			-- Reroll
+			local account = GuildAdsDB.profile.Main:get(owner, GuildAdsDB.profile.Main.Account) or owner;
+			local otherChars = GuildAdsGuild.data.cacheByAccount[account];
+			if otherChars and #otherChars > 1 then
+				GameTooltip:AddLine(" ");
+				for _, playerName in ipairs(otherChars) do
+					if playerName ~= owner then
+						ocolor = GuildAdsUITools.onlineColor[GuildAdsGuild.isOnline(playerName)];
+						GameTooltip:AddLine(playerName, ocolor.r, ocolor.g, ocolor.b);
+					end
+				end
+			end
+			
 			-- show tooltip
 			GameTooltip:Show();
 		end;
 		
-		update =  function(button, selected, playerName)
+		update =  function(button, selected, reroll, playerName)
 			local buttonName= button:GetName();
 			
 			local ownerField = buttonName.."Owner";
 			local classField = buttonName.."Class";
 			local raceField = buttonName.."Race";
 			local levelField = buttonName.."Level";
+			local infoField = buttonName.."Info";
 			
 			-- 
 			if selected then
@@ -331,33 +424,53 @@ GuildAdsGuild = {
 				button:UnlockHighlight();
 			end
 			
-			local ocolor = GuildAdsUITools.onlineColor[GuildAdsGuild.isOnline(playerName)];
-			
-			-- icon will be nicer
-			local prefix;
-			if GuildAds.guildName and GuildAdsDB.profile.Main:get(playerName, GuildAdsDB.profile.Main.Guild) == GuildAds.guildName then
-				prefix = "G";
+			local online = GuildAdsGuild.isOnline(playerName);
+			local ocolor, lcolor;
+			local account = GuildAdsDB.profile.Main:get(playerName, GuildAdsDB.profile.Main.Account);
+			if online then
+				ocolor = GuildAdsUITools.onlineColor[online];
+				lcolor = GuildAdsUITools.white;
 			else
-				prefix = "A";
+				ocolor = GuildAdsUITools.accountOnlineColor[GuildAdsGuild.isAccountOnline(account)];
+				lcolor = ocolor;
 			end
 			
+			local prefix, suffix, suffixGuild;
 			if GuildAdsDB.channel[GuildAds.channelName]:getPlayers()[playerName] then
-				prefix = "["..prefix.."]";
+				suffixGuild = "";
 			else
-				prefix = " "..prefix.." ";
+				suffixGuild = "*";
+			end
+
+			if not reroll and account and #GuildAdsGuild.data.cacheByAccount[account]>1 then
+				suffix = "+"
+			else
+				suffix = "";
 			end
 			
-			getglobal(ownerField):SetText(prefix..playerName);
+			if reroll then
+				prefix = "    ";
+			else
+				prefix = "";
+			end
+			
+			getglobal(ownerField):SetText(prefix..playerName..suffix);
 			getglobal(ownerField):SetTextColor(ocolor.r, ocolor.g, ocolor.b);
 			getglobal(ownerField):Show();
 			
 			-- update clas, race, level
 			getglobal(levelField):SetText(GuildAdsDB.profile.Main:get(playerName, GuildAdsDB.profile.Main.Level) or "");
+			getglobal(levelField):SetTextColor(lcolor.r, lcolor.g, lcolor.b);
 			getglobal(levelField):Show();
 			getglobal(classField):SetText(GuildAdsDB.profile.Main:getClassNameFromId(GuildAdsDB.profile.Main:get(playerName, GuildAdsDB.profile.Main.Class)));
+			getglobal(classField):SetTextColor(lcolor.r, lcolor.g, lcolor.b);
 			getglobal(classField):Show();
 			getglobal(raceField):SetText(GuildAdsDB.profile.Main:getRaceNameFromId(GuildAdsDB.profile.Main:get(playerName, GuildAdsDB.profile.Main.Race)));
+			getglobal(raceField):SetTextColor(lcolor.r, lcolor.g, lcolor.b);
 			getglobal(raceField):Show();
+			getglobal(infoField):SetText(GuildAdsDB.profile.Main:get(playerName, GuildAdsDB.profile.Main.Guild)..suffixGuild);
+			getglobal(infoField):SetTextColor(lcolor.r, lcolor.g, lcolor.b);
+			getglobal(infoField):Show();
 			
 			-- update highlight
 			getglobal(buttonName.."Highlight"):SetVertexColor(ocolor.r, ocolor.g, ocolor.b);
@@ -369,6 +482,7 @@ GuildAdsGuild = {
 			getglobal(buttonName.."Class"):Hide();
 			getglobal(buttonName.."Level"):Hide();
 			getglobal(buttonName.."Race"):Hide();
+			getglobal(buttonName.."Info"):Hide();
 			button:UnlockHighlight();
 			local ocolor = GuildAdsUITools.onlineColor[false];
 			getglobal(buttonName.."Highlight"):SetVertexColor(ocolor.r, ocolor.g, ocolor.b);
@@ -396,7 +510,28 @@ GuildAdsGuild = {
 		end;
 		
 		initialize = function()
-			GuildAdsPlayerMenu.initialize(this.owner, 1);
+			-- default menu
+			GuildAdsPlayerMenu.header(GuildAdsGuildContextMenu.owner, 1);
+			GuildAdsPlayerMenu.menus(GuildAdsGuildContextMenu.owner, 1);
+			-- 
+			if 		GuildAdsDB.profile.Main:getRevision(GuildAdsGuildContextMenu.owner)==0 
+				and GuildAdsDB.profile.Main:get(GuildAdsGuildContextMenu.owner, GuildAdsDB.profile.Main.Account) ~= nil then
+				info = { };
+				info.text =  GUILDADS_GUILD_DEGROUP;
+				info.notCheckable = 1;
+				info.value = GuildAdsGuildContextMenu.owner;
+				info.func = GuildAdsGuild.contextMenu.resetAccount;
+				UIDropDownMenu_AddButton(info, 1);
+			end
+			-- 
+			GuildAdsPlayerMenu.footer(GuildAdsGuildContextMenu.owner, 1);
+		end;
+		
+		resetAccount = function()
+			if this.value then
+				GuildAdsDB.profile.Main:setRaw(this.value, GuildAdsDB.profile.Main.Account, nil);
+				GuildAdsGuild.peopleButtonsUpdate(true);
+			end
 		end;
 			
 	};
@@ -409,23 +544,19 @@ GuildAdsGuild = {
 	classFilter = {
 
 		init = function()
-			-- called only if Reagent is on
 			if not GuildAdsGuild.getProfileValue(nil, "Filters") then
 				for id, _ in pairs(GUILDADS_CLASSES) do
 					GuildAdsGuild.setProfileValue("Filters", id, true);
 				end
 			end;
-			--local index = 1;
 			FilterNames = GUILDADS_CLASSES;
-			index = 1;
+			local index = 1;
 			for k,filterDesc in pairs(g_AdFilters) do
 				local info = { };
-				--if (filters[k]) then
-				--if (FilterNames[k]) then
 				info.text = GUILDADS_CLASSES[filterDesc.id];
 				info.value = filterDesc.id;
 				if GuildAdsGuild.getProfileValue("Filters", filterDesc.id) then
-					info.checked = 1;--:SetChecked(1);
+					info.checked = 1;
 				else
 					info.checked = nil;
 				end
@@ -435,8 +566,27 @@ GuildAdsGuild = {
 				info.keepShownOnClick = 1;
 				info.func = GuildAdsGuild.classFilter.onClick;
 				UIDropDownMenu_AddButton(info);
-				--end
 			end
+			-- hack : add an option : filter guild roster
+			info = { };
+			info.text =  "";
+			info.notCheckable = 1;
+			info.textR = 0;
+			info.textG = 0;
+			info.textB = 0;
+			info.keepShownOnClick = 1;
+			UIDropDownMenu_AddButton(info);
+			
+			local info = { };
+			info.text = GUILD;
+			info.value = "guild";
+			info.checked = GuildAdsGuild.getProfileValue("Filters", "guild") and 1 or nil;
+			info.textR = 1;
+			info.textG = 0.86;
+			info.textB = 0;
+			info.keepShownOnClick = 1;
+			info.func = GuildAdsGuild.classFilter.onClick;
+			UIDropDownMenu_AddButton(info);		
 		end;
 		
 		onClick = function()
@@ -448,8 +598,9 @@ GuildAdsGuild = {
 				GuildAdsGuild.setProfileValue("Filters", this.value, true);
 			end
 			GuildAdsGuild.peopleButtonsUpdate(true);
+			GuildAdsGuild.peopleCountUpdate();
 		end;
-
+		
 	};
 	
 
@@ -460,26 +611,30 @@ GuildAdsGuild = {
 	---------------------------------------------------------------------------------		
 	data = {
 		cache = nil;
+		cacheByAccount = nil;
 		
 		resetCache = function()
 			GuildAdsGuild.debug("resetCache");
 			GuildAdsGuild.data.cache = nil;
+			GuildAdsGuild.data.cacheByAccount = nil;
 		end;
 		
-		adIsVisible = function(playerName)
-			if GuildAdsGuild.getProfileValue(nil, "HideOfflines") and not GuildAdsGuild.isOnline(playerName) then
-				return false;
-			end
-			local class = GuildAdsDB.profile.Main:get(playerName, GuildAdsDB.profile.Main.Class);
-			local filters = GuildAdsGuild.getProfileValue(nil, "Filters");
-			if filters then
-				for id, name in pairs(filters) do
-					if id == class then
-						return true;
+		isVisible = function(playerName)
+			if GuildAdsGuild.getProfileValue(nil, "HideOfflines") then
+				if GuildAdsGuild.getProfileValue(nil, "GroupByAccount") then
+					local playerAccount = GuildAdsDB.profile.Main:get(playerName, GuildAdsDB.profile.Main.Account) or playerName;
+					if not GuildAdsGuild.isAccountOnline(playerAccount) then
+						return false;
+					end
+				else
+					if not GuildAdsGuild.isOnline(playerName) then
+						return false;
 					end
 				end
 			end
-			return false;
+			local class = GuildAdsDB.profile.Main:get(playerName, GuildAdsDB.profile.Main.Class);
+			local filters = GuildAdsGuild.getProfileValue(nil, "Filters");
+			return filters[class] and true or false;
 		end;
 	
 		get = function(updateData)
@@ -494,7 +649,7 @@ GuildAdsGuild = {
 					tinsert(workingTable, playerName);
 				end
 				
-				if (IsInGuild()) then
+				if IsInGuild() and GuildAdsGuild.getProfileValue("Filters", "guild") then
 					GuildRoster();
 					-- TODO should wait for the GUILD_ROSTER_UPDATE event
 					local guildName = GetGuildInfo("player");
@@ -517,35 +672,57 @@ GuildAdsGuild = {
 									tinsert(workingTable, name);
 								end
 								
-								if online then
-									GuildAdsGuild.onlineCache[name] = true;
-								else
-									GuildAdsGuild.onlineCache[name] = false;
-								end
+								GuildAdsGuild.onlineCache[name] = online and true or false;
 							end
 						end
 					end
 				end
 				
-				-- sort data
-				GuildAdsGuild.sortData.doIt(workingTable);
-				
 				-- create GuildAdsGuild.data.cache
 				GuildAdsGuild.data.cache = {};
+				GuildAdsGuild.data.cacheByAccount = {};
+				GuildAdsGuild.accountOnlineCache = {};
 				
-				local currentAccount, playerAccount;
-				local groupByAccount = GuildAdsGuild.getProfileValue(nil, "GroupByAccount");
-				for _, playerName in pairs(workingTable) do
-					if GuildAdsGuild.data.adIsVisible(playerName) then
-						if groupByAccount then
-							playerAccount = GuildAdsDB.profile.Main:get(playerName, GuildAdsDB.profile.Main.Account) or playerName;
-							if currentAccount~=playerAccount then
-								tinsert(GuildAdsGuild.data.cache, false );
-								currentAccount = playerAccount;
-							end
+				local playerAccount;
+				if GuildAdsGuild.getProfileValue(nil, "GroupByAccount") then
+					for _, playerName in pairs(workingTable) do
+						playerAccount = GuildAdsDB.profile.Main:get(playerName, GuildAdsDB.profile.Main.Account) or playerName;
+						GuildAdsGuild.accountOnlineCache[playerAccount] = GuildAdsGuild.accountOnlineCache[playerAccount] or GuildAdsGuild.isOnline(playerName);
+						if not GuildAdsGuild.data.cacheByAccount[playerAccount] then
+							GuildAdsGuild.data.cacheByAccount[playerAccount] = {};
 						end
-						tinsert(GuildAdsGuild.data.cache, playerName );
+						tinsert(GuildAdsGuild.data.cacheByAccount[playerAccount], playerName);
 					end
+					
+					-- sort data
+					for account, forAccount in pairs(GuildAdsGuild.data.cacheByAccount) do
+						GuildAdsGuild.sortData.doForAccount(forAccount);
+						if GuildAdsGuild.data.isVisible(forAccount[1]) then
+							tinsert(GuildAdsGuild.data.cache, forAccount[1]);
+						end
+					end
+					
+					GuildAdsGuild.sortData.doIt(GuildAdsGuild.data.cache);
+				else
+					-- sort data
+					for _, playerName in pairs(workingTable) do
+						playerAccount = GuildAdsDB.profile.Main:get(playerName, GuildAdsDB.profile.Main.Account) or playerName;
+						GuildAdsGuild.accountOnlineCache[playerAccount] = GuildAdsGuild.accountOnlineCache[playerAccount] or GuildAdsGuild.isOnline(playerName);
+						if GuildAdsGuild.data.isVisible(playerName) then
+							tinsert(GuildAdsGuild.data.cache, playerName);
+						end
+						if not GuildAdsGuild.data.cacheByAccount[playerAccount] then
+							GuildAdsGuild.data.cacheByAccount[playerAccount] = {};
+						end
+						tinsert(GuildAdsGuild.data.cacheByAccount[playerAccount], playerName);
+					end
+					
+					-- sort data
+					for account, forAccount in pairs(GuildAdsGuild.data.cacheByAccount) do
+						GuildAdsGuild.sortData.doForAccount(forAccount);
+					end
+					
+					GuildAdsGuild.sortData.doIt(GuildAdsGuild.data.cache);
 				end
 				
 				workingTable = nil;
@@ -569,10 +746,15 @@ GuildAdsGuild = {
 			name = "up",
 			level = "normal",
 			class = "up",
-			race = "up"
+			race = "up",
+			info = "up"
 		};
 
 		predicateFunctions = {
+		
+			mainPlayer = function(a, b)
+				return a==GuildAdsGuild.sortData.mainPlayerForAccount;
+			end;
 		
 			name = function(a, b)
 				if (a < b) then
@@ -621,6 +803,16 @@ GuildAdsGuild = {
 				end
 				return nil;
 			end;
+			
+			info = function(a, b)
+				local ag = GuildAdsDB.profile.Main:get(a, GuildAdsDB.profile.Main.Guild) or "";
+				local bg = GuildAdsDB.profile.Main:get(b, GuildAdsDB.profile.Main.Guild) or "";
+				if (ag < bg) then
+					return false;
+				elseif (ag > bg) then
+					return true;
+				end
+			end;
 		
 		};
 		
@@ -643,8 +835,24 @@ GuildAdsGuild = {
 		cacheHigherLevel = {};
 		
 		doIt = function(adTable)
-			GuildAdsGuild.sortData.initHigherLevel(adTable);
  			table.sort(adTable, GuildAdsGuild.sortData.predicate);
+		end;
+		
+		doForAccount = function(adTable)
+			local mainPlayerForAccount;
+			local currentLevel;
+			for _, playerName in pairs(adTable) do
+				local level = GuildAdsDB.profile.Main:get(playerName, GuildAdsDB.profile.Main.Level);
+				if not currentLevel 
+					or level>currentLevel 
+					or (level==currentLevel and playerName<mainPlayerForAccount) then
+						currentLevel = level;
+						mainPlayerForAccount = playerName;
+				end
+			end
+			GuildAdsGuild.sortData.mainPlayerForAccount = mainPlayerForAccount;
+			table.sort(adTable, GuildAdsGuild.sortData.predicateForAccount);
+			GuildAdsGuild.sortData.mainPlayerForAccount = nil;
 		end;
 		
 		predicate = function(a, b)
@@ -654,67 +862,28 @@ GuildAdsGuild = {
 				return result;
 			end
 			
-			-- sortData by account first if need
-			if result==nil and GuildAdsGuild.getProfileValue(nil, "GroupByAccount") then
-				local ha, hb;
-				ha = GuildAdsGuild.sortData.getHigherlevel(a) or a;
-				hb = GuildAdsGuild.sortData.getHigherlevel(b) or b;
-				
- 				result = GuildAdsGuild.sortData.byNilAA(ha, hb);
-				if result == nil then
-					result = GuildAdsGuild.sortData.predicateFunctions[GuildAdsGuild.sortData.current](ha, hb);
-					result = GuildAdsGuild.sortData.wayFunctions[GuildAdsGuild.sortData.currentWay[GuildAdsGuild.sortData.current]](result);
-				end
-				
-				if result == nil then
-					result = GuildAdsGuild.sortData.predicateFunctions.name(ha, hb);
-					result = GuildAdsGuild.sortData.wayFunctions.up(result);
-				end
-				
-				if result == nil then
-					result = GuildAdsGuild.sortData.predicateFunctions.level(a, b);
-					result = GuildAdsGuild.sortData.wayFunctions.normal(result);
-				end
-				
-				if result == nil then
-					result = GuildAdsGuild.sortData.predicateFunctions.name(a, b);
-					result = GuildAdsGuild.sortData.wayFunctions.up(result);
-				end
-			else
-				if result == nil then
-					result = GuildAdsGuild.sortData.predicateFunctions[GuildAdsGuild.sortData.current](a, b);
-					result = GuildAdsGuild.sortData.wayFunctions[GuildAdsGuild.sortData.currentWay[GuildAdsGuild.sortData.current]](result);
-				end;
-			end;
+			result = GuildAdsGuild.sortData.predicateFunctions[GuildAdsGuild.sortData.current](a, b);
+			result = GuildAdsGuild.sortData.wayFunctions[GuildAdsGuild.sortData.currentWay[GuildAdsGuild.sortData.current]](result);
 			
 			return result or false;
 		end;
 		
-		initHigherLevel = function(adTable)
-			GuildAdsGuild.sortData.cacheHigherLevel = {};
-			local higherLevel = GuildAdsGuild.sortData.cacheHigherLevel;
-			local currentLevel = {};
-			for _, playerName in pairs(adTable) do
-				local account = GuildAdsDB.profile.Main:get(playerName, GuildAdsDB.profile.Main.Account) or playerName;
-				local level = GuildAdsDB.profile.Main:get(playerName, GuildAdsDB.profile.Main.Level);
-				if account and GuildAdsGuild.data.adIsVisible(playerName) then
-					if not currentLevel[account] 
-					    or level>currentLevel[account] 
-						or (level==currentLevel[account] and playerName<higherLevel[account]) then
-						currentLevel[account] = level;
-						higherLevel[account] = playerName;
-					end
-				end
+		predicateForAccount = function(ha, hb)
+			-- nil references are always less than
+			local result = GuildAdsGuild.sortData.byNilAA(ha, hb);
+			if result~=nil then
+				return result;
 			end
 			
-			currentLevel = nil;
-		end;
-		
-		getHigherlevel = function(playerName)
-			local account = GuildAdsDB.profile.Main:get(playerName, GuildAdsDB.profile.Main.Account);
-			if account then
-				return GuildAdsGuild.sortData.cacheHigherLevel[account];
+			result = GuildAdsGuild.sortData.predicateFunctions.mainPlayer(ha, hb);
+			result = GuildAdsGuild.sortData.wayFunctions.normal(result);
+				
+			if result == nil then
+				result = GuildAdsGuild.sortData.predicateFunctions.name(ha, hb);
+				result = GuildAdsGuild.sortData.wayFunctions.up(result);
 			end
+			
+			return result or false;
 		end;
 		
 		byNilAA = function(a, b)

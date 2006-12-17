@@ -55,6 +55,9 @@ GUILDADS_HEADER_AVAILABLE      = "Propose";
 -- GUILDADS_HEADER_ANNONCE : done by WOW
 GUILDADS_HEADER_EVENT		= "Evénements";
 
+GUILDADS_GUILD_GROUPWITHACCOUNT	= "Associer %s avec le compte de %s";
+GUILDADS_GUILD_DEGROUP			= "Dissocier du compte";
+
 -- Equipment
 GUILDADS_EQUIPMENT             = "Equipement";
 

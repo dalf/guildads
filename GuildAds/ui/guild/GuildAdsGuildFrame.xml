@@ -96,20 +96,35 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 								</Scripts>
 							</Button>
 					<Button name="GuildAdsGuildColumnHeader4" inherits="GuildAdsGuildColumnHeaderTemplate" text="RACE">
-								<Anchors>
-									<Anchor point="LEFT" relativeTo="GuildAdsGuildColumnHeader3" relativePoint="RIGHT">
-										<Offset>
-											<AbsDimension x="-2" y="0"/>
-										</Offset>
-									</Anchor>
-								</Anchors>
-								<Scripts>
-									<OnLoad>
-										WhoFrameColumn_SetWidth(100);
-										this.sortType = "race";
-									</OnLoad>
-								</Scripts>
-							</Button>
+						<Anchors>
+							<Anchor point="LEFT" relativeTo="GuildAdsGuildColumnHeader3" relativePoint="RIGHT">
+								<Offset>
+									<AbsDimension x="-2" y="0"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								WhoFrameColumn_SetWidth(100);
+								this.sortType = "race";
+							</OnLoad>
+						</Scripts>
+					</Button>
+					<Button name="GuildAdsGuildColumnHeader5" inherits="GuildAdsGuildColumnHeaderTemplate" text="GUILD">
+						<Anchors>
+							<Anchor point="LEFT" relativeTo="GuildAdsGuildColumnHeader4" relativePoint="RIGHT">
+								<Offset>
+									<AbsDimension x="-2" y="0"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								WhoFrameColumn_SetWidth(170);
+								this.sortType = "info";
+							</OnLoad>
+						</Scripts>
+					</Button>
 					<Button name="GuildAdsPeopleGlobalAdButton1" inherits="GuildAdsGuildAdButtonTemplate" id="1">
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="GuildAdsGuildColumnHeader1" relativePoint="BOTTOMLEFT">
