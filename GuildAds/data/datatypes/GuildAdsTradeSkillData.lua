@@ -29,16 +29,30 @@ function GuildAdsTradeSkillDataType:Initialize()
 	self:RegisterEvent("CRAFT_UPDATE", "onEventSpecial");
 	self:RegisterEvent("TRADE_SKILL_SHOW", "onEvent");
 	self:RegisterEvent("TRADE_SKILL_UPDATE", "onEvent");
+	
+	-- delete the items from WOW1
+	local tmp = {};
+	local craft = GuildAdsTradeSkillDataType:getTableForPlayer(GuildAds.playerName);
+	for item, data in pairs(craft) do
+		if string.find(item, "^item:(%d+):(%d+):(%d+):(%d+)$") then
+			tinsert(tmp, item);
+		end
+	end
+	
+	for _, item in pairs(tmp) do
+		self:set(GuildAds.playerName, item, nil);
+	end
+
 end
 
 function GuildAdsTradeSkillDataType:onEventSpecial()
-	local item, type;
+	local item, kind;
 	local skillId = GuildAdsSkillDataType:getIdFromName(GetCraftName());
 	local t = self:getTableForPlayer(GuildAds.playerName);
 	
 	for i=1,GetNumCrafts() do
-		_, type = GetCraftInfo(i);
-		if (type ~= "header") then
+		_, kind = GetCraftInfo(i);
+		if (kind ~= "header") then
 			item = GetCraftItemLink(i);
 			if item then
 				_, item = GuildAds_ExplodeItemRef(item);
@@ -51,13 +65,13 @@ function GuildAdsTradeSkillDataType:onEventSpecial()
 end
 
 function GuildAdsTradeSkillDataType:onEvent()
-	local item, colddown, type;
+	local item, colddown, kind;
 	local skillId = GuildAdsSkillDataType:getIdFromName(GetTradeSkillLine());
 	local t = self:getTableForPlayer(GuildAds.playerName);
 	
 	for i=1,GetNumTradeSkills() do
-		_, type = GetTradeSkillInfo(i);
-		if (type ~= "header") then
+		_, kind = GetTradeSkillInfo(i);
+		if (kind ~= "header") then
 			item = GetTradeSkillItemLink(i);
 			if item then
 				_, item = GuildAds_ExplodeItemRef(item);
@@ -119,7 +133,7 @@ end
 function GuildAdsTradeSkillDataType:set(author, id, info)
 	local craft = self.profile:getRaw(author).craft;
 	if info then
-		if craft[id]==nil or info.v ~= craft[id].v or info.m ~= craft[id].m then
+		if craft[id]==nil or info.s ~= craft[id].s or info.cd ~= craft[id].cd then
 			craft._u = 1 + (craft._u or 0);
 			info._u = craft._u;
 			craft[id] = info;
