@@ -3,6 +3,12 @@ local currentLevel;
 GuildAdsPlayerMenu = {
 
 	initialize = function(owner, level)
+		GuildAdsPlayerMenu.header(owner, level);
+		GuildAdsPlayerMenu.menus(owner, level);
+		GuildAdsPlayerMenu.footer(owner, level);
+	end;
+	
+	header = function(owner, level)
 		currentLevel = level;
 		local online = GuildAdsComm:IsOnLine(owner);
 		
@@ -13,7 +19,9 @@ GuildAdsPlayerMenu = {
 		info.textG = GuildAdsUITools.onlineColor[online].g;
 		info.textB = GuildAdsUITools.onlineColor[online].b;
 		UIDropDownMenu_AddButton(info, level);
-
+	end;
+	
+	menus = function(owner, level)
 		info = { };
 		info.text =  WHISPER_MESSAGE;
 		info.notCheckable = 1;
@@ -21,17 +29,14 @@ GuildAdsPlayerMenu = {
 		info.func = GuildAdsPlayerMenu.whisper;
 		UIDropDownMenu_AddButton(info, level);
 
-		info = { };
-		info.text =  INSPECT;
-		info.notCheckable = 1;
-		info.value = owner;
 		if GuildAdsInspectWindow then
+			info = { };
+			info.text =  INSPECT;
+			info.notCheckable = 1;
+			info.value = owner;
 			info.func = GuildAdsPlayerMenu.inspect;
-		else
---~ 			info.func = GuildAdsPlayerMenu.inspectDefault;
+			UIDropDownMenu_AddButton(info, level);
 		end
-		UIDropDownMenu_AddButton(info, level);
-
 
 		info = { };
 		info.text =  CHAT_INVITE_SEND;
@@ -39,20 +44,6 @@ GuildAdsPlayerMenu = {
 		info.value = owner;
 		info.func = GuildAdsPlayerMenu.invite;
 		UIDropDownMenu_AddButton(info, level);
-		
---~ 		info = { };
---~ 		info.text =  TEXT(TRADE);
---~ 		info.notCheckable = 1;
---~ 		info.value = owner;
---~ 		info.func = GuildAdsPlayerMenu.trade;
---~ 		UIDropDownMenu_AddButton(info, level);
---~ 		
---~ 		info = { };
---~ 		info.text =  TEXT(FOLLOW);
---~ 		info.notCheckable = 1;
---~ 		info.value = owner;
---~ 		info.func = GuildAdsPlayerMenu.follow;
---~ 		UIDropDownMenu_AddButton(info, level);
 	
 		info = { };
 		info.text =  WHO;
@@ -60,7 +51,9 @@ GuildAdsPlayerMenu = {
 		info.value = owner;
 		info.func = GuildAdsPlayerMenu.who;
 		UIDropDownMenu_AddButton(info, level);
-
+	end;
+	
+	footer = function(owner, level)
 		info = { };
 		info.text = CANCEL;
 		info.notCheckable = 1;
@@ -92,46 +85,10 @@ GuildAdsPlayerMenu = {
 		end
 	end;
 	
---~ 	inspectDefault = function()
---~ 		local owner = this.value;
---~ 		if owner then
---~ 			TargetByName(owner)
---~ 			if UnitName("target")==owner and CheckInteractDistance("target", 2) then
---~ 				InspectUnit("target")
---~ 			else
---~ 				TargetLastTarget()
---~ 			end
---~ 		end
---~ 	end;
-	
 	invite = function()
 		local owner = this.value;
 		if owner then
 			InviteUnit(owner);
-		end
-	end;
-	
-	trade = function()
-		local owner = this.value;
-		if owner then
-			TargetByName(owner);
-			if UnitName("target")==owner and CheckInteractDistance("target", 2) then
-				InitiateTrade("target");
-			else
-				TargetLastTarget()
-			end
-		end
-	end;
-	
-	follow = function()
-		local owner = this.value;
-		if owner then
-			TargetByName(owner);
-			if UnitName("target")==owner and CheckInteractDistance("target", 4) then
-				FollowUnit(unit);
-			else
-				TargetLastTarget()
-			end
 		end
 	end;
 	
