@@ -15,6 +15,10 @@ revision.lua
 localization.lua
 localization.de.lua
 localization.fr.lua
+localization.es.lua
+localization.tw.lua
+localization.cn.lua
+localization.kr.lua
 GuildAds.lua
 GuildAdsTask.lua
 GuildAds.xml
