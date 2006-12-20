@@ -42,23 +42,23 @@ GuildAdsShiftClick = {
 	-- onInit
 	onInit = function()
 		-- Patch in inventory OnClick
-		GuildAdsShiftClick.hook("inventory", "ContainerFrameItemButton_OnModifiedClick", GuildAdsShiftClick.inventoryOnClick);
+		GuildAdsShiftClick.hook("inventory", "ContainerFrameItemButton_OnModifiedClick", GuildAdsShiftClick.inventoryOnClick, true);
 		
 		-- Patch in chat link
-		GuildAdsShiftClick.hook("chatFrameHyperlink", "ChatFrame_OnHyperlinkShow", GuildAdsShiftClick.chatFrameOnHyperlinkShow);
+		GuildAdsShiftClick.hook("chatFrameHyperlink", "ChatFrame_OnHyperlinkShow", GuildAdsShiftClick.chatFrameOnHyperlinkShow, true);
 		
 		-- Patch in bank OnClick
-		GuildAdsShiftClick.hook("bank", "BankFrameItemButtonGeneric_OnModifiedClick", GuildAdsShiftClick.bankOnClick);
+		GuildAdsShiftClick.hook("bank", "BankFrameItemButtonGeneric_OnModifiedClick", GuildAdsShiftClick.bankOnClick, true);
 		
 		-- Patch in paperdoll
-		GuildAdsShiftClick.hook("paperdoll", "PaperDollItemSlotButton_OnModifiedClick", GuildAdsShiftClick.paperdollOnClick)
+		GuildAdsShiftClick.hook("paperdoll", "PaperDollItemSlotButton_OnModifiedClick", GuildAdsShiftClick.paperdollOnClick, true)
 		
 		-- Patch in merchant OnClick
-		GuildAdsShiftClick.hook("merchant", "MerchantItemButton_OnModifiedClick", GuildAdsShiftClick.merchantOnClick);
+		GuildAdsShiftClick.hook("merchant", "MerchantItemButton_OnModifiedClick", GuildAdsShiftClick.merchantOnClick, true);
 		
 		-- Patch in quest item OnClick
-		-- GuildAdsShiftClick.hook("questProgress", "QuestItem_OnClick", GuildAdsShiftClick.quest.progressOnClick);
-		-- GuildAdsShiftClick.hook("questReward", "QuestRewardItem_OnClick", GuildAdsShiftClick.quest.rewardOnClick);
+		-- GuildAdsShiftClick.hook("questProgress", "QuestItem_OnClick", GuildAdsShiftClick.quest.progressOnClick, true);
+		-- GuildAdsShiftClick.hook("questReward", "QuestRewardItem_OnClick", GuildAdsShiftClick.quest.rewardOnClick, true);
 		
 		-- Patch in inspect : on parse of the LUA file
 		
@@ -125,22 +125,14 @@ GuildAdsShiftClick = {
 			local texture, itemCount = GetContainerItemInfo(this:GetParent():GetID(), this:GetID());
 			local link = GetContainerItemLink(this:GetParent():GetID(), this:GetID());
 			GuildAdsShiftClick.setItem(button, link, texture, itemCount);
-		else
-			GuildAdsShiftClick.callHook.inventory(button, ignoreShift);
 		end
 	end;
 
 	-- Link into chatframe	
 	chatFrameOnHyperlinkShow = function(link, text, button)
-		if (GuildAdsShiftClick.hookTest(button)) then
-			if string.sub(link, 1, 5) == "item:" then
-				local info = GuildAds_ItemInfo[link] or {};
-				GuildAdsShiftClick.setItem(button, text, info.texture, 1);
-			else
-				GuildAdsShiftClick.callHook.chatFrameHyperlink(link, text, button);
-			end
-		else
-			GuildAdsShiftClick.callHook.chatFrameHyperlink(link, text, button);
+		if (GuildAdsShiftClick.hookTest(button)) and string.sub(link, 1, 5) == "item:" then
+			local info = GuildAds_ItemInfo[link] or {};
+			GuildAdsShiftClick.setItem(button, text, info.texture, 1);
 		end		
 	end;
 	
@@ -150,8 +142,6 @@ GuildAdsShiftClick = {
 			local texture, itemCount = GetContainerItemInfo(BANK_CONTAINER, this:GetID());
 			local link = GetContainerItemLink(BANK_CONTAINER, this:GetID());
 			GuildAdsShiftClick.setItem(button, link, texture, itemCount);
-		else
-			GuildAdsShiftClick.callHook.bank(button);
 		end
 	end;
 	
@@ -165,8 +155,6 @@ GuildAdsShiftClick = {
 			end
 			local link = GetInventoryItemLink("player", this:GetID());
 			GuildAdsShiftClick.setItem(button, link, texture, count);
-		else
-			GuildAdsShiftClick.callHook.paperdoll(button, ignoreModifiers);
 		end
 	end;
 	
@@ -179,8 +167,6 @@ GuildAdsShiftClick = {
 				quantity = nil;
 			end
 			GuildAdsShiftClick.setItem(button, link, texture, quantity);
-		else
-			GuildAdsShiftClick.callHook.merchant(button, ignoreModifiers);
 		end
 	end;
 	
@@ -192,8 +178,6 @@ GuildAdsShiftClick = {
 				local name, texture, numItems, quality, isUsable = GetQuestItemInfo(this.type, this:GetID());
 				local link = GetQuestItemLink(this.type, this:GetID());
 				GuildAdsShiftClick.setItem(button, link, texture, nil);
-			else
-				hookToCall(button, ignoreModifiers);
 			end
 		end;
 		
@@ -217,7 +201,7 @@ GuildAdsShiftClick = {
 			
 			if GuildAdsShiftClick.inspect.notHook then
 				GuildAdsShiftClick.inspect.notHook = nil;
-				GuildAdsShiftClick.hook("inspect", "InspectPaperDollItemSlotButton_OnClick", GuildAdsShiftClick.inspect.onClick);
+				GuildAdsShiftClick.hook("inspect", "InspectPaperDollItemSlotButton_OnClick", GuildAdsShiftClick.inspect.onClick, true);
 			end
 		end;
 	
@@ -230,8 +214,6 @@ GuildAdsShiftClick = {
 					count = GetInventoryItemCount(unit, button:GetID());
 				end
 				GuildAdsShiftClick.setItem(button, link, texture, count);
-			else
-				GuildAdsShiftClick.callHook.inspect(button);
 			end
 		end;
 		
