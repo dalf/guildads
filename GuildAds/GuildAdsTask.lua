@@ -11,13 +11,15 @@
 -- TimeXCore.lua, revision 637 from https://opensvn.csie.org/traccgi/Ace/trac.cgi/browser/trunk/Timex/Core
 
 GuildAdsTask = {
-	timerDB       = {}
+	timerDB       = {},
+	emptyArray 	  = {}
 };
 
 function GuildAdsTask:NamedScheduleCheck(n, r)
     for k, v in pairs(self.timerDB) do
 		if v.n == n then
-			r = r and (v.e or 0) or TRUE return r
+			r = r and (v.e or 0) or TRUE
+			return r
 		end
 	end
 end
@@ -51,7 +53,6 @@ end
 function GuildAdsTask:Update()
 	for k, v in pairs(self.timerDB) do
 		v.e = v.e + (arg1 or 0.015)
-		local e = v.e
 		if not v.t then elseif v.e >= v.t then v.e = 0
 			if v.c then
 				v.c = v.c - 1
@@ -61,7 +62,9 @@ function GuildAdsTask:Update()
 			elseif not v.r then
 				tremove(self.timerDB, k)
 			end
-			if v.f then v.f(unpack(v.a or {})) end
+			if v.f then 
+				v.f(unpack(v.a or GuildAdsTask.emptyArray))
+			end
 		end
 	end
 end
