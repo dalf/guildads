@@ -507,12 +507,18 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 		</Frames>
 		
 		<Scripts> 
+			<OnLoad>
+				GuildAdsGuild.onLoad();
+			</OnLoad>
 			<OnShow>
 				GuildAdsGuild.onShow();
 			</OnShow>
 			<OnUpdate>
 				GuildAdsGuild.onUpdate();
 			</OnUpdate>
+			<OnEvent>
+				GuildAdsGuild.onEvent(event);
+			</OnEvent>
 		</Scripts> 
 	</Frame>
 	

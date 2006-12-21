@@ -9,6 +9,8 @@
 ----------------------------------------------------------------------------------
 
 local g_AdFilters = {};
+FRIEND_OFFLINE_FILTER = string.format(ERR_FRIEND_OFFLINE_S, "(.*)");
+FRIEND_ONLINE_FILTER = string.gsub(string.format(ERR_FRIEND_ONLINE_SS, "(.*)", "(.*)"), "([%[%]])", "%%%1");
 
 GuildAdsGuild = {
 
@@ -41,6 +43,11 @@ GuildAdsGuild = {
 		end
 	end;
 	
+	onLoad = function()
+		this:RegisterEvent("CHAT_MSG_SYSTEM");
+		this:RegisterEvent("GUILD_ROSTER_UPDATE");
+	end;
+	
 	onConnection = function(playerName, status) 
 		GuildAdsGuild.peopleButtonsUpdate(true);
 		GuildAdsGuild.peopleCountUpdate();
@@ -56,6 +63,21 @@ GuildAdsGuild = {
 			end
 			GuildAdsUITools:AddSystemMessage(msg);
 		end		
+	end;
+	
+	onEvent = function()
+		if event=="CHAT_MSG_SYSTEM" then
+			local _, _, playerName = string.find(arg1, FRIEND_OFFLINE_FILTER);
+			if not playerName then
+				_, _, playerName = string.find(arg1, FRIEND_ONLINE_FILTER);
+			end
+			if playerName and IsInGuild() then
+				GuildAdsGuild.debug("connect/disconnect:"..playerName);
+				GuildRoster();
+			end
+		elseif event=="GUILD_ROSTER_UPDATE" then
+			GuildAdsGuild.delayedUpdate();			
+		end
 	end;
 	
 	onUpdate = function()
