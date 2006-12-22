@@ -149,4 +149,7 @@ GUILDADS_SKILLS	= {
 	[34] = "Baguettes"
 };
 
+
+GUILDADSTOOLTIPS_ADS =  "Vous permet de voir les annonces";
+
 end

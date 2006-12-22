@@ -7,11 +7,11 @@
 	<Button name="GuildAdsWindowTabTemplate" inherits="CharacterFrameTabButtonTemplate" virtual="true">
 		<Scripts>
 			<OnClick>
-				this.window:TabOnClick(this:GetID())
+				this.window:TabOnClick(this:GetID());
 			</OnClick>
 			<OnEnter>
-				if this.tooltip then
-					GameTooltip_AddNewbieTip(nil, nil, nil, nil, this.tooltip, 1);
+				if (this.tooltip and this.tooltiptitle) then
+					GameTooltip_AddNewbieTip(MicroButtonTooltipText(this.tooltiptitle, "TOGGLEGUILDTAB"), 1.0,1.0, 1.0, this.tooltip, 1);
 				end
 			</OnEnter>
 			<OnLeave>

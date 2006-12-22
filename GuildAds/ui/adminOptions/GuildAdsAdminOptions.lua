@@ -38,4 +38,4 @@ GuildAdsAdminOptions = {
 	
 }
 
-GuildAdsPlugin.UIregister(GuildAdsAdminOptions);
+--~ GuildAdsPlugin.UIregister(GuildAdsAdminOptions);

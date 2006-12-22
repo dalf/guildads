@@ -99,7 +99,8 @@ GuildAdsSkill = {
 			main = {
 				frame = "GuildAdsSkillFrame",
 				tab = "GuildAdsSkillTab",
-				tooltip = "Skill tab",
+                tooltiptitle = GUILDADSTOOLTIPS_SKILL_TITLE,
+				tooltip = GUILDADSTOOLTIPS_SKILL,--"Skill tab",
 				priority = 2
 			}
 		}

@@ -24,7 +24,8 @@ GuildAdsGuild = {
 			main = {
 				frame = "GuildAdsGuildFrame",
 				tab = "GuildAdsGuildTab",
-				tooltip = "Guild tab",
+				tooltiptitle = GUILDADSTOOLTIPS_GUILD_TITLE,--"Guilde",
+                tooltip = GUILDADSTOOLTIPS_GUILD,--"Guild tab",
 				priority = 4
 			}
 		}

@@ -223,6 +223,6 @@
 		</Scripts>
 	</Frame>
 	
-	<Button name="GuildAdsChannelOptionsTab" inherits="GuildAdsWindowTabTemplate" text="--Channels" />
+	<Button name="GuildAdsChannelOptionsTab" inherits="GuildAdsWindowTabTemplate" text="CHANNELS" />
 	
 </Ui>

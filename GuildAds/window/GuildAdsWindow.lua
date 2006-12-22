@@ -57,6 +57,9 @@ function GuildAdsWindow:InitializeTabs()
 		if info.tooltip then
 			currTab.tooltip = info.tooltip;
 		end
+        if info.tooltiptitle then
+			currTab.tooltiptitle = info.tooltiptitle;
+		end
 		currTab.window = self;		
 		self:InitializeTab(currTab, id, info, previousTab);
 		

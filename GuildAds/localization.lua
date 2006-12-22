@@ -227,3 +227,15 @@ GUILDADS_SKILLS	= {
 	[33] = "Crossbows",
 	[34] = "Wands"
 };
+
+
+
+
+GUILDADSTOOLTIPS_ADS_TITLE = TRADE;
+GUILDADSTOOLTIPS_ADS =  "Allow you to see the current adds of your guildads mate";
+
+GUILDADSTOOLTIPS_SKILL_TITLE = GUILDADS_HEADER_SKILL;
+GUILDADSTOOLTIPS_SKILL =  "Allow you to see skills and professions of your current guildads mate";
+
+GUILDADSTOOLTIPS_GUILD_TITLE = GUILD;
+GUILDADSTOOLTIPS_GUILD = "Allow you to see roster of current guildads mate";

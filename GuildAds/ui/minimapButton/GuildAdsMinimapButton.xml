@@ -119,6 +119,6 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 		</Scripts>
 	</Frame>
 	
-	<Button name="GuildAdsMinimapButtonTab" inherits="GuildAdsWindowTabTemplate" text="--Minimap button" />
+	<Button name="GuildAdsMinimapButtonTab" inherits="GuildAdsWindowTabTemplate" text="MINIMAP_LABEL" />
 	
 </Ui>

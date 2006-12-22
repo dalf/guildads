@@ -5,7 +5,7 @@
 	<Script file="GuildAdsAdminOptions.lua"/>
 	<Include file="GuildAdsAdminOptionsTemplates.xml"/>
 		
-	<Frame name="GuildAdsAdminOptionsFrame" inherits="GuildAdsConfig_OptionFrameBoxTemplate" parent="GuildAdsOptionsWindowFrame">
+	<Frame name="GuildAdsAdminOptionsFrame" inherits="GuildAdsConfig_OptionFrameBoxTemplate" parent="GuildAdsOptionsWindowFrame" visible="false">
 		<Size>
 			<AbsDimension x="380" y="235"/>
 		</Size>

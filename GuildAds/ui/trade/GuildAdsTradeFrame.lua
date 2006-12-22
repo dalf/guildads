@@ -18,7 +18,8 @@ GuildAdsTrade = {
 			main = {
 				frame = "GuildAdsTradeFrame",
 				tab = "GuildAdsTradeTab",
-				tooltip = "Trade tab",
+				tooltip = GUILDADSTOOLTIPS_ADS,--"Trade tab",
+                tooltiptitle =GUILDADSTOOLTIPS_ADS_TITLE,
 				priority = 1
 			},
 			options = {
