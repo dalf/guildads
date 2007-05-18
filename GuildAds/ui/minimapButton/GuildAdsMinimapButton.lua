@@ -42,9 +42,9 @@ GuildAdsMinimapButtonCore = {
 	
 	onInit = function()
 		-- init config value
-		if not GuildAdsMinimapButtonCore.getConfigValue(nil, "RadiusOffset") then
+--~ 		if not GuildAdsMinimapButtonCore.db.RadiusOffset then
 			GuildAdsMinimapButtonCore.defaultsOptions();
-		end
+--~ 		end
 		
 		if not ButtonHole then
 			GuildAdsMinimapButtonCore.update();
@@ -77,12 +77,12 @@ GuildAdsMinimapButtonCore = {
 	end;
 	
 	defaultsOptions = function()
-		GuildAdsMinimapButtonCore.setConfigValue(nil, "RadiusOffset", 77);
-		GuildAdsMinimapButtonCore.setConfigValue(nil, "ArcOffset", 296);		
+--~ 		GuildAdsMinimapButtonCore.db.RadiusOffset = 77;
+--~ 		GuildAdsMinimapButtonCore.db.ArcOffset = 296;
 	end;
 	
 	onShowOptions = function()
-		GuildAds_MinimapArcSlider:SetValue(GuildAdsMinimapButtonCore.getConfigValue(nil, "ArcOffset", 77));
+        GuildAds_MinimapArcSlider:SetValue(GuildAdsMinimapButtonCore.getConfigValue(nil, "ArcOffset", 77));
 		GuildAds_MinimapRadiusSlider:SetValue(GuildAdsMinimapButtonCore.getConfigValue(nil, "RadiusOffset", 296));
 	end
 	
