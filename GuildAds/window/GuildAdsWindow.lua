@@ -8,24 +8,28 @@
 -- Licence: GPL version 2 (General Public License)
 ----------------------------------------------------------------------------------
 
-GuildAdsWindow = AceModule:new();
+local AceOO = AceLibrary("AceOO-2.0");
+GuildAdsWindow = AceOO.Class();
 
 --------------------------------------------------------------------------------
 --
 -- New
 -- 
 --------------------------------------------------------------------------------
-function GuildAdsWindow:new(t)
-	-- Call parent new method
-	local o = AceModule.new(self,t)
-	-- Register this new window into GuildAds object
-	if o.name then
-		GuildAds.windows[o.name] = o;
-	else
-		tinsert(GuildAds.windows, o)
+function GuildAdsWindow.prototype:init(t)
+	GuildAdsDataType.super.prototype.init(self)
+	
+	if type(t)=="table" then
+		for k,v in pairs(t) do
+			self[k] = v
+		end
 	end
-	-- return new object
-	return o;
+	
+	if self.name then
+		GuildAds.windows[self.name] = self;
+	else
+		tinsert(GuildAds.windows, self)
+	end
 end;
 
 --------------------------------------------------------------------------------
@@ -33,7 +37,7 @@ end;
 -- Create (called by GuildAds)
 -- 
 --------------------------------------------------------------------------------
-function GuildAdsWindow:Create()
+function GuildAdsWindow.prototype:Create()
 	-- Escape hide the window
 	tinsert(UISpecialFrames,self.frame);
 
@@ -46,14 +50,20 @@ end
 -- Choose a tab (Available, Request, Event, ...)
 -- 
 ---------------------------------------------------------------------------------
-function GuildAdsWindow:InitializeTabs()
+function GuildAdsWindow.prototype:InitializeTabs()
 	local currTab, previousTab;
-	
+--~ 	GuildAds:CustomPrint(1, 0, 0, nil, nil, nil,"ml"..self.name);
 	self.tabDescription = GuildAdsPlugin_GetUI(self.name);
+	if self.name ~= nil then
+GuildAds:CustomPrint(1, 0, 0, nil, nil, nil,"GAW init["..self.name.."]");
+else 
+GuildAds:CustomPrint(1, 0, 0, nil, nil, nil,"GAW init[".."nil".."]");
+
+end
 
 	for id, info in pairs(self.tabDescription) do
-		currTab = getglobal(info.tab);
 
+		currTab = getglobal(info.tab);
 		if info.tooltip then
 			currTab.tooltip = info.tooltip;
 		end
@@ -67,7 +77,7 @@ function GuildAdsWindow:InitializeTabs()
 	end
 end
 
-function GuildAdsWindow:InitializeTab(currTab, id, info, previousTab)
+function GuildAdsWindow.prototype:InitializeTab(currTab, id, info, previousTab)
 	currTab:SetID(id);
 	currTab:ClearAllPoints();
 	currTab:SetParent(self.frame);
@@ -82,8 +92,9 @@ function GuildAdsWindow:InitializeTab(currTab, id, info, previousTab)
 	end
 end
 
-function GuildAdsWindow:TabOnClick(tab)	
+function GuildAdsWindow.prototype:TabOnClick(tab)	
     for id, info in pairs(self.tabDescription) do
+
 		if id == tab then
 			getglobal(info.frame):Show();
 			self:SelectTab(getglobal(info.tab));
@@ -94,7 +105,7 @@ function GuildAdsWindow:TabOnClick(tab)
 	end
 end
 
-function GuildAdsWindow:SelectTab(tab)
+function GuildAdsWindow.prototype:SelectTab(tab)
 	local name = tab:GetName();
 	getglobal(name.."Left"):Hide();
 	getglobal(name.."Middle"):Hide();
@@ -110,7 +121,7 @@ function GuildAdsWindow:SelectTab(tab)
 	end
 end
 
-function GuildAdsWindow:DeselectTab(tab)
+function GuildAdsWindow.prototype:DeselectTab(tab)
 	local name = tab:GetName();
 	getglobal(name.."Left"):Show();
 	getglobal(name.."Middle"):Show();
