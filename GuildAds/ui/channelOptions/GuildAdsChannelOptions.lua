@@ -32,26 +32,26 @@ GuildAdsChannelOptions = {
 	
 	saveOptions = function()
 		if GuildAds_ChatAutoChannelConfig:GetChecked() then
-			GuildAdsDB:SetConfigValue(GuildAdsDB.PROFILE_PATH, "ChannelConfig", nil);
-			GuildAdsDB:SetConfigValue(GuildAdsDB.PROFILE_PATH, "ChannelName", nil);
-			GuildAdsDB:SetConfigValue(GuildAdsDB.PROFILE_PATH, "ChannelPassword", nil);
+			GuildAds.db.char.ChannelConfig = nil;
+			GuildAds.db.char.ChannelName = nil;
+			GuildAds.db.char.ChannelPassword = nil;
 		elseif ( GuildAds_ChatManualChannelConfig:GetChecked() ) then
 			local name = GuildAds_ChannelEditBox:GetText();
 			local password = GuildAds_ChannelPasswordEditBox:GetText();
 			if (name == "") then
-				GuildAdsDB:SetConfigValue(GuildAdsDB.PROFILE_PATH, "ChannelConfig", "none");
+				GuildAds.db.char.ChannelConfig= "none";
 			else
-				GuildAdsDB:SetConfigValue(GuildAdsDB.PROFILE_PATH, "ChannelConfig", "manual");
+				GuildAds.db.char.ChannelConfig= "manual";
 				if (password == "") then
 					password = nil;
 				end
-				GuildAdsDB:SetConfigValue(GuildAdsDB.PROFILE_PATH, "ChannelName", name);
-				GuildAdsDB:SetConfigValue(GuildAdsDB.PROFILE_PATH, "ChannelPassword", password);
+				GuildAds.db.char.ChannelName = name;
+				GuildAds.db.char.ChannelPassword = password;
 			end
 		else
-			GuildAdsDB:SetConfigValue(GuildAdsDB.PROFILE_PATH, "ChannelConfig", "none");
-			GuildAdsDB:SetConfigValue(GuildAdsDB.PROFILE_PATH, "ChannelName", nil);
-			GuildAdsDB:SetConfigValue(GuildAdsDB.PROFILE_PATH, "ChannelPassword", nil);
+			GuildAds.db.char.ChannelConfig = "none";
+			GuildAds.db.char.ChannelName = nil;
+			GuildAds.db.char.ChannelPassword = nil;
 		end
 		GuildAds:CheckChannelConfig();
 	
@@ -61,13 +61,15 @@ GuildAdsChannelOptions = {
 	end;
 	
 	onShowOptions = function()
-		local configType = GuildAdsDB:GetConfigValue(GuildAdsDB.PROFILE_PATH, "ChannelConfig") or (IsInGuild() and "automatic") or "none";
+		local configType = GuildAds.db.char.ChannelConfig;
 		
 		if IsInGuild() then
 			GuildAds_ChatAutoChannelConfig:Enable();
 			GuildAds_ChatAutoChannelConfigLabel:SetFontObject(GameFontNormalSmall);
-			
 		else
+			if configType == "automatic" then
+				configType = "none";
+			end
 			GuildAds_ChatAutoChannelConfig:Disable();
 			GuildAds_ChatAutoChannelConfigLabel:SetFontObject(GameFontDisableSmall);
 		end
@@ -83,8 +85,8 @@ GuildAdsChannelOptions = {
 			GuildAds_ChannelEditBox:Hide();
 			GuildAds_ChannelPasswordEditBox:Hide();
 		elseif configType=="manual" then
-			local channelName = GuildAdsDB:GetConfigValue(GuildAdsDB.PROFILE_PATH, "ChannelName") or "";
-			local channelPassword = GuildAdsDB:GetConfigValue(GuildAdsDB.PROFILE_PATH, "ChannelPassword") or "";
+			local channelName = GuildAds.db.char.ChannelName or "";
+			local channelPassword = GuildAds.db.char.ChannelPassword or "";
 			
 			GuildAds_ChatAutoChannelConfig:SetChecked(0);
 			GuildAds_ChatManualChannelConfig:SetChecked(1);
