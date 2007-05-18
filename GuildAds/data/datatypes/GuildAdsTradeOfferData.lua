@@ -10,34 +10,35 @@
 
 -- TODO: make a parent class
 
-GuildAdsTradeOfferDataType = GuildAdsDataType:new({
-	metaInformations = {
+local AceOO = AceLibrary("AceOO-2.0");
+GuildAdsTradeOfferDataTypeClass = AceOO.Class(GuildAdsTableDataType);
+GuildAdsTradeOfferDataTypeClass.prototype.metaInformations = {
 		name = "TradeOffer",
 		version = 1,
         guildadsCompatible = 200,
 		parent = GuildAdsDataType.CHANNEL,
 		priority = 500
-	};
-	schema = {
+};
+
+GuildAdsTradeOfferDataTypeClass.prototype.schema = {
 		id = "ItemRef",
 		data = {
 			[1] = { key="q",	codec="Integer" },
 			[2] = { key="_t",	codec="BigInteger" },
 			[3] = { key="c",	codec="String" },
 		}
-	}
-});
+};
 
-function GuildAdsTradeOfferDataType:Initialize()
+function GuildAdsTradeOfferDataTypeClass.prototype:Initialize()
 end
 
-function GuildAdsTradeOfferDataType:InitializeChannel()
+function GuildAdsTradeOfferDataTypeClass.prototype:InitializeChannel()
 	if self.db.items == nil then
 		self.db.items = {};
 	end;
 end
 
-function GuildAdsTradeOfferDataType:get(author, id)
+function GuildAdsTradeOfferDataTypeClass.prototype:get(author, id)
 	if not author then
 		error("author is nil", 2);
 	end
@@ -49,7 +50,7 @@ function GuildAdsTradeOfferDataType:get(author, id)
 	end
 end
 
-function GuildAdsTradeOfferDataType:setRevision(author, revision)
+function GuildAdsTradeOfferDataTypeClass.prototype:setRevision(author, revision)
 	local itemsRevision = self.db.itemsRevision;
 	if not itemsRevision[author] then
 		itemsRevision[author] = {};
@@ -57,7 +58,7 @@ function GuildAdsTradeOfferDataType:setRevision(author, revision)
 	itemsRevision[author]._uo = revision;
 end
 
-function GuildAdsTradeOfferDataType:getRevision(author)
+function GuildAdsTradeOfferDataTypeClass.prototype:getRevision(author)
 	local itemsRevision = self.db.itemsRevision;
 	if itemsRevision[author] then
 		return itemsRevision[author]._uo or 0;
@@ -65,7 +66,7 @@ function GuildAdsTradeOfferDataType:getRevision(author)
 	return 0;
 end
 
-function GuildAdsTradeOfferDataType:setRaw(author, id, info, revision)
+function GuildAdsTradeOfferDataTypeClass.prototype:setRaw(author, id, info, revision)
 	local items = self.db.items;
 	if info then
 		if (self.db.items[id] == nil) then
@@ -84,7 +85,7 @@ function GuildAdsTradeOfferDataType:setRaw(author, id, info, revision)
 	end
 end
 
-function GuildAdsTradeOfferDataType:set(author, id, info)
+function GuildAdsTradeOfferDataTypeClass.prototype:set(author, id, info)
 	if info then
 		if (self.db.items[id] == nil) then
 			self.db.items[id] = {};
@@ -111,7 +112,7 @@ function GuildAdsTradeOfferDataType:set(author, id, info)
 	end
 end
 
-function GuildAdsTradeOfferDataType:nextItem(item)
+function GuildAdsTradeOfferDataTypeClass.prototype:nextItem(item)
 	item = next(self.db.items, item);
 	while item and not (self.db.items[item].o and next(self.db.items[item].o))do
 		item = next(self.db.items, item);
@@ -119,7 +120,7 @@ function GuildAdsTradeOfferDataType:nextItem(item)
 	return item;
 end
 
-function GuildAdsTradeOfferDataType:iterator(author, id)
+function GuildAdsTradeOfferDataTypeClass.prototype:iterator(author, id)
 	if author and not id then
 		-- iterateur sur les id d'un même joueur
 		return self.iteratorId, { self, author} , nil;
@@ -132,7 +133,7 @@ function GuildAdsTradeOfferDataType:iterator(author, id)
 	end;
 end
 
-GuildAdsTradeOfferDataType.iteratorId = function(state, item)
+GuildAdsTradeOfferDataTypeClass.prototype.iteratorId = function(state, item)
 	local t = state[1].db.items;
 	local author = state[2];
 	local data;
@@ -145,7 +146,7 @@ GuildAdsTradeOfferDataType.iteratorId = function(state, item)
 	end
 end
 
-GuildAdsTradeOfferDataType.iteratorAll = function(self, state)
+GuildAdsTradeOfferDataTypeClass.prototype.iteratorAll = function(self, state)
 	local item = state[1] or self:nextItem();
 	
 	if item then
@@ -166,4 +167,5 @@ GuildAdsTradeOfferDataType.iteratorAll = function(self, state)
 	end
 end
 
+GuildAdsTradeOfferDataType = GuildAdsTradeOfferDataTypeClass:new();
 GuildAdsTradeOfferDataType:register();

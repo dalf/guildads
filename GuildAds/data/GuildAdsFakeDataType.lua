@@ -10,60 +10,64 @@
 
 local nilFunction = function() end;
 
-GuildAdsFakeDataType = GuildAdsDataType:new();
+local AceOO = AceLibrary("AceOO-2.0");
+GuildAdsFakeDataType = AceOO.Class(GuildAdsDataType);
 
-function GuildAdsFakeDataType:new(dataTypeName)
-	local o = {
-		metaInformations = {
+function GuildAdsFakeDataType.prototype:init(dataTypeName)
+	
+	self.metaInformations = {
 			name = dataTypeName,
 			version = 0,
 			guildadsCompatible = 200,
 			parent = GuildAdsDataType.PROFILE
 		};
-		schema = {
-		};
-	}
-	return GuildAdsDataType.new(self, o);
+	self.schema = {};
 end
 
-function GuildAdsFakeDataType:iterator(playerName, id)
+function GuildAdsFakeDataType.prototype:iterator(playerName, id)
 	return nilFunction;
 end
 
-function GuildAdsFakeDataType:set(playerName, id, data)
+function GuildAdsFakeDataType.prototype:set(playerName, id, data)
 end
 
-function GuildAdsFakeDataType:clear()
+function GuildAdsFakeDataType.prototype:clear()
 end
 
-function GuildAdsFakeDataType:getRevision(playerName)
+function GuildAdsFakeDataType.prototype:getRevision(playerName)
 	return 0;
 end
 
-function GuildAdsFakeDataType:setRevision(playerName, revisionNumber)
+function GuildAdsFakeDataType.prototype:setRevision(playerName, revisionNumber)
 end
 
-function GuildAdsFakeDataType:setRaw(playerName, id, data, revisionNumber)
+function GuildAdsFakeDataType.prototype:setRaw(playerName, id, data, revisionNumber)
 end
 
-function GuildAdsFakeDataType:delete(playerName, id)
+function GuildAdsFakeDataType.prototype:delete(playerName, id)
 	return 0;
 end
 
 --[[ about events ]]
 -- nothing will happen
-function GuildAdsFakeDataType:triggerUpdate(playerName, id)
+
+function GuildAdsFakeDataType.prototype:triggerEvent(playerName, id)
+
 end
 
-function GuildAdsFakeDataType:registerUpdate(obj, method)
+
+function GuildAdsFakeDataType.prototype:registerEvent(obj, method)
+
 end
 
-function GuildAdsFakeDataType:unregisterUpdate(obj)
+
+function GuildAdsFakeDataType.prototype:unregisterEvent(obj)
+
 end
 
 --[[ about version ]]
 -- herited from GuildAdsDataType
 
 --[[ register the data type ]]
-function GuildAdsFakeDataType:register()
+function GuildAdsFakeDataType.prototype:register()
 end

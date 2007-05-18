@@ -8,24 +8,25 @@
 -- Licence: GPL version 2 (General Public License)
 ----------------------------------------------------------------------------------
 
-GuildAdsSkillDataType = GuildAdsTableDataType:new({
-	metaInformations = {
+local AceOO = AceLibrary("AceOO-2.0");
+GuildAdsSkillDataTypeClass = AceOO.Class(GuildAdsTableDataType);
+GuildAdsSkillDataTypeClass.prototype.metaInformations = {
 		name = "Skill",
 		version = 1,
         guildadsCompatible = 200,
 		parent = GuildAdsDataType.PROFILE,
 		priority = 300
-	};
-	schema = {
+};
+
+GuildAdsSkillDataTypeClass.prototype.schema = {
 		id = "Integer",
 		data = {
 			[1] = { key="v",	codec="Integer" },
 			[2] = { key="m",	codec="Integer" }
 		}
-	}
-});
+};
 
-function GuildAdsSkillDataType:Initialize()
+function GuildAdsSkillDataTypeClass.prototype:Initialize()
 	--[[
 		SKILL_LINES_CHANGED event fires when there is change in skills
 		CHAT_MSG_SYSTEM event with this text ERR_SPELL_UNLEARNED_S fires when a skill is forget
@@ -38,16 +39,18 @@ function GuildAdsSkillDataType:Initialize()
 	self:RegisterEvent("PLAYER_LEVEL_UP", "onEvent");
 end
 
-function GuildAdsSkillDataType:onEvent()
+
+function GuildAdsSkillDataTypeClass.prototype:onUpdate()
+
 	local playerName = UnitName("player");
 	local playerSkillIds = {};
 	-- add new skills
 	for i = 1, GetNumSkillLines(), 1 do	
 		local skillName, header, isExpanded, skillRank, numTempPoints, skillModifier, skillMaxRank, isAbandonable, stepCost, rankCost, minLevel, skillCostType = GetSkillLineInfo(i);
 		if (header ~= 1) then
-			local id = self:getIdFromName(skillName);
+			local id = GuildAdsSkillDataTypeClass.prototype:getIdFromName(skillName);
 			if (id > 0) then
-				self:set(playerName, id, { v=skillRank; m=skillMaxRank });
+				GuildAdsSkillDataTypeClass.prototype:set(playerName, id, { v=skillRank; m=skillMaxRank });
 				playerSkillIds[id] = true;
 			end
 		end
@@ -63,8 +66,10 @@ function GuildAdsSkillDataType:onEvent()
 	end
 end
 
-function GuildAdsSkillDataType:getIdFromName(SkillName)
+
+function GuildAdsSkillDataTypeClass.prototype:getIdFromName(SkillName)
 	for id, name in pairs(GUILDADS_SKILLS) do
+
 		if (name == SkillName) then
 			return id;
 		end
@@ -72,54 +77,59 @@ function GuildAdsSkillDataType:getIdFromName(SkillName)
 	return -1;	
 end
 
-function GuildAdsSkillDataType:getNameFromId(SkillId)
+function GuildAdsSkillDataTypeClass.prototype:getNameFromId(SkillId)
 	return GUILDADS_SKILLS[SkillId] or "";
 end
 
-function GuildAdsSkillDataType:getTableForPlayer(author)
+function GuildAdsSkillDataTypeClass.prototype:getTableForPlayer(author)
 	return self.profile:getRaw(author).skills;
 end
 
-function GuildAdsSkillDataType:get(author, id)
+function GuildAdsSkillDataTypeClass.prototype:get(author, id)
 	if not author then
 		error("author is nil", 2);
 	end
 	return self.profile:getRaw(author).skills[id];
 end
 
-function GuildAdsSkillDataType:getRevision(author)
+function GuildAdsSkillDataTypeClass.prototype:getRevision(author)
 	return self.profile:getRaw(author).skills._u or 0;
 end
 
-function GuildAdsSkillDataType:setRevision(author, revision)
+function GuildAdsSkillDataTypeClass.prototype:setRevision(author, revision)
 	self.profile:getRaw(author).skills._u = revision;
 end
 
-function GuildAdsSkillDataType:setRaw(author, id, info, revision)
-	local skills = self.profile:getRaw(author).skills;
+function GuildAdsSkillDataTypeClass.prototype:setRaw(author, id, info, revision)
+	local skills = GuildAdsDB.profile:getRaw(author).skills;
 	skills[id] = info;
 	if info then
 		skills[id]._u = revision;
 	end
 end
 
-function GuildAdsSkillDataType:set(author, id, info)
-	local skills = self.profile:getRaw(author).skills;
+function GuildAdsSkillDataTypeClass.prototype:set(author, id, info)
+	local skills = GuildAdsDB.profile:getRaw(author).skills;
 	if info then
 		if skills[id]==nil or info.v ~= skills[id].v or info.m ~= skills[id].m then
 			skills._u = 1 + (skills._u or 0);
 			info._u = skills._u;
 			skills[id] = info;
-			self:triggerUpdate(author, id);
+
+			GuildAdsSkillDataTypeClass.prototype:triggerEvent(author, id);
+
 			return info;
 		end
 	else
 		if skills[id] then
 			skills[id] = nil;
 			skills._u = 1 + (skills._u or 0);
-			self:triggerUpdate(author, id);
+
+			GuildAdsSkillDataTypeClass.prototype:triggerEvent(author, id);
+
 		end
 	end
 end
 
+GuildAdsSkillDataType = GuildAdsSkillDataTypeClass:new();
 GuildAdsSkillDataType:register();

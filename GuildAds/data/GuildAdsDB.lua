@@ -81,6 +81,7 @@ end
 	   - add/delete sur whitelist/guild, whitelist/player, blacklist/guild, blacklist/player
 ]]
 function GuildAdsDBChannel:registerEvent(obj, method)
+ GuildAds:CustomPrint(1, 0, 0, nil, nil, nil, "re: ");
 	self.eventRegistry[obj] = method or true;
 end
 
@@ -171,6 +172,7 @@ GuildAdsDBChannel.__index = GuildAdsDBChannel;
 --[[ GuildAdsDBchannelMT ]]
 GuildAdsDBchannelMT = {
 	__index = function(t, n)
+        GuildAds:CustomPrint(1, 0, 0, nil, nil, nil,"Ask channel["..n.."]");
 		local db = GuildAdsDBchannelMT.getChannel(n);
 		-- TODO : db, eventRegistry invisibles sur une iteration sur t[n]
 		t[n] = { 
@@ -179,6 +181,7 @@ GuildAdsDBchannelMT = {
 		};
 		setmetatable(t[n], GuildAdsDBChannel);
 		for name, datatype in pairs(GuildAdsDB._channelDataTypes) do
+        GuildAds:CustomPrint(1, 0, 0, nil, nil, nil,name);
 			t[n][name] = {
 				channelName = n;
 				channel = t;
@@ -195,14 +198,19 @@ GuildAdsDBchannelMT = {
 	-- TODO : gerer le case des noms
 	getChannel = function(channelName)
 		GuildAds_ChatDebug(GA_DEBUG_STORAGE, "Ask channel["..channelName.."]");
+--~         GuildAds:CustomPrint(1, 0, 0, nil, nil, nil,"Ask channel["..channelName.."]");
 		channelName = GuildAdsDBchannelMT.getChannelKey(channelName);
-		local t = GuildAdsDB.db.channels[channelName];
+        GuildAds_ChatDebug(GA_DEBUG_STORAGE, "Ask channel["..channelName.."]");
+        if (not GuildAds.db.profile.channels) then
+         GuildAds.db.profile.channels = {};
+        end;
+		local t = GuildAds.db.profile.channels[channelName];
 		if t == nil then
 			t = {
 				Players = {
 				};
 			};
-			GuildAdsDB.db.channels[channelName] = t;
+			GuildAds.db.profile.channels[channelName] = t;
 		end;
 		if getmetatable(t) == nil then
 			setmetatable(t, {
@@ -274,49 +282,76 @@ end
 
 function GuildAdsDB:Initialize()
 	-- import from the version 20060311
-	if GuildAds.db:get({}, "Version") == "20060311" then
-		GuildAds.db:set({ "Config" }, "Account", GuildAds.db:get({}, "Account"));
-		GuildAds.db:set({}, "Account", nil);
-		GuildAds.db:set({}, "Version", nil);
-		GuildAds.db:set({ "Versions" }, "DB", self.VERSION);
+	if GuildAds.db.profile.Version == "20060311" then
+		GuildAds.db.profile.Config.Account = GuildAds.db.Account;
+		GuildAds.db.profile.Account = nil;
+		GuildAds.db.profile.Version = nil;
+		GuildAds.db.profile.Versions.DB = self.VERSION;
 	end
 	
 	-- import from the version 20060426
-	if GuildAds.db:get({"Metadata" }, "Version") == "20060426" then
-		GuildAds.db:set({ }, "Metadata", nil);
-		GuildAds.db:set({ "Versions" }, "DB", self.VERSION);
+	if GuildAds.db.profile.Metadata and GuildAds.db.profile.Metadata.Version == "20060426" then
+		GuildAds.db.profile.Metadata = nil;
+		GuildAds.db.profile.Versions.DB = self.VERSION;
 	end
 	
 	-- check version
-	local currentVersion = GuildAds.db:get({ "Versions" }, "DB");
+	local currentVersion = GuildAds.db.profile.Versions and GuildAds.db.profile.Versions.DB;
 	if currentVersion ~= self.VERSION then
-		if type(GuildAds.db)=="table" then
-			GuildAds.cmd:msg("|cffff1e00All data are deleted (except account ID)|r");
-			local account = GuildAds.db:get({ "Config" }, "Account");
-			GuildAds.db:set({ }, "Data", nil);
-			GuildAds.db:set({ }, "Config", nil);
-			GuildAds.db:set({ }, "Versions", nil);
-			self.account = GuildAds.db:set({ "Config" }, "Account", account);
-		end
-		GuildAds.db:set({ "Versions" }, "DB", self.VERSION);
+--~ 		GuildAds:CustomPrint(1, 0, 0, nil, nil, nil, "All data are deleted (except account ID)");
+		local account = GuildAds.db.profile.Config and GuildAds.db.profile.Config.Account;
+		GuildAds.db.profile.Data = {};
+		GuildAds.db.profile.Config = nil;
+		GuildAds.db.profile.Versions = {};
+        GuildAds.db.profile.Versions.DataTypes = {};
+		GuildAds.db.profile.Config = {};
+		GuildAds.db.profile.Versions.DB = self.VERSION;
+		
+		GuildAds.db.profile.Config.Account = account;
+		self.account = GuildAds.db.profile.Config.Account;
 	end;
 
 	-- initialize account
-	self.account = GuildAds.db:get({ "Config" }, "Account");
+	self.account = GuildAds.db.profile.Config.Account;
 	if not self.account then
 		-- TODO : not defined : try to get it on the network
-		self.account = GuildAds.db:set({ "Config" }, "Account", self:CreateAccount());
+		GuildAds.db.profile.Config.Account = self:CreateAccount();
+		self.account = GuildAds.db.profile.Config.Account;
 	end
 	
 	-- initialize realm
-	self.db = GuildAds.db:get({"Data"}, GuildAds.realmName);
+--~     error(self.db);
+--~ 	self.db = GuildAds.db.profile.Data[GuildAds.realmName];
+	
+--~     self.db = GuildAds.db.profile.Data.GuildAds.realmName;
 	if not self.db then
-		self.db = GuildAds.db:set({"Data"}, GuildAds.realmName, 
-		{
-			profiles = {};
-			channels = {}
-		});
+     GuildAds.db.profile.Data ={};
+--~     GuildAds.db.profile.Data.GuildAds = {};
+    GuildAds.db.profile.Data[GuildAds.realmName] = {}
+		GuildAds.db.profile.Data[GuildAds.realmName].profiles = {};
+        GuildAds.db.profile.Data[GuildAds.realmName].channels = {};
+--~         self.db = GuildAds.db.profile.Data;
+--~ 		self.db = GuildAds.db.profile:set({"Data"}, GuildAds.realmName, 
+--~ 		{
+--~ 			profiles = {};
+--~ 			channels = {}
+--~ 		});
 	end
+    self.db = GuildAds.db.profile.Data[GuildAds.realmName];
+--~     if not self.db then
+--~     GuildAds.db.profile.Data ={};
+--~     GuildAds.db.profile.Data.GuildAds = {};
+--~     GuildAds.db.profile.Data.GuildAds.realmName = {}
+--~ 		GuildAds.db.profile.Data.GuildAds.realmName.profiles = {};
+--~         GuildAds.db.profile.Data.GuildAds.realmName.channels = {};
+--~         self.db = GuildAds.db.profile.Data;
+--~         
+      
+--~ 		{
+--~ 			profiles = {};
+--~ 			channels = {}
+--~ 		});
+--~ 	end
 	
 	-- initialize profile & channel
 	self.profile = {};
@@ -325,31 +360,41 @@ function GuildAdsDB:Initialize()
 	setmetatable(GuildAdsDB.profile, GuildAdsDBprofileMT);
 	
 	-- initialize data types
-	local metadataPath = { "Versions", "DataTypes" };
+
 	for _, dataType in pairs(self._load) do
+
 		local name = dataType.metaInformations.name;
+         GuildAds:CustomPrint(1, 0, 0, nil, nil, nil,name);
 		dataType.profile = self.profile;
 		if dataType.metaInformations.parent == GuildAdsDataType.PROFILE then
 			dataType.db = self.db.profiles;
 			self.profile[name] = dataType;
 		elseif dataType.metaInformations.parent == GuildAdsDataType.CHANNEL then
 			self._channelDataTypes[name] = dataType;
+--~              GuildAds:CustomPrint(1, 0, 0, nil, nil, nil,"*" ..name);
 		end
-		
-		local version = GuildAds.db:get(metadataPath, name);
+
+--~ GuildAds:CustomPrint(1, 0, 0, nil, nil, nil,name);
+
+		local version = GuildAds.db.profile.Versions.DataTypes[name];
 		local current = version and version.Current or 0;
+--~         GuildAds:CustomPrint(1, 0, 0, nil, nil, nil,version);
 		local mostRecent = version and version.MostRecent or dataType.metaInformations.version;
+--~         GuildAds:CustomPrint(1, 0, 0, nil, nil, nil,mostRecent);
 		if type(dataType.Initialize)=="function" then
+--~          GuildAds:CustomPrint(1, 0, 0, nil, nil, nil,"initialize");
 			dataType:Initialize(current);
 		end
-		GuildAds.db:set(metadataPath, name, {Current=dataType.metaInformations.version, MostRecent=mostRecent});
+        GuildAds.db.profile.Versions.DataTypes[name]={}
+		GuildAds.db.profile.Versions.DataTypes[name].Current = dataType.metaInformations.version;
+		GuildAds.db.profile.Versions.DataTypes[name].MostRecent = mostRecent;
 	end
 	
 	self._load = nil;
 end
 
 function GuildAdsDB:ResetAll()
-	GuildAds.db:set({ "Versions" }, "DB", "Reset");
+	GuildAds.db.profile.Versions.DB = "Reset";
 	ReloadUI();
 end
 
@@ -362,22 +407,73 @@ function GuildAdsDB:ResetOthers()
 	GuildAds.cmd:error("Not implemented");
 end
 
-
 --[[ About config ]]
 function GuildAdsDB:GetConfigValue(path, key, defaultValue)
-	return GuildAds.db:get(path, key) or defaultValue;
+local node = GuildAds.db.char;
+if (path) then
+	for _,current in pairs(path) do 
+		if (current) then
+			GuildAds:CustomPrint(1, 0, 0, nil, nil, nil, "get"..current);
+			if (not node[current]) then 
+				node[current]={};
+			end
+			node = node[current];
+		else
+			break;
+		end;
+	end
+end 
+--~   if (not node[path[1]]) then 
+--~     node[path[1]]={};
+--~ 	end;
+--~   if (not node[path[1]][path[2]] )then
+--~  node[path[1]][path[2]]={};
+--~  node[path[1]][path[2]][key]= defaultValue;
+--~   end
+--~   if (not GuildAds.db.char.path[1].path[2]) then 
+--~   GuildAds.db.char.path[1].path[2]={};
+--~   end
+ 
+ if (not node[key]) then
+ node[key]=defaultValue;
+  return defaultValue
+  else
+	return node[key] ;
+	end;
 end
 
 function GuildAdsDB:SetConfigValue(...)
-    arg = {...}
-	local path, key, val = GuildAds.db:_GetArgs(arg)
-	local node = GuildAds.db:_GetNode(path, TRUE)
+    --arg = {...}
+	local path, key, val = ...; --GuildAds.db:_GetArgs(arg)
+	local node = GuildAds.db.char;
+	 if (path) then
+
+ for _,current in pairs(path) do 
+  if (current)  then 
+	if (not node[current]) then 
+		GuildAds:CustomPrint(1, 0, 0, nil, nil, nil, "set error"..current);
+		node[current]={};
+	end;
+	node = node[current];
+  else
+   break;
+  end
+  
+ end
+end 
+
 	if( not key ) then error("No key supplied to AceDatabase:set.", 2) end
+
 	local changed = node[key] ~= val;
 	node[key] = val
 	return changed;
-end
+--~ 	local node = GuildAds.db:_GetNode(path, TRUE)
+--~ 	if( not key ) then error("No key supplied to AceDatabase:set.", 2) end
+--~ 	local changed = node[key] ~= val;
+--~ 	node[key] = val
+--~ 	return changed;
 
+end
 --[[About time]]
 
 --[[

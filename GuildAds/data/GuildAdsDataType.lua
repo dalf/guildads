@@ -8,18 +8,42 @@
 -- Licence: GPL version 2 (General Public License)
 ----------------------------------------------------------------------------------
 
--- GuildAdsDataType
-GuildAdsDataType = AceModule:new({ 
-	PROFILE = "PROFILE",
-	CHANNEL = "CHANNEL",
-});
+local AceEvent = AceLibrary("AceEvent-2.0");
+local AceOO = AceLibrary("AceOO-2.0");
 
--- o.eventRegistry utile ?
-function GuildAdsDataType:new(o)
-	o = AceModule.new(self, o);
-	o.eventRegistry = {};
-	return o;
-end;
+-- GuildAdsDataTypeInterface
+GuildAdsDataTypeInterface = AceOO.Interface {
+	iterator = "function",
+	set = "function",
+	get = "function",
+	clear = "function",
+	getRevision = "function",
+	setRevision = "function",
+	setRaw = "function",
+	delete = "function",
+	getMostRecentVersion = "function",
+	setMostRecentVersion = "function",
+	triggerEvent = "function"
+};
+
+-- GuildAdsDataType
+GuildAdsDataType = AceOO.Class(GuildAdsDataTypeInterface, AceEvent);
+GuildAdsDataType.CHANNEL = "CHANNEL";
+GuildAdsDataType.PROFILE = "PROFILE";
+function GuildAdsDataType:ToString()
+	return "GuildAdsDataType";
+end
+
+function GuildAdsDataType.prototype:init(o)
+	GuildAdsDataType.super.prototype.init(self)
+	if type(o)=="table" then
+		for k,v in pairs(o) do
+			self[k] = v
+		end
+	end
+	-- o.eventRegistry utile ?
+	self.eventRegistry = {};
+end
 
 --[[ 
 	GuildAdsDataType:Initialize()
@@ -45,31 +69,31 @@ end;
 	end
 	return 
 ]]
-function GuildAdsDataType:iterator(playerName, id)
+function GuildAdsDataType.prototype:iterator(playerName, id)
 	error("GuildAdsDataType:iterator not implemented", 2);
 end
 
-function GuildAdsDataType:set(playerName, id, data)
+function GuildAdsDataType.prototype:set(playerName, id, data)
 	error("GuildAdsDataType:set not implemented", 2);
 end
 
-function GuildAdsDataType:clear()
+function GuildAdsDataType.prototype:clear()
 	error("GuildAdsDataType:deleteAll not implemented", 2);
 end
 
-function GuildAdsDataType:getRevision(playerName)
+function GuildAdsDataType.prototype:getRevision(playerName)
 	error("GuildAdsDataType:getRevision not implemented", 2);
 end
 
-function GuildAdsDataType:setRevision(playerName, revisionNumber)
+function GuildAdsDataType.prototype:setRevision(playerName, revisionNumber)
 	error("GuildAdsDataType:setRevision not implemented", 2);
 end
 
-function GuildAdsDataType:setRaw(playerName, id, data, revisionNumber)
+function GuildAdsDataType.prototype:setRaw(playerName, id, data, revisionNumber)
 	error("GuildAdsDataType:setRaw not implemented", 2);
 end
 
-function GuildAdsDataType:delete(playerName, id)
+function GuildAdsDataType.prototype:delete(playerName, id)
 	if playerName and id then
 		self:set(playerName, id);
 		return 1;
@@ -95,7 +119,7 @@ function GuildAdsDataType:delete(playerName, id)
 end
 
 --[[ iterator ]]
-GuildAdsDataType.iteratorAuthor = function(state, playerName)
+GuildAdsDataType.prototype.iteratorAuthor = function(state, playerName)
 	-- state = { self, id }
 	-- iteration sur la liste des joueurs
 	local players;
@@ -125,18 +149,18 @@ GuildAdsDataType.iteratorAuthor = function(state, playerName)
 end
 
 --[[ about version ]]
-function GuildAdsDataType:getMostRecentVersion()
+function GuildAdsDataType.prototype:getMostRecentVersion()
 	return GuildAds.db:get({ "Versions", "DataTypes", self.metaInformations.name }, "MostRecent");
 end
 
-function GuildAdsDataType:setMostRecentVersion(version)
+function GuildAdsDataType.prototype:setMostRecentVersion(version)
 	return GuildAds.db:set({ "Versions", "DataTypes", self.metaInformations.name }, "MostRecent", version);
 end
 
 --[[ about events ]]
-function GuildAdsDataType:triggerUpdate(playerName, id)
+function GuildAdsDataType.prototype:triggerEvent(playerName, id)
 	if self.eventRegistry then
-		GuildAds_ChatDebug(GA_DEBUG_STORAGE, "["..self.metaInformations.name..","..playerName..","..tostring(id).."] triggerUpdate - begin");
+		GuildAds_ChatDebug(GA_DEBUG_STORAGE, "["..self.metaInformations.name..","..playerName..","..tostring(id).."] triggerEvent - begin");
 		for obj, method in pairs(self.eventRegistry) do
 			if method == true then
 				GuildAds_ChatDebug(GA_DEBUG_STORAGE, "  - function");
@@ -152,21 +176,36 @@ function GuildAdsDataType:triggerUpdate(playerName, id)
 	end
 end
 
-function GuildAdsDataType:registerUpdate(obj, method)
+
+function GuildAdsDataType.prototype:registerEvent(obj, method)
 	if not self.eventRegistry then
 		self.eventRegistry = {};
 	end
 	self.eventRegistry[obj] = method or true;
 end
 
-function GuildAdsDataType:unregisterUpdate(obj)
+
+function GuildAdsDataType.prototype:unregisterEvent(obj)
+	if self.eventRegistry then
+		self.eventRegistry[obj] = nil;
+	end
+end
+
+function GuildAdsDataType.prototype:registerUpdate(obj, method)
+	if not self.eventRegistry then
+		self.eventRegistry = {};
+	end
+	self.eventRegistry[obj] = method or true;
+end
+
+function GuildAdsDataType.prototype:unregisterUpdate(obj)
 	if self.eventRegistry then
 		self.eventRegistry[obj] = nil;
 	end
 end
 
 --[[ isValid() returns true if the data type is valid ]]
-function GuildAdsDataType:isValid()
+function GuildAdsDataType.prototype:isValid()
     -- Check metainformations
     if type(self.metaInformations) == "table" then
 		local metainfo = self.metaInformations;
@@ -202,11 +241,11 @@ function GuildAdsDataType:isValid()
 end
 
 --[[ register the data type ]]
-function GuildAdsDataType:register()
+function GuildAdsDataType.prototype:register()
 	local status, errorMessage = self:isValid();
 	if status then
 		GuildAdsDB:RegisterDataType(self);
 	else
-		GuildAds.cmd:error("invalid datatype : "..errorMessage);
+		GuildAds:Print("Invalid datatype : "..errorMessage);
 	end;
 end

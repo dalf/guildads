@@ -8,34 +8,35 @@
 -- Licence: GPL version 2 (General Public License)
 ----------------------------------------------------------------------------------
 
-GuildAdsTradeNeedDataType = GuildAdsDataType:new({
-	metaInformations = {
+local AceOO = AceLibrary("AceOO-2.0");
+GuildAdsTradeNeedDataTypeClass = AceOO.Class(GuildAdsTableDataType);
+
+GuildAdsTradeNeedDataTypeClass.prototype.metaInformations = {
 		name = "TradeNeed",
 		version = 1,
         guildadsCompatible = 200,
 		parent = GuildAdsDataType.CHANNEL,
 		priority = 400
-	};
-	schema = {
+};
+GuildAdsTradeNeedDataTypeClass.prototype.schema = {
 		id = "ItemRef",
 		data = {
 			[1] = { key="q",	codec="Integer" },
 			[2] = { key="_t",	codec="BigInteger" },
 			[3] = { key="c",	codec="String" },
 		}
-	}
-});
+};
 
-function GuildAdsTradeNeedDataType:Initialize()
+function GuildAdsTradeNeedDataTypeClass.prototype:Initialize()
 end
 
-function GuildAdsTradeNeedDataType:InitializeChannel()
+function GuildAdsTradeNeedDataTypeClass.prototype:InitializeChannel()
 	if self.db.items == nil then
 		self.db.items = {};
 	end
 end
 
-function GuildAdsTradeNeedDataType:get(author, id)
+function GuildAdsTradeNeedDataTypeClass.prototype:get(author, id)
 	if not author then
 		error("author is nil", 2);
 	end
@@ -47,7 +48,7 @@ function GuildAdsTradeNeedDataType:get(author, id)
 	end
 end
 
-function GuildAdsTradeNeedDataType:setRevision(author, revision)
+function GuildAdsTradeNeedDataTypeClass.prototype:setRevision(author, revision)
 	local itemsRevision = self.db.itemsRevision;
 	if not itemsRevision[author] then
 		itemsRevision[author] = {};
@@ -55,7 +56,7 @@ function GuildAdsTradeNeedDataType:setRevision(author, revision)
 	itemsRevision[author]._un = revision;
 end
 
-function GuildAdsTradeNeedDataType:getRevision(author)
+function GuildAdsTradeNeedDataTypeClass.prototype:getRevision(author)
 	local itemsRevision = self.db.itemsRevision;
 	if itemsRevision[author] then
 		return itemsRevision[author]._un or 0;
@@ -63,7 +64,7 @@ function GuildAdsTradeNeedDataType:getRevision(author)
 	return 0;
 end
 
-function GuildAdsTradeNeedDataType:setRaw(author, id, info, revision)
+function GuildAdsTradeNeedDataTypeClass.prototype:setRaw(author, id, info, revision)
 	local items = self.db.items;
 	if info then
 		if (self.db.items[id] == nil) then
@@ -81,7 +82,7 @@ function GuildAdsTradeNeedDataType:setRaw(author, id, info, revision)
 	end
 end
 
-function GuildAdsTradeNeedDataType:set(author, id, info)
+function GuildAdsTradeNeedDataTypeClass.prototype:set(author, id, info)
 	if info then
 		if (self.db.items[id] == nil) then
 			self.db.items[id] = {};
@@ -107,7 +108,7 @@ function GuildAdsTradeNeedDataType:set(author, id, info)
 	end
 end
 
-function GuildAdsTradeNeedDataType:nextItem(item)
+function GuildAdsTradeNeedDataTypeClass.prototype:nextItem(item)
 	item = next(self.db.items, item);
 	while item and not (self.db.items[item].n and next(self.db.items[item].n))do
 		item = next(self.db.items, item);
@@ -115,7 +116,7 @@ function GuildAdsTradeNeedDataType:nextItem(item)
 	return item;
 end
 
-function GuildAdsTradeNeedDataType:iterator(author, id)
+function GuildAdsTradeNeedDataTypeClass.prototype:iterator(author, id)
 	if author and not id then
 		-- iterateur sur les id d'un même joueur
 		return self.iteratorId, { self, author} , nil;
@@ -128,7 +129,7 @@ function GuildAdsTradeNeedDataType:iterator(author, id)
 	end;
 end
 
-GuildAdsTradeNeedDataType.iteratorId = function(state, item)
+GuildAdsTradeNeedDataTypeClass.prototype.iteratorId = function(state, item)
 	local t = state[1].db.items;
 	local author = state[2];
 	local data;
@@ -141,7 +142,7 @@ GuildAdsTradeNeedDataType.iteratorId = function(state, item)
 	end
 end
 
-GuildAdsTradeNeedDataType.iteratorAll = function(self, state)
+GuildAdsTradeNeedDataTypeClass.prototype.iteratorAll = function(self, state)
 	local item = state[1] or self:nextItem();
 	
 	if item then
@@ -162,4 +163,5 @@ GuildAdsTradeNeedDataType.iteratorAll = function(self, state)
 	end
 end
 
+GuildAdsTradeNeedDataType = GuildAdsTradeNeedDataTypeClass:new();
 GuildAdsTradeNeedDataType:register();

@@ -8,7 +8,8 @@
 -- Licence: GPL version 2 (General Public License)
 ----------------------------------------------------------------------------------
 
-GuildAdsTableDataType = GuildAdsDataType:new();
+local AceOO = AceLibrary("AceOO-2.0");
+GuildAdsTableDataType = AceOO.Class(GuildAdsDataType);
 
 --[[
 	convention :
@@ -18,7 +19,7 @@ GuildAdsTableDataType = GuildAdsDataType:new();
 	data : (value, max, spe, subspe)
 	_u : revision
 ]]
-GuildAdsTableDataType.iteratorId = function(state, id)
+GuildAdsTableDataType.prototype.iteratorId = function(state, id)
 	local id, data = next(state[1], id);
 	if id=="_u" then
 		id, data = next(state[1], id);
@@ -32,7 +33,7 @@ GuildAdsTableDataType.iteratorId = function(state, id)
 	end
 end
 
-function GuildAdsTableDataType:nextId(playerName, id)
+function GuildAdsTableDataType.prototype:nextId(playerName, id)
 	local id, data = next(self:getTableForPlayer(playerName), id)
 	if id~="_u" then
 		return id, data;
@@ -40,7 +41,7 @@ function GuildAdsTableDataType:nextId(playerName, id)
 	return next(self:getTableForPlayer(playerName), id);
 end
 
-function GuildAdsTableDataType:nextPlayerName(players, playerName)
+function GuildAdsTableDataType.prototype:nextPlayerName(players, playerName)
 	playerName = next(players, playerName);
 	while playerName and next(self:getTableForPlayer(playerName))==nil do
 		playerName = next(players, playerName);
@@ -48,7 +49,7 @@ function GuildAdsTableDataType:nextPlayerName(players, playerName)
 	return playerName;
 end
 	
-GuildAdsTableDataType.iteratorAll = function(self, current)
+GuildAdsTableDataType.prototype.iteratorAll = function(self, current)
 	local players;
 	if self.channel then
 		players = self.channel:getPlayers();
@@ -84,11 +85,11 @@ GuildAdsTableDataType.iteratorAll = function(self, current)
 	end
 end
 
-function GuildAdsTableDataType:getTableForPlayer(author)
+function GuildAdsTableDataType.prototype:getTableForPlayer(author)
 	error("GuildAdsTableDataType:getTableForPlayer not impletemented", 2);
 end
 
-function GuildAdsTableDataType:iterator(author, id)
+function GuildAdsTableDataType.prototype:iterator(author, id)
 	if author and not id then
 		-- iterateur sur les id d'un même joueur
 		return self.iteratorId, { self:getTableForPlayer(author), author} , nil;

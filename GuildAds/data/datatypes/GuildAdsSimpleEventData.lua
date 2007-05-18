@@ -82,4 +82,5 @@ function GuildAdsSimpleEventDataType:set(author, id, info)
 	end
 end
 
-GuildAdsSimpleEventDataType:register();
+--~ GuildAdsSimpleEventDataType:register();
+--~ GuildAdsSimpleEventDataType:register();

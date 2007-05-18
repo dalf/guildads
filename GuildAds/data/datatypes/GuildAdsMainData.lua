@@ -8,15 +8,18 @@
 -- Licence: GPL version 2 (General Public License)
 ----------------------------------------------------------------------------------
 
-GuildAdsMainDataType = GuildAdsTableDataType:new({
-	metaInformations = {
+local AceOO = AceLibrary("AceOO-2.0");
+GuildAdsMainDataTypeClass = AceOO.Class(GuildAdsTableDataType);
+
+GuildAdsMainDataTypeClass.prototype.metaInformations = {
 		name = "Main",
 		version = 1,
         guildadsCompatible = 200,
 		parent = GuildAdsDataType.PROFILE,
 		priority = 100
-	};
-	schema = {
+};
+
+GuildAdsMainDataTypeClass.prototype.schema = {
 		keys = {
 			[1] = { key="g",  	codec="String" },
 			[2] = { key="gr", 	codec="String" },
@@ -26,17 +29,18 @@ GuildAdsMainDataType = GuildAdsTableDataType:new({
 			[6] = { key="r",	codec="Integer" },
 			[7] = { key="a",	codec="String" }
 		}
-	};
-	Guild = "g";
-	GuildRank = "gr";
-	GuildRankIndex = "gri";
-	Level = "l";
-	Class = "c";
-	Race = "r";
-	Account = "a";
-});
+};
 
-function GuildAdsMainDataType:Initialize()
+GuildAdsMainDataTypeClass.prototype.Guild = "g";
+GuildAdsMainDataTypeClass.prototype.GuildRank = "gr";
+GuildAdsMainDataTypeClass.prototype.GuildRankIndex = "gri";
+GuildAdsMainDataTypeClass.prototype.Level = "l";
+GuildAdsMainDataTypeClass.prototype.Class = "c";
+GuildAdsMainDataTypeClass.prototype.Race = "r";
+GuildAdsMainDataTypeClass.prototype.Account = "a";
+
+
+function GuildAdsMainDataTypeClass.prototype:Initialize()
 	self:set(GuildAds.playerName, self.Level, UnitLevel("player"));
 	self:set(GuildAds.playerName, self.Race, self:getRaceIdFromName(UnitRace("player")));
 	self:set(GuildAds.playerName, self.Class, self:getClassIdFromName(UnitClass("player")));
@@ -46,11 +50,11 @@ function GuildAdsMainDataType:Initialize()
 	self:RegisterEvent("PLAYER_GUILD_UPDATE", "onGuildUpdate");
 end
 
-function GuildAdsMainDataType:onLevelUp()
+function GuildAdsMainDataTypeClass.prototype:onLevelUp()
 	self:set(GuildAds.playerName, self.Level, arg1);
 end
 
-function GuildAdsMainDataType:onGuildUpdate()
+function GuildAdsMainDataTypeClass.prototype:onGuildUpdate()
 	local guildName, guildRank, guildRankIndex = GetGuildInfo("player");
 	
 	self:set(GuildAds.playerName, self.Guild, guildName);
@@ -58,8 +62,10 @@ function GuildAdsMainDataType:onGuildUpdate()
 	self:set(GuildAds.playerName, self.GuildRankIndex, guildRankIndex);
 end
 
-function GuildAdsMainDataType:getClassIdFromName(ClassName)
+
+function GuildAdsMainDataTypeClass.prototype:getClassIdFromName(ClassName)
 	for id, name in pairs(GUILDADS_CLASSES) do
+
 		if (name == ClassName) then
 			return id;
 		end
@@ -67,12 +73,14 @@ function GuildAdsMainDataType:getClassIdFromName(ClassName)
 	return -1;
 end
 
-function GuildAdsMainDataType:getClassNameFromId(ClassId)
+function GuildAdsMainDataTypeClass.prototype:getClassNameFromId(ClassId)
 	return GUILDADS_CLASSES[ClassId or ""] or "";
 end
 
-function GuildAdsMainDataType:getRaceIdFromName(RaceName)
+
+function GuildAdsMainDataTypeClass.prototype:getRaceIdFromName(RaceName)
 	for id, name in pairs(GUILDADS_RACES) do
+
 		if (name == RaceName) then
 			return id;
 		end
@@ -80,41 +88,41 @@ function GuildAdsMainDataType:getRaceIdFromName(RaceName)
 	return -1;
 end
 
-function GuildAdsMainDataType:getRaceNameFromId(RaceId)
+function GuildAdsMainDataTypeClass.prototype:getRaceNameFromId(RaceId)
 	return GUILDADS_RACES[RaceId or ""] or "";
 end
 
-function GuildAdsMainDataType:getTableForPlayer(author)
+function GuildAdsMainDataTypeClass.prototype:getTableForPlayer(author)
 	return self.profile:getRaw(author).main;
 end
 
-function GuildAdsMainDataType:get(author, id)
+function GuildAdsMainDataTypeClass.prototype:get(author, id)
 	if not author then
 		error("author is nil", 2);
 	end
 	return self.profile:getRaw(author).main[id];
 end
 
-function GuildAdsMainDataType:getRevision(author)
+function GuildAdsMainDataTypeClass.prototype:getRevision(author)
 	return self.profile:getRaw(author).main._u or 0;
 end
 
-function GuildAdsMainDataType:setRevision(author, revision)
+function GuildAdsMainDataTypeClass.prototype:setRevision(author, revision)
 	self.profile:getRaw(author).main._u = revision;
 end
 
-function GuildAdsMainDataType:setRaw(author, id, info, revision)
+function GuildAdsMainDataTypeClass.prototype:setRaw(author, id, info, revision)
 	local main =self.profile:getRaw(author).main;
 	main[id] = info;
 end
 
 --[[
-function GuildAdsMainDataType:compareTable(a, b)
+function GuildAdsMainDataTypeClass.prototype:compareTable(a, b)
 	return not table.foreach(a, function(k, v) if b[k]~=v then return true end);
 end
 ]]
 
-function GuildAdsMainDataType:set(author, id, info)
+function GuildAdsMainDataTypeClass.prototype:set(author, id, info)
 	local main = self.profile:getRaw(author).main;
 	if info then
 		if main[id]==nil or main[id]~=info then
@@ -132,4 +140,5 @@ function GuildAdsMainDataType:set(author, id, info)
 	end
 end
 
+GuildAdsMainDataType = GuildAdsMainDataTypeClass:new();
 GuildAdsMainDataType:register();

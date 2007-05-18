@@ -10,46 +10,39 @@
 
 local slot, link, item, count, data, playerInventory;
 
-GuildAdsInventoryDataType = GuildAdsTableDataType:new({
-	metaInformations = {
+local AceOO = AceLibrary("AceOO-2.0");
+GuildAdsInventoryDataTypeClass = AceOO.Class(GuildAdsTableDataType);
+GuildAdsInventoryDataTypeClass.prototype.metaInformations = {
 		name = "Inventory",
 		version = 1,
         guildadsCompatible = 200,
 		parent = GuildAdsDataType.PROFILE,
 		priority = 300
-	};
-	schema = {
+};
+
+GuildAdsInventoryDataTypeClass.prototype.schema = {
 		id = "Integer";
 		data = {
 			[1] = { key="i", 	codec="ItemRef" },
 			[2] = { key="q",	codec="Integer" }
 		}
-	}
-});
+};
 
-function GuildAdsInventoryDataType:Initialize()
+function GuildAdsInventoryDataTypeClass.prototype:Initialize()
 	playerInventory = self:getTableForPlayer(GuildAds.playerName);
 	self:onEvent();
 	self:RegisterEvent("UNIT_INVENTORY_CHANGED");
-	self:RegisterEvent("PLAYER_ENTERING_WORLD");
-	self:RegisterEvent("PLAYER_LEAVING_WORLD");
 end
 
-function GuildAdsInventoryDataType:PLAYER_ENTERING_WORLD()
-	self:RegisterEvent("UNIT_INVENTORY_CHANGED");
-end
-
-function GuildAdsInventoryDataType:PLAYER_LEAVING_WORLD()
-	self:UnregisterEvent("UNIT_INVENTORY_CHANGED");
-end
-
-function GuildAdsInventoryDataType:UNIT_INVENTORY_CHANGED()
+function GuildAdsInventoryDataTypeClass.prototype:UNIT_INVENTORY_CHANGED()
 	if arg1 == "player" then
 		self:onEvent();
 	end
 end
 
-function GuildAdsInventoryDataType:onEvent()
+
+function GuildAdsInventoryDataTypeClass.prototype:onUpdate()
+
 	for slot = 1,19, 1 do
 		link = GetInventoryItemLink("player", slot);
 		if (link) then
@@ -69,29 +62,29 @@ function GuildAdsInventoryDataType:onEvent()
 	end
 end
 
-function GuildAdsInventoryDataType:getTableForPlayer(author)
+function GuildAdsInventoryDataTypeClass.prototype:getTableForPlayer(author)
 	return self.profile:getRaw(author).inventory;
 end
 
-function GuildAdsInventoryDataType:get(author, id)
+function GuildAdsInventoryDataTypeClass.prototype:get(author, id)
 	if not author then
 		error("author is nil", 2);
 	end
 	return self.profile:getRaw(author).inventory[id];
 end
 
-function GuildAdsInventoryDataType:getRevision(author)
+function GuildAdsInventoryDataTypeClass.prototype:getRevision(author)
 	if not author then
 		error("author is nil", 2);
 	end
 	return self.profile:getRaw(author).inventory._u or 0;
 end
 
-function GuildAdsInventoryDataType:setRevision(author, revision)
+function GuildAdsInventoryDataTypeClass.prototype:setRevision(author, revision)
 	self.profile:getRaw(author).inventory._u = revision;
 end
 
-function GuildAdsInventoryDataType:setRaw(author, id, info, revision)
+function GuildAdsInventoryDataTypeClass.prototype:setRaw(author, id, info, revision)
 	local inventory = self.profile:getRaw(author).inventory;
 	inventory[id] = info;
 	if info then
@@ -99,7 +92,7 @@ function GuildAdsInventoryDataType:setRaw(author, id, info, revision)
 	end
 end
 
-function GuildAdsInventoryDataType:set(author, id, info)
+function GuildAdsInventoryDataTypeClass.prototype:set(author, id, info)
 	local inventory = self.profile:getRaw(author).inventory;
 	if info then
 		if info.q == 1 then
@@ -124,4 +117,5 @@ function GuildAdsInventoryDataType:set(author, id, info)
 	end
 end
 
+GuildAdsInventoryDataType = GuildAdsInventoryDataTypeClass:new();
 GuildAdsInventoryDataType:register();
