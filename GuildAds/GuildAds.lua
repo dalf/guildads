@@ -18,40 +18,45 @@ GA_DEBUG_STORAGE = 5;
 GA_DEBUG_GUI = 6;
 GA_DEBUG_PLUGIN = 8;
 
-GuildAds = AceAddon:new({
-	name          = GUILDADS_TITLE,
-    description   = GUILDADS_TITLE,
-    version       = GUILDADS_REVISION_STRING or "2.0 beta",
-    releaseDate   = GUILDADS_REVISION_DATE or "??",
-    aceCompatible = 103,
-    author        = "Zarkan, Fkai",
-    email         = "guildads@gmail.com",
-    website       = "http://guildads.sourceforge.net",
-    category      = "guild",
-    optionsFrame  = "GuildAdsOptionsWindowFrame",
-    db            = AceDatabase:new("GuildAdsDatabase"),
-    defaults      = DEFAULT_OPTIONS,
-    cmd           = AceChatCmd:new(GUILDADS_CMD, GUILDADS_CMD_OPTIONS),
-	
-	channelName			= nil,
-	channelPassword		= nil,
-	channelNameFrom		= nil,				-- channel name from : user, guildInfo, guildName
-	playerName 			= false,
-	guildName			= false,
-	windows				= {},
-})
+if not AceLibrary then
+	ChatFrame1:AddMessage("GuildAds: Ace2 not found", 1, 0, 0);
+end
+GuildAds = AceLibrary("AceAddon-2.0"):new("AceEvent-2.0", "AceHook-2.1", "AceConsole-2.0", "AceDB-2.0","AceDebug-2.0");
+GuildAds:RegisterDB("GuildAdsDatabase");
+GuildAds:RegisterDefaults('char',
+	{   ['**'] = {},
+		ChannelConfig = 'automatic',
+		ChannelCommand = 'ga',
+		ChannelAlias = 'GuildAds'
+	});
+    
+--~ GuildAds:RegisterDefaults('profile', {
+--~      ['*'] = {}
+--~ })
+GuildAds:RegisterChatCommand(GUILDADS_CMD, GUILDADS_CMD_OPTIONS);
 
-function GuildAds:Initialize()
-	GuildAds_ChatDebug(GA_DEBUG_GLOBAL,"[GuildAds:Initialize] begin");
+GuildAds.channelName = nil;
+GuildAds.channelPassword = nil;
+GuildAds.channelNameFrom = nil;
+GuildAds.playerName = false;
+GuildAds.guildName = false;
+GuildAds.windows = {};
+
+function GuildAds:OnInitialize()
+	GuildAds_ChatDebug(GA_DEBUG_GLOBAL,"[GuildAds:OnInitialize] begin");
+--~ 	self.dbZZ = self.db;
+--~ 	self.db = self.dbZZ.profile;
 	
 	-- Check if GuildAds is still GuildAds (not erased by SavedVariables/GuildAds.lua version 1)
-	if GuildAds.aceCompatible then
+	if GuildAds.windows then
 		GuildAdsBackup = nil
 	else
 		GuildAds = GuildAdsBackup;
 		self = GuildAds;
 	end
-	
+    self:SetDebugging(true)
+    self:Debug(GuildAds.db.profile.Versions)
+--~ 	GuildAds:CustomPrint(1, 0, 0, nil, nil, nil,GuildAds.db.profile.Versions.DataTypes["Main"]);
 	-- Init player name, faction name, realm name
 	self.playerName = UnitName("player");
 	self.factionName = UnitFactionGroup("player");
@@ -84,8 +89,13 @@ function GuildAds:Initialize()
 	
 	-- Initialize windows (main, options, inspect)
 	GuildAds_ChatDebug(GA_DEBUG_GLOBAL,"[GuildAdsWindow:Create] begin");
+<<<<<<< .mine
+	for _, window in pairs(self.windows) do
+        window:Create()
+=======
 	for _, window in pairs(self.windows) do
 		window:Create()
+>>>>>>> .r166
 	end
 	GuildAds_ChatDebug(GA_DEBUG_GLOBAL,"[GuildAdsWindow:Create] end");
 	
@@ -98,18 +108,19 @@ function GuildAds:Initialize()
 	GuildAdsSystem:Show();
 	GuildAdsTask:AddNamedSchedule("JoinChannel", 8, nil, nil, self.JoinChannel, self)
 	
-	GuildAds_ChatDebug(GA_DEBUG_GLOBAL,"[GuildAds:Initialize] end");
+	GuildAds_ChatDebug(GA_DEBUG_GLOBAL,"[GuildAds:OnInitialize] end");
 end
 
 function GuildAds:JoinChannel()
 	GuildAds_ChatDebug(GA_DEBUG_GLOBAL,"[GuildAds:JoinChannel] begin");
-	
+	GuildAds:CustomPrint(1, 0, 0, nil, nil, nil,"-----");
 	-- Init du channel
-	self.channelName, self.channelPassword, self.channelNameFrom = self:GetDefaultChannel();
+    GuildAds:DisplayDebugInfo();
+	GuildAds.channelName, GuildAds.channelPassword, GuildAds.channelNameFrom = GuildAds:GetDefaultChannel();
 	
-	if self.channelName then
+	if GuildAds.channelName then
 		local command, alias = GuildAds:GetDefaultChannelAlias();
-		GuildAdsComm:JoinChannel(self.channelName, self.channelPassword, command, alias);
+		GuildAdsComm:JoinChannel(GuildAds.channelName, GuildAds.channelPassword, command, alias);
 	end
 	
 	GuildAds_ChatDebug(GA_DEBUG_GLOBAL,"[GuildAds:JoinChannel] end");
@@ -120,6 +131,8 @@ function GuildAds:LeaveChannel()
 end
 
 function GuildAds:ToggleMainWindow()
+
+GuildAds:CustomPrint(1, 0, 0, nil, nil, nil,"---+++--");
 	self:ToggleWindow("main");
 end
 
@@ -136,7 +149,7 @@ function GuildAds:ToggleWindow(name)
 			frame:Show();
 		end
 	else
-		self.cmd:error(GUILDADS_ERROR_NOTINITIALIZED);
+		self:CustomPrint(1, 0, 0, nil, nil, nil, GUILDADS_ERROR_NOTINITIALIZED);
 	end
 end
 
@@ -144,7 +157,7 @@ function GuildAds:ShowWindow(name)
 	if (self.channelName) then
 		getglobal(self.windows[name].frame):Show();
 	else
-		self.cmd:error(GUILDADS_ERROR_NOTINITIALIZED);
+		self:CustomPrint(1, 0, 0, nil, nil, nil, GUILDADS_ERROR_NOTINITIALIZED);
 	end
 end
 
@@ -152,33 +165,37 @@ function GuildAds:HideWindow(name)
 	if (self.channelName) then
 		getglobal(self.windows[name].frame):Hide();
 	else
-		self.cmd:error(GUILDADS_ERROR_NOTINITIALIZED);
+		self:CustomPrint(1, 0, 0, nil, nil, nil, GUILDADS_ERROR_NOTINITIALIZED);
 	end
 end
 
-function GuildAds:ToggleDebugOn()
-	GuildAds_DebugPlugin.logMessages(true);
-	self.cmd:status("Debug tab", TRUE, ACEG_MAP_ONOFF)
+function GuildAds:IsDebugging()
+	if GuildAds_DebugPlugin then
+		return GuildAds_DebugPlugin.showDebug() and "on" or "off";
+	else
+		return "off";
+	end
 end
 
-function GuildAds:ToggleDebugOff()
-	GuildAds_DebugPlugin.logMessages(false);
-	self.cmd:status("Debug tab", FALSE, ACEG_MAP_ONOFF)
+function GuildAds:SetDebug(value)
+GuildAds:CustomPrint(1, 0, 0, nil, nil, nil,"de");
+	if GuildAds_DebugPlugin then
+    GuildAds:CustomPrint(1, 0, 0, nil, nil, nil," opn");
+		GuildAds_DebugPlugin.logMessages(value == "on");
+	end
 end
 
 function GuildAds:DisplayDebugInfo()
 	local status, message = GuildAdsComm:GetChannelStatus();
 	message = message and status.."("..message..")" or status;
-	self.cmd:report({
-		{text="version", val=GUILDADS_VERSION },
-		{text="player name", val=tostring(self.playerName) },
-		{text="guild name", val=tostring(self.guildName) },
-		{text="account", val=tostring(GuildAdsDB.account) },
-		{text="faction", val=tostring(self.factionName) },
-		{text="realm", val=tostring(self.realmName) },
-		{text="channel", val=tostring(self.channelName) },
-		{text="channel status", val=tostring(message) }
-	});
+	self:Print("version: ", tostring(GUILDADS_VERSION));
+	self:Print("Player name: ", tostring(self.playerName));
+	self:Print("Guild name: ", tostring(self.guildName));
+	self:Print("Account: ", tostring(GuildAdsDB.account));
+	self:Print("Faction: ", tostring(self.factionName));
+	self:Print("Realm: ", tostring(self.realmName));
+	self:Print("Channel: ", tostring(self.channelName));
+	self:Print("Channel status: ", tostring(message));
 end
 
 function GuildAds:ResetAll()
@@ -224,12 +241,12 @@ function GuildAds:CheckChannelConfig()
 end
 
 function GuildAds:GetDefaultChannel()
-	local configType = GuildAdsDB:GetConfigValue(GuildAdsDB.PROFILE_PATH, "ChannelConfig") or "automatic";
+	local configType = GuildAds.db.char.ChannelConfig;
 	local source, channel, password;
 	if configType=="manual" then
 		source="user"
-		channel = GuildAdsDB:GetConfigValue(GuildAdsDB.PROFILE_PATH, "ChannelName");
-		password = GuildAdsDB:GetConfigValue(GuildAdsDB.PROFILE_PATH, "ChannelPassword");		
+		channel = GuildAds.db.char.ChannelName;
+		password = GuildAds.db.char.ChannelPassword;
 	elseif configType=="automatic" then
 		-- If in a guild
 		if self.guildName then
@@ -261,17 +278,17 @@ function GuildAds:GetDefaultChannel()
 end
 
 function GuildAds:GetDefaultChannelAlias()
-	return GuildAdsDB:GetConfigValue(GuildAdsDB.PROFILE_PATH, "ChannelCommand", "ga"), GuildAdsDB:GetConfigValue(GuildAdsDB.PROFILE_PATH, "ChannelAlias", "GuildAds");
+	return GuildAds.db.char.ChannelCommand, GuildAds.db.char.ChannelAlias;
 end
 
 function GuildAds:SetDefaultChannelAlias(command, alias)
-	if 		GuildAdsDB:SetConfigValue(GuildAdsDB.PROFILE_PATH, "ChannelCommand", command) 
-		 or GuildAdsDB:SetConfigValue(GuildAdsDB.PROFILE_PATH, "ChannelAlias", alias) then
+	if 	GuildAds.db.char.ChannelCommand ~= command or
+		GuildAds.db.char.ChannelAlias ~= alias then
+		GuildAds.db.char.ChannelCommand = command;
+		GuildAds.db.char.ChannelAlias = alias;
 		SimpleComm_SetAlias(command, alias);
 	end
 end
-
-GuildAds:RegisterForLoad()
 
 ---------------------------------------------------------------------------------
 --

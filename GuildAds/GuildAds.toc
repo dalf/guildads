@@ -1,13 +1,12 @@
 ## Interface: 20006
-## Title: GuildAds
+## Title: GuildAds |cff7fff7f -Ace2-|r
 ## Author: Zarkan, Fkai
 ## Version: 2.0
-## Notes: Guild Ads
+## Notes: Guild Ads 
 ## Notes-frFR: Les annonces de la guilde
 ## eMail: guildads@gmail.com
 ## URL: http://guildads.sourceforge.net
-## Dependencies: Ace
-## OptionalDeps: ReagentData,GuildEventManager2
+## OptionalDeps: Ace2, ReagentData,GuildEventManager2
 ## DefaultState: Enabled
 ## LoadOnDemand: 0
 ## SavedVariables: GuildAdsDatabase
