@@ -109,6 +109,9 @@ function GuildAdsDTS:SendRevision(playerName)
 			-- send result to parent in whisper
 			GuildAdsComm:SendSearchResultToParent(GuildAdsComm.playerTree[GuildAds.playerName].p, self.dataType, playerName, result.bestPlayerName, result.bestRevision, result.bestWeight, result.worstRevision, result.version);
 		else
+			-- the owner is online
+			if GuildAdsComm:IsOnLine(playerName) then
+			end
 			-- send search result to channel
 			GuildAdsComm:SendSearchResult(self.dataType, playerName, result.bestPlayerName, result.bestRevision, result.worstRevision);
 		end
@@ -123,10 +126,14 @@ function GuildAdsDTS:ReceiveRevision(childPlayerName, playerName, who, revision,
 	version = version or 1;
 	
 	local result = self.search[playerName];
-	-- TODO : handle the case, playerName has reset, so he has a lower revision but we must update to this one.
-	if  	(revision>result.bestRevision) 
-		or	(revision==result.bestRevision and weight<result.bestWeight)
-		or	(version>result.version) then
+
+	if  (
+			(revision>result.bestRevision) 									-- newer revision
+		or	(revision==result.bestRevision and weight>result.bestWeight)	-- same revision but higher weight
+		or	(version>result.version) 										-- newer version of the datatype
+		)  
+	then
+
 		result.bestPlayerName = who;
 		result.bestRevision = revision;
 		result.bestWeight = weight;
@@ -242,11 +249,20 @@ function GuildAdsDTS:ReceiveOpenTransaction(transaction, playerName, fromRevisio
 		return
 	end
 	
-	-- TODO : don't accept transaction about myself(me and reroll) from other player
-	-- TODO : handle the case fromRevision is lower than toRevision
-	local currentRevision = self.dataType:getRevision(playerName);
-	if currentRevision<toRevision and currentRevision>=fromRevision then
-		transaction._valid = true;
+	if playerName==GuildAds.playerName then
+		-- don't accept transaction about myself(me and reroll) from other player
+	else
+		local currentRevision = self.dataType:getRevision(playerName);
+		if fromRevision==0 and currentRevision>toRevision then
+			-- update to a lower revsion toRevsion
+			-- delete everything about this (playerName, self.dataType)
+			self.dataType:delete(playerName)
+			self.dataType:setRevision(transaction.playerName, 0);
+			transaction._valid = true;
+		elseif toRevsion and fromRevsion and toRevsion>fromRevsion and currentRevision<toRevision and currentRevision>=fromRevision then
+			-- normal update to revision toRevsion
+			transaction._valid = true;
+		end
 	end
 end
 

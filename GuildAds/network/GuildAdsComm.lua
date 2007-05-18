@@ -24,7 +24,7 @@ GUILDADS_MSG_TYPE_AVAILABLE = 2;
 -- GuildAdsComm
 -- 
 ---------------------------------------------------------------------------------
-GuildAdsComm = AceModule:new({
+GuildAdsComm = ({
 	IGNOREMYMESSAGE = {
 		CF=true,
 		OT=true,
@@ -167,8 +167,8 @@ function GuildAdsComm:Initialize()
 		self.ChannelStatusListener
 	);
 	
-	self:RegisterEvent("CHAT_MSG_CHANNEL_JOIN");
-	self:RegisterEvent("CHAT_MSG_CHANNEL_LEAVE");
+    this:RegisterEvent("CHAT_MSG_CHANNEL_JOIN");
+    this:RegisterEvent("CHAT_MSG_CHANNEL_LEAVE");
 end
 
 function GuildAdsComm:JoinChannel(channel, password, command, alias)
@@ -319,7 +319,7 @@ end
 -- 
 --------------------------------------------------------------------------------
 function GuildAdsComm:SendSearchAboutMyData()
-	self:SendSearchAboutPlayer(GuildAds.playerName);
+	GuildAdsComm:SendSearchAboutPlayer(GuildAds.playerName);
 end
 
 --------------------------------------------------------------------------------
