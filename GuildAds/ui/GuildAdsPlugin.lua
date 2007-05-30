@@ -67,6 +67,7 @@ GuildAdsPlugin = {
 	unserializeColor = GAC_UnserializeColor;
 	
 	isPluginValid  = function(plugin)
+--~ 	GuildAds:CustomPrint(1, 0, 0, nil, nil, nil,"Ask Register[".."ispluging".."]");
     	-- Every plugin needs to be a table
         if type(plugin) ~= "table" then
             return false, "Plugin type check failed.";
@@ -86,7 +87,7 @@ GuildAdsPlugin = {
 		else
             return false, "Plugin Metainformations check failed.";
         end
-
+--~ GuildAds:CustomPrint(1, 0, 0, nil, nil, nil,"Ask Register[".."ok".."]");
         return true;
 	end;
 	
@@ -134,27 +135,36 @@ GuildAdsPlugin = {
 				end
 				return value;
 			end;
+			
+			plugin.db = GuildAds.db.profile.Config[pluginName];
+			plugin.dbChar = GuildAds.db.char[pluginName];
 	
 			plugin.getConfigValue = function(path, key, defaultValue)
-				return GuildAdsDB:GetConfigValue({ GuildAdsDB.CONFIG_PATH, pluginName, path }, key, defaultValue)
+--~ 				error("!!", 2);
+				 return GuildAdsDB:GetConfigValue({GuildAdsDB.CONFIG_PATH, pluginName, path }, key, defaultValue)
 			end;
 			
 			plugin.setProfileValue = function(path, key, value)
-				if GuildAdsDB:SetConfigValue({ GuildAdsDB.PROFILE_PATH, pluginName, path}, key, value) then
+--~ 				error("!!", 2);
+				
+				if GuildAdsDB:SetConfigValue({ pluginName, path}, key, value) then
 					if type(plugin.onConfigChanged) == "function" then
 						plugin.onConfigChanged(path, key, value);
 					end
 				end
 				return value;
+				
 			end;
 	
 			plugin.getProfileValue = function(path, key, defaultValue)
-				return GuildAdsDB:GetConfigValue({ GuildAdsDB.PROFILE_PATH, pluginName, path}, key, defaultValue)
+--~ 				error("!!", 2);
+				return GuildAdsDB:GetConfigValue({ pluginName, path}, key, defaultValue)
 			end;
 			
 			-- call onChannelJoin() ??
 			
 			GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "Register plugin: "..pluginName);
+--~             GuildAds:CustomPrint(1, 0, 0, nil, nil, nil,"Ask Register["..pluginName.."]");
 			return true;
 		else
 			return false, errorMessage;
@@ -163,9 +173,11 @@ GuildAdsPlugin = {
 	
     register = function(plugin)
   	    if pluginsToRegister then
+--~ 		GuildAds:CustomPrint(1, 0, 0, nil, nil, nil,"Ask Register[====+++]");
 			tinsert(pluginsToRegister, plugin)
   	        return true;
 		else
+--~ 		GuildAds:CustomPrint(1, 0, 0, nil, nil, nil,"Ask Register[====]");
 			return GuildAdsPlugin._register(plugin);
 		end
 	end;
@@ -299,9 +311,11 @@ end
 
 function GuildAdsPlugin_OnInit()
 	-- call onInit
+
   	for pluginName, plugin in pairs(GuildAdsPlugin.PluginsList) do
 		if type(plugin.onInit) == "function" then
 			GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "onInit: "..pluginName);
+            GuildAds:CustomPrint(1, 0, 0, nil, nil, nil,"onInit: "..pluginName);
 			plugin.onInit();
 		end
 	end
@@ -310,6 +324,7 @@ end
 function GuildAdsPlugin_OnChannelJoin()
 	for pluginName, plugin in pairs(GuildAdsPlugin.PluginsList) do
 		if type(plugin.onChannelJoin) == "function" then
+        GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "onChannelJoin: "..pluginName);
 			GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "onChannelJoin: "..pluginName);
 			plugin.onChannelJoin();
 		end
@@ -319,6 +334,7 @@ end
 function GuildAdsPlugin_OnChannelLeave()
 	for pluginName, plugin in pairs(GuildAdsPlugin.PluginsList) do
 		if type(plugin.onChannelLeave) == "function" then
+        GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "onChannelLeave: "..pluginName);
 			GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "onChannelLeave: "..pluginName);
 			plugin.onChannelLeave();
 		end
@@ -329,6 +345,7 @@ function GuildAdsPlugin_OnEvent(ltype, arg1, arg2, arg3, arg4, arg5, arg6, arg7,
 	local method = EventIdToMethod[ltype];
 	for pluginName, plugin in pairs(GuildAdsPlugin.PluginsList) do
 		if type(plugin[method]) == "function" then
+        GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "====: "..method);
 			plugin[method](arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
 		end
 	end

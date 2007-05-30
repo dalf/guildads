@@ -38,8 +38,8 @@ GuildAdsTradeTooltip = {
 	
 	onChannelJoin = function()
 		-- Register for events
-		GuildAdsDB.channel[GuildAds.channelName].TradeNeed:registerUpdate(GuildAdsTradeTooltip.onDBUpdate);
-		GuildAdsDB.channel[GuildAds.channelName].TradeOffer:registerUpdate(GuildAdsTradeTooltip.onDBUpdate);
+		GuildAdsDB.channel[GuildAds.channelName].TradeNeed:registerEvent(GuildAdsTradeTooltip.onDBUpdate);
+		GuildAdsDB.channel[GuildAds.channelName].TradeOffer:registerEvent(GuildAdsTradeTooltip.onDBUpdate);
 		
 		-- Scan database
 		GuildAdsItems = {};
@@ -53,8 +53,8 @@ GuildAdsTradeTooltip = {
 	
 	onChannelLeave = function()
 		-- Unregister for events
-		GuildAdsDB.channel[GuildAds.channelName].TradeNeed:unregisterUpdate(GuildAdsTradeTooltip.onDBUpdate);
-		GuildAdsDB.channel[GuildAds.channelName].TradeOffer:unregisterUpdate(GuildAdsTradeTooltip.onDBUpdate);
+		GuildAdsDB.channel[GuildAds.channelName].TradeNeed:unregisterEvent(GuildAdsTradeTooltip.onDBUpdate);
+		GuildAdsDB.channel[GuildAds.channelName].TradeOffer:unregisterEvent(GuildAdsTradeTooltip.onDBUpdate);
 	
 		-- Clear database
 		GuildAdsItems = {};
@@ -197,4 +197,4 @@ GuildAdsTradeTooltip = {
 	
 }
 
-GuildAdsPlugin.UIregister(GuildAdsTradeTooltip);
+--~ GuildAdsPlugin.UIregister(GuildAdsTradeTooltip);

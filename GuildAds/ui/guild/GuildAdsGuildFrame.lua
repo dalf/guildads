@@ -492,10 +492,12 @@ GuildAdsGuild = {
 			getglobal(raceField):SetText(GuildAdsDB.profile.Main:getRaceNameFromId(GuildAdsDB.profile.Main:get(playerName, GuildAdsDB.profile.Main.Race)));
 			getglobal(raceField):SetTextColor(lcolor.r, lcolor.g, lcolor.b);
 			getglobal(raceField):Show();
-			getglobal(infoField):SetText((GuildAdsDB.profile.Main:get(playerName, GuildAdsDB.profile.Main.Guild) or "")..suffixGuild);
-			getglobal(infoField):SetTextColor(lcolor.r, lcolor.g, lcolor.b);
-			getglobal(infoField):Show();
-			
+            if (GuildAdsDB.profile.Main.Guild) then
+--~             GuildAdsDB.profile.Main.Guild
+--~ 			getglobal(infoField):SetText((GuildAdsDB.profile.Main:get(playerName, GuildAdsDB.profile.Main.Guild) or "")..suffixGuild);
+--~ 			getglobal(infoField):SetTextColor(lcolor.r, lcolor.g, lcolor.b);
+--~ 			getglobal(infoField):Show();
+			end;
 			-- update highlight
 			getglobal(buttonName.."Highlight"):SetVertexColor(ocolor.r, ocolor.g, ocolor.b);
 		end;
@@ -522,6 +524,7 @@ GuildAdsGuild = {
 	contextMenu = {
 	
 		onLoad = function()
+            GuildAds:CustomPrint(1, 0, 0, nil, nil, nil,"test onload contextmenu");
 			GuildAdsGuildContextMenu.initialize = GuildAdsGuild.contextMenu.initialize;
 			GuildAdsGuildContextMenu.displayMode = "MENU";
 		end;

@@ -96,58 +96,64 @@ BINDING_NAME_SHOW_CONFIG = "Show GuildAds configuration"
 
 GUILDADS_CMD = { "/guildads" }
 GUILDADS_CMD_OPTIONS = {
-	{
-		option = "toggle",
-		desc = BINDING_NAME_SHOW,
-		method = "ToggleMainWindow"
-	},
-	{
-		option = "options",
-		desc = BINDING_NAME_SHOW_CONFIG,
-		method = "ToggleOptionsWindow"
-	},
-	{
-		option = "debug",
-		desc = "Toggle on or off debug message",
-		args = {
-			{
-				option = "on",
-				desc = "Toggle on debug message",
-				method = "ToggleDebugOn",
-			},
-			{
-				option = "off",
-				desc = "Toggle off debug message",
-				method = "ToggleDebugOff"
-			},
-			{
-				option = "info",
-				desc = "Show general debug information",
-				method = "DisplayDebugInfo"
+	type = 'group',
+	desc = '',
+	args = {
+		show = {
+			name = 'show',
+			type = 'execute',
+			desc = BINDING_NAME_SHOW,
+			func = "ToggleMainWindow"
+		},
+		config = {
+			name = 'config',
+			type = 'execute',
+			desc = BINDING_NAME_SHOW_CONFIG,
+			func = "ToggleOptionsWindow"
+		},
+		debug = {
+			name = 'debug',
+			type = 'toggle',
+			desc = "Toggle on or off debug message",
+			get = "IsDebugging",
+			set = "SetDebug",
+			map = { 
+				[true] = "Toggle on debug message",
+				[false] = "Toggle off debug message" 
+			}
+		},
+		debugInfo = {
+			name = 'debugInfo',
+			type = 'execute',
+			desc = "Show general debug information",
+			func = "DisplayDebugInfo"
+		},
+		reset = {
+			name = 'reset',
+			type = 'group',
+			desc = 'Reset database',
+			args = {
+				all = {
+					name = 'all',
+					type = 'execute',
+					desc = "Reset all database except account information",
+					func = "ResetAll"
+				},
+				channel = {
+					name = 'channel',
+					type = 'execute',
+					desc = "Reset all channel datas",
+					func = "ResetChannel"
+				},
+				others = {
+					name = 'others',
+					type = 'execute',
+					desc = "Reset all informations about others players",
+					func = "ResetOthers"
+				}
 			}
 		}
-	},
-	{
-		option = "reset",
-		desc = "Reset database",
-		args = {
-			{
-				option = "all",
-				desc = "Reset all database except account information",
-				method = "ResetAll"
-			},
-			{
-				option = "channel",
-				desc = "Reset all channel datas",
-				method = "ResetChannel"
-			},
-			{
-				option = "others",
-				desc = "Reset all informations about others players",
-				method = "ResetOthers"
-			}
-		}
-	},
+	}
 }
 
 -- Race

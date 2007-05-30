@@ -1,3 +1,4 @@
+if ( GetLocale() == "esES" ) then
 GUILDADS_TITLE			= "GuildAds";
 
 -- Minimap button
@@ -94,61 +95,61 @@ BINDING_HEADER_GUILDADS	= GUILDADS_TITLE;
 BINDING_NAME_SHOW = "Mostrar GuildAds";
 BINDING_NAME_SHOW_CONFIG = "Mostrar configuración de GuildAds"
 
-GUILDADS_CMD = { "/guildads" }
-GUILDADS_CMD_OPTIONS = {
-	{
-		option = "toggle",
-		desc = BINDING_NAME_SHOW,
-		method = "ToggleMainWindow"
-	},
-	{
-		option = "options",
-		desc = BINDING_NAME_SHOW_CONFIG,
-		method = "ToggleOptionsWindow"
-	},
-	{
-		option = "debug",
-		desc = "Activa/desactiva mensajes de debug",
-		args = {
-			{
-				option = "on",
-				desc = "Activa mensajes de debug",
-				method = "ToggleDebugOn",
-			},
-			{
-				option = "off",
-				desc = "Desactiva mensajes de debug",
-				method = "ToggleDebugOff"
-			},
-			{
-				option = "info",
-				desc = "Muestra información general de debug",
-				method = "DisplayDebugInfo"
-			}
-		}
-	},
-	{
-		option = "reset",
-		desc = "Reiniciar base de datos",
-		args = {
-			{
-				option = "all",
-				desc = "Reinicias todas las bases de datos excepto información de cuenta",
-				method = "ResetAll"
-			},
-			{
-				option = "channel",
-				desc = "Reiniciar datos de canales",
-				method = "ResetChannel"
-			},
-			{
-				option = "others",
-				desc = "Reiniciar toda la información sobre otros jugadores",
-				method = "ResetOthers"
-			}
-		}
-	},
-}
+--~ GUILDADS_CMD = { "/guildads" }
+--~ GUILDADS_CMD_OPTIONS = {
+--~ 	{
+--~ 		option = "toggle",
+--~ 		desc = BINDING_NAME_SHOW,
+--~ 		method = "ToggleMainWindow"
+--~ 	},
+--~ 	{
+--~ 		option = "options",
+--~ 		desc = BINDING_NAME_SHOW_CONFIG,
+--~ 		method = "ToggleOptionsWindow"
+--~ 	},
+--~ 	{
+--~ 		option = "debug",
+--~ 		desc = "Activa/desactiva mensajes de debug",
+--~ 		args = {
+--~ 			{
+--~ 				option = "on",
+--~ 				desc = "Activa mensajes de debug",
+--~ 				method = "ToggleDebugOn",
+--~ 			},
+--~ 			{
+--~ 				option = "off",
+--~ 				desc = "Desactiva mensajes de debug",
+--~ 				method = "ToggleDebugOff"
+--~ 			},
+--~ 			{
+--~ 				option = "info",
+--~ 				desc = "Muestra información general de debug",
+--~ 				method = "DisplayDebugInfo"
+--~ 			}
+--~ 		}
+--~ 	},
+--~ 	{
+--~ 		option = "reset",
+--~ 		desc = "Reiniciar base de datos",
+--~ 		args = {
+--~ 			{
+--~ 				option = "all",
+--~ 				desc = "Reinicias todas las bases de datos excepto información de cuenta",
+--~ 				method = "ResetAll"
+--~ 			},
+--~ 			{
+--~ 				option = "channel",
+--~ 				desc = "Reiniciar datos de canales",
+--~ 				method = "ResetChannel"
+--~ 			},
+--~ 			{
+--~ 				option = "others",
+--~ 				desc = "Reiniciar toda la información sobre otros jugadores",
+--~ 				method = "ResetOthers"
+--~ 			}
+--~ 		}
+--~ 	},
+--~ }
 
 -- Race
 GUILDADS_RACES	= {
@@ -239,3 +240,4 @@ GUILDADSTOOLTIPS_SKILL =  "Te permite ver las habilidades y profesiones de tus c
 
 GUILDADSTOOLTIPS_GUILD_TITLE = GUILD;
 GUILDADSTOOLTIPS_GUILD = "Te permite ver la lista de tus compañeros de GuildAds";
+end;

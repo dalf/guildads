@@ -130,16 +130,16 @@ GuildAdsGEMEvent = {
 			ChannelAddedByGA = channelName;
 		end
 		-- update ChannelAddedByGA
-		GuildAdsGEMEvent.setProfileValue(nil, "ChannelAddedByGA", ChannelAddedByGA);
+		GuildAdsGEMEvent.dbChar.ChannelAddedByGA = ChannelAddedByGA;
 	end;
 	
 	onChannelLeave = function()
 		GuildAdsGEMEvent.debug("onChannelLeave");
 --~ 		-- delete previous GA channel from the the GEM channel list
---~ 		if GuildAdsGEMEvent.getProfileValue(nil, "ChannelAddedByGA") then
---~ 			local channelName = GuildAdsGEMEvent.getProfileValue(nil, "ChannelAddedByGA");
+--~ 		if GuildAdsGEMEvent.dbChar.ChannelAddedByGA then
+--~ 			local channelName = GuildAdsGEMEvent.dbChar.ChannelAddedByGA;
 --~ 			GuildAdsGEMEvent.debug("   - leave : "..channelName..","..tostring(GEM_COM_Channels[channelName]));
---~ 			GEMOptions_RemoveChannel(GuildAdsGEMEvent.getProfileValue(nil, "ChannelAddedByGA"));
+--~ 			GEMOptions_RemoveChannel(GuildAdsGEMEvent.dbChar.ChannelAddedByGA);
 --~ 		end
 	end;
 	

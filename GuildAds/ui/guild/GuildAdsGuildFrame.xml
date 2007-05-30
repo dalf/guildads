@@ -2,9 +2,148 @@
 C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 
 	<Script file="GuildAdsGuildFrame.lua"/>
-	<Include file="GuildAdsGuildFrameTemplates.xml"/>
 	
-    <Frame name="GuildAdsGuildFrame" parent="GuildAdsMainWindowFrame" hidden="true" setAllPoints="true">
+	<Button name="GuildAdsGuildColumnHeaderTemplate" virtual="true">
+		<Size>
+			<AbsDimension x="10" y="24"/>
+		</Size>
+		<Layers>
+			<Layer level="BACKGROUND">
+				<Texture name="$parentLeft" file="Interface\FriendsFrame\WhoFrame-ColumnTabs">
+					<Size>
+						<AbsDimension x="5" y="24"/>
+					</Size>
+					<Anchors>
+						<Anchor point="TOPLEFT"/>
+					</Anchors>
+					<TexCoords left="0" right="0.078125" top="0" bottom="0.75"/>
+				</Texture>
+				<Texture name="$parentMiddle" file="Interface\FriendsFrame\WhoFrame-ColumnTabs">
+					<Size>
+						<AbsDimension x="53" y="24"/>
+					</Size>
+					<Anchors>
+						<Anchor point="LEFT" relativeTo="$parentLeft" relativePoint="RIGHT"/>
+					</Anchors>
+					<TexCoords left="0.078125" right="0.90625" top="0" bottom="0.75"/>
+				</Texture>
+				<Texture name="$parentRight" file="Interface\FriendsFrame\WhoFrame-ColumnTabs">
+					<Size>
+						<AbsDimension x="4" y="24"/>
+					</Size>
+					<Anchors>
+						<Anchor point="LEFT" relativeTo="$parentMiddle" relativePoint="RIGHT"/>
+					</Anchors>
+					<TexCoords left="0.90625" right="0.96875" top="0" bottom="0.75"/>
+				</Texture>
+			</Layer>
+		</Layers>
+		<Scripts>
+			<OnClick>
+				if ( this.sortType ) then
+					GuildAdsGuild.sortGuildAdsRoster(this.sortType);
+				end
+				PlaySound("igMainMenuOptionCheckBoxOn");
+			</OnClick>
+		</Scripts>
+		<NormalText inherits="GameFontHighlightSmall">
+			<Anchors>
+				<Anchor point="LEFT">
+					<Offset>
+						<AbsDimension x="8" y="0"/>
+					</Offset>
+				</Anchor>
+			</Anchors>
+		</NormalText>
+	</Button>
+	
+	<Button name="GuildAdsGuildAdButtonTemplate" virtual="true">
+		<Size>
+			<AbsDimension x="490" y="16"/>
+		</Size>
+		<HighlightTexture name="$parentHighlight" file="Interface\Buttons\UI-Listbox-Highlight2" alphaMode="ADD">
+			<Size>
+				<AbsDimension x="505" y="16"/>
+			</Size>
+			<Anchors>
+				<Anchor point="LEFT">
+					<Offset>
+						<AbsDimension x="5" y="-2"/>
+					</Offset>
+				</Anchor>
+			</Anchors>
+		</HighlightTexture>
+		<Layers>
+			<Layer level="BORDER">
+				<FontString name="$parentOwner" inherits="GameFontNormalSmall" justifyH="LEFT">
+					<Size>
+						<AbsDimension x="93" y="14"/>
+					</Size>
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset>
+								<AbsDimension x="20" y="-3"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+				<FontString name="$parentLevel" inherits="GameFontHighlightSmall" justifyH="LEFT">
+					<Size>
+						<AbsDimension x="32" y="14"/>
+					</Size>
+					<Anchors>
+						<Anchor point="LEFT" relativeTo="$parentOwner" relativePoint="RIGHT">
+							<Offset>
+								<AbsDimension x="0" y="0"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+				<FontString name="$parentClass" inherits="GameFontHighlightSmall" justifyH="LEFT">
+					<Size>
+						<AbsDimension x="92" y="14"/>
+					</Size>
+					<Anchors>
+						<Anchor point="LEFT" relativeTo="$parentLevel" relativePoint="RIGHT">
+							<Offset>
+								<AbsDimension x="0" y="0"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+				<FontString name="$parentRace" inherits="GameFontHighlightSmall" justifyH="LEFT">
+					<Size>
+						<AbsDimension x="100" y="14"/>
+					</Size>
+					<Anchors>
+						<Anchor point="LEFT" relativeTo="$parentClass" relativePoint="RIGHT">
+							<Offset>
+								<AbsDimension x="0" y="0"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		<Scripts>
+			<OnLoad>
+				this:RegisterForClicks("LeftButtonDown", "RightButtonDown");
+			</OnLoad>
+			<OnClick>
+				GuildAdsGuild.peopleButton.onClick();
+			</OnClick>
+			<OnEnter>
+				GuildAdsGuild.peopleButton.onEnter();
+			</OnEnter>
+			<OnLeave>
+				GameTooltip:Hide();
+			</OnLeave>
+		</Scripts>
+	</Button>
+	
+	
+	
+	<Frame name="GuildAdsGuildFrame" parent="GuildAdsMainWindowFrame" hidden="true" setAllPoints="true">
 		<Anchors>
 			<Anchor point="TOPLEFT">
 				<Offset>
@@ -96,35 +235,20 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 								</Scripts>
 							</Button>
 					<Button name="GuildAdsGuildColumnHeader4" inherits="GuildAdsGuildColumnHeaderTemplate" text="RACE">
-						<Anchors>
-							<Anchor point="LEFT" relativeTo="GuildAdsGuildColumnHeader3" relativePoint="RIGHT">
-								<Offset>
-									<AbsDimension x="-2" y="0"/>
-								</Offset>
-							</Anchor>
-						</Anchors>
-						<Scripts>
-							<OnLoad>
-								WhoFrameColumn_SetWidth(100);
-								this.sortType = "race";
-							</OnLoad>
-						</Scripts>
-					</Button>
-					<Button name="GuildAdsGuildColumnHeader5" inherits="GuildAdsGuildColumnHeaderTemplate" text="GUILD">
-						<Anchors>
-							<Anchor point="LEFT" relativeTo="GuildAdsGuildColumnHeader4" relativePoint="RIGHT">
-								<Offset>
-									<AbsDimension x="-2" y="0"/>
-								</Offset>
-							</Anchor>
-						</Anchors>
-						<Scripts>
-							<OnLoad>
-								WhoFrameColumn_SetWidth(170);
-								this.sortType = "info";
-							</OnLoad>
-						</Scripts>
-					</Button>
+								<Anchors>
+									<Anchor point="LEFT" relativeTo="GuildAdsGuildColumnHeader3" relativePoint="RIGHT">
+										<Offset>
+											<AbsDimension x="-2" y="0"/>
+										</Offset>
+									</Anchor>
+								</Anchors>
+								<Scripts>
+									<OnLoad>
+										WhoFrameColumn_SetWidth(100);
+										this.sortType = "race";
+									</OnLoad>
+								</Scripts>
+							</Button>
 					<Button name="GuildAdsPeopleGlobalAdButton1" inherits="GuildAdsGuildAdButtonTemplate" id="1">
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="GuildAdsGuildColumnHeader1" relativePoint="BOTTOMLEFT">
@@ -507,18 +631,12 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 		</Frames>
 		
 		<Scripts> 
-			<OnLoad>
-				GuildAdsGuild.onLoad();
-			</OnLoad>
 			<OnShow>
 				GuildAdsGuild.onShow();
 			</OnShow>
 			<OnUpdate>
 				GuildAdsGuild.onUpdate();
 			</OnUpdate>
-			<OnEvent>
-				GuildAdsGuild.onEvent(event);
-			</OnEvent>
 		</Scripts> 
 	</Frame>
 	

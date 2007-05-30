@@ -127,7 +127,7 @@ GuildAdsTrade = {
 	end;
 	
 	onShow = function()
-		GuildAdsTrade.debug("onShow");
+--~ 		GuildAdsTrade.debug("onShow");
 		GuildAdsTrade.updateCurrentTab();
 	end;
 	
@@ -161,16 +161,16 @@ GuildAdsTrade = {
 		local range = table.getn(GuildAdsTrade.g_DateFilter)+1;
 		GuildAds_DateFilter:SetMinMaxValues(1,range);
 		GuildAds_DateFilter:SetValueStep(1);
-		local dateFilter = GuildAdsTrade.getProfileValue(nil, "HideAdsOlderThan", nil);
-		if dateFilter then
-			for value, time in pairs(GuildAdsTrade.g_DateFilter) do
-				if dateFilter==time then
-					GuildAds_DateFilter:SetValue(value);
-				end
-			end
-		else
-			GuildAds_DateFilter:SetValue(range);
-		end
+--~ 		local dateFilter = GuildAdsTrade.getProfileValue(nil, "HideAdsOlderThan", nil);
+--~ 		if dateFilter then
+--~ 			for value, time in pairs(GuildAdsTrade.g_DateFilter) do
+--~ 				if dateFilter==time then
+--~ 					GuildAds_DateFilter:SetValue(value);
+--~ 				end
+--~ 			end
+--~ 		else
+--~ 			GuildAds_DateFilter:SetValue(range);
+--~ 		end
 		
 		local t1,t2,t3 = GuildControlGetRankFlags();
 		
@@ -420,7 +420,7 @@ GuildAdsTrade = {
 	end;
 	
 	selectTab = function(tab)
-		GuildAdsTrade.debug("selectTab("..tostring(tab)..")");
+--~ 		GuildAdsTrade.debug("selectTab("..tostring(tab)..")");
 		
 		GuildAdsTrade.currentTab = tab;	
 		
@@ -589,7 +589,7 @@ GuildAdsTrade = {
 	end;
 	
 	updateCurrentTab = function()
-		GuildAdsTrade.debug("updateCurrentTab");
+--~ 		GuildAdsTrade.debug("updateCurrentTab");
 		if GuildAdsTradeFrame and GuildAdsTradeFrame.IsVisible and GuildAdsTradeFrame:IsVisible() then
 			if (GuildAdsTrade.currentTab == GuildAdsTrade.TAB_REQUEST or 
 				GuildAdsTrade.currentTab == GuildAdsTrade.TAB_AVAILABLE or
@@ -859,14 +859,14 @@ GuildAdsTrade = {
 		
 		adIsVisible = function(adtype, author, item, data)
 			-- show offline player
-			if GuildAdsTrade.getProfileValue(nil, "HideOfflinePlayer") and not GuildAdsComm:IsOnLine(author) then
-				return false;
-			end
+--~ 			if GuildAdsTrade.getProfileValue(nil, "HideOfflinePlayer") and not GuildAdsComm:IsOnLine(author) then
+--~ 				return false;
+--~ 			end
 			
 			-- show my ads
-			if GuildAdsTrade.getProfileValue(nil, "HideMyAds") and (GuildAds.playerName == author) then
-				return false;
-			end
+--~ 			if GuildAdsTrade.getProfileValue(nil, "HideMyAds") and (GuildAds.playerName == author) then
+--~ 				return false;
+--~ 			end
 			
 			-- get item info
 			local info = GuildAds_ItemInfo[item] or {};

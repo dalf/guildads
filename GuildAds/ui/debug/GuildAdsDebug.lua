@@ -36,18 +36,19 @@ GuildAds_DebugPlugin = {
 	};
 	
 	showDebug = function()
-		return GuildAdsDatabase and GuildAdsDatabase.Config and GuildAdsDatabase.Config.Debug;
+		return GuildAds.db and GuildAds.db.profile.Config and GuildAds.db.profile.Config.Debug;
 	end;
 	
 	setShowDebug = function(status)
 		if status then
-			GuildAdsDB:SetConfigValue({"Config"}, "Debug", true);
+			GuildAds.db.Config.Debug = true;
 		else
-			GuildAdsDB:SetConfigValue({"Config"}, "Debug", nil);
+			GuildAds.db.Config.Debug = nil;
 		end
 	end;
 	
 	onLoad = function()
+    GuildAds:CustomPrint(1, 0, 0, nil, nil, "load debug");
 		GuildAds_ChatDebug = GuildAds_DebugPlugin.addDebugMessageReal;
 		this:RegisterEvent("VARIABLES_LOADED");
 		GuildAdsPlugin.UIregister(GuildAds_DebugPlugin);
