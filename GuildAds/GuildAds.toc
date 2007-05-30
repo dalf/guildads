@@ -1,4 +1,4 @@
-## Interface: 20006
+## Interface: 20100
 ## Title: GuildAds |cff7fff7f -Ace2-|r
 ## Author: Zarkan, Fkai
 ## Version: 2.0
