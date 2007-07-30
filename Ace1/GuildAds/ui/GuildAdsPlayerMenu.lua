@@ -22,6 +22,7 @@ GuildAdsPlayerMenu = {
 	end;
 	
 	menus = function(owner, level)
+		currentLevel = level;
 		info = { };
 		info.text =  WHISPER_MESSAGE;
 		info.notCheckable = 1;
@@ -54,6 +55,7 @@ GuildAdsPlayerMenu = {
 	end;
 	
 	footer = function(owner, level)
+		currentLevel = level;
 		info = { };
 		info.text = CANCEL;
 		info.notCheckable = 1;
