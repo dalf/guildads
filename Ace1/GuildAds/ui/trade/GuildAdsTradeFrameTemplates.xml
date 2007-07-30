@@ -323,7 +323,7 @@
 						this:SetChecked(false);
 					</OnLoad>
 					<OnClick>
-						GuildAdsTrade.myAds.myAdCheckButton_OnClick();
+						GuildAdsTrade.exchangeButton.checkButton_OnClick();
 					</OnClick>
 				</Scripts>
 			</CheckButton>
@@ -334,9 +334,11 @@
 			</OnClick>
 			<OnEnter>
 				GuildAdsTrade.exchangeButton.onEnter();
+				this:SetScript("OnUpdate",GuildAdsTrade.exchangeButton.onUpdate);
 			</OnEnter>
 			<OnLeave>
 				GameTooltip:Hide();
+				this:SetScript("OnUpdate",nil);
 			</OnLeave>
 		</Scripts>
 	</Button>

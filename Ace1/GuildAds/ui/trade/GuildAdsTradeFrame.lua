@@ -128,6 +128,12 @@ GuildAdsTrade = {
 	
 	onShow = function()
 		GuildAdsTrade.debug("onShow");
+		local t1,t2,t3 = GuildControlGetRankFlags();
+		
+		if (t3) then 
+			GuildAdsTrade.administrator = true;
+			GuildAdsTradeAdminDeleteButton:Show();
+		end
 		GuildAdsTrade.updateCurrentTab();
 	end;
 	
@@ -172,12 +178,6 @@ GuildAdsTrade = {
 			GuildAds_DateFilter:SetValue(range);
 		end
 		
-		local t1,t2,t3 = GuildControlGetRankFlags();
-		
-		if (t3) then 
-			GuildAdsTrade.administrator = true;
-			GuildAdsTradeAdminDeleteButton:Show();
-		end
 		GuildAdsTrade.PrepareSortArrow();
 		
 		GuildAdsAddButtonLookFor:Disable();
@@ -239,7 +239,7 @@ GuildAdsTrade = {
 			end
 			if (tochat ~= nil) then
 				local info = GuildAds_ItemInfo[item] or {};
-				local _, _, _, hex = GetItemQualityColor(info.quality or 1)
+				local _, _, _, hex = GuildAds_GetItemQualityColor(info.quality or 1)
 				tochat = tochat .. hex.."|H"..item.."|h["..info.name.."]|r";
 				if data.q then
 					tochat = tochat.." x "..data.q;
@@ -391,6 +391,8 @@ GuildAdsTrade = {
 					button.item = linear[j].i;
 					button.playerName = linear[j].p;
 					button.data = linear[j].d;
+					button.recipe = linear[j].e;
+					
 					-- update button
 					local selected = 	(GuildAdsTrade.currentPlayerName == button.playerName) 
 									and (GuildAdsTrade.currentItem == button.item)
@@ -403,6 +405,7 @@ GuildAdsTrade = {
 					button.item = nil;
 					button.playerName = nil;
 					button.data = nil;
+					button.recipe = nil;
 					button:Hide();
 				end
 			
@@ -474,7 +477,7 @@ GuildAdsTrade = {
 			else 
 				GuildAds_Filter_ZoneDropDown:Hide();
 			end
-			
+			GuildAdsTrade.altkey=IsAltKeyDown(); -- used to display invalid items, i.e. items that lack recipelinks (hidden feature)
 			GuildAdsTrade.exchangeButtonsUpdate(tab,true);
 
 		elseif (tab == GuildAdsTrade.TAB_MY_ADS) then
@@ -562,7 +565,7 @@ GuildAdsTrade = {
 		
 		if info then
 			GuildAdsEditTexture:SetNormalTexture(info.texture);
-			local _, _, _, hex = GetItemQualityColor(info.quality or 1)
+			local _, _, _, hex = GuildAds_GetItemQualityColor(info.quality or 1)
 			GuildAdsEditTextureName:SetText(hex..info.name.."|r");
 		else
 			if GuildAdsTrade.currentItem~="" then
@@ -623,16 +626,90 @@ GuildAdsTrade = {
 	
 	exchangeButton = {
 		t = {};
-	
+		currentButton = false;
+		--checkedList = { [GuildAdsTrade.TAB_REQUEST]={}; [GuildAdsTrade.TAB_AVAILABLE]={}; [GuildAdsTrade.TAB_CRAFTABLE]={} };
+		checkedList = { [1]={}; [2]={}; [3]={} };
+		
 		onClick = function(button)
-			GuildAdsTrade.select(this.adType, this.playerName, this.item);
+			if this.item and button=="LeftButton" and IsShiftKeyDown() and ChatFrameEditBox:IsVisible() then 
+				local thisitem,itemInfo;
+				if not IsAltKeyDown() then
+					thisItem=this.item;
+				else
+					thisItem=this.recipe;
+				end
+				itemInfo=GuildAds_ItemInfo[thisItem] or {};
+				if (thisItem and itemInfo and itemInfo.name) then
+  					local r, g, b, hex = GuildAds_GetItemQualityColor(itemInfo.quality);
+  					--local hexcol = string.gsub( hex, "|c(.+)", "%1" );
+  					local link = hex.."|H"..thisItem.."|h["..itemInfo.name.."]|h|r";
+  					ChatFrameEditBox:Insert(link);
+				end
+			else
+				GuildAdsTrade.select(this.adType, this.playerName, this.item);
 			
-			if button == "RightButton" then
-				GuildAdsTrade.contextMenu.show();
+				if button == "RightButton" then
+					GuildAdsTrade.contextMenu.show();
+				end
+				if this.item and button=="LeftButton" and IsControlKeyDown() then 
+					DressUpItemLink(this.item); 
+				end
 			end
-			if this.item and button=="LeftButton" and IsControlKeyDown() then 
-				DressUpItemLink(this.item); 
+		end;
+		
+		checkButton_OnClick = function()
+			local item=(this:GetParent()).item;
+			local playerName=(this:GetParent()).playerName;
+			local adType=(this:GetParent()).adType;
+			if item then
+				if this:GetChecked() then
+					GuildAdsTrade.exchangeButton.checkedList[GuildAdsTrade.currentTab][item]=playerName;
+					--GuildAdsTrade.debug(item.." inserted into list with value "..tostring(playerName));
+				else
+					GuildAdsTrade.exchangeButton.checkedList[GuildAdsTrade.currentTab][item]=nil;
+					--GuildAdsTrade.debug(item.." removed from list");
+				end
+			else
+				GuildAdsTrade.debug("item=nil");
 			end
+		end;
+		
+		adminDel_onClick = function()
+			GuildAdsTrade.debug("deleting items");
+			local item, players, playerName, adType, datatype, channelDB, data;
+			for item, players in pairs(GuildAdsTrade.exchangeButton.checkedList[GuildAdsTrade.currentTab]) do
+				GuildAdsTrade.debug("deleting item "..item.." from players");
+				if type(players)=="table" then
+					for _, playerName in pairs(players) do
+						GuildAdsTrade.exchangeButton.deleteItemFromDB(playerName,item);
+					end
+				elseif type(players)=="string" then
+					GuildAdsTrade.exchangeButton.deleteItemFromDB(players,item);
+				end
+			end
+			GuildAdsTrade.exchangeButton.checkedList[GuildAdsTrade.currentTab]={}; -- clear checkmark list
+			GuildAdsTrade.data.resetCache();
+			GuildAdsTrade.updateCurrentTab();
+		end;
+		
+		deleteItemFromDB = function(author,item)
+			local adType,datatype,data;
+			adType=GuildAdsTrade.TabToAdType[GuildAdsTrade.currentTab];
+	 		if adType == GUILDADS_MSG_TYPE_AVAILABLE then
+	 			datatype = GuildAdsDB.channel[GuildAds.channelName].TradeOffer;
+	 		elseif adType == GUILDADS_MSG_TYPE_REQUEST then
+	 			datatype = GuildAdsDB.channel[GuildAds.channelName].TradeNeed;
+	 		elseif adType == 3 then
+	 			datatype = GuildAdsDB.profile.TradeSkill;
+	 		else
+	 			GuildAdsTrade.debug("unknown adType");
+	 		end
+	 		if datatype then
+	 			--data = datatype:getRevision(author, item);
+	 			GuildAdsTrade.debug("item "..item.." at player "..author.." has revision "..tostring(data));
+	 			--GuildAdsTrade.debug("deleting item "..item.." from player "..author);
+	 			datatype:set(author,item,nil);
+	 		end
 		end;
 		
 		update = function(button, selected, item, playerName, data)
@@ -649,6 +726,11 @@ GuildAdsTrade = {
 			
 			local texture = buttonName.."ItemIconTexture";
 			if (GuildAdsTrade.administrator) then
+				if item and GuildAdsTrade.exchangeButton.checkedList[GuildAdsTrade.currentTab][item] then
+					getglobal(buttonName.."CheckButton"):SetChecked(1);
+				else
+					getglobal(buttonName.."CheckButton"):SetChecked(0);
+				end
 				getglobal(buttonName.."CheckButton"):Show();
 			end
 				
@@ -663,15 +745,31 @@ GuildAdsTrade = {
 			if type(playerName)=="string" then
 				ownerColor = GuildAdsUITools.onlineColor[GuildAdsComm:IsOnLine(playerName)];
 				getglobal(ownerField):SetText(playerName);
-				
 			else
 				ga_table_erase(GuildAdsTrade.exchangeButton.t);
 				local online;
 				local atLeastOneOnline;
+				local colour;
+				local visible;
 				for _, name in pairs(playerName) do
 					online = GuildAdsComm:IsOnLine(name);
 					atLeastOneOnline = atLeastOneOnline or online;
-					tinsert(GuildAdsTrade.exchangeButton.t, GuildAdsUITools.onlineColorHex[online]..name.."|r");
+					colour=GuildAdsUITools.onlineColorHex[online];
+					--if GuildAdsTrade.altkey then
+					--	visible=false;
+					--	if item then
+					--		local itemlink = GuildAdsTradeSkillDataType:get(name,item);
+					--		if itemlink and not itemlink.e then
+								--colour=GuildAdsUITools.invalidHex;
+					--			visible=true;
+					--		end
+					--	end
+					--else
+						visible=true;
+					--end
+					--if visible then
+						tinsert(GuildAdsTrade.exchangeButton.t, colour..name.."|r");
+					--end
 				end
 				ownerColor = GuildAdsUITools.onlineColor[atLeastOneOnline];
 				getglobal(ownerField):SetText(table.concat(GuildAdsTrade.exchangeButton.t, ", "));
@@ -694,7 +792,7 @@ GuildAdsTrade = {
 			if info.name then
 				getglobal(textField):Show();
 				if info.quality then
-					local _, _, _, hex = GetItemQualityColor(info.quality)
+					local _, _, _, hex = GuildAds_GetItemQualityColor(info.quality)
 					getglobal(textField):SetText(hex..info.name.."|r");
 				else
 					getglobal(textField):SetText(info.name);
@@ -719,7 +817,7 @@ GuildAdsTrade = {
 			else
 				getglobal(sinceField):Hide();
 			end
-				
+						
 			-- Drop/Use
 			if info.name and ReagentData then
 				-- Drop
@@ -754,12 +852,21 @@ GuildAdsTrade = {
 		onEnter = function(obj) 
 			obj = obj or this;
 			
-			local item = obj.item;
+			GuildAdsTrade.exchangeButton.currentButton=obj;
+			
+			local item;-- = obj.item;
 			local playerName = obj.playerName;
 			local data = obj.data;
 			
 			-- set tooltip
-			if item then
+			local itemInfo;
+			if GuildAdsTrade.exchangeButton.altTooltip then
+				item=this.recipe;
+			else
+				item=this.item;
+			end
+			itemInfo=GuildAds_ItemInfo[this.item];
+			if item and itemInfo and itemInfo.name then -- GALMOK
 				GameTooltip:SetOwner(obj, "ANCHOR_BOTTOMRIGHT");
 				GameTooltip:SetHyperlink(item);
 				
@@ -772,7 +879,7 @@ GuildAdsTrade = {
 				GameTooltip:Show();
 				local info = GuildAds_ItemInfo[item];
 				if info then
-					GuildAdsUITools:TooltipAddTT(GameTooltip, GetItemQualityColor(info.quality or 1), item, info.name, data.q or 1);
+					GuildAdsUITools:TooltipAddTT(GameTooltip, GuildAds_GetItemQualityColor(info.quality or 1), item, info.name, data.q or 1);
 				end
 			end
 			
@@ -783,7 +890,19 @@ GuildAdsTrade = {
 			elseif type(playerName)=="table" then
 				-- TODO ...
 			end
-		end
+		end;
+		
+		onUpdate = function()
+			if GuildAdsTrade.exchangeButton.currentButton then
+				if IsAltKeyDown() and not GuildAdsTrade.exchangeButton.altTooltip then
+					GuildAdsTrade.exchangeButton.altTooltip = true;
+					GuildAdsTrade.exchangeButton.onEnter(GuildAdsTrade.exchangeButton.currentButton);
+				elseif not IsAltKeyDown() and GuildAdsTrade.exchangeButton.altTooltip then
+					GuildAdsTrade.exchangeButton.altTooltip = false;
+					GuildAdsTrade.exchangeButton.onEnter(GuildAdsTrade.exchangeButton.currentButton);
+				end
+			end
+		end;
 	};
 	
 	itemFilterFunction = {
@@ -943,22 +1062,48 @@ GuildAdsTrade = {
 				end
 				GuildAdsTrade.data.cache[tab] = {};
 				if (tab == GuildAdsTrade.TAB_CRAFTABLE) then
-					local already;
+					-- TOO SLOW
+--					local already;
+--					for _, item, playerName, data in datatype:iterator() do
+--						for key,value in pairs(GuildAdsTrade.data.cache[tab]) do
+--							if (GuildAdsTrade.data.cache[tab][key].i==item) then 
+--								already=true;
+--								tinsert(GuildAdsTrade.data.cache[tab][key].p, playerName);
+--								break;
+--							end
+--						end
+--						if (not already) then
+--							if GuildAdsTrade.data.adIsVisible(adtype, playerName, item, data) then
+--								tinsert(GuildAdsTrade.data.cache[tab], { i=item, p={playerName}, d=data, t=adtype });
+--							end
+--						end
+--						already=nil;
+--					end
+					-- MUCH FASTER -- GALMOK
+					local tmptable = {};
 					for _, item, playerName, data in datatype:iterator() do
-						for key,value in pairs(GuildAdsTrade.data.cache[tab]) do
-							if (GuildAdsTrade.data.cache[tab][key].i==item) then 
-								already=true;
-								tinsert(GuildAdsTrade.data.cache[tab][key].p, playerName);
-								break;
+						if (tmptable[item]) then
+							if GuildAdsTrade.altkey then
+								if not data.e then
+									tinsert(tmptable[item].p, playerName);
+								end
+							else
+								tinsert(tmptable[item].p, playerName);
+								if data.e and not tmptable[item].e then
+									tmptable[item].e=data.e;
+								end
+							end
+						else
+							if (not GuildAdsTrade.altkey and GuildAdsTrade.data.adIsVisible(adtype, playerName, item, data)) or (GuildAdsTrade.altkey and not data.e) then
+								tmptable[item]={ i=item, p={playerName}, d=data, t=adtype, e=data.e };
 							end
 						end
-						if (not already) then
-							if GuildAdsTrade.data.adIsVisible(adtype, playerName, item, data) then
-								tinsert(GuildAdsTrade.data.cache[tab], { i=item, p={playerName}, d=data, t=adtype });
-							end
-						end
-						already=nil;
 					end
+					for key,value in pairs(tmptable) do
+						tinsert(GuildAdsTrade.data.cache[tab], { i=key, p=value.p, d=value.d, t=value.t, e=value.e });
+					end
+					-- /FASTER GALMOK
+
 					for _, data in pairs(GuildAdsTrade.data.cache[tab]) do
 						table.sort(data.p, GuildAdsTrade.sortData.predicateFunctions.crafter);
 					end
@@ -1305,32 +1450,49 @@ GuildAdsTrade = {
 	
 	
 	contextMenu = {
-	
+		currentItem=false;
+		
 		onLoad = function()
 			HideDropDownMenu(1);
 			GuildAdsTradeContextMenu.initialize = GuildAdsTrade.contextMenu.initialize;
 			GuildAdsTradeContextMenu.displayMode = "MENU";
-			GuildAdsTradeContextMenu.name = "Titre";			
+			--GuildAdsTradeContextMenu.name = "Titre";			
 		end;
 	
 		show = function(owner)
+			GuildAdsTrade.contextMenu.currentItem=this.item;
 			HideDropDownMenu(1);
-			ToggleDropDownMenu(1, nil, GuildAdsTradeContextMenu, "cursor");			
+			GuildAdsTradeContextMenu.name = "Title";
+			GuildAdsTradeContextMenu.owner = owner;
+			ToggleDropDownMenu(1, nil, GuildAdsTradeContextMenu, "cursor");	
 		end;
 		
 		addPlayer = function(playerName)
+			local online = GuildAdsComm:IsOnLine(playerName);
 			local info = { };
 			info.text =  playerName;
 			info.notCheckable = 1;
-			info.notClickable = 1;
+			--info.notClickable = 1; --will make the button white...
 			info.hasArrow = 1;
 			info.func = ToggleDropDownMenu;
 			info.arg1 = 2;
+			info.textR = GuildAdsUITools.onlineColor[online].r;
+			info.textG = GuildAdsUITools.onlineColor[online].g;
+			info.textB = GuildAdsUITools.onlineColor[online].b;
+			if GuildAdsTrade.contextMenu.currentItem then
+				local item = GuildAdsTradeSkillDataType:get(playerName,GuildAdsTrade.contextMenu.currentItem);
+				if item and not item.e then
+					info.textR = GuildAdsUITools.invalid.r;
+					info.textG = GuildAdsUITools.invalid.g;
+					info.textB = GuildAdsUITools.invalid.b;
+				end
+			end
 			UIDropDownMenu_AddButton(info, 1);			
 		end;
 		
 		initialize = function(level)
 			if level==1 then
+				--GuildAdsPlayerMenu.header(GuildAdsTradeContextMenu.owner, 1);
 				if type(GuildAdsTrade.currentPlayerName)=="string" then
 					GuildAdsTrade.contextMenu.addPlayer(GuildAdsTrade.currentPlayerName);
 				elseif type(GuildAdsTrade.currentPlayerName)=="table" then
@@ -1339,6 +1501,11 @@ GuildAdsTrade = {
 					end
 				end
 			else
+				GuildAdsPlayerMenu.header(UIDROPDOWNMENU_MENU_VALUE, level);
+				GuildAdsPlayerMenu.menus(UIDROPDOWNMENU_MENU_VALUE, level);
+				GuildAdsPlayerMenu.footer(UIDROPDOWNMENU_MENU_VALUE, level);
+			end
+			if false then
             info = { };
 		local online = GuildAdsComm:IsOnLine(UIDROPDOWNMENU_MENU_VALUE);
 		
@@ -1492,7 +1659,7 @@ GuildAdsTrade = {
 					
 				-- Set name
 				if (info.name) then
-					local _, _, _, hex = GetItemQualityColor(info.quality or 1)
+					local _, _, _, hex = GuildAds_GetItemQualityColor(info.quality or 1)
 					getglobal(textField):SetText(hex..info.name.."|r");
 				else
 					getglobal(textField):SetText(button.item);

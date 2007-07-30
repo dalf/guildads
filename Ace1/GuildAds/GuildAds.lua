@@ -193,6 +193,12 @@ function GuildAds:ResetOthers()
 	GuildAdsDB:ResetOthers();
 end
 
+function GuildAds:CleanOther()
+	if GuildAdsTradeSkillDataType then
+		GuildAdsTradeSkillDataType:deleteOtherTradeSkillItems();
+	end
+end
+
 function GuildAds:LoadGuildRosterTask()
 	if IsInGuild() then
 		GuildRoster();

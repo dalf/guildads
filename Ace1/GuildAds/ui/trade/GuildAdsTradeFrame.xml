@@ -1267,6 +1267,9 @@
 					</Anchor>
 				</Anchors>
 				<Scripts>
+					<OnClick>
+						GuildAdsTrade.exchangeButton.adminDel_onClick();
+					</OnClick>
 				</Scripts>
 			</Button>
 			
