@@ -10,8 +10,8 @@
 
 SIMPLECOMM_DEBUG = false;				-- output debug information
 
-SIMPLECOMM_CHARACTERSPERTICK_MAX = 300;	-- char per tick
-SIMPLECOMM_OUTBOUND_TICK_DELAY = 1;		-- delay in second between tick
+SIMPLECOMM_CHARACTERSPERTICK_MAX = 100;		-- char per tick			300
+SIMPLECOMM_OUTBOUND_TICK_DELAY = 0.5;		-- delay in second between tick		1
 
 SIMPLECOMM_INBOUND_TICK_DELAY = 0.125;	-- TODO : change from 0.125 to 0.5 according to FPS
 
@@ -52,6 +52,7 @@ local SimpleComm_messageQueueLast = SimpleComm_messageQueueHeader;
 local SimpleComm_inboundMessageQueue = {};
 	
 local SimpleComm_sentBytes = 0;
+local SimpleComm_extraBytes = 0;
 local SimpleComm_channelId;
 SimpleComm_YouAreDrunk = false;
 
@@ -263,16 +264,20 @@ local function SimpleComm_SendQueue(elapsed)
 	
 	local previousMessage = SimpleComm_messageQueueHeader;
 	local message = SimpleComm_messageQueueHeader.next;
-	
+
 	while message do
 		
 		-- check chat traffic
 		SimpleComm_sentBytes = SimpleComm_sentBytes + string.len(message.text);
-		if SimpleComm_sentBytes > SIMPLECOMM_CHARACTERSPERTICK_MAX then
+		if SimpleComm_sentBytes > (SIMPLECOMM_CHARACTERSPERTICK_MAX+SimpleComm_extraBytes) then
 			SimpleComm_sentBytes = SimpleComm_sentBytes - string.len(message.text);
 			previousMessage = SimpleComm_messageQueueLast;
+			SimpleComm_extraBytes = SimpleComm_extraBytes + (SIMPLECOMM_CHARACTERSPERTICK_MAX - SimpleComm_sentBytes);
+			--SimpleComm_extraBytes = SimpleComm_extraBytes + (SIMPLECOMM_CHARACTERSPERTICK_MAX - (SimpleComm_sentBytes - sentBytes));
+			--DEBUG_MSG("too long message, saving "..tostring(SimpleComm_extraBytes).." for next message.", true);
 			break;
 		end
+		SimpleComm_extraBytes = 0;
 		
 		-- send message
 		if message.to then
@@ -299,7 +304,7 @@ local function SimpleComm_SendQueue(elapsed)
 	SimpleComm_messageQueueLast = previousMessage;
 	
 	SetCVar("autoClearAFK", clearAFK);
-	if (SimpleComm_sentBytes > 0) then
+	if (SimpleComm_sentBytes> 0) then
 		DEBUG_MSG(SimpleComm_sentBytes.." bytes sent", true);
 	end
 end
@@ -584,13 +589,14 @@ function SimpleComm_SendMessage(who, text)
 			local packetNumber = 1;
 			while text~="" do
 				-- take first 240 char
-				local tmp = string.sub(text, 1, 240);
+				local tmp = string.sub(text, 1, 239); -- GALMOK: 239 was 240
 				text = string.sub(text, 240);
 				-- add a packet
 				SimpleComm_messageQueueLast.next = {
 					to = who;
 					text = SimpleComm_SplitSerialize(packetNumber, text=="", tmp);
 				};
+				--DEBUG_MSG("long message part "..packetNumber..": "..tmp, true);
 				SimpleComm_messageQueueLast = SimpleComm_messageQueueLast.next;
 				-- next packet
 				packetNumber = packetNumber + 1;
