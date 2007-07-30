@@ -1,3 +1,4 @@
+if GetLocale() == "esES" then
 GUILDADS_TITLE			= "GuildAds";
 
 -- Minimap button
@@ -239,3 +240,5 @@ GUILDADSTOOLTIPS_SKILL =  "Te permite ver las habilidades y profesiones de tus c
 
 GUILDADSTOOLTIPS_GUILD_TITLE = GUILD;
 GUILDADSTOOLTIPS_GUILD = "Te permite ver la lista de tus compañeros de GuildAds";
+
+end
