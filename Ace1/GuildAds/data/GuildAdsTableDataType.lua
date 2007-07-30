@@ -55,7 +55,7 @@ GuildAdsTableDataType.iteratorAll = function(self, current)
 	else
 		players = GuildAdsDB.channel[GuildAds.channelName]:getPlayers();
 	end
-
+	
 	-- current[1] = playerName, current[2] = id
 	local data;
 
@@ -68,7 +68,8 @@ GuildAdsTableDataType.iteratorAll = function(self, current)
 	if current[1] then
 		current[2], data = self:nextId(current[1], current[2])
 
-		if not current[2] then
+		--if not current[2] then
+		while current[1] and not current[2] do
 			-- end of table for this player current[1], so try the next player
 			current[1] = self:nextPlayerName(players, current[1]);
 			if current[1] then
