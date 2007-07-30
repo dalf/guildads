@@ -191,8 +191,9 @@ function GuildAdsInternalTooltip_ParseTooltip(itemRef)
 		local rr, gg, bb;
 		local d = 10;
 		local q = 1;
-		for quality=1,6,1 do
-			rr, gg, bb = GetItemQualityColor(quality);
+		--for quality=1,6,1 do
+		for quality=-1,6,1 do -- quality starts from 0, not 1. Also added quality -1 for enchant links. --GALMOK
+			rr, gg, bb = GuildAds_GetItemQualityColor(quality);
 			local dd = math.abs(rr-r)+math.abs(gg-g)+math.abs(bb-b);
 			if dd<d then
 				d = dd;
@@ -218,5 +219,14 @@ function GuildAdsInternalTooltip_ParseTooltip(itemRef)
 				GuildAds_ItemInfo[itemRef].spellKnown = true;
 			end
 		end
+	end
+end
+
+-- GALMOK: Use this if the quality comes from item.quality and not from GetItemInfo.
+function GuildAds_GetItemQualityColor(quality)
+	if quality>=0 and quality<=6 then -- item colours
+		return GetItemQualityColor(quality)
+	elseif quality==-1 then -- enchant color
+		return 1.0,208/255,0,"|cffffd000";
 	end
 end
