@@ -163,6 +163,7 @@ GuildAdsGuild = {
 		for id, name in pairs(GUILDADS_CLASSES) do
 			tinsert(g_AdFilters, { id=id, name=name});
 		end
+
 	end;
 	
 	---------------------------------------------------------------------------------
@@ -548,6 +549,17 @@ GuildAdsGuild = {
 				UIDropDownMenu_AddButton(info, 1);
 			end
 			-- 
+			-- GALMOK
+			local t1,t2,t3 = GuildControlGetRankFlags();
+			if (t3) then 
+				info = { };
+				info.text = GUILDADS_GUILD_DELETE;
+				info.notCheckable = 1;
+				info.value = GuildAdsGuildContextMenu.owner;
+				info.func = GuildAdsGuild.contextMenu.deletePlayer;
+				UIDropDownMenu_AddButton(info, 1);
+			end
+			
 			GuildAdsPlayerMenu.footer(GuildAdsGuildContextMenu.owner, 1);
 		end;
 		
@@ -556,6 +568,13 @@ GuildAdsGuild = {
 				GuildAdsDB.profile.Main:setRaw(this.value, GuildAdsDB.profile.Main.Account, nil);
 				GuildAdsGuild.peopleButtonsUpdate(true);
 				GuildAdsGuild.peopleCountUpdate();
+			end
+		end;
+		
+		deletePlayer = function()
+			if this.value then
+				GuildAdsGuild.debug("Deleting player "..this.value.." from GuildAds database");
+				GuildAdsDB.channel[GuildAds.channelName]:deletePlayer(this.value);
 			end
 		end;
 			
