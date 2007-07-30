@@ -152,6 +152,11 @@ GuildAdsPlugin = {
 				return GuildAdsDB:GetConfigValue({ GuildAdsDB.PROFILE_PATH, pluginName, path}, key, defaultValue)
 			end;
 			
+			-- GALMOK -- needed a way to read the raw db value
+			plugin.getRawProfileValue = function(path, key)
+				return GuildAdsDB:GetRawConfigValue({ GuildAdsDB.PROFILE_PATH, pluginName, path}, key)
+			end;
+			
 			-- call onChannelJoin() ??
 			
 			GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "Register plugin: "..pluginName);

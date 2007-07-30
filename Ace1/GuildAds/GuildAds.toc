@@ -30,6 +30,7 @@ data\GuildAdsTableDataType.lua
 data\GuildAdsDB.lua
 data\datatypes\GuildAdsMainData.lua
 data\datatypes\GuildAdsSkillData.lua
+data\datatypes\GuildAdsFactionData.lua
 data\datatypes\GuildAdsTradeNeedData.lua
 data\datatypes\GuildAdsTradeOfferData.lua
 data\datatypes\GuildAdsInventoryData.lua
@@ -56,6 +57,7 @@ ui\trade\GuildAdsShiftClick.xml
 ui\tradeCraft\GuildAdsCraftFrame.xml
 ui\tradeTooltip\GuildAdsTooltip.xml
 ui\skill\GuildAdsSkillFrame.xml
+ui\faction\GuildAdsFactionFrame.xml
 ui\inventory\GuildAdsInventoryFrame.xml
 ui\GEM\GuildAdsGEMEventFrame.xml
 ui\minimapButton\GuildAdsMinimapButton.xml

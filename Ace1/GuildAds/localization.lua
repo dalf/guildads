@@ -15,6 +15,10 @@ GUILDADS_CHAT_SHOW_NEWEVENT	= "Show news about 'Event'"
 GUILDADS_CHAT_SHOW_NEWASK	= "Show news about 'Ask'";
 GUILDADS_CHAT_SHOW_NEWHAVE	= "Show news about 'Have'";
 GUILDADS_ADS_OPTIONS		= "Ads settings";
+GUILDADS_FACTION_OPTIONS	= "Faction settings";
+GUILDADS_FACTION_HIDE_COLLAPSED = "Hide collapsed factions";
+GUILDADS_FACTION_ONLY_LEVEL_70	= "Show only level 70 players";
+GUILDADS_FACTION_FACTION	= "Show Faction"; -- Should be updated runtime to either Horde or Alliance
 GUILDADS_PUBLISH		= "Publish my ads";
 GUILDADS_VIEWMYADS		= "Show my ads";
 GUILDADS_ICON_OPTIONS		= "Minimap icon settings";
@@ -57,10 +61,12 @@ GUILDADS_HEADER_AVAILABLE	= "Have";
 GUILDADS_HEADER_INVENTORY	= INSPECT;
 GUILDADS_HEADER_SKILL 		= SKILLS;
 GUILDADS_HEADER_ANNONCE		= GUILD;
+GUILDADS_HEADER_FACTION		= "Reputation";
 GUILDADS_HEADER_EVENT		= "Events";
 
 GUILDADS_GUILD_GROUPWITHACCOUNT	= "Group %s with the account of %s";
 GUILDADS_GUILD_DEGROUP		= "Degroup from the account";
+GUILDADS_GUILD_DELETE		= "Delete"; 
                     
 -- Item
 GUILDADS_ITEMS = {
@@ -145,6 +151,17 @@ GUILDADS_CMD_OPTIONS = {
 				option = "others",
 				desc = "Reset all informations about others players",
 				method = "ResetOthers"
+			}
+		}
+	},
+	{
+		option = "clean",
+		desc = "Clean the database",
+		args = {
+			{
+				option = "other",
+				desc = "Delete tradeskill information from other accounts that doesn't have recipe links",
+				method = "CleanOther"
 			}
 		}
 	},
@@ -239,3 +256,78 @@ GUILDADSTOOLTIPS_SKILL =  "Allow you to see skills and professions of your curre
 
 GUILDADSTOOLTIPS_GUILD_TITLE = GUILD;
 GUILDADSTOOLTIPS_GUILD = "Allow you to see roster of current guildads mate";
+
+--Factions (only factions mentioned here can be synchronized)
+-- Taken from http://www.wowwiki.com/Reputation#Reputation_sheet
+GUILDADS_FACTIONS = {
+	[1]  = "Darnassus";  -- Alliance
+	[2]  = "Exodar";
+	[3]  = "Gnomeregan Exiles";
+	[4]  = "Ironforge";
+	[5]  = "Stormwind";
+	[6]  = "Silverwing Sentinels";
+	[7]  = "Stormpike Guard";
+	[8]  = "The League of Arathor";
+	[9]  = "Darkspear Trolls"; -- Horde
+	[10] = "Orgrimmar";
+	[11] = "Silvermoon City";
+	[12] = "Thunder Bluff";
+	[13] = "Undercity";
+	[14] = "Frostwolf Clan";
+	[15] = "The Defilers";
+	[16] = "Warsong Outriders";
+	[17] = "Honor Hold"; -- Outland
+	[18] = "Thrallmar";
+	[19] = "Kurenai";
+	[20] = "The Mag'har";
+	[21] = "Cenarion Expedition";
+	[22] = "Sporeggar";
+	[23] = "The Consortium";
+	[24] = "Netherwing";
+	[25] = "Ogri'la";
+	[26] = "Ashtongue Deathsworn";
+	[27] = "Lower City"; -- Shattrath City
+	[28] = "Sha'tari Skyguard";
+	[29] = "The Aldor";
+	[30] = "The Scryers";
+	[31] = "The Sha'tar";
+	[32] = "Booty Bay"; -- Steamwheedle Cartel
+	[33] = "Everlook";
+	[34] = "Gadgetzan";
+	[35] = "Ratchet";
+	[36] = "Argent Dawn"; -- Other
+	[37] = "Bloodsail Buccaneers";
+	[38] = "Brood of Nozdormu";
+	[39] = "Cenarion Circle";
+	[40] = "Darkmoon Faire";
+	[41] = "Gelkis Clan Centaur";
+	[42] = "Hydraxian Waterlords";
+	[43] = "Magram Clan Centaur";
+	[44] = "Ravenholdt";
+	[45] = "Shen'dralar";
+	[46] = "Syndicate";
+	[47] = "Thorium Brotherhood";
+	[48] = "Timbermaw Hold";
+	[49] = "Wintersaber Trainers";
+	[50] = "Zandalar Tribe";
+	[51] = "Keepers of Time"; -- Other - BC
+	[52] = "The Scale of the Sands";
+	[53] = "Tranquillien";
+	[54] = "The Violet Eye";
+};
+
+-- Left side: Profile options (do NOT modify), Right side: CheckButton label
+--GUILDADS_FACTION_GROUP_LABELS = {
+--	"ShowFaction" = "Show Faction",
+--	"ShowFactionForces" = "Show Faction Forces",
+--	"ShowOutland" = "Show Outland",
+--	"ShowShattrathCity" = "Show Shattrath City",
+--	"ShowSteamwheedleCartel" = "Show Steamwheedle Cartel",
+--	"ShowOther" = "Show Other"
+--};
+GUILDADS_FACTION_SHOWFACTION = "Show Faction";
+GUILDADS_FACTION_SHOWFACTIONFORCES = "Show Faction Forces";
+GUILDADS_FACTION_SHOWOUTLAND = "Show Outland";
+GUILDADS_FACTION_SHOWSHATTRATHCITY = "Show Shattrath City";
+GUILDADS_FACTION_SHOWSTEAMWHEEDLECARTEL = "Show Steamwheedle Cartel";
+GUILDADS_FACTION_SHOWOTHER = "Show Other";
