@@ -14,7 +14,8 @@ GuildAdsTradeNeedDataType = GuildAdsDataType:new({
 		version = 1,
         guildadsCompatible = 200,
 		parent = GuildAdsDataType.CHANNEL,
-		priority = 400
+		priority = 400,
+		depend = { "Main" }
 	};
 	schema = {
 		id = "ItemRef",

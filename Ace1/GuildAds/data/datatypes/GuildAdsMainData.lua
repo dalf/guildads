@@ -14,7 +14,8 @@ GuildAdsMainDataType = GuildAdsTableDataType:new({
 		version = 1,
         guildadsCompatible = 200,
 		parent = GuildAdsDataType.PROFILE,
-		priority = 100
+		priority = 100,
+		depend = { }
 	};
 	schema = {
 		keys = {

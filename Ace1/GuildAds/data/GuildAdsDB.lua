@@ -324,6 +324,45 @@ function GuildAdsDB:Initialize()
 	setmetatable(GuildAdsDB.channel, GuildAdsDBchannelMT);
 	setmetatable(GuildAdsDB.profile, GuildAdsDBprofileMT);
 	
+	-- prioritize data types
+	priority=100
+	list = {}
+	while true do
+		-- check dependency of every module
+		tmp = {}
+		for _, dataType in pairs(self._load) do
+			if not list[dataType.metaInformations.name] then
+				dependencyFailed=false;
+				for _, dependency in pairs(dataType.metaInformations.depend) do
+					if not list[dependency] then
+						dependencyFailed=true;
+					end
+				end
+				if not dependencyFailed then
+					tinsert(tmp,dataType.metaInformations.name)
+				end
+			end
+		end
+		if #tmp == 0 then
+			break
+		end
+		-- pick one from tmp at random
+		i=math.random(#tmp)
+		list[tmp[i]]=priority;
+		priority=priority+100;
+	end
+	for _, dataType in pairs(self._load) do
+		if list[dataType.metaInformations.name] then
+			dataType.metaInformations.priority = list[dataType.metaInformations.name];
+			GuildAds_ChatDebug(GA_DEBUG_STORAGE,"datatype "..dataType.metaInformations.name.." is given priority "..dataType.metaInformations.priority);
+		else
+			dataType.metaInformations.priority = priority;
+			GuildAds_ChatDebug(GA_DEBUG_STORAGE,"datatype "..dataType.metaInformations.name.." is given default priority "..dataType.metaInformations.priority);
+			priority=priority+100;
+		end
+	end
+
+	
 	-- initialize data types
 	local metadataPath = { "Versions", "DataTypes" };
 	for _, dataType in pairs(self._load) do
@@ -362,10 +401,14 @@ function GuildAdsDB:ResetOthers()
 	GuildAds.cmd:error("Not implemented");
 end
 
-
 --[[ About config ]]
 function GuildAdsDB:GetConfigValue(path, key, defaultValue)
 	return GuildAds.db:get(path, key) or defaultValue;
+end
+
+-- GALMOK -- needed af way to read the raw db value
+function GuildAdsDB:GetRawConfigValue(path, key)
+	return GuildAds.db:get(path, key);
 end
 
 function GuildAdsDB:SetConfigValue(...)

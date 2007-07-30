@@ -16,7 +16,8 @@ GuildAdsInventoryDataType = GuildAdsTableDataType:new({
 		version = 1,
         guildadsCompatible = 200,
 		parent = GuildAdsDataType.PROFILE,
-		priority = 300
+		priority = 300,
+		depend = { "Main" }
 	};
 	schema = {
 		id = "Integer";

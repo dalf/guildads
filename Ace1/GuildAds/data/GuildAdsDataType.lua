@@ -176,6 +176,11 @@ function GuildAdsDataType:isValid()
 			return false, "Data type name check failed.";
 		end
 		
+		-- check dependency
+		if type(metainfo.depend)~="table" then
+			return false, "Dependency table missing.";
+		end
+		
 		-- check version
 		if type(metainfo.guildadsCompatible)~="number" or metainfo.guildadsCompatible>GUILDADS_VERSION then
 			return false, "Data type incompatible with this version of GuildAds";
