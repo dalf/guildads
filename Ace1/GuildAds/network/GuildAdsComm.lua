@@ -582,9 +582,9 @@ function GuildAdsComm:ReceiveMeta(channelName, personName, revision, revisionStr
 		onlineSince = startTime;
 		version = revision
 	}
-	if revision and GuildAds.latestRevision and revision>GuildAds.latestRevision then
+	if revision and self.latestRevision and revision>self.latestRevision then
 		GuildAds.latestRevision = revision;
-		GuildAds.cmd:msg("There is a newer version of GuildAds: "..tostring(revisionString));
+		GuildAds.cmd:msg("There is a newer version of GuildAds available: "..tostring(revisionString));
 	end
 	if personName ~= GuildAds.playerName then
 		-- Add this player to the current channel
