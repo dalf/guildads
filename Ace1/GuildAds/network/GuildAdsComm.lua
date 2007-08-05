@@ -583,7 +583,7 @@ function GuildAdsComm:ReceiveMeta(channelName, personName, revision, revisionStr
 		version = revision
 	}
 	if revision and self.latestRevision and revision>self.latestRevision then
-		GuildAds.latestRevision = revision;
+		self.latestRevision = revision;
 		GuildAds.cmd:msg("There is a newer version of GuildAds available: "..tostring(revisionString));
 	end
 	if personName ~= GuildAds.playerName then
