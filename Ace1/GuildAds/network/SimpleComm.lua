@@ -270,9 +270,8 @@ local function SimpleComm_SendQueue(elapsed)
 	while message do
 		
 		-- check chat traffic
-		if SimpleComm_extraBytes > 0 then
+		if (SimpleComm_sentBytes+SimpleComm_extraBytes) > SIMPLECOMM_CHARACTERSPERTICK_MAX then
 			previousMessage = SimpleComm_messageQueueLast;
-			SimpleComm_extraBytes = SimpleComm_extraBytes - SIMPLECOMM_CHARACTERSPERTICK_MAX;
 			break;
 		end
 		
@@ -298,9 +297,9 @@ local function SimpleComm_SendQueue(elapsed)
 		
 		-- go to next message (previousMessage keeps the same value)
 		message = message.next
-		
-		SimpleComm_extraBytes=SimpleComm_sentBytes-SIMPLECOMM_CHARACTERSPERTICK_MAX;
 	end
+	
+	SimpleComm_extraBytes = SimpleComm_extraBytes + SimpleComm_sentBytes - SIMPLECOMM_CHARACTERSPERTICK_MAX;
 	
 	SimpleComm_messageQueueLast = previousMessage;
 	
