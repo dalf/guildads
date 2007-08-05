@@ -70,8 +70,46 @@ end
 
 function GuildAdsDBChannel:deletePlayer(playerName)
 	if self.db.Players[playerName] then
+		GuildAds_ChatDebug(GA_DEBUG_STORAGE,"clearing datatypes for player "..playerName);
+		for name, profileDT in pairs(GuildAdsDB.profile) do
+			--GuildAds.cmd:msg("clearing "..name.." for player "..playerName);
+			profileDT:clear(playerName);
+		end
+	
+		for name, channelDT in pairs(GuildAdsDB.channel[GuildAds.channelName]) do
+			if type(channelDT)=="table" and channelDT.metaInformations and name~="db" then
+				--GuildAds.cmd:msg("clearing "..name.." for player "..playerName);
+				channelDT:clear(playerName);
+			end
+		end
 		self.db.Players[playerName] = nil;
-		self:triggerEvent(self.PLAYER, playerName);
+		self:triggerEvent( self.PLAYER, playerName);
+	end
+end
+
+function GuildAdsDBChannel:deletePlayers(id)
+	local leaveChannel;
+	local players;
+	if id then
+		players = { [id]=true }; -- don't check the whole list if we know only 1 id has changed.
+	else
+		players = GuildAdsDB.channel[GuildAds.channelName]:getPlayers();
+	end
+	local workingTable = {};
+	for playerName in pairs(players) do
+		--GuildAds.cmd:msg("Checking player "..playerName..": allowed="..tostring(self:isPlayerAllowed(playerName)));
+		if not self:isPlayerAllowed(playerName) then
+			tinsert(workingTable, playerName);
+			if playerName==GuildAds.playerName then
+				leaveChannel=true;
+			end
+		end
+	end
+	for _, playerName in pairs(workingTable) do
+		self:deletePlayer(playerName);
+	end
+	if leaveChannel then
+		GuildAds:UnconfigureChannel();
 	end
 end
 
@@ -100,14 +138,41 @@ function GuildAdsDBChannel:triggerEvent(list, name)
 	end
 end
 
+function GuildAdsDBChannel:GetACLId(playerName, guildName)
+	return playerName or "@"..guildName;
+end
+
+function GuildAdsDBChannel:IsGuildID(id)
+	if id and string.sub(id,1,1)=="@" then
+		return true;
+	else
+		return false;
+	end
+end
+
 function GuildAdsDBChannel:isPlayerAllowed(playerName)
-	return true;
-	--[[
 	local guildName;
 	if GuildAdsDB.profile.Main then
 		guildName = GuildAdsDB.profile.Main:get(playerName, GuildAdsDB.profile.Main.Guild);
 	end
-	local channelRoot = self.db.Admin;
+	guildName=guildName or "";
+	local dataType = GuildAdsDB.channel[GuildAds.channelName].Admin;
+	local adminPlayer=dataType:getNewestData(playerName);
+	local adminGuild=dataType:getNewestData("@"..guildName);
+	-- player can either be allowed, not allowed or undefined (=allowed)
+	if not adminPlayer and not adminGuild then	-- neither player nor guild mentioned in black- or whitelist
+		return true;
+	end
+	if adminPlayer and not adminGuild then		-- only player is mentioned
+		return adminPlayer.a;
+	end
+	if not adminPlayer and adminGuild then		-- only guild is mentioned
+		return adminGuild.a;
+	end
+	-- both guild and player mentioned (both have to be allowed)
+	return adminPlayer.a and adminGuild.a;
+	
+	--[[	
 	if channelRoot.blackList.guilds[guildName] or channelRoot.blackList.players[playerName] then
 		return false;
 	end;
@@ -117,6 +182,78 @@ function GuildAdsDBChannel:isPlayerAllowed(playerName)
  	return nil;
 	]]
 end
+
+function GuildAdsDBChannel:ShowACL()
+	if GuildAds.channelName then
+		for _, id, author, data in GuildAdsDB.channel[GuildAds.channelName].Admin:iterator() do
+			if GuildAdsDBChannel:IsGuildID(id) then
+				GuildAds.cmd:msg("Guild "..string.sub(id,2).." is "..(data.a and "whitelisted" or "blacklisted").." for "..GuildAdsDB:FormatTime(data.t or 0).." with reason: "..tostring(data.c));
+			else
+				GuildAds.cmd:msg("Player "..id.." is "..(data.a and "whitelisted" or "blacklisted").." for "..GuildAdsDB:FormatTime(data.t or 0).." with reason: "..tostring(data.c));
+			end
+		end
+	else
+		self.cmd:error(GUILDADS_ERROR_NOTINITIALIZED);
+	end
+end
+
+function GuildAdsDBChannel:DenyPlayerGuild(id)
+	if GuildAds.channelName then
+		if CanGuildRemove() then
+			GuildAdsDB.channel[GuildAds.channelName].Admin:set(GuildAds.playerName, id, { a=false, t=GuildAdsDB:GetCurrentTime() });
+		end
+	else
+		self.cmd:error(GUILDADS_ERROR_NOTINITIALIZED);
+	end		
+end
+
+function GuildAdsDBChannel:AllowPlayerGuild(id)
+	if GuildAds.channelName then
+		if CanGuildRemove() then
+			GuildAdsDB.channel[GuildAds.channelName].Admin:set(GuildAds.playerName, id, { a=true, t=GuildAdsDB:GetCurrentTime() });
+		end
+	else
+		self.cmd:error(GUILDADS_ERROR_NOTINITIALIZED);
+	end		
+end
+
+function GuildAdsDBChannel:RemoveFromACL(id)
+	if CanGuildRemove() then
+		GuildAdsDB.channel[GuildAds.channelName].Admin:set(GuildAds.playerName, id, nil);
+	end
+end
+
+function GuildAdsDBChannel:CheckACL(playerName)
+	if playerName then
+		local guildName;
+		if GuildAdsDB.profile.Main then
+			guildName = GuildAdsDB.profile.Main:get(playerName, GuildAdsDB.profile.Main.Guild);
+		end
+		guildName=guildName or "";
+		local dataType = GuildAdsDB.channel[GuildAds.channelName].Admin;
+		local adminPlayer=dataType:getNewestData(playerName);
+		local adminGuild=dataType:getNewestData("@"..guildName);
+		-- player can either be allowed, not allowed or undefined (=allowed)
+		if not adminPlayer and not adminGuild then	-- neither player nor guild mentioned in black- or whitelist
+			GuildAds.cmd:msg("not, not");
+			return true;
+		end
+		if adminPlayer and not adminGuild then		-- only player is mentioned
+			GuildAds.cmd:msg("player, not");
+			return adminPlayer.a;
+		end
+		if not adminPlayer and adminGuild then		-- only guild is mentioned
+			GuildAds.cmd:msg("not, guild");
+			return adminGuild.a;
+		end
+		-- both guild and player mentioned (both have to be allowed)
+		GuildAds.cmd:msg("player, guild");
+		return adminPlayer.a and adminGuild.a;
+
+		--GuildAds.cmd:msg("Player "..id.." is "..(GuildAdsDB.channel[GuildAds.channelName]:isPlayerAllowed(id) and "allowed" or "not allowed").." access.");
+	end
+end
+
 
 -- TODO : une guilde peut etre blacklistée et whitelistée
 --[[

@@ -94,6 +94,21 @@ function GuildAdsDataType:delete(playerName, id)
 	end
 end
 
+function GuildAdsDataType:clear(playerName)
+	if (not playerName) then
+		error("GuildAdsDataType:clear(nil) not implemented", 2);
+	end
+	local tmp = {};
+	for currentId in self:iterator(playerName) do
+		tinsert(tmp, currentId);
+	end
+	for _, currentId in ipairs(tmp) do
+		self:setRaw(playerName, currentId);
+	end
+	self:setRevision(playerName);
+	return table.getn(tmp);
+end
+
 --[[ iterator ]]
 GuildAdsDataType.iteratorAuthor = function(state, playerName)
 	-- state = { self, id }

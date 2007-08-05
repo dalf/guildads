@@ -1,4 +1,4 @@
-﻿----------------------------------------------------------------------------------
+----------------------------------------------------------------------------------
 --
 -- GuildAdsTradeFrame.lua
 --
@@ -128,9 +128,10 @@ GuildAdsTrade = {
 	
 	onShow = function()
 		GuildAdsTrade.debug("onShow");
-		local t1,t2,t3 = GuildControlGetRankFlags();
+		--local t1,t2,t3 = GuildControlGetRankFlags();
 		
-		if (t3) then 
+		--if (t3) then 
+		if CanGuildRemove() then
 			GuildAdsTrade.administrator = true;
 			GuildAdsTradeAdminDeleteButton:Show();
 		end
@@ -392,6 +393,7 @@ GuildAdsTrade = {
 					button.playerName = linear[j].p;
 					button.data = linear[j].d;
 					button.recipe = linear[j].e;
+					button.count = linear[j].q;
 					
 					-- update button
 					local selected = 	(GuildAdsTrade.currentPlayerName == button.playerName) 
@@ -406,6 +408,7 @@ GuildAdsTrade = {
 					button.playerName = nil;
 					button.data = nil;
 					button.recipe = nil;
+					button.count = nil;
 					button:Hide();
 				end
 			
@@ -749,27 +752,10 @@ GuildAdsTrade = {
 				ga_table_erase(GuildAdsTrade.exchangeButton.t);
 				local online;
 				local atLeastOneOnline;
-				local colour;
-				local visible;
 				for _, name in pairs(playerName) do
 					online = GuildAdsComm:IsOnLine(name);
 					atLeastOneOnline = atLeastOneOnline or online;
-					colour=GuildAdsUITools.onlineColorHex[online];
-					--if GuildAdsTrade.altkey then
-					--	visible=false;
-					--	if item then
-					--		local itemlink = GuildAdsTradeSkillDataType:get(name,item);
-					--		if itemlink and not itemlink.e then
-								--colour=GuildAdsUITools.invalidHex;
-					--			visible=true;
-					--		end
-					--	end
-					--else
-						visible=true;
-					--end
-					--if visible then
-						tinsert(GuildAdsTrade.exchangeButton.t, colour..name.."|r");
-					--end
+					tinsert(GuildAdsTrade.exchangeButton.t, GuildAdsUITools.onlineColorHex[online]..name.."|r");
 				end
 				ownerColor = GuildAdsUITools.onlineColor[atLeastOneOnline];
 				getglobal(ownerField):SetText(table.concat(GuildAdsTrade.exchangeButton.t, ", "));
@@ -802,9 +788,10 @@ GuildAdsTrade = {
 			end
 				
 			-- quantity
-			if data.q then 
+			--if data.q then 
+			if button.count then
 				getglobal(countField):Show();
-				getglobal(countField):SetText(data.q);
+				getglobal(countField):SetText(button.count);
 			else
 				getglobal(countField):Hide();
 			end;
@@ -879,7 +866,7 @@ GuildAdsTrade = {
 				GameTooltip:Show();
 				local info = GuildAds_ItemInfo[item];
 				if info then
-					GuildAdsUITools:TooltipAddTT(GameTooltip, GuildAds_GetItemQualityColor(info.quality or 1), item, info.name, data.q or 1);
+					GuildAdsUITools:TooltipAddTT(GameTooltip, GuildAds_GetItemQualityColor(info.quality or 1), item, info.name, type(obj.count)=="string" and (tonumber(strsplit("-",obj.count or "1")) or 1) or (obj.count or 1)); -- last field was "data.q or 1" but errored. Needs look at.
 				end
 			end
 			
@@ -1062,24 +1049,6 @@ GuildAdsTrade = {
 				end
 				GuildAdsTrade.data.cache[tab] = {};
 				if (tab == GuildAdsTrade.TAB_CRAFTABLE) then
-					-- TOO SLOW
---					local already;
---					for _, item, playerName, data in datatype:iterator() do
---						for key,value in pairs(GuildAdsTrade.data.cache[tab]) do
---							if (GuildAdsTrade.data.cache[tab][key].i==item) then 
---								already=true;
---								tinsert(GuildAdsTrade.data.cache[tab][key].p, playerName);
---								break;
---							end
---						end
---						if (not already) then
---							if GuildAdsTrade.data.adIsVisible(adtype, playerName, item, data) then
---								tinsert(GuildAdsTrade.data.cache[tab], { i=item, p={playerName}, d=data, t=adtype });
---							end
---						end
---						already=nil;
---					end
-					-- MUCH FASTER -- GALMOK
 					local tmptable = {};
 					for _, item, playerName, data in datatype:iterator() do
 						if (tmptable[item]) then
@@ -1089,28 +1058,25 @@ GuildAdsTrade = {
 								end
 							else
 								tinsert(tmptable[item].p, playerName);
-								if data.e and not tmptable[item].e then
-									tmptable[item].e=data.e;
-								end
+								tmptable[item].e=tmptable[item].e or data.e;
+								tmptable[item].q=tmptable[item].q or data.q;
 							end
 						else
 							if (not GuildAdsTrade.altkey and GuildAdsTrade.data.adIsVisible(adtype, playerName, item, data)) or (GuildAdsTrade.altkey and not data.e) then
-								tmptable[item]={ i=item, p={playerName}, d=data, t=adtype, e=data.e };
+								tmptable[item]={ i=item, p={playerName}, d=data, t=adtype, e=data.e, q=data.q };
 							end
 						end
 					end
 					for key,value in pairs(tmptable) do
-						tinsert(GuildAdsTrade.data.cache[tab], { i=key, p=value.p, d=value.d, t=value.t, e=value.e });
+						tinsert(GuildAdsTrade.data.cache[tab], { i=key, p=value.p, d=value.d, t=value.t, e=value.e, q=value.q });
 					end
-					-- /FASTER GALMOK
-
 					for _, data in pairs(GuildAdsTrade.data.cache[tab]) do
 						table.sort(data.p, GuildAdsTrade.sortData.predicateFunctions.crafter);
 					end
 				else
 					for _, item, playerName, data in datatype:iterator() do
 						if GuildAdsTrade.data.adIsVisible(adtype, playerName, item, data) then
-							tinsert(GuildAdsTrade.data.cache[tab], { i=item, p=playerName, d=data, t=adtype });
+							tinsert(GuildAdsTrade.data.cache[tab], { i=item, p=playerName, d=data, t=adtype, q=data.q });
 						end
 					end
 				end
@@ -1165,9 +1131,15 @@ GuildAdsTrade = {
 				return nil;
 			end;
 		
-			count = function(a, b)
-				local ac = a.d.q or 0;
-				local bc = b.d.q or 0;
+			count = function(a, b)		-- a and b can either be both integers or strings ("1", "1-3", "5", "2-3" and so on)
+				local ac, bc;
+				if type(a.q)=="string" or type(b.q)=="string" then
+					ac = tonumber((string.gsub(a.q or "1","-","."))) or 1;
+					bc = tonumber((string.gsub(b.q or "1","-","."))) or 1;
+				else
+					ac = a.q or 1;
+					bc = b.q or 1;
+				end
 				
 				if (ac < bc) then
 					return false;

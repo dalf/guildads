@@ -11,7 +11,7 @@
 GuildAdsTradeSkillDataType = GuildAdsTableDataType:new({
 	metaInformations = {
 		name = "TradeSkill",
-		version = 1,
+		version = 2,
         guildadsCompatible = 200,
 		parent = GuildAdsDataType.PROFILE,
 		priority = 600,
@@ -22,6 +22,7 @@ GuildAdsTradeSkillDataType = GuildAdsTableDataType:new({
 		data = {
 			[1] = { key="cd",	codec="BigInteger" },
 			[2] = { key="e",	codec="ItemRef" },
+			[3] = { key="q",	codec="String" },
 		}
 	}
 });
@@ -48,7 +49,7 @@ function GuildAdsTradeSkillDataType:Initialize()
 end
 
 function GuildAdsTradeSkillDataType:onEventSpecial()
-	local item, kind, itemRecipe;
+	local item, kind, itemRecipe, minMade, maxMade, q;
 	local skillId = GuildAdsSkillDataType:getIdFromName(GetCraftName());
 	local t = self:getTableForPlayer(GuildAds.playerName);
 	
@@ -56,12 +57,20 @@ function GuildAdsTradeSkillDataType:onEventSpecial()
 		_, kind = GetCraftInfo(i);
 		if (kind ~= "header") then
 			item = GetCraftItemLink(i);
+			minMade, maxMade = GetTradeSkillNumMade(i);
 			itemRecipe = GetCraftRecipeLink(i);
 			if item then
 				_, item = GuildAds_ExplodeItemRef(item);
 				_, itemRecipe = GuildAds_ExplodeItemRef(itemRecipe);
-				if not (t[item] and t[item].e) then
-					self:set(GuildAds.playerName, item, { s=skillId, e=itemRecipe });
+				q=nil;
+				if minMade~=1 then
+					q=tostring(minMade);
+					if maxMade~=minMade then
+						q=q.."-"..tostring(maxMade);
+					end
+				end
+				if not (t[item] and t[item].e and t[item].q) then  -- q will proabbly be nil for most items...
+					self:set(GuildAds.playerName, item, { s=skillId, e=itemRecipe, q=q });
 				end
 			end
 		end
@@ -70,7 +79,7 @@ function GuildAdsTradeSkillDataType:onEventSpecial()
 end
 
 function GuildAdsTradeSkillDataType:onEvent()
-	local item, colddown, kind, itemRecipe;
+	local item, colddown, kind, itemRecipe, minMade, maxMade, q;
 	local skillId = GuildAdsSkillDataType:getIdFromName(GetTradeSkillLine());
 	local t = self:getTableForPlayer(GuildAds.playerName);
 	
@@ -78,6 +87,7 @@ function GuildAdsTradeSkillDataType:onEvent()
 		_, kind = GetTradeSkillInfo(i);
 		if (kind ~= "header") then
 			item = GetTradeSkillItemLink(i);
+			minMade, maxMade = GetTradeSkillNumMade(i);
 			itemRecipe = GetTradeSkillRecipeLink(i);
 			if item then
 				_, item = GuildAds_ExplodeItemRef(item);
@@ -87,15 +97,20 @@ function GuildAdsTradeSkillDataType:onEvent()
 				end;
 				_, itemRecipe = GuildAds_ExplodeItemRef(itemRecipe);
 				--if not (t[item] and t[item].cd==colddown) then
-				if not (t[item] and t[item].e) then
-					--DEFAULT_CHAT_FRAME:AddMessage("Adding item "..item.." to GuildAds");
-					GuildAdsTradeSkillDataType.debug("Adding item: "..item.." : "..tostring(itemRecipe));
-					self:set(GuildAds.playerName, item, { cd = colddown, s=skillId, e=itemRecipe });
+				q=nil;
+				if minMade~=1 then
+					q=tostring(minMade);
+					if maxMade~=minMade then
+						q=q.."-"..tostring(maxMade);
+					end
+				end
+				if not (t[item] and t[item].e and t[item].q) then
+					self:set(GuildAds.playerName, item, { cd = colddown, s=skillId, e=itemRecipe, q=q });
 				end
 			end
 		end
 	end
-	
+	--[[
 	if (GuildAds.channelName) then
 		-- delete the items from WOW1 for every player (dont update revision)
 		local players = GuildAdsDB.channel[GuildAds.channelName]:getPlayers();
@@ -120,7 +135,7 @@ function GuildAdsTradeSkillDataType:onEvent()
 		end
 		
 	end
-		
+	]]
 end
 
 -- delete items without recipelink for every player
@@ -250,7 +265,9 @@ end
 function GuildAdsTradeSkillDataType:set(author, id, info)
 	local craft = self.profile:getRaw(author).craft;
 	if info then
-		if craft[id]==nil or info.s ~= craft[id].s or info.cd ~= craft[id].cd or info.e ~= craft[id].e then
+		-- don't share cooldown (causes to much update, needs a rework)
+		--if craft[id]==nil or info.s ~= craft[id].s or info.cd ~= craft[id].cd or info.e ~= craft[id].e or into.q ~= craft[id].q then
+		if craft[id]==nil or info.s ~= craft[id].s or info.e ~= craft[id].e or info.q ~= craft[id].q then
 			craft._u = 1 + (craft._u or 0);
 			info._u = craft._u;
 			craft[id] = info;

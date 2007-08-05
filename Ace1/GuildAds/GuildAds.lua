@@ -62,7 +62,7 @@ function GuildAds:Initialize()
 			GuildAdsTask:AddNamedSchedule("GetGuildName", 4, nil, nil, self.PLAYER_GUILD_UPDATE, self)
 		end
 	end
-	
+		
 	-- RegisterEvent
 	self:RegisterEvent("PLAYER_GUILD_UPDATE");
 	self:RegisterEvent("GUILD_ROSTER_UPDATE");
@@ -199,6 +199,26 @@ function GuildAds:CleanOther()
 	end
 end
 
+function GuildAds:ShowACL()
+	GuildAdsDBChannel:ShowACL();
+end
+
+function GuildAds:DenyPlayerGuild(id)
+	GuildAdsDBChannel:DenyPlayerGuild(id);
+end
+
+function GuildAds:AllowPlayerGuild(id)
+	GuildAdsDBChannel:AllowPlayerGuild(id);
+end
+
+function GuildAds:RemoveFromACL(id)
+	GuildAdsDBChannel:RemoveFromACL(id);
+end
+
+function GuildAds:CheckACL(id)
+	GuildAdsDBChannel:CheckACL(id);
+end
+
 function GuildAds:LoadGuildRosterTask()
 	if IsInGuild() then
 		GuildRoster();
@@ -216,6 +236,15 @@ end
 function GuildAds:GUILD_ROSTER_UPDATE()
 	self.guildName = GetGuildInfo("player");
 	self:CheckChannelConfig();
+end
+
+function GuildAds:UnconfigureChannel()
+	-- not allow to stay on the channel -> unconfigure the current config
+	GuildAdsDB:SetConfigValue(GuildAdsDB.PROFILE_PATH, "ChannelConfig", nil); -- or "none"?
+	GuildAdsDB:SetConfigValue(GuildAdsDB.PROFILE_PATH, "ChannelName", nil);
+	GuildAdsDB:SetConfigValue(GuildAdsDB.PROFILE_PATH, "ChannelPassword", nil);
+	GuildAds:CheckChannelConfig();
+	self.cmd:error("You are not allow to use this channel !");	
 end
 
 function GuildAds:CheckChannelConfig()

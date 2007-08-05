@@ -8,7 +8,7 @@
 -- Licence: GPL version 2 (General Public License)
 ----------------------------------------------------------------------------------
 
-GUILDADS_VERSION_PROTOCOL = "2";
+GUILDADS_VERSION_PROTOCOL = "3";
 GUILDADS_MSG_PREFIX_NOVERSION = "GA\t";
 
 GUILDADS_MSG_PREFIX1= GUILDADS_MSG_PREFIX_NOVERSION..GUILDADS_VERSION_PROTOCOL;
@@ -36,9 +36,11 @@ GuildAdsComm = AceModule:new({
 	
 	MessageCodecs = {
 		M= {	-- Meta
-			[1] = "String",		-- version
-			[2] = "BigInteger",	-- startTime
-			[3] = "Integer"		-- playerCount
+		 	[1] = "String", -- SVN revision
+			[2] = "String", -- user friendly version
+			-- [1] = "String",		-- version
+			[3] = "BigInteger",	-- startTime
+			[4] = "Integer"		-- playerCount
 		};
 		
 		CF= {	-- Chat Flag
@@ -154,6 +156,10 @@ setmetatable(GuildAdsComm.DTS, DTSMT);
 --------------------------------------------------------------------------------
 function GuildAdsComm:Initialize()
 	self.startTime = GuildAdsDB:GetCurrentTime();
+
+	-- Store latest known GuildAds revision
+	self.latestRevision = GUILDADS_REVISION;
+	self.latestRevisionString = GUILDADS_REVISION_STRING;
 
 	SimpleComm_Initialize(
 		self.FilterText,
@@ -474,7 +480,7 @@ end
 --------------------------------------------------------------------------------
 function GuildAdsComm:SendMeta(toPlayerName)
 	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendMeta");
-	SimpleComm_SendMessage(toPlayerName, GUILDADS_MSG_PREFIX.."M>"..GUILDADS_VERSION..">"..self.startTime..">"..table.getn(self.playerList)..">");
+	SimpleComm_SendMessage(toPlayerName, GUILDADS_MSG_PREFIX.."M>"..GUILDADS_REVISION..">"..GUILDADS_REVISION_STRING..">"..self.startTime..">"..table.getn(self.playerList)..">");
 	self:SendChatFlag(toPlayerName);
 end
 
@@ -569,13 +575,17 @@ end
 -- Receive inbound messages
 -- 
 --------------------------------------------------------------------------------
-function GuildAdsComm:ReceiveMeta(channelName, personName, version, startTime, playerCount)
+function GuildAdsComm:ReceiveMeta(channelName, personName, revision, revisionString, startTime, playerCount)
 	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "ReceiveMeta("..personName..")");
 	-- store information about this player (useful ?)
 	self.playerMeta[personName] = {
 		onlineSince = startTime;
-		version = version
+		version = revision
 	}
+	if revision and GuildAds.latestRevision and revision>GuildAds.latestRevision then
+		GuildAds.latestRevision = revision;
+		GuildAds.cmd:msg("There is a newer version of GuildAds: "..tostring(revisionString));
+	end
 	if personName ~= GuildAds.playerName then
 		-- Add this player to the current channel
 		GuildAdsDB.channel[GuildAds.channelName]:addPlayer(personName);
@@ -647,6 +657,7 @@ function GuildAdsComm:ReceiveOpenTransaction(channelName, personName, dataTypeNa
 	-- add transaction
 	self.transactions[personName] = {
 		playerName = playerName,
+		ignore = not GuildAdsDB.channel[GuildAds.channelName]:isPlayerAllowed(playerName),
 		dataTypeName = dataTypeName,
 		fromRevision = fromRevision,
 		toRevision = toRevision,
@@ -654,41 +665,52 @@ function GuildAdsComm:ReceiveOpenTransaction(channelName, personName, dataTypeNa
 	}
 	self.transactions[personName].__index = self.transactions[personName];
 	-- parse message
-	DTS:ReceiveOpenTransaction(self.transactions[personName], playerName, fromRevision, toRevision, version or 1)
+	DTS:ReceiveOpenTransaction(self.transactions[personName], playerName, fromRevision, toRevision, version or 1);
+	if self.transactions[personName].ignore then
+		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"|cffff1e00Ignore|r ReceiveOpenTransaction("..tostring(DTS)..","..playerName..","..fromRevision..") (blacklisted)");
+	end
 end
 
 function GuildAdsComm:ReceiveNewRevision(channelName, personName, revision, idSerialized, dataSerialized)
 	if self.transactions[personName] then
-		local t = self.transactions[personName];
-		local DTS = self.DTS[t.dataTypeName];
-		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"ReceiveNewRevision("..tostring(DTS)..","..t.playerName..","..tostring(id)..")");
-		t.lmt = time();
-		local id, data;
-		if t._valid then
-			id = GuildAdsCodecs[DTS.dataType.schema.id].decode(idSerialized);
-			data = GuildAdsCodecs[t.dataTypeName.."Data"].decode(dataSerialized);
+		if not self.transactions[personName].ignore then
+			local t = self.transactions[personName];
+			local DTS = self.DTS[t.dataTypeName];
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"ReceiveNewRevision("..tostring(DTS)..","..t.playerName..","..tostring(id)..")");
+			t.lmt = time();
+			local id, data;
+			if t._valid then
+				id = GuildAdsCodecs[DTS.dataType.schema.id].decode(idSerialized);
+				data = GuildAdsCodecs[t.dataTypeName.."Data"].decode(dataSerialized);
+			end
+			DTS:ReceiveNewRevision(t, revision, id, data)
+		else
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "|cffff1e00Ignore|r NEW about "..self.transactions[personName].playerName.." (blacklisted)");
 		end
-		DTS:ReceiveNewRevision(t, revision, id, data)
 	else
-		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "|cffff1e00Ignore|r NEW from "..playerName.." (no transaction)");
+		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "|cffff1e00Ignore|r NEW from "..personName.." (no transaction)");
 	end
 end
 
 function GuildAdsComm:ReceiveOldRevision(channelName, personName, revisionsSerialized)
 	if self.transactions[personName] then
-		local t = self.transactions[personName];
-		local DTS = self.DTS[t.dataTypeName];
-		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"ReceiveOldRevisions("..tostring(DTS)..","..t.playerName..")");
-		t.lmt = time();
-		local revisions = {};
-		local revision;
-		for revision in string.gmatch(revisionsSerialized, "([^\/]*)/?$?") do
-			revision = tonumber(revision);
-			if revision then
-				revisions[tonumber(revision)] = true;
+		if not self.transactions[personName].ignore then
+			local t = self.transactions[personName];
+			local DTS = self.DTS[t.dataTypeName];
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"ReceiveOldRevisions("..tostring(DTS)..","..t.playerName..")");
+			t.lmt = time();
+			local revisions = {};
+			local revision;
+			for revision in string.gmatch(revisionsSerialized, "([^\/]*)/?$?") do
+				revision = tonumber(revision);
+				if revision then
+					revisions[tonumber(revision)] = true;
+				end
 			end
+			DTS:ReceiveOldRevisions(t, revisions)
+		else
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "|cffff1e00Ignore|r OLD about "..self.transactions[personName].playerName.." (blacklisted)");
 		end
-		DTS:ReceiveOldRevisions(t, revisions)
 	else
 		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "|cffff1e00Ignore|r OLD from "..personName.." (no transaction)");
 	end
@@ -696,12 +718,16 @@ end
 
 function GuildAdsComm:ReceiveKeys(channelName, personName, keys)
 	if self.transactions[personName] then
-		local t = self.transactions[personName];
-		local DTS = self.DTS[t.dataTypeName];
-		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"ReceiveKeys("..tostring(DTS)..","..t.playerName..")");
-		t.lmt = time();
-		local keys = GuildAdsCodecs[t.dataTypeName.."Keys"].decode(keys);
-		DTS:ReceiveKeys(t, keys);
+		if not self.transactions[personName].ignore then
+			local t = self.transactions[personName];
+			local DTS = self.DTS[t.dataTypeName];
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"ReceiveKeys("..tostring(DTS)..","..t.playerName..")");
+			t.lmt = time();
+			local keys = GuildAdsCodecs[t.dataTypeName.."Keys"].decode(keys);
+			DTS:ReceiveKeys(t, keys);
+		else
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "|cffff1e00Ignore|r KEYS about "..self.transactions[personName].playerName.." (blacklisted)");
+		end
 	else
 		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "|cffff1e00Ignore|r KEYS from "..personName.." (no transaction)");
 	end
@@ -709,10 +735,14 @@ end
 
 function GuildAdsComm:ReceiveCloseTransaction(channelName, personName)
 	if self.transactions[personName] then
-		local t = self.transactions[personName];
-		local DTS = self.DTS[t.dataTypeName];
-		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"ReceiveCloseTransaction("..tostring(DTS)..","..personName..")");
-		DTS:ReceiveCloseTransaction(t)
+		if not self.transactions[personName].ignore then
+			local t = self.transactions[personName];
+			local DTS = self.DTS[t.dataTypeName];
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"ReceiveCloseTransaction("..tostring(DTS)..","..personName..")");
+			DTS:ReceiveCloseTransaction(t)
+		else
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "|cffff1e00Ignore|r CLOSE TRANSACTION about "..self.transactions[personName].playerName.." (blacklisted)");
+		end
 		self.transactions[personName] = nil;
 	else
 		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "|cffff1e00Ignore|r CLOSE TRANSACTION from "..personName.." (no transaction)");
@@ -727,6 +757,14 @@ end
 function GuildAdsComm:OnDBUpdate(dataType, playerName, id)
 	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"[GuildAdsComm:OnDBUpdate]"..dataType.metaInformations.name..","..playerName);
 	self:QueueSearch(self.DTS[dataType.metaInformations.name], playerName);
+	if dataType.metaInformations.name=="Admin" then
+		local channelRoot=GuildAdsDB.channel[GuildAds.channelName];
+		if id and GuildAdsDBChannel:IsGuildID(id) then
+			channelRoot:deletePlayers();
+		else
+			channelRoot:deletePlayers(id);
+		end
+	end
 end
 
 --------------------------------------------------------------------------------

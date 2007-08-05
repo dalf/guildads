@@ -129,7 +129,7 @@ function GuildAdsCodecGeneric.encode(obj)
 	elseif ( type(obj) == "number" ) then
 		return "n"..obj;
 	elseif ( type(obj) == "boolean" ) then
-		if (value) then
+		if (obj) then
 			return "1";
 		else
 			return "0";

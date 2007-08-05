@@ -66,7 +66,7 @@ GUILDADS_HEADER_EVENT		= "Events";
 
 GUILDADS_GUILD_GROUPWITHACCOUNT	= "Group %s with the account of %s";
 GUILDADS_GUILD_DEGROUP		= "Degroup from the account";
-GUILDADS_GUILD_DELETE		= "Delete"; 
+GUILDADS_GUILD_BLACKLIST	= "Blacklist"; 
                     
 -- Item
 GUILDADS_ITEMS = {
@@ -163,6 +163,37 @@ GUILDADS_CMD_OPTIONS = {
 				desc = "Delete tradeskill information from other accounts that doesn't have recipe links",
 				method = "CleanOther"
 			}
+		}
+	},
+	{
+		option = "admin",
+		desc = "Handle access control of players and guilds",
+		args = {
+			{
+				option = "show",
+				desc = "Show current access control list",
+				method = "ShowACL"
+			},
+			{
+				option = "deny",
+				desc = "Deny player or @guild access (deletes player data)",
+				method = "DenyPlayerGuild"
+			},
+			{
+				option = "allow",
+				desc = "Allow player or @guild access (deletes player data)",
+				method = "AllowPlayerGuild"
+			},
+			{
+				option = "remove",
+				desc = "Remove player or @guild from access control list",
+				method = "RemoveFromACL"
+			},
+			{
+				option = "allowed",
+				desc = "Checks if a player is allowed access",
+				method = "CheckACL"
+			}			
 		}
 	},
 }

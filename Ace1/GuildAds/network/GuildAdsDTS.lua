@@ -257,6 +257,9 @@ function GuildAdsDTS:ReceiveCloseTransaction(transaction)
 			self:SendSearch(transaction.playerName);
 		else
 			self.dataType:setRevision(transaction.playerName, transaction.toRevision);
+			if self.dataType.metaInformations.name=="Admin" then
+				GuildAdsDB.channel[GuildAds.channelName]:deletePlayers();
+			end
 		end
 	end
 end

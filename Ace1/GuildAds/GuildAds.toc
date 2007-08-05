@@ -28,6 +28,7 @@ data\GuildAdsDataType.lua
 data\GuildAdsFakeDataType.lua
 data\GuildAdsTableDataType.lua
 data\GuildAdsDB.lua
+data\datatypes\GuildAdsAdminData.lua
 data\datatypes\GuildAdsMainData.lua
 data\datatypes\GuildAdsSkillData.lua
 data\datatypes\GuildAdsFactionData.lua

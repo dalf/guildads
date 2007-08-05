@@ -88,7 +88,7 @@ end
 -- 
 ---------------------------------------------------------------------------------
 function SimpleComm_OnLoad()
-	this:RegisterEvent("CHAT_MSG_WHISPER");
+	this:RegisterEvent("CHAT_MSG_ADDON");
 	this:RegisterEvent("CHAT_MSG_CHANNEL");
 end
 
@@ -264,34 +264,33 @@ local function SimpleComm_SendQueue(elapsed)
 	
 	local previousMessage = SimpleComm_messageQueueHeader;
 	local message = SimpleComm_messageQueueHeader.next;
-
+	if not message then
+		SimpleComm_extraBytes=0;
+	end
 	while message do
 		
 		-- check chat traffic
-		SimpleComm_sentBytes = SimpleComm_sentBytes + string.len(message.text);
-		if SimpleComm_sentBytes > (SIMPLECOMM_CHARACTERSPERTICK_MAX+SimpleComm_extraBytes) then
-			SimpleComm_sentBytes = SimpleComm_sentBytes - string.len(message.text);
+		if SimpleComm_extraBytes > 0 then
 			previousMessage = SimpleComm_messageQueueLast;
-			SimpleComm_extraBytes = SimpleComm_extraBytes + (SIMPLECOMM_CHARACTERSPERTICK_MAX - SimpleComm_sentBytes);
-			--SimpleComm_extraBytes = SimpleComm_extraBytes + (SIMPLECOMM_CHARACTERSPERTICK_MAX - (SimpleComm_sentBytes - sentBytes));
-			--DEBUG_MSG("too long message, saving "..tostring(SimpleComm_extraBytes).." for next message.", true);
+			SimpleComm_extraBytes = SimpleComm_extraBytes - SIMPLECOMM_CHARACTERSPERTICK_MAX;
 			break;
 		end
-		SimpleComm_extraBytes = 0;
 		
 		-- send message
 		if message.to then
 			if not SimpleComm_Disconnected[message.to] then
 				-- DEBUG_MSG("Envois a("..message.to..") de("..message.text..")");
-				SendChatMessage(message.text, "WHISPER", nil, message.to);
-				SimpleComm_AddWhisper(message.to);
+				SendAddonMessage("GuildAds",message.text,"WHISPER",message.to);
+				--SimpleComm_AddWhisper(message.to);
+				SimpleComm_sentBytes = SimpleComm_sentBytes + string.len(message.text);
 			else
 				-- Ignore the message since the player is offline.
-				SimpleComm_sentBytes = SimpleComm_sentBytes - string.len(message.text);
+				--SimpleComm_sentBytes = SimpleComm_sentBytes - string.len(message.text);
 			end
 		else
 			-- DEBUG_MSG("Envois a tous de("..message.text..")");
 			SendChatMessage(message.text, "CHANNEL", nil, SimpleComm_channelId);
+			SimpleComm_sentBytes = SimpleComm_sentBytes + string.len(message.text);
 		end
 		
 		-- delete current message in queue
@@ -299,6 +298,8 @@ local function SimpleComm_SendQueue(elapsed)
 		
 		-- go to next message (previousMessage keeps the same value)
 		message = message.next
+		
+		SimpleComm_extraBytes=SimpleComm_sentBytes-SIMPLECOMM_CHARACTERSPERTICK_MAX;
 	end
 	
 	SimpleComm_messageQueueLast = previousMessage;
@@ -366,9 +367,9 @@ function SimpleComm_ParseEvent(event)
 			SimpleComm_Disconnected[arg2] = nil;
 			SimpleComm_ParseMessage(arg2, SimpleComm_Decode(arg1, true), arg9);
 		
-		elseif (event == "CHAT_MSG_WHISPER") then
-			SimpleComm_Disconnected[arg2] = nil;
-			SimpleComm_ParseMessage(arg2, SimpleComm_Decode(arg1, true), nil);
+		elseif (event == "CHAT_MSG_ADDON") and (arg1=="GuildAds") and (arg3=="WHISPER") then
+			SimpleComm_Disconnected[arg4] = nil;
+			SimpleComm_ParseMessage(arg4, SimpleComm_Decode(arg2, true), nil);
 			
 		end
 		
@@ -414,14 +415,6 @@ function SimpleComm_New_ChatFrame_MessageEventHandler(event)
 			end
 		end
 		
-		if (event == "CHAT_MSG_WHISPER") and SimpleComm_FilterText(arg1) then
-			return;
-		end
-		
-		if (event == "CHAT_MSG_WHISPER_INFORM") and SimpleComm_FilterText(arg1) then
-			return;
-		end
-		
 		if (event == "CHAT_MSG_CHANNEL_JOIN") and (arg8 == SimpleComm_channelId) then
 			SimpleComm_Disconnected[arg2] = nil;
 			return;
@@ -443,13 +436,8 @@ function SimpleComm_New_ChatFrame_MessageEventHandler(event)
 			return;
 		end
 		
-		if event == "CHAT_MSG_AFK" or event == "CHAT_MSG_DND" then
-			if SimpleComm_DelWhisper(arg2) then
-				return;
-			end
-		end
 	else
-		if event=="CHAT_MSG_CHANNEL" or event=="CHAT_MSG_WHISPER" or event=="CHAT_MSG_WHISPER_INFORM" then
+		if event=="CHAT_MSG_CHANNEL" then
 			if SimpleComm_FilterText and SimpleComm_FilterText(arg1) then
 				return;
 			end
@@ -589,14 +577,13 @@ function SimpleComm_SendMessage(who, text)
 			local packetNumber = 1;
 			while text~="" do
 				-- take first 240 char
-				local tmp = string.sub(text, 1, 239); -- GALMOK: 239 was 240
+				local tmp = string.sub(text, 1, 239);
 				text = string.sub(text, 240);
 				-- add a packet
 				SimpleComm_messageQueueLast.next = {
 					to = who;
 					text = SimpleComm_SplitSerialize(packetNumber, text=="", tmp);
 				};
-				--DEBUG_MSG("long message part "..packetNumber..": "..tmp, true);
 				SimpleComm_messageQueueLast = SimpleComm_messageQueueLast.next;
 				-- next packet
 				packetNumber = packetNumber + 1;

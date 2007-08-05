@@ -59,7 +59,9 @@ end
 dofile(config.guildAdsDatabaseFile);
 dofile(config.wowPath.."Interface\\AddOns\\GuildAds\\data\\GuildAdsDB.lua");
 dofile(config.wowPath.."Interface\\AddOns\\GuildAds\\data\\GuildAdsDataType.lua");
+dofile(config.wowPath.."Interface\\AddOns\\GuildAds\\data\\GuildAdsFakeDataType.lua");
 dofile(config.wowPath.."Interface\\AddOns\\GuildAds\\data\\GuildAdsTableDataType.lua");
+dofile(config.wowPath.."Interface\\AddOns\\GuildAds\\data\\datatypes\\GuildAdsAdminData.lua");
 dofile(config.wowPath.."Interface\\AddOns\\GuildAds\\data\\datatypes\\GuildAdsTradeNeedData.lua");
 dofile(config.wowPath.."Interface\\AddOns\\GuildAds\\data\\datatypes\\GuildAdsTradeOfferData.lua");
 dofile(config.wowPath.."Interface\\AddOns\\GuildAds\\data\\datatypes\\GuildAdsTradeSkillData.lua");

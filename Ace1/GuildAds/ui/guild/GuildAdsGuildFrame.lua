@@ -467,7 +467,7 @@ GuildAdsGuild = {
 				suffixGuild = "*";
 			end
 
-			if not reroll and account and #GuildAdsGuild.data.cacheByAccount[account]>1 then
+			if not reroll and account and GuildAdsGuild.data.cacheByAccount[account] and #GuildAdsGuild.data.cacheByAccount[account]>1 then
 				suffix = "+"
 			else
 				suffix = "";
@@ -550,10 +550,11 @@ GuildAdsGuild = {
 			end
 			-- 
 			-- GALMOK
-			local t1,t2,t3 = GuildControlGetRankFlags();
-			if (t3) then 
+			--local t1,t2,t3 = GuildControlGetRankFlags();
+			--if (t3) then 
+			if CanGuildRemove() then
 				info = { };
-				info.text = GUILDADS_GUILD_DELETE;
+				info.text = GUILDADS_GUILD_BLACKLIST;
 				info.notCheckable = 1;
 				info.value = GuildAdsGuildContextMenu.owner;
 				info.func = GuildAdsGuild.contextMenu.deletePlayer;
@@ -573,8 +574,8 @@ GuildAdsGuild = {
 		
 		deletePlayer = function()
 			if this.value then
-				GuildAdsGuild.debug("Deleting player "..this.value.." from GuildAds database");
-				GuildAdsDB.channel[GuildAds.channelName]:deletePlayer(this.value);
+				GuildAdsGuild.debug("Blacklisting player "..this.value.." from GuildAds database");
+				GuildAdsDB.channel[GuildAds.channelName]:DenyPlayerGuild(this.value);
 			end
 		end;
 			
