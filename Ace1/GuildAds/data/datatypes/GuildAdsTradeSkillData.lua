@@ -63,7 +63,7 @@ function GuildAdsTradeSkillDataType:onEventSpecial()
 				_, item = GuildAds_ExplodeItemRef(item);
 				_, itemRecipe = GuildAds_ExplodeItemRef(itemRecipe);
 				q=nil;
-				if minMade~=1 then
+				if minMade~=1 or maxMade~=1 then
 					q=tostring(minMade);
 					if maxMade~=minMade then
 						q=q.."-"..tostring(maxMade);
@@ -98,7 +98,7 @@ function GuildAdsTradeSkillDataType:onEvent()
 				_, itemRecipe = GuildAds_ExplodeItemRef(itemRecipe);
 				--if not (t[item] and t[item].cd==colddown) then
 				q=nil;
-				if minMade~=1 then
+				if minMade~=1 or maxMade~=1 then
 					q=tostring(minMade);
 					if maxMade~=minMade then
 						q=q.."-"..tostring(maxMade);
