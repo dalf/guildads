@@ -1,29 +1,33 @@
 ﻿if ( GetLocale() == "frFR" ) then
 
-GUILDADS_TITLE			= "GuildAds";
+GUILDADS_TITLE					= "GuildAds";
 
 -- Minimap button
-GUILDADS_BUTTON_TIP		= "Les Annonces de la guilde";
+GUILDADS_BUTTON_TIP				= "Les Annonces de la guilde";
 
 -- Config
-GUILDADS_CHAT_OPTIONS		= "Options du canal GuildAds";
-GUILDADS_CHAT_USETHIS		= "Utiliser ce canal :";
-GUILDADS_CHAT_CHANNEL		= "Nom";
-GUILDADS_CHAT_PASSWORD		= "Mot de passe";
-GUILDADS_CHAT_COMMAND		= 'Commande "/"';
-GUILDADS_CHAT_ALIAS		= "Alias";
-GUILDADS_CHAT_SHOW_NEWEVENT	= "Afficher les nouveaux evenements"
-GUILDADS_CHAT_SHOW_NEWASK	= "Afficher les nouvelles demandes";
-GUILDADS_CHAT_SHOW_NEWHAVE	= "Afficher les nouvelles propositions";
-GUILDADS_ADS_OPTIONS		= "Options des annonces";
-GUILDADS_PUBLISH		= "Publier mes annonces";
-GUILDADS_VIEWMYADS		= "Voir mes annonces";
-GUILDADS_ICON_OPTIONS		= "Options de l\'ic\195\180ne de la Minimap";
-GUILDADS_ICON			= "Ic\195\180ne de la Minimap";
-GUILDADS_ADJUST_ANGLE		= "Adjuster l\'Angle";
-GUILDADS_ADJUST_RADIUS		= "Adjuster le Rayon";
+GUILDADS_CHAT_OPTIONS			= "Options du canal GuildAds";
+GUILDADS_CHAT_USETHIS			= "Utiliser ce canal :";
+GUILDADS_CHAT_CHANNEL			= "Nom";
+GUILDADS_CHAT_PASSWORD			= "Mot de passe";
+GUILDADS_CHAT_COMMAND			= 'Commande "/"';
+GUILDADS_CHAT_ALIAS				= "Alias";
+GUILDADS_CHAT_SHOW_NEWEVENT		= "Afficher les nouveaux evenements"
+GUILDADS_CHAT_SHOW_NEWASK		= "Afficher les nouvelles demandes";
+GUILDADS_CHAT_SHOW_NEWHAVE		= "Afficher les nouvelles propositions";
+GUILDADS_ADS_OPTIONS			= "Options des annonces";
+GUILDADS_FACTION_OPTIONS		= "Réglages";
+GUILDADS_FACTION_HIDE_COLLAPSED = "Cacher les factions réduites";
+GUILDADS_FACTION_ONLY_LEVEL_70	= "Cacher les niveaux < 70";
+GUILDADS_FACTION_FACTION		= "Afficher les factions"; -- Should be updated runtime to either Horde or Alliance
+GUILDADS_PUBLISH				= "Publier mes annonces";
+GUILDADS_VIEWMYADS				= "Voir mes annonces";
+GUILDADS_ICON_OPTIONS			= "Options de l\'ic\195\180ne de la Minimap";
+GUILDADS_ICON					= "Ic\195\180ne de la Minimap";
+GUILDADS_ADJUST_ANGLE			= "Adjuster l'angle";
+GUILDADS_ADJUST_RADIUS			= "Adjuster le rayon";
 
-GUILDADS_AUTOCHANNELCONFIG	= "Configuration de canal automatique";
+GUILDADS_AUTOCHANNELCONFIG		= "Configuration de canal automatique";
 GUILDADS_MANUALCHANNELCONFIG	= "Configuration du canal manuelle";
 
 GUILDADS_ERROR_TOOMANYCHANNELS		= "Vous avez d\195\169j\195\160 rejoint le nombre maximum de canaux (10)"; 
@@ -31,12 +35,12 @@ GUILDADS_ERROR_JOINCHANNELFAILED 	= "N'a pas joint le canal pour une raison inco
 GUILDADS_ERROR_WRONGPASSWORD 		= "Le mot de passe est incorrect";
 
 -- Main frame
-GUILDADS_MYADS			= "Mes Annonces";
+GUILDADS_MYADS				= "Mes Annonces";
 GUILDADS_BUTTON_INVITE		= "Invite Groupe";
 GUILDADS_BUTTON_ADDREQUEST	= "Demander";
 GUILDADS_BUTTON_ADDAVAILABLE	= "Proposer";
-GUILDADS_QUANTITY		= "Quantité";
-GUILDADS_SINCE			= "Depuis %s";
+GUILDADS_QUANTITY			= "Quantité";
+GUILDADS_SINCE				= "Depuis %s";
 GUILDADS_SIMPLE_SINCE		= "Depuis";
 GUILDADS_GROUPBYACCOUNT		= "Regrouper par compte";
 
@@ -44,7 +48,7 @@ GUILDADS_TRADE_PROVIDER		= "Par";
 GUILDADS_TRADE_NUMBER		= "Nb";
 GUILDADS_TRADE_OBJECT		= "Objet";
 GUILDADS_TRADE_ACTIVE		= "Active";
-GUILDADS_TRADE_TYPE		= "Type";
+GUILDADS_TRADE_TYPE			= "Type";
 
 -- Column headers
 GUILDADS_HEADER_REQUEST		= "Demande";
@@ -52,10 +56,12 @@ GUILDADS_HEADER_AVAILABLE	= "Propose";
 -- GUILDADS_HEADER_INVENTORY : done by WOW
 -- GUILDADS_HEADER_SKILL : done by WOW
 -- GUILDADS_HEADER_ANNONCE : done by WOW
+GUILDADS_HEADER_FACTION		= "Réputation";
 GUILDADS_HEADER_EVENT		= "Evénements";
 
 GUILDADS_GUILD_GROUPWITHACCOUNT	= "Associer %s avec le compte de %s";
-GUILDADS_GUILD_DEGROUP		= "Dissocier du compte";
+GUILDADS_GUILD_DEGROUP			= "Dissocier du compte";
+GUILDADS_GUILD_BLACKLIST		= "Interdire";
 
 -- Equipment
 GUILDADS_EQUIPMENT		= "Equipement";
@@ -151,5 +157,70 @@ GUILDADS_SKILLS	= {
 
 
 GUILDADSTOOLTIPS_ADS =  "Vous permet de voir les annonces";
+
+GUILDADS_FACTIONS = {
+	[1]  = "Darnassus";  -- Alliance
+	[2]  = "Exodar";
+	[3]  = "Exilés de Gnomeregan";
+	[4]  = "Forgefer";
+	[5]  = "Hurlevent";
+	[6]  = "Sentinelles d'Aile-argent";
+	[7]  = "Garde Foudrepique";
+	[8]  = "La Ligue d'Arathor";
+	[9]  = "Trolls Sombrelance"; -- Horde
+	[10] = "Orgrimmar";
+	[11] = "Lune-d'argent";
+	[12] = "Les Pitons du Tonnerre";
+	[13] = "Fossoyeuse";
+	[14] = "Clan Loup-de-givre";
+	[15] = "Les Profanateurs";
+	[16] = "Voltigeurs Chanteguerre";
+	[17] = "Bastion de l'honneur"; -- Outland
+	[18] = "Thrallmar";
+	[19] = "Kurenaï";
+	[20] = "Mag'har";
+	[21] = "Expédition cénarienne";
+	[22] = "Sporeggar";
+	[23] = "Le Consortium";
+	[24] = "Aile-du-Néant";
+	[25] = "Ogri'la";
+	[26] = "Ligemort cendrelangue";
+	[27] = "Ville basse"; -- Shattrath City
+	[28] = "Garde-ciel sha'tari";
+	[29] = "L'Aldor";
+	[30] = "Les Clairvoyants";
+	[31] = "Les Sha'tar";
+	[32] = "Baie-du-Butin"; -- Steamwheedle Cartel
+	[33] = "Long-guet";
+	[34] = "Gadgetzan";
+	[35] = "Cabestan";
+	[36] = "Aube d'argent"; -- Other
+	[37] = "La Voile sanglante";
+	[38] = "Progéniture de Nozdormu";
+	[39] = "Cercle cénarien";
+	[40] = "Foire de Sombrelune";
+	[41] = "Centaures (Gelkis)";
+	[42] = "Les Hydraxiens";
+	[43] = "Centaures (Magram)";
+	[44] = "Ravenholdt";
+	[45] = "Shen'dralar";
+	[46] = "Syndicat";
+	[47] = "Confrérie du thorium";
+	[48] = "Les Grumegueules";
+	[49] = "Éleveurs de sabres-d'hiver";
+	[50] = "Tribu Zandalar";
+	[51] = "Gardiens du Temps"; -- Other - BC
+	[52] = "La Balance des sables";
+	[53] = "Tranquillien";
+	[54] = "L'Œil pourpre";
+};
+
+GUILDADS_FACTION_SHOWFACTION = "Afficher Faction";
+GUILDADS_FACTION_SHOWFACTIONFORCES = "Afficher Force de la faction";
+GUILDADS_FACTION_SHOWOUTLAND = "Afficher Outreterre";
+GUILDADS_FACTION_SHOWSHATTRATHCITY = "Afficher Shattrath";
+GUILDADS_FACTION_SHOWSTEAMWHEEDLECARTEL = "Afficher Cartel Gentepression";
+GUILDADS_FACTION_SHOWOTHER = "Afficher Autres";
+
 
 end
