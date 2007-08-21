@@ -788,13 +788,7 @@ GuildAdsTrade = {
 			end
 				
 			-- quantity
-			--if data.q then 
-			if button.count then
-				getglobal(countField):Show();
-				getglobal(countField):SetText(button.count);
-			else
-				getglobal(countField):Hide();
-			end;
+			getglobal(countField):SetText(button.count or "");
 				
 			-- creationtime
 			if data._t then
