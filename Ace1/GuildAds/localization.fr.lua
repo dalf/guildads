@@ -5,6 +5,8 @@ GUILDADS_TITLE					= "GuildAds";
 -- Minimap button
 GUILDADS_BUTTON_TIP				= "Les Annonces de la guilde";
 
+GUILDADSTOOLTIPS_ADS 			=  "Vous permet de voir les annonces";
+
 -- Config
 GUILDADS_CHAT_OPTIONS			= "Options du canal GuildAds";
 GUILDADS_CHAT_USETHIS			= "Utiliser ce canal :";
@@ -16,10 +18,6 @@ GUILDADS_CHAT_SHOW_NEWEVENT		= "Afficher les nouveaux evenements"
 GUILDADS_CHAT_SHOW_NEWASK		= "Afficher les nouvelles demandes";
 GUILDADS_CHAT_SHOW_NEWHAVE		= "Afficher les nouvelles propositions";
 GUILDADS_ADS_OPTIONS			= "Options des annonces";
-GUILDADS_FACTION_OPTIONS		= "Réglages";
-GUILDADS_FACTION_HIDE_COLLAPSED = "Cacher les factions réduites";
-GUILDADS_FACTION_ONLY_LEVEL_70	= "Cacher les niveaux < 70";
-GUILDADS_FACTION_FACTION		= "Afficher les factions"; -- Should be updated runtime to either Horde or Alliance
 GUILDADS_PUBLISH				= "Publier mes annonces";
 GUILDADS_VIEWMYADS				= "Voir mes annonces";
 GUILDADS_ICON_OPTIONS			= "Options de l\'ic\195\180ne de la Minimap";
@@ -49,6 +47,7 @@ GUILDADS_TRADE_NUMBER		= "Nb";
 GUILDADS_TRADE_OBJECT		= "Objet";
 GUILDADS_TRADE_ACTIVE		= "Active";
 GUILDADS_TRADE_TYPE			= "Type";
+GUILDADS_TRADE_SHIFTCLICKHELP= "Pour placer un objet içi, utiliser shift-click lorsque cette fenêtre est ouverte";
 
 -- Column headers
 GUILDADS_HEADER_REQUEST		= "Demande";
@@ -122,7 +121,7 @@ GUILDADS_CLASSES = {
 };
 
 -- Skill
-GUILDADS_SKILLS	= {
+GUILDADS_SKILLS = {
 	[1]  = "Herboristerie",
 	[2]  = "Minage",
 	[3]  = "Dépeçage",
@@ -133,11 +132,11 @@ GUILDADS_SKILLS	= {
 	[8]  = "Couture",
 	[9]  = "Enchantement",
 	[10] = "Pêche",
-	[11] = "Secourisme",
+	[11] = "Premiers soins",
 	[12] = "Cuisine",
 	[13] = "Crochetage",
 	[14] = "Joaillerie",
-					
+
 	[20] = "Armes de pugilat",
 	[21] = "Dagues",
 	[22] = "Epées",
@@ -155,13 +154,15 @@ GUILDADS_SKILLS	= {
 	[34] = "Baguettes"
 };
 
-
-GUILDADSTOOLTIPS_ADS =  "Vous permet de voir les annonces";
+GUILDADS_FACTION_OPTIONS		= "Paramètres Faction";
+GUILDADS_FACTION_HIDE_COLLAPSED = "Cacher les factions réduites";
+GUILDADS_FACTION_ONLY_LEVEL_70	= "Cacher les niveaux < 70";
+GUILDADS_FACTION_FACTION		= "Afficher Factions"; -- Should be updated runtime to either Horde or Alliance
 
 GUILDADS_FACTIONS = {
 	[1]  = "Darnassus";  -- Alliance
 	[2]  = "Exodar";
-	[3]  = "Exilés de Gnomeregan";
+	[3]  = "Exil\195\169s de Gnomeregan";
 	[4]  = "Forgefer";
 	[5]  = "Hurlevent";
 	[6]  = "Sentinelles d'Aile-argent";
@@ -179,7 +180,7 @@ GUILDADS_FACTIONS = {
 	[18] = "Thrallmar";
 	[19] = "Kurenaï";
 	[20] = "Mag'har";
-	[21] = "Expédition cénarienne";
+	[21] = "Exp\195\169dition c\195\169narienne";
 	[22] = "Sporeggar";
 	[23] = "Le Consortium";
 	[24] = "Aile-du-Néant";
@@ -190,14 +191,14 @@ GUILDADS_FACTIONS = {
 	[29] = "L'Aldor";
 	[30] = "Les Clairvoyants";
 	[31] = "Les Sha'tar";
-	[32] = "Baie-du-Butin"; -- Steamwheedle Cartel
+	[32] = "Baie-du-Butin"; -- Cartel Gentepression
 	[33] = "Long-guet";
 	[34] = "Gadgetzan";
 	[35] = "Cabestan";
-	[36] = "Aube d'argent"; -- Other
+	[36] = "Aube d'argent"; -- Autres
 	[37] = "La Voile sanglante";
-	[38] = "Progéniture de Nozdormu";
-	[39] = "Cercle cénarien";
+	[38] = "Prog\195\169niture de Nozdormu";
+	[39] = "Cercle c\195\169narien";
 	[40] = "Foire de Sombrelune";
 	[41] = "Centaures (Gelkis)";
 	[42] = "Les Hydraxiens";
@@ -205,22 +206,22 @@ GUILDADS_FACTIONS = {
 	[44] = "Ravenholdt";
 	[45] = "Shen'dralar";
 	[46] = "Syndicat";
-	[47] = "Confrérie du thorium";
+	[47] = "Confr\195\169rie du Thorium";
 	[48] = "Les Grumegueules";
 	[49] = "Éleveurs de sabres-d'hiver";
 	[50] = "Tribu Zandalar";
 	[51] = "Gardiens du Temps"; -- Other - BC
 	[52] = "La Balance des sables";
 	[53] = "Tranquillien";
-	[54] = "L'Œil pourpre";
+	[54] = "L'\197\146il pourpre";
 };
 
-GUILDADS_FACTION_SHOWFACTION = "Afficher Faction";
-GUILDADS_FACTION_SHOWFACTIONFORCES = "Afficher Force de la faction";
-GUILDADS_FACTION_SHOWOUTLAND = "Afficher Outreterre";
-GUILDADS_FACTION_SHOWSHATTRATHCITY = "Afficher Shattrath";
-GUILDADS_FACTION_SHOWSTEAMWHEEDLECARTEL = "Afficher Cartel Gentepression";
-GUILDADS_FACTION_SHOWOTHER = "Afficher Autres";
+GUILDADS_FACTION_SHOWFACTION = "Faction";
+GUILDADS_FACTION_SHOWFACTIONFORCES = "Force de la faction";
+GUILDADS_FACTION_SHOWOUTLAND = "Outreterre";
+GUILDADS_FACTION_SHOWSHATTRATHCITY = "Shattrath";
+GUILDADS_FACTION_SHOWSTEAMWHEEDLECARTEL = "Cartel Gentepression";
+GUILDADS_FACTION_SHOWOTHER = "Autres";
 
 
 end
