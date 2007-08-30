@@ -145,7 +145,7 @@ GuildAdsFaction = {
 						if GuildAdsFaction.getProfileValue("Filters", id) then
 							for playerName, _, data in GuildAdsFactionDataType:iterator(nil, id) do
 								if not GuildAdsGuild.getProfileValue(nil, "HideOfflines") or GuildAdsGuild.isOnline(playerName) then
-									if not (GuildAdsFaction.getProfileValue(nil, "OnlyLevel70") and (GuildAdsDB.profile.Main:get(playerName, GuildAdsDB.profile.Main.Level)<GUILDADS_PLAYER_MAX_LEVEL)) then
+									if not (GuildAdsFaction.getProfileValue(nil, "OnlyLevel70") and ((GuildAdsDB.profile.Main:get(playerName, GuildAdsDB.profile.Main.Level) or 0)<GUILDADS_PLAYER_MAX_LEVEL)) then
 										hideCollapsed=true;
 									end
 								end
@@ -165,7 +165,7 @@ GuildAdsFaction = {
 					-- for each player
 					for playerName, _, data in GuildAdsFactionDataType:iterator(nil, id) do
 						if not GuildAdsGuild.getProfileValue(nil, "HideOfflines") or GuildAdsGuild.isOnline(playerName) then
-							if not (GuildAdsFaction.getProfileValue(nil, "OnlyLevel70") and (GuildAdsDB.profile.Main:get(playerName, GuildAdsDB.profile.Main.Level)<GUILDADS_PLAYER_MAX_LEVEL)) then
+							if not (GuildAdsFaction.getProfileValue(nil, "OnlyLevel70") and ((GuildAdsDB.profile.Main:get(playerName, GuildAdsDB.profile.Main.Level) or 0)<GUILDADS_PLAYER_MAX_LEVEL)) then
 								if insertHeader and (not hideCollapsed or factionOpen) then
 									tinsert(GuildAdsFaction.data.cache, {i=id, h=factionOpen } );
 									insertHeader = nil;
