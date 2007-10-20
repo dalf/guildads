@@ -8,7 +8,29 @@
 -- Licence: GPL version 2 (General Public License)
 ----------------------------------------------------------------------------------
 
-GUILDADS_VERSION_PROTOCOL = "3";
+--[[
+Bug
+	* Check the player who has token is still alive : see SetState method
+	* Erreur ligne 148, et 168 dans le code lua de la réput (en faisant tous/aucun)
+	* Create Iterator for player when it doesn't exist : see GuildAdsComm:ReceiveMeta
+Todo :
+	* GuildAdsTask : frame is hidden if there is not task (not usefull for now, since there is task to load the roster, see GuildAds.lua)
+	* Iterator by database id. Database id, identify a SavedVariables/GuildAds.lua. So synchronization handles 
+		when a player logs on from different PC
+		when a player logs on with different rerolls
+	Add to field to SR/R messages : number of player ignoring this search (even if this is not fully implemented now, it's will avoid to break the protocol after)
+	Reduce the number of search when the database seems to be synchronized (??? how ...)
+	The curse-gaming (etc..) zip : all ChatDebug are deleted to avoid memory/cpu usage.
+	Clean up :
+		Move GUILDADS_MSG_TYPE_REQUEST et GUILDADS_MSG_TYPE_AVAILABLE to the UI part
+		Move GuildAdsDB:FormatTime to the UI
+		Replace some "if ... error... end" by "assert"
+		* Replace ChatDebug(x, "blabla"..a.."blalba") by ChatDebug(x, "blabla", a, "blabla)
+Note:
+	/print GuildAds.db._table.UpdateHistory["Ner'zhul"].GuildAdsTest
+]]
+
+GUILDADS_VERSION_PROTOCOL = "4";
 GUILDADS_MSG_PREFIX_NOVERSION = "GA\t";
 
 GUILDADS_MSG_PREFIX1= GUILDADS_MSG_PREFIX_NOVERSION..GUILDADS_VERSION_PROTOCOL;
@@ -25,27 +47,53 @@ GUILDADS_MSG_TYPE_AVAILABLE = 2;
 -- 
 ---------------------------------------------------------------------------------
 GuildAdsComm = AceModule:new({
-	IGNOREMYMESSAGE = {
-		CF=true,
+	IGNOREMESSAGE = {
+		HS=true,
+		HR=true,
+		HSR=true,
+		S=true,
+		R=true,
+		SR=true,
 		OT=true,
 		N=true,
 		O=true,
 		K=true,
 		CT=true,
+		T=true
 	},
 	
 	MessageCodecs = {
 		M= {	-- Meta
-		 	[1] = "String", -- SVN revision
-			[2] = "String", -- user friendly version
-			-- [1] = "String",		-- version
+		 	[1] = "String", 	-- SVN revision
+			[2] = "String", 	-- user friendly version
 			[3] = "BigInteger",	-- startTime
-			[4] = "Integer"		-- playerCount
+			[4] = "Integer",	-- playerCount
+			[5] = "String"		-- databaseId
 		};
 		
 		CF= {	-- Chat Flag
 			[1]	= "String",		-- flag
 			[2] = "String"		-- text
+		};
+		
+		HS= {	-- Hash Search
+			[1] = "String",		-- Hash Path
+			[2] = "String"		-- Hash sequence (16 parts)
+		};
+		
+		HR= {	-- Hash Result
+			[1] = "String",		-- Hash Path
+			[2] = "Integer",		-- Hash Changed (16 bits, 1=changed, 0=not changed)
+			[3] = "Integer",		-- Who: name=self.playerList[who] or who=self.playerTree[index]
+			[4] = "Integer",		-- number of ID's 'who' has for this path
+			[5] = "Integer",		-- number of players, 'who' has been selected from (to ensure even probabilities)
+		};
+		
+		HSR= {	-- Hash Search Result
+			[1] = "String",		-- Hash Path
+			[2] = "Integer",		-- Hash Changed (16 bits, 1=changed, 0=not changed)
+			[3] = "Integer",		-- Who
+			[4] = "Integer",		-- number of ID's 'who' has for this path
 		};
 		
 		S= {	-- Search
@@ -94,12 +142,19 @@ GuildAdsComm = AceModule:new({
 		};
 		
 		CT= {	-- Close Transaction
-		}
+		};
+		
+		T= {	-- Move the token to the next player
+			[1] = "Integer"		-- new token position
+		};
 	},
 	
 	MessageMethod = {
 		M	= "ReceiveMeta",
 		CF	= "ReceiveChatFlag",
+		HS	= "ReceiveHashSearch",
+		HR	= "ReceiveHashSearchResultToParent",
+		HSR	= "ReceiveHashSearchResult",
 		S	= "ReceiveSearch",
 		R	= "ReceiveSearchResultToParent",
 		SR	= "ReceiveSearchResult",
@@ -107,33 +162,40 @@ GuildAdsComm = AceModule:new({
 		N	= "ReceiveNewRevision",
 		O	= "ReceiveOldRevision",
 		K	= "ReceiveKeys",
-		CT	= "ReceiveCloseTransaction"
+		CT	= "ReceiveCloseTransaction",
+		T	= "ReceiveMoveToken"
 	},
 	
 	hasJoined = {},
 	playerTree = {},
 	playerList = {},
 	playerMeta = {},
+	databaseIdList = {},
+	token = 1,
 	channelName = "",
 	channelPassword = "",
 	
 	DTS = {},
-	DTSPriority = {},
 	
 	transactions = {},
-	transactionQueue = {},
-	searchQueue = {},
+	searchQueue = GuildAdsList:new(),
+	hashSearchQueue={ GuildAdsList:new(), GuildAdsList:new() };
 	
 	delay = {
-		Init 					= 15,
+		Init 					= 14,
 		AnswerMeta 				= 10,
-		SendSearchAboutMeMin 	= 20,
 		Search 					= 2,
 		SearchDelay				= 2,		-- updated by self:_UpdateTree
-		ExpectedTransaction 	= 25,
-		Transaction				= 2,
-		TransactionStartRange	= 20
-	}
+		Transaction				= 0.5,
+		TransactionDelay		= 40,
+		Timeout					= 15,		-- timeout should now trigger for most portal crossings
+		HashDelay					= 60,		-- all databases are identical. Wait a while before searching again.
+		MoveToken					= 5		-- delay to wait before actually moving the token
+	},
+	
+	-- to check the token
+	state = "Init",
+	stateTime = 0,
 });
 
 local DTSMT = {
@@ -179,7 +241,6 @@ end
 
 function GuildAdsComm:JoinChannel(channel, password, command, alias)
 	LoggingChat(true);
-	
 	self.channelName = channel
 	self.channelPassword = password
 	
@@ -190,7 +251,6 @@ end
 
 function GuildAdsComm:LeaveChannel()
 	LoggingChat(false);
-	
 	if self.channelName then
 		SimpleComm_Leave();
 	
@@ -229,7 +289,7 @@ end
 
 function GuildAdsComm.OnJoin(self)
 	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "[GuildAdsComm.OnJoin] begin");
-	self=self or GuildAdsComm;
+	local self=self or GuildAdsComm;
 	
 	-- add my self to the channel
 	GuildAdsDB.channel[self.channelName]:addPlayer(GuildAds.playerName);
@@ -237,40 +297,38 @@ function GuildAdsComm.OnJoin(self)
 	-- I'm online
 	self:SetOnlineStatus(GuildAds.playerName, true);
 	
-	-- create self.DTS and self.DTSPriority
-	ga_table_erase(self.DTSPriority);
-	
+	-- create self.DTS
 	for name, profileDT in pairs(GuildAdsDB.profile) do
 		self.DTS[name] = GuildAdsDTS:new(profileDT);
-		table.insert(self.DTSPriority, self.DTS[name]);
 	end
 	
 	for name, channelDT in pairs(GuildAdsDB.channel[self.channelName]) do
 		if type(channelDT)=="table" and channelDT.metaInformations and name~="db" then
 			self.DTS[name] = GuildAdsDTS:new(channelDT);
-			table.insert(self.DTSPriority, self.DTS[name]);
 		end
-	end
-	
-	-- sort self.DTSPriority
-	table.sort(self.DTSPriority, GuildAdsDTS.predicate);
-	for _, DTS in pairs(self.DTSPriority) do
-		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, " - "..DTS.dataType.metaInformations.name);
 	end
 	
 	-- listeners
 	for name, DTS in pairs(self.DTS) do
+		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, " - %s", DTS.dataType.metaInformations.name);
 		DTS.dataType:registerUpdate(GuildAdsComm, "OnDBUpdate");
 	end
 	
 	-- for plugins
 	GuildAdsPlugin_OnChannelJoin();
+
+	-- create hash tree. This will unfortunately cause a noticable lag spike (probably 0.3 - 1 seconds depending on number of players in database)
+	GuildAdsHash:Initialize();
+	GuildAdsHash.tree=GuildAdsHash:CreateHashTree();
 	
 	-- Send Meta
 	self:SendMeta();
 	
-	-- Send search about my data in ten seconds (need a valid search tree)
-	GuildAdsTask:AddNamedSchedule("SendSearchAboutMyData", self.delay.Init, nil, nil, self.SendSearchAboutMyData, self);
+	-- after initialization : tick
+	GuildAdsTask:AddNamedSchedule("Tick", self.delay.Init, nil, nil, self.EnableFullProtocol, self);
+	
+	-- set state
+	self:SetState("JOIN");
 	
 	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "[GuildAdsComm.OnJoin] end");
 end
@@ -279,19 +337,24 @@ function GuildAdsComm.OnLeave(self)
 	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "[GuildAdsComm.OnLeave] begin");
 	self=self or GuildAdsComm;
 	
+	-- set state
+	self:SetState("LEAVE");
+	
 	-- for plugins
 	GuildAdsPlugin_OnChannelLeave();
+
+	-- clear the search queue
+	--for i=1,table.getn(self.searchQueue) do table.remove(self.searchQueue) end
+	self.searchQueue:DeleteAll();
+	self.hashSearchQueue[1]:DeleteAll();
+	self.hashSearchQueue[2]:DeleteAll();
 	
-	-- Delete queues
-	self.searchQueueDelay = nil;
-	self.transactionQueueDelay = nil;
-
-	for i=1,table.getn(self.searchQueue) do table.remove(self.searchQueue) end
-	for i=1,table.getn(self.transactionQueue) do table.remove(self.transactionQueue) end
-
+	-- unregister the datatype listeners
 	for name, DTS in pairs(self.DTS) do
 		DTS.dataType:unregisterUpdate(GuildAdsComm);
 	end
+	
+	GuildAdsComm:DisableFullProtocol()
 	
 	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "[GuildAdsComm.OnLeave] end");
 end
@@ -321,67 +384,6 @@ end
 
 --------------------------------------------------------------------------------
 --
--- SendSearchAboutMyData
--- 
---------------------------------------------------------------------------------
-function GuildAdsComm:SendSearchAboutMyData()
-	self:SendSearchAboutPlayer(GuildAds.playerName);
-end
-
---------------------------------------------------------------------------------
---
--- SendSearchAboutPlayer
--- 
---------------------------------------------------------------------------------
-function GuildAdsComm:SendSearchAboutPlayer(playerName)
-	for index, DTS in ipairs(self.DTSPriority) do
-		self:QueueSearch(DTS, playerName);
-	end
-end
-
---------------------------------------------------------------------------------
---
--- SendSearchAboutDTS
--- 
---------------------------------------------------------------------------------
-function GuildAdsComm:SendSearchAboutDTS(DTS)
-	local players = GuildAdsDB.channel[GuildAds.channelName]:getPlayers();
-	local count = 0;
-	for playerName in pairs(players) do
-		if not self.playerTree[playerName] then
-			self:QueueSearch(DTS, playerName);
-			count = count+1;
-		end
-	end
-	return count;
-end
-
---------------------------------------------------------------------------------
---
--- SendSearchAboutOfflines
--- 
---------------------------------------------------------------------------------
-function GuildAdsComm:SendSearchAboutOfflines(DTSIndex)
-	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "SendSearchAboutOfflines("..DTSIndex..")");
-	if self.DTSPriority[DTSIndex] then
-	
-		local players = GuildAdsDB.channel[GuildAds.channelName]:getPlayers();
-		local DTS = self.DTSPriority[DTSIndex];
-		local offlinePlayerCount = 0;
-		for playerName in pairs(players) do
-			if not self.playerTree[playerName] then
-				self:QueueSearch(DTS, playerName);
-				offlinePlayerCount = offlinePlayerCount+1;
-			end
-		end
-		
-		local delay = offlinePlayerCount*table.getn(self.DTSPriority)*self.delay.SearchDelay+1;
-		GuildAdsTask:AddNamedSchedule("SendSearchAboutOfflines", delay, nil, nil, self.SendSearchAboutOfflines, self, DTSIndex+1);
-	end
-end
-
---------------------------------------------------------------------------------
---
 -- Get online status of a player
 -- 
 --------------------------------------------------------------------------------
@@ -400,25 +402,19 @@ end
 
 --------------------------------------------------------------------------------
 --
--- Get tree info about a player (parent player, and child players)
--- index  : .i
--- parent : .p
--- childs : .c1, .c2
--- 
---------------------------------------------------------------------------------
-function GuildAdsComm:GetTreeInfo(playerName)
-	return self.playerTree[playerName];
-end
-
---------------------------------------------------------------------------------
---
 -- Update tree
 -- 
 --------------------------------------------------------------------------------
 function GuildAdsComm:_UpdateTree()
 	local p, c;
+	self.databaseIdList = {};
 	table.sort(self.playerList);
 	for i, playerName in ipairs(self.playerList) do
+		-- update self.databaseIdList
+		if playerName ~= GuildAds.playerName then
+			table.insert(self.databaseIdList, self.playerMeta[playerName].databaseId);
+		end
+		-- update self.playerTree
 		p = i>1 and bit.rshift(i, 1);
 		c = bit.lshift(i, 1);
 		if type(self.playerTree[playerName]) == "table" then
@@ -448,9 +444,11 @@ end
 --------------------------------------------------------------------------------
 function GuildAdsComm:SetOnlineStatus(playerName, status)
 	if status then
+		-- change to online
 		if (not self.playerTree[playerName]) then
 			table.insert(self.playerList, playerName);
 			self:_UpdateTree();
+			self.token = 1;
 			if self.hasJoined[playerName] then
 				self.hasJoined[playerName] = nil;
 				GuildAdsPlugin_OnEvent(GAS_EVENT_CONNECTION, playerName, true);
@@ -458,6 +456,7 @@ function GuildAdsComm:SetOnlineStatus(playerName, status)
 			GuildAdsPlugin_OnEvent(GAS_EVENT_ONLINE, playerName, true);
 		end
 	else
+		-- change to offline
 		if (self.playerTree[playerName]) then
 			self.playerTree[playerName] = nil;
 			local f = function(i, p) 
@@ -467,9 +466,137 @@ function GuildAdsComm:SetOnlineStatus(playerName, status)
 			end;
 			table.remove(self.playerList, table.foreach(self.playerList, f));
 			self:_UpdateTree();
+			if self.token>#self.playerList then
+				self.token = 1;
+			end
 			GuildAdsPlugin_OnEvent(GAS_EVENT_ONLINE, playerName, false);
 			GuildAdsPlugin_OnEvent(GAS_EVENT_CONNECTION, playerName, false);
 		end
+	end
+end
+
+--------------------------------------------------------------------------------
+--
+-- Set the current state
+-- 
+--------------------------------------------------------------------------------
+function GuildAdsComm:SetState(state, timeout)
+	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "Set state \"%s\", timeout=%s", state, tostring(timeout));
+	local now = time();
+	self.state = state;
+	self.stateTime = now;
+	if timeout then
+		GuildAdsTask:AddNamedSchedule("CheckTimeout", timeout, nil, nil, self.CheckTimeout, self, state, now);
+	else
+		GuildAdsTask:DeleteNamedSchedule("CheckTimeout");
+	end
+end
+
+function GuildAdsComm:CheckTimeout(state, stateTime)
+	if state==self.state and stateTime==self.stateTime then
+		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "Timeout for state: %s", state);
+		-- move token to the next 
+		local newToken = 1;
+		if self.token<#self.playerList then
+			newToken = self.token + 1;
+		end
+		if self.playerList[newToken]==GuildAds.playerName then
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "I send the new token position", state);
+			self:SendMoveToken(newToken);
+		else
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "%s will send the new token position", self.playerList[newToken] or "");
+		end
+		--self:MoveToken(newToken);
+	else
+		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "NO Timeout for state: %s=%s, %s=%s", state, self.state, stateTime, self.stateTime);
+	end
+end
+
+--------------------------------------------------------------------------------
+--
+-- Move the token
+-- 
+--------------------------------------------------------------------------------
+function GuildAdsComm:MoveToken(index)
+	-- move the token
+	if index then
+		self.token = index
+	else
+		if self.token<#self.playerList then
+			self.token = self.token + 1;
+		else
+			self.token = 1
+		end
+	end
+	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "MoveToken %s", tostring(self.token));
+	self:Tick();
+end
+
+function GuildAdsComm:MoveTokenDelayed(index)
+	self:MoveToken(self.moveToken);
+	self.moveToken=nil;
+end
+
+--------------------------------------------------------------------------------
+--
+-- Tick
+-- 
+--------------------------------------------------------------------------------
+function GuildAdsComm:Tick()
+	if  #self.playerList>1 then
+		if self.playerList[self.token]==GuildAds.playerName then
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "Tick: I have the token");
+			-- If I have token, then I will send a search
+
+			local nextSearch, nextSearchDT, nextSearchP;
+			if self.searchQueue:Length() > 0 then
+				-- uses searches from the revision search queue first
+				nextSearch = self.searchQueue:First();
+				--nextSearch = self.searchQueue[1];
+				--table.remove(self.searchQueue, 1);
+				self.searchQueue:Delete(nextSearch);
+				nextSearchP = nextSearch.data.playerName;
+				nextSearchDT = nextSearch.data.DTS.dataType;
+				GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "Next search : revision queue (%s,%s)",nextSearchDT.metaInformations.name, nextSearchP);
+				GuildAdsTask:AddNamedSchedule("SendSearch", self.delay.Search, nil, nil, self.SendSearch, self, nextSearchDT, nextSearchP);
+			else
+				-- revision search queue empty.
+				-- make hash search to find paths (hashIDs) that have IDs (to construct new revision searches with)
+				-- ALWAYS use the longest path in the queue.
+				-- if queue is empty, use an empty path = {}
+				local path, hashSequence, element;
+				if self.hashSearchQueue[2]:Length() > 0 then -- check longest path queue first
+					path = GuildAdsComm.hashSearchQueue[2]:GetRandom(); -- pick a random element (to avoid deadlocks)
+					GuildAdsComm.hashSearchQueue[2]:Delete(path); -- result will be a full path (which will probably give rise to revision searches)
+					--GuildAdsComm:DequeueHashSearch(path); -- can be used instead of the above line but is slower.
+				elseif self.hashSearchQueue[1]:Length() > 0 then
+					path = GuildAdsComm.hashSearchQueue[1]:GetRandom();
+					GuildAdsComm.hashSearchQueue[1]:Delete(path);
+				else
+					path=""; -- search queue empty: Start hash search from the root
+				end
+				GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "Next search : hash search: %s", tostring(path));
+				GuildAdsTask:AddNamedSchedule("SendHashSearch", self.delay.Search, nil, nil, self.SendHashSearch, self, path, nil);
+			end
+		else
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "Tick: I DON'T have the token");
+			self:SetState("WAITING_SEARCH_OR_MOVE", self.delay.Search+self.delay.Timeout);
+		end
+	else
+		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "Tick: I'm alone");
+		self:SetState("ALONE");
+	end
+end
+
+--------------------------------------------------------------------------------
+--
+-- Check if the player who has the token have a problem
+-- 
+--------------------------------------------------------------------------------
+function GuildAdsComm:CheckToken()
+	local now = time();
+	if self.lastReceivedTime-self.tokenTime<1 then
+		
 	end
 end
 
@@ -480,7 +607,7 @@ end
 --------------------------------------------------------------------------------
 function GuildAdsComm:SendMeta(toPlayerName)
 	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendMeta");
-	SimpleComm_SendMessage(toPlayerName, GUILDADS_MSG_PREFIX.."M>"..GUILDADS_REVISION..">"..GUILDADS_REVISION_STRING..">"..self.startTime..">"..table.getn(self.playerList)..">");
+	SimpleComm_SendMessage(toPlayerName, GUILDADS_MSG_PREFIX.."M>"..GUILDADS_REVISION..">"..GUILDADS_REVISION_STRING..">"..self.startTime..">"..(#self.playerList)..">"..GuildAdsDB.databaseId..">");
 	self:SendChatFlag(toPlayerName);
 end
 
@@ -490,44 +617,65 @@ function GuildAdsComm:SendChatFlag(toPlayerName)
 	SimpleComm_SendMessage(toPlayerName, GUILDADS_MSG_PREFIX.."CF>"..(flag or "")..">"..(message or "")..">");
 end
 
+function GuildAdsComm:SendHashSearch(path)
+	local hashSequence = GuildAdsHash:GetBase64Hash(GuildAdsHash.tree[path]); -- always use the newest hash key
+	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendHashSearch(%s, %s)", path, hashSequence);
+	SimpleComm_SendMessage(nil, string.format("%sHS>%s>%s>", GUILDADS_MSG_PREFIX, path, hashSequence));
+end
+
+function GuildAdsComm:SendHashSearchResultToParent(parentPlayerName, path, hashChanged, who, amount, numplayers)
+	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendHashSearchResultWhisper[%s](%s, %i)", parentPlayerName, path, hashChanged);
+	SimpleComm_SendMessage(parentPlayerName, string.format("%sHR>%s>%i>%i>%i>%i>", GUILDADS_MSG_PREFIX, path, hashChanged, who, amount, numplayers));
+end
+
+function GuildAdsComm:SendHashSearchResult(path, hashChanged, who, amount)
+	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendHashSearchResult(%s, %i)", path, hashChanged);
+	SimpleComm_SendMessage(nil, string.format("%sHSR>%s>%i>%i>%i>", GUILDADS_MSG_PREFIX, path, hashChanged, who, amount));
+end
+
 function GuildAdsComm:SendSearch(dataType, playerName)
-	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendSearch("..dataType.metaInformations.name..","..playerName..")");
-	SimpleComm_SendMessage(nil, GUILDADS_MSG_PREFIX.."S>"..dataType.metaInformations.name..">"..playerName..">");
+	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendSearch(%s, %s)", dataType.metaInformations.name, playerName);
+	SimpleComm_SendMessage(nil, string.format("%sS>%s>%s>", GUILDADS_MSG_PREFIX, dataType.metaInformations.name, playerName));
 end
 
 function GuildAdsComm:SendSearchResultToParent(parentPlayerName, dataType, playerName, who, revision, weight, worstRevision, version)
-	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendRevisionWhisper["..parentPlayerName.."]("..dataType.metaInformations.name..","..playerName..")");
-	SimpleComm_SendMessage(parentPlayerName, GUILDADS_MSG_PREFIX.."R>"..dataType.metaInformations.name..">"..playerName..">"..who..">"..revision..">"..weight..">"..worstRevision..">"..version..">");
+	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendRevisionWhisper[%s](%s, %s)", parentPlayerName, dataType.metaInformations.name, playerName);
+	SimpleComm_SendMessage(parentPlayerName, string.format("%sR>%s>%s>%s>%s>%i>%i>%i>", GUILDADS_MSG_PREFIX, dataType.metaInformations.name, playerName, who, revision, weight, worstRevision, version));
 end
 
 function GuildAdsComm:SendSearchResult(dataType, playerName, who, revision, worstRevision)
-	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendSearchResult("..dataType.metaInformations.name..","..playerName..")");
-	SimpleComm_SendMessage(nil, GUILDADS_MSG_PREFIX.."SR>"..dataType.metaInformations.name..">"..playerName..">"..who..">"..revision..">"..worstRevision..">");
+	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendSearchResult(%s, %s)", dataType.metaInformations.name, playerName);
+	SimpleComm_SendMessage(nil, string.format("%sSR>%s>%s>%s>%i>%i>", GUILDADS_MSG_PREFIX, dataType.metaInformations.name, playerName, who, revision, worstRevision));
 end
 
 function GuildAdsComm:SendOpenTransaction(dataType, playerName, fromRevision, toRevision)
-	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendOpenTransaction("..dataType.metaInformations.name..","..playerName..")");
+	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendOpenTransaction(%s, %s)", dataType.metaInformations.name, playerName);
 	SimpleComm_SendMessage(nil, GUILDADS_MSG_PREFIX.."OT>"..dataType.metaInformations.name..">"..playerName..">"..fromRevision..">"..toRevision..">"..dataType.metaInformations.version..">");
 end
 
 function GuildAdsComm:SendRevision(dataType, playerName, revision, id, data)
-	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendNewRevision("..dataType.metaInformations.name..","..playerName..","..tostring(id)..")");
+	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendNewRevision(%s, %s, %s)", dataType.metaInformations.name, playerName, tostring(id));
 	SimpleComm_SendMessage(nil, GUILDADS_MSG_PREFIX.."N>"..revision..">"..GuildAdsCodecs[dataType.schema.id].encode(id)..">"..GuildAdsCodecs[dataType.metaInformations.name.."Data"].encode(data)..">");
 end
 
 function GuildAdsComm:SendKeys(dataType, playerName, keys)
-	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendKeys("..dataType.metaInformations.name..","..playerName..")");
+	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendKeys(%s, %s)", dataType.metaInformations.name, playerName);
 	SimpleComm_SendMessage(nil, GUILDADS_MSG_PREFIX.."K>"..GuildAdsCodecs[dataType.metaInformations.name.."Keys"].encode(keys)..">");
 end
 
 function GuildAdsComm:SendOldRevision(dataType, playerName, revisions)
-	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendOldRevision("..dataType.metaInformations.name..","..playerName..")");
+	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendOldRevision(%s, %s)", dataType.metaInformations.name, playerName);
 	SimpleComm_SendMessage(nil, GUILDADS_MSG_PREFIX.."O>"..table.concat(revisions, "/")..">");
 end
 
 function GuildAdsComm:SendCloseTransaction(dataType, playerName)
-	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendCloseTransaction("..dataType.metaInformations.name..","..playerName..")");
-	SimpleComm_SendMessage(nil, GUILDADS_MSG_PREFIX.."CT");
+	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendCloseTransaction(%s, %s)", dataType.metaInformations.name, playerName);
+	SimpleComm_SendMessage(nil, GUILDADS_MSG_PREFIX.."CT>");
+end
+
+function GuildAdsComm:SendMoveToken(index)
+	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendMoveToken");
+	SimpleComm_SendMessage(nil, string.format("%sT>%s>", GUILDADS_MSG_PREFIX, index or ""));
 end
 
 --------------------------------------------------------------------------------
@@ -536,17 +684,17 @@ end
 -- 
 --------------------------------------------------------------------------------
 function GuildAdsComm:CallReceive(channelName, personName, command, ...)
-	-- ignore transaction from myself
- 	if personName == GuildAds.playerName and GuildAdsComm.IGNOREMYMESSAGE[command] then
-		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "Ignore message from my self, command="..tostring(command));
+	-- ignore message
+ 	if GuildAdsComm.IGNOREMESSAGE[command] then
+		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "Ignore message, command=%s", tostring(command));
 		return;
 	end
 	
 	-- call Receive* method
 	local d = GuildAdsComm.MessageCodecs[command];
-	
-	if GuildAdsComm.MessageMethod[command] then
-		GuildAdsComm[GuildAdsComm.MessageMethod[command]](
+	local m = GuildAdsComm.MessageMethod[command];
+	if m then
+		GuildAdsComm[m](
 			self,
 			channelName,
 			personName,
@@ -570,17 +718,39 @@ function GuildAdsComm.OnMessage(personName, text, channelName)
 	GuildAdsComm:CallReceive(channelName, personName, strsplit(">", text));
 end
 
+function GuildAdsComm:EnableFullProtocol()
+	GuildAdsComm.IGNOREMESSAGE={}; -- maybe empty the existing table? shouldn't be necessary
+	self:Tick();
+end
+
+function GuildAdsComm:DisableFullProtocol()
+	GuildAdsComm.IGNOREMESSAGE = {
+		HS=true,
+		HR=true,
+		HSR=true,
+		S=true,
+		R=true,
+		SR=true,
+		OT=true,
+		N=true,
+		O=true,
+		K=true,
+		CT=true,
+		T=true
+	};
+end
 --------------------------------------------------------------------------------
 --
 -- Receive inbound messages
 -- 
 --------------------------------------------------------------------------------
-function GuildAdsComm:ReceiveMeta(channelName, personName, revision, revisionString, startTime, playerCount)
-	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "ReceiveMeta("..personName..")");
-	-- store information about this player (useful ?)
+function GuildAdsComm:ReceiveMeta(channelName, personName, revision, revisionString, startTime, playerCount, databaseId)
+	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "ReceiveMeta(%s)", personName);
+	-- store information about this player
 	self.playerMeta[personName] = {
 		onlineSince = startTime;
-		version = revision
+		version = revision;
+		databaseId = databaseId
 	}
 	if revision and self.latestRevision and revision>self.latestRevision then
 		self.latestRevision = revision;
@@ -593,82 +763,134 @@ function GuildAdsComm:ReceiveMeta(channelName, personName, revision, revisionStr
 		self:SetOnlineStatus(personName, true);
 		if channelName then
 			-- someone has joined, and he is building the player tree : stop search/transaction during this period
-			self:Standby(self.delay.Init);
-			-- send my information
-			GuildAdsTask:AddNamedSchedule("SendMeta", random(self.delay.AnswerMeta), nil, nil, self.SendMeta, self, personName);
-			-- delete and queue again all searchs
 			for _, DTS in pairs(self.DTS) do
-				DTS:RestartAllSearches()
+				DTS:DeleteAllSearches();
 			end
-			-- send my search about my data
-			local delay = self.playerTree[GuildAds.playerName].i*(self.delay.Search*table.getn(self.DTSPriority))+self.delay.SendSearchAboutMeMin;
-			GuildAdsTask:AddNamedSchedule("SendSearchAboutMyData", delay, nil, nil, self.SendSearchAboutMyData, self);
+			GuildAdsTask:DeleteNamedSchedule("SendSearch");
+			GuildAdsHash:DeleteAllSearches();
+			GuildAdsTask:DeleteNamedSchedule("SendHashSearch");
+			GuildAdsTask:DeleteNamedSchedule("MoveToken");
+			-- send my information
+			GuildAdsTask:AddNamedSchedule("SendMeta"..personName, random(self.delay.AnswerMeta), nil, nil, self.SendMeta, self, personName);
 		end
+		-- after initialization : tick again
+		self:SetState("BUILDING_PLAYER_TREE");
+		GuildAdsTask:AddNamedSchedule("Initialise", self.delay.Init, nil, nil, self.EnableFullProtocol, self);
 	end
-	-- Offline synchronization
-	local delay = table.getn(self.playerList)*table.getn(self.DTSPriority)*self.delay.Search+self.delay.SendSearchAboutMeMin;
-	GuildAdsTask:AddNamedSchedule("SendSearchAboutOfflines", delay, nil, nil, self.SendSearchAboutOfflines, self, 1);
 end
 
 function GuildAdsComm:ReceiveChatFlag(channelName, personName, flag, text)
-	SimpleComm_SetFlag(personName, flag, text);
+	if personName~=GuildAds.playerName then
+		SimpleComm_SetFlag(personName, flag, text);
+	end
 end
+
+function GuildAdsComm:ReceiveHashSearch(channelName, personName, path, hashSequence)
+	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "ReceiveHashSearch(%s, %s)", path, hashSequence);
+	GuildAdsHash:ReceiveSearch(path, hashSequence);
+	self:DequeueHashSearch(path); -- enough that 1 player makes a hash search for this path. Everyone else can dequeue it.
+	self:SetState("HASHSEARCHING", self.delay.SearchDelay+self.delay.Timeout);
+	local lasttoken=(self.playerTree[personName] or { i=1 }).i;
+	if self.token~=lasttoken then
+		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "GuildAdsComm:ReceiveHashSearch TOKEN MISMATCH: Should be %i, but %i is sending.",self.token, lasttoken );
+	end
+	self.token=(self.playerTree[personName] or { i=1 }).i; -- the last to send a hash search. Used to get clients back on track
+end
+
+function GuildAdsComm:ReceiveHashSearchResultToParent(channelName, personName, path, hashChanged, who, amount, numplayers)
+	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "ReceiveHashSearchFromChild(%s, %i)= %s, %i, %i", path, hashChanged, who, amount, numplayers or 1);
+	GuildAdsHash:ReceiveHashSearchToParent(personName, path, hashChanged, who, amount, numplayers);
+end
+
+function GuildAdsComm:ReceiveHashSearchResult(channelName, personName, path, hashChanged, who, amount)
+	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "ReceiveHashSearchResult(%s, %i) = %s", path, hashChanged, who, amount);
+	
+	GuildAdsHash:ReceiveHashSearchResult(path, hashChanged, who, amount, self.DTS);
+	
+	if hashChanged == 0 then
+		if path == "" then
+			-- All databases are updated. Wait a while...
+			GuildAdsTask:AddNamedSchedule("MoveToken", self.delay.HashDelay, nil, nil, self.MoveToken, self, nil, nil);
+			self:SetState("SLEEP", self.delay.HashDelay+self.delay.Timeout);
+		else
+			self:MoveToken();
+		end
+	else
+		-- not sure about this...
+		if amount>0 then
+			self:MoveToken(who);
+		else
+			self:MoveToken();
+		end
+	end
+end
+
 
 function GuildAdsComm:ReceiveSearch(channelName, personName, dataTypeName, playerName)
 	local DTS = self.DTS[dataTypeName];
-	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "ReceiveSearch("..tostring(DTS)..","..playerName..")");
-		self:DeleteDuplicateSearch(DTS, playerName);
-		DTS:ReceiveSearch(playerName)
-		if personName~=GuildAds.playerName then
-			self:Standby(self.delay.SearchDelay)
-		end
-		-- Add playerName to the current channel
-		GuildAdsDB.channel[GuildAds.channelName]:addPlayer(playerName);
+	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "ReceiveSearch(%s, %s)", tostring(DTS), playerName);
+	DTS:ReceiveSearch(playerName)
+	-- Add playerName to the current channel
+	GuildAdsDB.channel[GuildAds.channelName]:addPlayer(playerName);
+	-- reset timeout
+	self:SetState("SEARCHING", self.delay.SearchDelay+self.delay.Timeout);
+	local lasttoken=(self.playerTree[personName] or { i=1 }).i;
+	if self.token~=lasttoken then
+		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "GuildAdsComm:ReceiveSearch TOKEN MISMATCH: Should be %i, but %i is sending.",self.token, lasttoken );
+	end
+	self.token=(self.playerTree[personName] or { i=1 }).i;
+	-- removing my own queued search for the same datatype/player
+	self:DequeueSearch(self.DTS[dataTypeName], playerName);
 end
 
 function GuildAdsComm:ReceiveSearchResultToParent(channelName, personName, dataTypeName, playerName, who, revision, weight, worstRevision, version)
 	local DTS = self.DTS[dataTypeName];
-	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "ReceiveRevision("..tostring(DTS)..","..playerName..")="..who.."("..worstRevision.."->"..revision..") v"..tostring(version));
+	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "ReceiveRevision(%s, %s)= %s (%i->%i) v%s", tostring(DTS), playerName, who, worstRevision, revision, tostring(version));
 	DTS:ReceiveRevision(personName, playerName, who, revision, weight, worstRevision, version)
 end
 
 function GuildAdsComm:ReceiveSearchResult(channelName, personName, dataTypeName, playerName, who, toRevision, fromRevision)
+	assert(fromRevision<=toRevision, "fromRevsion>toRevision");
+	
 	local DTS = self.DTS[dataTypeName];
-	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "ReceiveSearchResult("..tostring(DTS)..","..playerName..")="..who.."("..fromRevision.."->"..toRevision..")");
-	-- add an expected transaction
-	if (who ~= GuildAds.playerName) and (fromRevision<toRevision) then
-		-- TODO : solve the deadlock problem : 
-		-- two search result, one say me to send an transaction, another say John will send an transaction
-		-- me and John are waiting each others.
-		self:Standby(self.delay.ExpectedTransaction);
-	end
+	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "ReceiveSearchResult(%s, %s) = %s (%i->%i)", tostring(DTS), playerName, who, fromRevision, toRevision);
 	-- parse message
 	DTS:ReceiveSearchResult(playerName, who, fromRevision, toRevision)
+	-- no update : move the token
+	if fromRevision==toRevision then
+		self:MoveToken();
+	else
+		self:SetState("WAITING_UPDATE", self.delay.Transaction+self.delay.Timeout);
+	end
 end
 
 function GuildAdsComm:ReceiveOpenTransaction(channelName, personName, dataTypeName, playerName, fromRevision, toRevision, version)
 	local DTS = self.DTS[dataTypeName];
-	if self.transactions[personName] then
-			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "|cffff1e00Duplicate|r OPEN TRANSACTION from "..personName.." (already open)");
+	if personName~=GuildAds.playerName then
+		if self.transactions[personName] then
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "|cffff1e00Duplicate|r OPEN TRANSACTION from %s (already open)", personName);
+		end
+		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"ReceiveOpenTransaction(%s, %s, %s)", tostring(DTS), playerName, fromRevision);
+		-- add transaction
+		self.transactions[personName] = {
+			playerName = playerName,
+			ignore = not GuildAdsDB.channel[GuildAds.channelName]:isPlayerAllowed(playerName),
+			dataTypeName = dataTypeName,
+			fromRevision = fromRevision,
+			toRevision = toRevision,
+			lmt=time()
+		}
+		self.transactions[personName].__index = self.transactions[personName];
+		-- parse message
+		DTS:ReceiveOpenTransaction(self.transactions[personName], playerName, fromRevision, toRevision, version or 1);
+		if self.transactions[personName].ignore then
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"|cffff1e00Ignore|r ReceiveOpenTransaction(%s, %s, %s) (blacklisted)", tostring(DTS), playerName, fromRevision);
+		end
+	else
+		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"|cffff1e00Ignore|r ReceiveOpenTransaction(%s, %s, %s) (my update)", tostring(DTS), playerName, fromRevision);
 	end
-	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"ReceiveOpenTransaction("..tostring(DTS)..","..playerName..","..fromRevision..")");
-	-- update self.transactionQueue
-	self:DeleteDuplicateTransaction(DTS, playerName, fromRevision, toRevision)
-	-- add transaction
-	self.transactions[personName] = {
-		playerName = playerName,
-		ignore = not GuildAdsDB.channel[GuildAds.channelName]:isPlayerAllowed(playerName),
-		dataTypeName = dataTypeName,
-		fromRevision = fromRevision,
-		toRevision = toRevision,
-		lmt=time()
-	}
-	self.transactions[personName].__index = self.transactions[personName];
-	-- parse message
-	DTS:ReceiveOpenTransaction(self.transactions[personName], playerName, fromRevision, toRevision, version or 1);
-	if self.transactions[personName].ignore then
-		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"|cffff1e00Ignore|r ReceiveOpenTransaction("..tostring(DTS)..","..playerName..","..fromRevision..") (blacklisted)");
-	end
+	-- reset timeout
+	self:SetState("UPDATING", self.delay.TransactionDelay+self.delay.Timeout);
 end
 
 function GuildAdsComm:ReceiveNewRevision(channelName, personName, revision, idSerialized, dataSerialized)
@@ -676,7 +898,7 @@ function GuildAdsComm:ReceiveNewRevision(channelName, personName, revision, idSe
 		if not self.transactions[personName].ignore then
 			local t = self.transactions[personName];
 			local DTS = self.DTS[t.dataTypeName];
-			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"ReceiveNewRevision("..tostring(DTS)..","..t.playerName..","..tostring(id)..")");
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"ReceiveNewRevision(%s, %s, %s)", tostring(DTS), t.playerName, tostring(id));
 			t.lmt = time();
 			local id, data;
 			if t._valid then
@@ -685,11 +907,12 @@ function GuildAdsComm:ReceiveNewRevision(channelName, personName, revision, idSe
 			end
 			DTS:ReceiveNewRevision(t, revision, id, data)
 		else
-			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "|cffff1e00Ignore|r NEW about "..self.transactions[personName].playerName.." (blacklisted)");
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "|cffff1e00Ignore|r NEW about %s (blacklisted)", self.transactions[personName].playerName);
 		end
 	else
-		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "|cffff1e00Ignore|r NEW from "..personName.." (no transaction)");
+		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "|cffff1e00Ignore|r NEW from %s (no transaction)", personName);
 	end
+	self:SetState("UPDATING", self.delay.TransactionDelay+self.delay.Timeout);
 end
 
 function GuildAdsComm:ReceiveOldRevision(channelName, personName, revisionsSerialized)
@@ -697,7 +920,7 @@ function GuildAdsComm:ReceiveOldRevision(channelName, personName, revisionsSeria
 		if not self.transactions[personName].ignore then
 			local t = self.transactions[personName];
 			local DTS = self.DTS[t.dataTypeName];
-			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"ReceiveOldRevisions("..tostring(DTS)..","..t.playerName..")");
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"ReceiveOldRevisions(%s, %s)", tostring(DTS), t.playerName);
 			t.lmt = time();
 			local revisions = {};
 			local revision;
@@ -709,11 +932,12 @@ function GuildAdsComm:ReceiveOldRevision(channelName, personName, revisionsSeria
 			end
 			DTS:ReceiveOldRevisions(t, revisions)
 		else
-			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "|cffff1e00Ignore|r OLD about "..self.transactions[personName].playerName.." (blacklisted)");
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "|cffff1e00Ignore|r OLD about %s (blacklisted)", self.transactions[personName].playerName);
 		end
 	else
-		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "|cffff1e00Ignore|r OLD from "..personName.." (no transaction)");
+		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "|cffff1e00Ignore|r OLD from %s (no transaction)", personName);
 	end
+	self:SetState("UPDATING", self.delay.TransactionDelay+self.delay.Timeout);
 end
 
 function GuildAdsComm:ReceiveKeys(channelName, personName, keys)
@@ -721,32 +945,73 @@ function GuildAdsComm:ReceiveKeys(channelName, personName, keys)
 		if not self.transactions[personName].ignore then
 			local t = self.transactions[personName];
 			local DTS = self.DTS[t.dataTypeName];
-			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"ReceiveKeys("..tostring(DTS)..","..t.playerName..")");
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"ReceiveKeys(%s, %s)", tostring(DTS), t.playerName);
 			t.lmt = time();
 			local keys = GuildAdsCodecs[t.dataTypeName.."Keys"].decode(keys);
 			DTS:ReceiveKeys(t, keys);
 		else
-			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "|cffff1e00Ignore|r KEYS about "..self.transactions[personName].playerName.." (blacklisted)");
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "|cffff1e00Ignore|r KEYS about %s (blacklisted)", self.transactions[personName].playerName);
 		end
 	else
-		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "|cffff1e00Ignore|r KEYS from "..personName.." (no transaction)");
+		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "|cffff1e00Ignore|r KEYS from %s (no transaction)", personName);
 	end
+	self:SetState("UPDATING", self.delay.TransactionDelay+self.delay.Timeout);
 end
 
 function GuildAdsComm:ReceiveCloseTransaction(channelName, personName)
-	if self.transactions[personName] then
+	if personName == GuildAds.playerName then
+		self:MoveToken();
+	elseif self.transactions[personName] then
 		if not self.transactions[personName].ignore then
 			local t = self.transactions[personName];
 			local DTS = self.DTS[t.dataTypeName];
-			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"ReceiveCloseTransaction("..tostring(DTS)..","..personName..")");
-			DTS:ReceiveCloseTransaction(t)
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"ReceiveCloseTransaction(%s, %s)", tostring(DTS), personName);
+			DTS:ReceiveCloseTransaction(t);
+			GuildAdsHash:UpdateHashTree(self.DTS[t.dataTypeName].dataType, t.playerName, true); -- can't delete player/datatype combos using transactions.
 		else
-			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "|cffff1e00Ignore|r CLOSE TRANSACTION about "..self.transactions[personName].playerName.." (blacklisted)");
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "|cffff1e00Ignore|r CLOSE TRANSACTION about %s (blacklisted)", self.transactions[personName].playerName);
 		end
+		-- delete the transaction
 		self.transactions[personName] = nil;
+		-- move the token
+		self:MoveToken();
 	else
-		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "|cffff1e00Ignore|r CLOSE TRANSACTION from "..personName.." (no transaction)");
+		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "|cffff1e00Ignore|r CLOSE TRANSACTION from %s (no transaction)", personName);
 	end
+end
+--[[
+function GuildAdsComm:ReceiveMoveToken(channelName, personName, index)
+	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"ReceiveMoveToken(%s)", tostring(index));
+	if index then
+		index = tonumber(index);
+		assert(index>=0, "Invalid token (<0)");
+		assert(index<=#self.playerList, "Invalid token (> #self.playerList)"); -- this occurs when e.g. making /reloadui and another player sends the MoveToken command. 
+	end
+	-- move the token
+	self:MoveToken(index);
+end
+]]
+function GuildAdsComm:ReceiveMoveToken(channelName, personName, index)
+	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"ReceiveMoveToken(%s)", tostring(index));
+	if index then
+		index = tonumber(index);
+		assert(index>=0, "Invalid token (<0)");
+		assert(index<=#self.playerList, "Invalid token (> #self.playerList)"); -- this occurs when e.g. making /reloadui and another player sends the MoveToken command. 
+	end
+	-- move the token
+	if self.moveToken then
+		if index<self.moveToken then
+			self.moveToken=index;
+		end
+	else
+		self.moveToken=index;
+	end
+	GuildAdsTask:DeleteNamedSchedule("SendSearch");
+	GuildAdsTask:DeleteNamedSchedule("SendHashSearch");
+	GuildAdsTask:DeleteNamedSchedule("MoveToken"); -- necessary? dont think so
+	GuildAdsTask:AddNamedSchedule("MoveToken", self.delay.MoveToken, nil, nil, self.MoveTokenDelayed, self, self.moveToken, nil);
+	--self:MoveToken(index);
+	self:SetState("MOVETOKEN", self.delay.MoveToken+self.delay.Timeout);
 end
 
 --------------------------------------------------------------------------------
@@ -755,8 +1020,9 @@ end
 -- 
 --------------------------------------------------------------------------------
 function GuildAdsComm:OnDBUpdate(dataType, playerName, id)
-	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"[GuildAdsComm:OnDBUpdate]"..dataType.metaInformations.name..","..playerName);
+	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"[GuildAdsComm:OnDBUpdate] (%s, %s)", dataType.metaInformations.name, playerName);
 	self:QueueSearch(self.DTS[dataType.metaInformations.name], playerName);
+	GuildAdsHash:UpdateHashTree(dataType, playerName, id);
 	if dataType.metaInformations.name=="Admin" then
 		local channelRoot=GuildAdsDB.channel[GuildAds.channelName];
 		if id and GuildAdsDBChannel:IsGuildID(id) then
@@ -772,133 +1038,32 @@ end
 -- About search/transaction queues
 -- 
 --------------------------------------------------------------------------------
-function GuildAdsComm:DeleteDuplicateTransaction(DTS, playerName, fromRevision, toRevision)
-	local i = 1;
-	while self.transactionQueue[i] do
-		local transaction = self.transactionQueue[i];
-		if 		(transaction.DTS==DTS)
-			and (transaction.playerName==playerName)
-			and (		(transaction.toRevision<=toRevision)	-- better revision
-					or  (transaction.fromRevision>fromRevision)	-- start from an older revision
-				) then
-			table.remove(self.transactionQueue, i);
-		else
-			i=i+1;
-		end
+function GuildAdsComm:QueueHashSearch(path)
+	local pathTable=GuildAdsHash:stringToPath(path);
+	local p=#pathTable;
+	if p==1 or p==2 then
+		local t={ path=path };
+		self.hashSearchQueue[p]:Append(path);
 	end
 end
 
-function GuildAdsComm:DeleteDuplicateSearch(DTS, playerName)
-	local i=1;
-	while self.searchQueue[i] do
-		local search = self.searchQueue[i];
-		if 		(search.DTS==DTS)
-			and	(search.playerName==playerName)
-		then
-			table.remove(self.searchQueue, i);
-		else
-			i = i + 1;
-		end
-	end	
-end
-
-function GuildAdsComm:FindSearch(DTS, playerName)
-	local i=1;
-	while self.searchQueue[i] do
-		local search = self.searchQueue[i];
-		if 		(search.DTS==DTS)
-			and	(search.playerName==playerName)
-		then
-			return true;
-		end
-		i = i + 1;
-	end
-end
-
-function GuildAdsComm:QueueTransaction(DTS, playerName, fromRevision, toRevision)
-	self:DeleteDuplicateTransaction(DTS, playerName, fromRevision, toRevision);
-	table.insert(self.transactionQueue, { DTS=DTS, playerName=playerName, fromRevision=fromRevision, toRevision=toRevision });
-	if not self.transactionQueueDelay then
-		self.transactionQueueDelay = self.delay.Transaction+random(self.delay.TransactionStartRange);
+function GuildAdsComm:DequeueHashSearch(path)
+	local pathTable=GuildAdsHash:stringToPath(path);
+	local p=#pathTable;
+	if p==1 or p==2 then
+		self.hashSearchQueue[p]:Delete(path);
 	end
 end
 
 function GuildAdsComm:QueueSearch(DTS, playerName)
-	if not self:FindSearch(DTS, playerName) then
-		table.insert(self.searchQueue, { DTS=DTS, playerName=playerName} );
-		if not self.searchQueueDelay then
-			self.searchQueueDelay = self.delay.Search;
-		end
-	end
+	self.searchQueue:Append(DTS.dataType.metaInformations.name.."/"..playerName, { DTS=DTS, playerName=playerName});
 end
 
-function GuildAdsComm:Standby(delay)
-	if delay>(self.standbyDelay or 0) then
-		self.standbyDelay = delay - (self.standbyDelay or 0) 
-	end
+function GuildAdsComm:DequeueSearch(DTS, playerName)
+	self.searchQueue:Delete(DTS.dataType.metaInformations.name.."/"..playerName);
 end
 
-function GuildAdsComm:ProcessQueues(elapsed)
-	if elapsed>0.75 then
-		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"|cffff1e00Lag !!!|r");
-	end
-	
-	-- Standby (expected transaction, someone has joined the channel etc)
-	if self.standbyDelay then
-		self.standbyDelay = self.standbyDelay - elapsed;
-		if self.standbyDelay<0 then
-			self.standbyDelay = nil
-		else
-			return;
-		end
-	end
-	
-	-- Is there some opened transactions ?
-	if next(self.transactions) then
-		local t = time();
-		
-		-- timeout about one opened transaction
-		local k, v = next(self.transactions);
-		if k then
-			if v.lmt+20<t then
-				self.transactions[k] = nil;
-				GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"|cffff1e00Timeout|r opened transaction from "..k);
-			end
-		end
-		
-		-- don't flood the channel with my transaction/search
-		return;
-	end
-	
-	-- First : send transaction
-	if self.transactionQueueDelay then
-		self.transactionQueueDelay = self.transactionQueueDelay - elapsed;
-		if self.transactionQueueDelay<=0 and self.transactionQueue[1] then
-			local update = self.transactionQueue[1];
-			table.remove(self.transactionQueue, 1);
-			update.DTS:SendTransaction(update.playerName, update.fromRevision);
-			
-			if self.transactionQueue[1] then
-				self.transactionQueueDelay = self.delay.Transaction;
-			else
-				self.transactionQueueDelay = nil;
-			end
-		end
-	else
-		-- No transaction ? then send search
-		if self.searchQueueDelay then
-			self.searchQueueDelay = self.searchQueueDelay - elapsed;
-			if self.searchQueueDelay<=0 and self.searchQueue[1] then
-				local search = self.searchQueue[1];
-				table.remove(self.searchQueue, 1);
-				search.DTS:SendSearch(search.playerName);
-				
-				if self.searchQueue[1] then
-					self.searchQueueDelay = self.delay.Search;
-				else
-					self.searchQueueDelay = nil;
-				end
-			end
-		end
-	end
+function GuildAdsComm:QueueTransaction(DTS, playerName, fromRevision, toRevision)
+	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "GuildAdsComm:QueueTransaction");
+	GuildAdsTask:AddNamedSchedule("SendTransaction", self.delay.Transaction, nil, nil, DTS.SendTransaction, DTS, playerName, fromRevision);
 end

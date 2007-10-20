@@ -44,6 +44,9 @@ GuildAds = AceAddon:new({
 function GuildAds:Initialize()
 	GuildAds_ChatDebug(GA_DEBUG_GLOBAL,"[GuildAds:Initialize] begin");
 	
+	-- Initialize GuildAdsTask
+	GuildAdsTask:Initialize();
+	
 	-- Check if GuildAds is still GuildAds (not erased by SavedVariables/GuildAds.lua version 1)
 	if GuildAds.aceCompatible then
 		GuildAdsBackup = nil
@@ -95,7 +98,6 @@ function GuildAds:Initialize()
   	GuildAds_ChatDebug(GA_DEBUG_GLOBAL,"[GuildAdsPlugin_OnInit] end");
 	
 	-- Call GuildAds:JoinChannel() in 8 seconds
-	GuildAdsSystem:Show();
 	GuildAdsTask:AddNamedSchedule("JoinChannel", 8, nil, nil, self.JoinChannel, self)
 	
 	GuildAds_ChatDebug(GA_DEBUG_GLOBAL,"[GuildAds:Initialize] end");
@@ -332,3 +334,4 @@ function ga_table_erase(t)
 		t[i] = nil
 	end	
 end
+

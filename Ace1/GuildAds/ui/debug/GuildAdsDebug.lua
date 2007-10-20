@@ -36,7 +36,8 @@ GuildAds_DebugPlugin = {
 	};
 	
 	showDebug = function()
-		return GuildAdsDatabase and GuildAdsDatabase.Config and GuildAdsDatabase.Config.Debug;
+		return true;
+		-- return GuildAdsDatabase and GuildAdsDatabase.Config and GuildAdsDatabase.Config.Debug;
 	end;
 	
 	setShowDebug = function(status)
@@ -82,7 +83,7 @@ GuildAds_DebugPlugin = {
 	addDebugMessageFake = function(dbg_type, str)
 	end;
 	
-	addDebugMessageReal = function(dbg_type, str)
-		GuildAdsDebug_Log:AddMessage(date("[%H:%M:%S] ")..str, GuildAds_DebugPlugin.colors[dbg_type][1], GuildAds_DebugPlugin.colors[dbg_type][2], GuildAds_DebugPlugin.colors[dbg_type][3]);
+	addDebugMessageReal = function(dbg_type, fmt, ...)
+		GuildAdsDebug_Log:AddMessage(date("[%H:%M:%S] ")..string.format(fmt, select(1, ...)), GuildAds_DebugPlugin.colors[dbg_type][1], GuildAds_DebugPlugin.colors[dbg_type][2], GuildAds_DebugPlugin.colors[dbg_type][3]);
 	end;
 }

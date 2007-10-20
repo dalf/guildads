@@ -81,7 +81,7 @@ GuildAdsTableDataType.iteratorAll = function(self, current)
 
 	-- if there is a playerName and an Id
 	if current[2] and current[1] then
-		return current, current[2], current[1], data, data._u;
+		return current, current[2], current[1], data, (type(data)=="table") and data._u or 0;
 	end
 end
 

@@ -106,6 +106,7 @@ function GuildAdsDataType:clear(playerName)
 		self:setRaw(playerName, currentId);
 	end
 	self:setRevision(playerName);
+	GuildAdsHash:UpdateHashTree(self, playerName, nil);
 	return table.getn(tmp);
 end
 

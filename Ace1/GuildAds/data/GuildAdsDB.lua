@@ -409,6 +409,16 @@ function GuildAdsDB:CreateAccount()
 	return str;
 end
 
+function GuildAdsDB:CreateDatabaseId()
+	local str = string.sub(GuildAds.playerName, 1, 1);
+	local t = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ+*";
+	for i=1,5,1 do
+		local j = math.random(string.len(t));
+		str = str .. string.sub(t, j, j);
+	end
+	return str;
+end
+
 function GuildAdsDB:Initialize()
 	-- import from the version 20060311
 	if GuildAds.db:get({}, "Version") == "20060311" then
@@ -433,6 +443,8 @@ function GuildAdsDB:Initialize()
 			GuildAds.db:set({ }, "Data", nil);
 			GuildAds.db:set({ }, "Config", nil);
 			GuildAds.db:set({ }, "Versions", nil);
+			--GuildAds.db:set({ }, "UpdateHistory", nil);
+			GuildAds.db:set({ }, "DatabaseId", nil);
 			self.account = GuildAds.db:set({ "Config" }, "Account", account);
 		end
 		GuildAds.db:set({ "Versions" }, "DB", self.VERSION);
@@ -443,6 +455,12 @@ function GuildAdsDB:Initialize()
 	if not self.account then
 		-- TODO : not defined : try to get it on the network
 		self.account = GuildAds.db:set({ "Config" }, "Account", self:CreateAccount());
+	end
+	
+	-- initialize database id
+	self.databaseId = GuildAds.db:get({ }, "DatabaseId");
+	if not self.computerId then
+		self.databaseId = GuildAds.db:set({ }, "DatabaseId", self:CreateDatabaseId());
 	end
 	
 	-- initialize realm

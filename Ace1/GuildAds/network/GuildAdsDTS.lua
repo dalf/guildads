@@ -71,16 +71,20 @@ end
 -- 
 --------------------------------------------------------------------------------
 
-function GuildAdsDTS:RestartAllSearches()
+function GuildAdsDTS:DeleteAllSearches()
 	for playerName in pairs(self.search) do
 		self.search[playerName] = nil;
-		GuildAdsComm:QueueSearch(self, playerName);
 	end
 end
 
 function GuildAdsDTS:SendSearch(playerName)
 	-- send search to everyone
 	GuildAdsComm:SendSearch(self.dataType, playerName);
+end
+
+function GuildAdsDTS:QueueSearch(playerName)
+	-- queue a search
+	GuildAdsComm:QueueSearch(self, playerName);
 end
 
 function GuildAdsDTS:ReceiveSearch(playerName)
@@ -162,7 +166,7 @@ end
 
 function GuildAdsDTS:ReceiveSearchResult(playerName, who, fromRevision, toRevision)
 	if self.search[playerName] then
-		
+		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "ReceiveSearchResult:DTS");
 		if (GuildAds.playerName==who) and (fromRevision<toRevision) then
 			GuildAdsComm:QueueTransaction(self, playerName, fromRevision, self.dataType:getRevision(playerName) or 0);
 		end
@@ -178,6 +182,7 @@ end
 --------------------------------------------------------------------------------
 
 function GuildAdsDTS:SendTransaction(playerName, fromRevision)
+	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "GuildAdsDTS:SendTransaction("..playerName..","..fromRevision..")");
 	-- send open transaction
 	GuildAdsComm:SendOpenTransaction(self.dataType, playerName, fromRevision, self.dataType:getRevision(playerName) or 0);
 	
@@ -254,7 +259,7 @@ function GuildAdsDTS:ReceiveCloseTransaction(transaction)
 	if transaction._valid then
 		if transaction._IntegrityProblem then
 			self.dataType:setRevision(transaction.playerName, 0);
-			self:SendSearch(transaction.playerName);
+			self:QueueSearch(transaction.playerName);
 		else
 			self.dataType:setRevision(transaction.playerName, transaction.toRevision);
 			if self.dataType.metaInformations.name=="Admin" then
