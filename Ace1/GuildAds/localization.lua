@@ -54,6 +54,7 @@ GUILDADS_TRADE_OBJECT		= "Item";
 GUILDADS_TRADE_ACTIVE		= "Active";
 GUILDADS_TRADE_TYPE		= "Type";
 GUILDADS_TRADE_SHIFTCLICKHELP 	= "To put an item here, shift-click it while this window is opened";
+GUILDADS_TRADE_MINLEVEL		= "MinLevel";
 
 -- Column headers
 GUILDADS_HEADER_REQUEST		= "Ask";

@@ -166,6 +166,21 @@
 							</OnLoad>
 						</Scripts>
 					</Button>
+					<Button name="GuildAdsTradeColumnHeader7" inherits="GuildAdsTradeColumnHeaderTemplate" text="GUILDADS_TRADE_MINLEVEL" hidden="true">
+						<Anchors>
+							<Anchor point="LEFT" relativeTo="GuildAdsTradeColumnHeader5" relativePoint="RIGHT">
+								<Offset>
+									<AbsDimension x="-2" y="0"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnLoad>
+								WhoFrameColumn_SetWidth(80);
+								this.sortType = "minlevel";
+							</OnLoad>
+						</Scripts>
+					</Button>
 					
 					<Button name="GuildAdsGlobalAdButton1" inherits="GuildAdsGlobalAdButtonTemplate" id="1">
 						<Anchors>

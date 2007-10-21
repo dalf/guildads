@@ -394,6 +394,7 @@ GuildAdsTrade = {
 					button.data = linear[j].d;
 					button.recipe = linear[j].e;
 					button.count = linear[j].q;
+					button.minlevel = linear[j].l;
 					
 					-- update button
 					local selected = 	(GuildAdsTrade.currentPlayerName == button.playerName) 
@@ -409,6 +410,7 @@ GuildAdsTrade = {
 					button.data = nil;
 					button.recipe = nil;
 					button.count = nil;
+					button.minlevel = nil;
 					button:Hide();
 				end
 			
@@ -440,6 +442,7 @@ GuildAdsTrade = {
 			GuildListAdExchangeListFrame:Show();
 			GuildAdsTradeFilterFrame:Show();
 			GuildAds_DateFilter:Show();
+			GuildAdsTrade.select_since_minlevel();
 			if (ReagentData) then
 				GuildAds_Filter_ZoneDropDown:Show();
 			else 
@@ -458,6 +461,7 @@ GuildAdsTrade = {
 			GuildListAdExchangeListFrame:Show();
 			GuildAdsTradeFilterFrame:Show();
 			GuildAds_DateFilter:Show();
+			GuildAdsTrade.select_since_minlevel();
 			if (ReagentData) then
 				GuildAds_Filter_ZoneDropDown:Show();
 			else 
@@ -475,6 +479,7 @@ GuildAdsTrade = {
 			GuildListAdExchangeListFrame:Show();
 			GuildAdsTradeFilterFrame:Show();
 			GuildAds_DateFilter:Hide();
+			GuildAdsTrade.select_since_minlevel(true);
 			if (ReagentData) then
 				GuildAds_Filter_ZoneDropDown:Show();
 			else 
@@ -496,6 +501,22 @@ GuildAdsTrade = {
 			
 			GuildAdsTrade.myAds.updateMyAdsFrame();
 			
+		end
+	end;
+	
+	select_since_minlevel = function(m)
+		if m then -- select "MinLevel"
+			if GuildAdsTrade.sortData.current == "since" then
+				GuildAdsTrade.sortData.current="minlevel";
+			end
+			GuildAdsTradeColumnHeader6:Hide(); -- since
+			GuildAdsTradeColumnHeader7:Show(); -- minlevel
+		else -- select "since"
+			if GuildAdsTrade.sortData.current == "minlevel" then
+				GuildAdsTrade.sortData.current="since";
+			end
+			GuildAdsTradeColumnHeader6:Show(); -- since
+			GuildAdsTradeColumnHeader7:Hide(); -- minlevel			
 		end
 	end;
 	
@@ -796,7 +817,13 @@ GuildAdsTrade = {
 				getglobal(sinceField):SetTextColor(ownerColor["r"], ownerColor["g"], ownerColor["b"]);
 				getglobal(sinceField):SetText(GuildAdsDB:FormatTime(data._t));
 			else
-				getglobal(sinceField):Hide();
+				if button.minlevel then
+					getglobal(sinceField):Show();
+					getglobal(sinceField):SetTextColor(ownerColor["r"], ownerColor["g"], ownerColor["b"]);
+					getglobal(sinceField):SetText(button.minlevel);
+				else
+					getglobal(sinceField):Hide();
+				end
 			end
 						
 			-- Drop/Use
@@ -1061,8 +1088,10 @@ GuildAdsTrade = {
 							end
 						end
 					end
+					local info;
 					for key,value in pairs(tmptable) do
-						tinsert(GuildAdsTrade.data.cache[tab], { i=key, p=value.p, d=value.d, t=value.t, e=value.e, q=value.q });
+						info = GuildAds_ItemInfo[key] or {};
+						tinsert(GuildAdsTrade.data.cache[tab], { i=key, p=value.p, d=value.d, t=value.t, e=value.e, q=value.q, l=info.minlevel });
 					end
 					for _, data in pairs(GuildAdsTrade.data.cache[tab]) do
 						table.sort(data.p, GuildAdsTrade.sortData.predicateFunctions.crafter);
@@ -1093,7 +1122,8 @@ GuildAdsTrade = {
 			drop = "up",
 			use = "up",
 			owner="normal",
-			since="normal"
+			since="normal",
+			minlevel="normal"
 		};
 		
 		
@@ -1182,6 +1212,24 @@ GuildAdsTrade = {
 				end
 				return nil;
 			end;
+			
+			minlevel = function(a, b)
+				if not a.l and b.l then
+					return false;
+				end
+				if a.l and not b.l then
+					return true;
+				end
+				if a.l and b.l then
+					if (a.l < b.l ) then
+						return false;
+					elseif (a.l > b.l ) then
+						return true;
+					end
+				end
+				return nil;
+			end;
+					
 		
 		};
 		
