@@ -267,10 +267,11 @@ local function SimpleComm_SendQueue(elapsed)
 	if not message then
 		SimpleComm_extraBytes=0;
 	end
+	local num_messages = 0;
 	while message do
 		
 		-- check chat traffic
-		if (SimpleComm_sentBytes+SimpleComm_extraBytes) > SIMPLECOMM_CHARACTERSPERTICK_MAX then
+		if (SimpleComm_sentBytes+SimpleComm_extraBytes) > SIMPLECOMM_CHARACTERSPERTICK_MAX or num_messages>0 then
 			previousMessage = SimpleComm_messageQueueLast;
 			break;
 		end
@@ -282,6 +283,7 @@ local function SimpleComm_SendQueue(elapsed)
 				SendAddonMessage("GuildAds",message.text,"WHISPER",message.to);
 				--SimpleComm_AddWhisper(message.to);
 				SimpleComm_sentBytes = SimpleComm_sentBytes + string.len(message.text);
+				num_messages = num_messages + 1;
 			else
 				-- Ignore the message since the player is offline.
 				--SimpleComm_sentBytes = SimpleComm_sentBytes - string.len(message.text);
@@ -290,6 +292,7 @@ local function SimpleComm_SendQueue(elapsed)
 			-- DEBUG_MSG("Envois a tous de("..message.text..")");
 			SendChatMessage(message.text, "CHANNEL", nil, SimpleComm_channelId);
 			SimpleComm_sentBytes = SimpleComm_sentBytes + string.len(message.text);
+			num_messages = num_messages + 1;
 		end
 		
 		-- delete current message in queue
