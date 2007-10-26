@@ -17,6 +17,7 @@ SIMPLECOMM_INBOUND_TICK_DELAY = 0.125;	-- TODO : change from 0.125 to 0.5 accord
 
 SIMPLECOMM_SENDCHATMESSAGE_TICK_DELAY = 0.5;
 SimpleComm_SendChatMessage_Queue ={};
+SimpleComm_NoThrottleMonitor={ SAY=true, WHISPER=true, PARTY=true, YELL=true, RAID=true  };
 
 local PIPE_ENTITIE = "\127p";
 
@@ -148,6 +149,8 @@ end
 function SimpleComm_newSendChatMessage(msg, sys, lang, name, noafkclear)
 	if (sys == SimpleComm_chanSlashCmdUpper) then
 		return SimpleComm_Queue_SendChatMessage(string.gsub(msg, "|", PIPE_ENTITIE), "CHANNEL", lang, GetChannelName( SimpleComm_Channel ), noafkclear);
+	elseif SimpleComm_NoThrottleMonitor[sys] then
+		SimpleComm_oldSendChatMessage(msg, sys, lang, name);
 	else
 		return SimpleComm_Queue_SendChatMessage(msg, sys, lang, name, noafkclear);
 	end
