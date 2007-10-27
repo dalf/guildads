@@ -16,10 +16,11 @@ local emptyArray = {};
 local frame;
 local timerDB = {};
 
-local OnUpdate = function()
+local OnUpdate = function(this, elapsed)
 	for k, v in pairs(timerDB) do
-		v.e = v.e + (arg1 or 0.015)
-		if not v.t then elseif v.e >= v.t then v.e = 0
+		v.e = v.e + elapsed
+		if v.t and v.e >= v.t then
+			v.e = 0
 			if v.c then
 				v.c = v.c - 1
 				if v.c <= 0 then
@@ -33,9 +34,13 @@ local OnUpdate = function()
 			end
 		end
 	end
-	if not next(timerDB) then
+	if #timerDB == 0 then
 		frame:Hide()
 	end
+end
+
+function GuildAdsTask:DB()
+	return timerDB;
 end
 
 function GuildAdsTask:Initialize()
