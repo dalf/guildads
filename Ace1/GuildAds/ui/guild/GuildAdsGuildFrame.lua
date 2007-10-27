@@ -411,7 +411,7 @@ GuildAdsGuild = {
 			end
 			
 			-- Add AFK/DND flag
-			local flag, message = GuildAdsComm:GetStatus(owner);
+			local flag, message = GuildAdsComm:GetChatFlag(owner);
 			if flag and flag~="" then
 				GameTooltip:AddLine(flag..": "..message, 1.0, 1.0, 1.0);
 			end

@@ -2,7 +2,7 @@
 --
 -- SimpleComm.lua
 --
--- Author: Zarkan, Fkaï of European Ner'zhul (Horde)
+-- Author: Zarkan@Ner'zhul-EU, Fkaï@Ner'zhul-EU, Galmok@Stormrage-EU
 -- URL : http://guildads.sourceforge.net
 -- Email : guildads@gmail.com
 -- Licence: GPL version 2 (General Public License)
@@ -65,8 +65,8 @@ SimpleComm_AmbiguousMessage = string.format(ERR_CHAT_PLAYER_AMBIGUOUS_S, "(.*)")
 SimpleComm_AFK_MESSAGE = string.format(MARKED_AFK_MESSAGE, "(.*)");
 SimpleComm_DND_MESSAGE = string.format(MARKED_DND, "(.*)");
 
-SimpleComm_Flags = {};
-SimpleComm_RecentWhispers = {};
+SimpleComm_Flags = nil;
+SimpleComm_FlagsText  =nil;
 SimpleComm_Disconnected = {};
 
 local SimpleComm_messageStack = {};
@@ -197,31 +197,14 @@ end
 -- AFK/DND status
 -- 
 ---------------------------------------------------------------------------------
-function SimpleComm_SetFlag(player, flag, message)
-	player = player or UnitName("player");
-	if flag then
-		SimpleComm_Flags[player] = { flag=flag; message=message };
-	else
-		SimpleComm_Flags[player] = nil;
-	end
-	if player==UnitName("player") and SimpleComm_FlagListener then
-		SimpleComm_FlagListener(flag, message);
-	end
+function SimpleComm_SetFlag(flag, message)
+	SimpleComm_Flags = flag
+	SimpleComm_FlagsText = message
+	SimpleComm_FlagListener(flag, message);
 end
 
-function SimpleComm_GetFlag(player)
-	if SimpleComm_Flags[player] then
-		return SimpleComm_Flags[player].flag, SimpleComm_Flags[player].message;
-	end
-end
-
-function SimpleComm_AddWhisper(player)
-	SimpleComm_RecentWhispers[string.lower(player)] = GetTime();
-end
-
-function SimpleComm_DelWhisper(player)
-	local t = SimpleComm_RecentWhispers[string.lower(player)];
-	return t and GetTime() - t <= 15;
+function SimpleComm_GetFlag()
+	return SimpleComm_Flags, SimpleComm_FlagsText;
 end
 
 ---------------------------------------------------------------------------------
@@ -505,16 +488,16 @@ function SimpleComm_New_ChatFrame_MessageEventHandler(event)
 		-- update my AFK/DND status
 		local iStart, iEnd, message = string.find(arg1, SimpleComm_AFK_MESSAGE);
 		if iStart or arg1==MARKED_AFK then 
-			SimpleComm_SetFlag(nil, "AFK", message);
+			SimpleComm_SetFlag("AFK", message);
 		end
 		
 		local iStart, iEnd, message = string.find(arg1, SimpleComm_DND_MESSAGE);
 		if iStart then
-			SimpleComm_SetFlag(nil, "DND", message);
+			SimpleComm_SetFlag("DND", message);
 		end
 		
 		if arg1==CLEARED_AFK or arg1==CLEARED_DND then
-			SimpleComm_SetFlag(nil, nil, nil);
+			SimpleComm_SetFlag(nil, nil);
 		end
 		
 		-- update Drunk status
@@ -674,10 +657,10 @@ function SimpleComm_Initialize(FilterText, FilterMessage, SplitSerialize, Unspli
 	-- AFK/DND test for myself (usefull when the UI was reloaded)
 	if SimpleComm_GetFlag(UnitName("player"))==nil then
 		if UnitIsAFK("player") then
-			SimpleComm_SetFlag(nil, "AFK", "");
+			SimpleComm_SetFlag("AFK", "");
 		end
 		if UnitIsDND("player") then
-			SimpleComm_SetFlag(nil, "DND", "");
+			SimpleComm_SetFlag("DND", "");
 		end
 	end
 	

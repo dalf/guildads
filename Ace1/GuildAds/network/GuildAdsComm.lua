@@ -2,7 +2,7 @@
 --
 -- GuildAdsComm.lua
 --
--- Author: Zarkan, Fkaï of European Ner'zhul (Horde)
+-- Author: Zarkan@Ner'zhul-EU, Fkaï@Ner'zhul-EU, Galmok@Stormrage-EU
 -- URL : http://guildads.sourceforge.net
 -- Email : guildads@gmail.com
 -- Licence: GPL version 2 (General Public License)
@@ -14,20 +14,12 @@ Bug
 	* Erreur ligne 148, et 168 dans le code lua de la réput (en faisant tous/aucun)
 	* Create Iterator for player when it doesn't exist : see GuildAdsComm:ReceiveMeta
 Todo :
-	* GuildAdsTask : frame is hidden if there is not task (not usefull for now, since there is task to load the roster, see GuildAds.lua)
-	* Iterator by database id. Database id, identify a SavedVariables/GuildAds.lua. So synchronization handles 
-		when a player logs on from different PC
-		when a player logs on with different rerolls
 	Add to field to SR/R messages : number of player ignoring this search (even if this is not fully implemented now, it's will avoid to break the protocol after)
-	Reduce the number of search when the database seems to be synchronized (??? how ...)
 	The curse-gaming (etc..) zip : all ChatDebug are deleted to avoid memory/cpu usage.
 	Clean up :
 		Move GUILDADS_MSG_TYPE_REQUEST et GUILDADS_MSG_TYPE_AVAILABLE to the UI part
 		Move GuildAdsDB:FormatTime to the UI
 		Replace some "if ... error... end" by "assert"
-		* Replace ChatDebug(x, "blabla"..a.."blalba") by ChatDebug(x, "blabla", a, "blabla)
-Note:
-	/print GuildAds.db._table.UpdateHistory["Ner'zhul"].GuildAdsTest
 ]]
 
 GUILDADS_VERSION_PROTOCOL = "4";
@@ -174,6 +166,7 @@ GuildAdsComm = AceModule:new({
 	token = 1,
 	channelName = "",
 	channelPassword = "",
+	chatFlags = {},
 	
 	DTS = {},
 	
@@ -396,8 +389,19 @@ end
 -- Get AFK/DND status
 -- 
 --------------------------------------------------------------------------------
-function GuildAdsComm:GetStatus(playerName)
-	return SimpleComm_GetFlag(playerName);
+function GuildAdsComm:GetChatFlag(playerName)
+	if not self.chatFlags[playerName] then
+		return "", ""
+	else
+		return self.chatFlags[playerName].flag, self.chatFlags[playerName].text
+	end
+end
+
+function GuildAdsComm:SetChatFlag(playerName, flag, text)
+	self.chatFlags[playerName] = {
+		flag = flag,
+		text = text
+	}
 end
 
 --------------------------------------------------------------------------------
@@ -614,7 +618,7 @@ end
 function GuildAdsComm:SendChatFlag(toPlayerName)
 	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendChatFlag");
 	local flag, message = SimpleComm_GetFlag(GuildAds.playerName);
-	SimpleComm_SendMessage(toPlayerName, GUILDADS_MSG_PREFIX.."CF>"..(flag or "")..">"..(message or "")..">");
+	SimpleComm_SendMessage(toPlayerName, string.format("%sCF>%s>%s>", GUILDADS_MSG_PREFIX, (flag or ""), (message or "")));
 end
 
 function GuildAdsComm:SendHashSearch(path)
@@ -780,9 +784,7 @@ function GuildAdsComm:ReceiveMeta(channelName, personName, revision, revisionStr
 end
 
 function GuildAdsComm:ReceiveChatFlag(channelName, personName, flag, text)
-	if personName~=GuildAds.playerName then
-		SimpleComm_SetFlag(personName, flag, text);
-	end
+	self:SetChatFlag(personName, flag, text);
 end
 
 function GuildAdsComm:ReceiveHashSearch(channelName, personName, path, hashSequence)
