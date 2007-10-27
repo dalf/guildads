@@ -36,8 +36,7 @@ GuildAds_DebugPlugin = {
 	};
 	
 	showDebug = function()
-		return true;
-		-- return GuildAdsDatabase and GuildAdsDatabase.Config and GuildAdsDatabase.Config.Debug;
+		return GuildAdsDatabase and GuildAdsDatabase.Config and GuildAdsDatabase.Config.Debug;
 	end;
 	
 	setShowDebug = function(status)
