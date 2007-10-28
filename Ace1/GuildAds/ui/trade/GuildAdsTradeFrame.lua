@@ -8,6 +8,9 @@
 -- Licence: GPL version 2 (General Public License)
 ----------------------------------------------------------------------------------
 
+GUILDADS_MSG_TYPE_REQUEST = 1;
+GUILDADS_MSG_TYPE_AVAILABLE = 2;
+
 local g_AdFilters = {}; 
 
 GuildAdsTrade = {

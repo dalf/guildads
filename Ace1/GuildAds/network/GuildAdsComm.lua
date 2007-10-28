@@ -10,14 +10,11 @@
 
 --[[
 Bug
-	* Check the player who has token is still alive : see SetState method
 	* Erreur ligne 148, et 168 dans le code lua de la réput (en faisant tous/aucun)
-	* Create Iterator for player when it doesn't exist : see GuildAdsComm:ReceiveMeta
 Todo :
 	Add to field to SR/R messages : number of player ignoring this search (even if this is not fully implemented now, it's will avoid to break the protocol after)
 	The curse-gaming (etc..) zip : all ChatDebug are deleted to avoid memory/cpu usage.
 	Clean up :
-		Move GUILDADS_MSG_TYPE_REQUEST et GUILDADS_MSG_TYPE_AVAILABLE to the UI part
 		Move GuildAdsDB:FormatTime to the UI
 		Replace some "if ... error... end" by "assert"
 ]]
@@ -29,9 +26,6 @@ GUILDADS_MSG_PREFIX1= GUILDADS_MSG_PREFIX_NOVERSION..GUILDADS_VERSION_PROTOCOL;
 GUILDADS_MSG_PREFIX = GUILDADS_MSG_PREFIX1..":";
 	
 GUILDADS_MSG_PREFIX_REGEX_UNSPLIT = GUILDADS_MSG_PREFIX.."([0-9]+)([\.|\:])(.*)";
-
-GUILDADS_MSG_TYPE_REQUEST = 1;
-GUILDADS_MSG_TYPE_AVAILABLE = 2;
 
 --------------------------------------------------------------------------------
 --
@@ -162,11 +156,11 @@ GuildAdsComm = AceModule:new({
 	playerTree = {},
 	playerList = {},
 	playerMeta = {},
+	playerChatFlags = {},
 	databaseIdList = {},
 	token = 1,
 	channelName = "",
 	channelPassword = "",
-	chatFlags = {},
 	
 	DTS = {},
 	
@@ -182,8 +176,8 @@ GuildAdsComm = AceModule:new({
 		Transaction				= 0.5,
 		TransactionDelay		= 40,
 		Timeout					= 15,		-- timeout should now trigger for most portal crossings
-		HashDelay					= 60,		-- all databases are identical. Wait a while before searching again.
-		MoveToken					= 5		-- delay to wait before actually moving the token
+		HashDelay				= 60,		-- all databases are identical. Wait a while before searching again.
+		MoveToken				= 5			-- delay to wait before actually moving the token
 	},
 	
 	-- to check the token
@@ -390,15 +384,15 @@ end
 -- 
 --------------------------------------------------------------------------------
 function GuildAdsComm:GetChatFlag(playerName)
-	if not self.chatFlags[playerName] then
+	if not self.playerChatFlags[playerName] then
 		return "", ""
 	else
-		return self.chatFlags[playerName].flag, self.chatFlags[playerName].text
+		return self.playerChatFlags[playerName].flag, self.playerChatFlags[playerName].text
 	end
 end
 
 function GuildAdsComm:SetChatFlag(playerName, flag, text)
-	self.chatFlags[playerName] = {
+	self.playerChatFlags[playerName] = {
 		flag = flag,
 		text = text
 	}
