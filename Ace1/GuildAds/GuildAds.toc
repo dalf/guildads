@@ -1,16 +1,18 @@
-## Interface: 20006
+## Interface: 20200
 ## Title: GuildAds
-## Author: Zarkan, Fkai
+## Author: Zarkan, Fkaï, Galmok
 ## Version: 2.0
 ## Notes: Guild Ads
 ## Notes-frFR: Les annonces de la guilde
-## eMail: guildads@gmail.com
-## URL: http://guildads.sourceforge.net
 ## Dependencies: Ace
 ## OptionalDeps: ReagentData,GuildEventManager2
 ## DefaultState: Enabled
 ## LoadOnDemand: 0
 ## SavedVariables: GuildAdsDatabase
+## X-eMail: guildads AT gmail DOT com
+## X-Website: http://guildads.sf.net
+## X-License: GPL v2
+## X-Category: Guild
 revision.lua
 localization.lua
 localization.de.lua
@@ -28,7 +30,6 @@ data\GuildAdsDataType.lua
 data\GuildAdsFakeDataType.lua
 data\GuildAdsTableDataType.lua
 data\GuildAdsDB.lua
-#data\UpdateHistory.lua
 data\GuildAdsList.lua
 data\GuildAdsHash.lua
 data\datatypes\GuildAdsAdminData.lua
