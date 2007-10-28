@@ -248,6 +248,7 @@ end
 GuildAdsCodecString = GuildAdsCodec:new({}, "String", 1);
 
 GuildAdsCodecString.SpecialChars = "|>/\31\n";
+GuildAdsCodecString.SpecialCharsRegex = "(["..GuildAdsCodecString.SpecialChars.."])";
 
 GuildAdsCodecString.SpecialCharMap =
 {
@@ -257,32 +258,28 @@ GuildAdsCodecString.SpecialCharMap =
 	n = "\n",		-- \n forbidden in chat
 };
 
+local encodeChar = function(pField)
+	for vName, vChar in pairs(GuildAdsCodecString.SpecialCharMap) do
+		if vChar == pField then
+			return "&"..vName..";";
+		end
+	end
+	return "";
+end
+
 function GuildAdsCodecString.encode(pString)
 	if pString then
 		return string.gsub(
 						pString,
-						"(["..GuildAdsCodecString.SpecialChars.."])",
-						function (pField)
-							for vName, vChar in GuildAdsCodecString.SpecialCharMap do
-								if vChar == pField then
-									return "&"..vName..";";
-								end
-							end
-							
-							return "";
-						end);
+						GuildAdsCodecString.SpecialCharsRegex,
+						encodeChar);
 	end
 	return "\31";
 end
 
-local func = function (pField)
-	local	vChar = GuildAdsCodecString.SpecialCharMap[pField];
-							
-	if vChar ~= nil then
-		return vChar;
-	else
-		return pField;
-	end
+local decodeChar = function (pField)
+	local vChar = GuildAdsCodecString.SpecialCharMap[pField];					
+	return vChar or "&"..pField..";"
 end
 
 function GuildAdsCodecString.decode(pString)
@@ -290,7 +287,7 @@ function GuildAdsCodecString.decode(pString)
 		return string.gsub(
 						pString,
 						"&(%w+);", 
-						func);
+						decodeChar);
 	end
 end
 
