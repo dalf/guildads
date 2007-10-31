@@ -62,9 +62,12 @@ function GuildAdsDBChannel:getPlayers()
 end
 
 function GuildAdsDBChannel:addPlayer(playerName)
-	if not self.db.Players[playerName] then
-		self.db.Players[playerName] = true;
-		self:triggerEvent(self.PLAYER, playerName);
+	if self:isPlayerAllowed(playerName) then
+		if not self.db.Players[playerName] then
+			self.db.Players[playerName] = true;
+			self:triggerEvent(self.PLAYER, playerName);
+		end
+		return true;
 	end
 end
 
