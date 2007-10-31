@@ -8,6 +8,9 @@
 -- Licence: GPL version 2 (General Public License)
 ----------------------------------------------------------------------------------
 
+-- function in GEM_List.lua that is called when there is a change in events: GEMList_NotifyNewEvent
+-- #GEM_NewEvents == 0 -->> No new event.   > 0 -->> New event. Start flashing.
+
 local oldGEMMain_SelectTab;
 local firstShow = true;
 
@@ -34,6 +37,7 @@ GuildAdsGEMEvent = {
 	
 	GUILDADSEVENT_TAB_EVENTLIST = 1;
 	GUILDADSEVENT_TAB_NEW = 2;
+	GUILDADSEVENT_TAB_PLAYERS = 3;
 	
 	onLoad = function()
 	    if GEMListFrame then 
@@ -59,6 +63,11 @@ GuildAdsGEMEvent = {
 			GEMNewFrame:SetPoint("TOPLEFT","GuildAdsMainWindowFrame","TOPLEFT",22,-58);
 			GEMNewFrame:SetFrameLevel(2);
 			
+			GEMPlayersFrame:SetParent("GuildListAdMemberFrame");
+			GEMPlayersFrame:ClearAllPoints();
+			GEMPlayersFrame:SetPoint("TOPLEFT","GuildAdsMainWindowFrame","TOPLEFT",25,-78);
+			GEMPlayersFrame:SetFrameLevel(2);
+			
 			GEMOptionsFrame:SetParent("GuildAdsOptionsWindowFrame");
 			GEMOptionsFrame:ClearAllPoints();
 			GEMOptionsFrame:SetPoint("TOPLEFT","GuildAdsOptionsWindowFrame","TOPLEFT",-42, -30);
@@ -76,6 +85,7 @@ GuildAdsGEMEvent = {
 			-- init tab in GA
 			PanelTemplates_SelectTab(GuildAds_GEMEventTab1);
 			PanelTemplates_DeselectTab(GuildAds_GEMEventTab2);
+			PanelTemplates_DeselectTab(GuildAds_GEMEventTab3);
 			
 			-- show GEMListFrame
 			GuildListAdEventListFrame:Show();
@@ -84,6 +94,10 @@ GuildAdsGEMEvent = {
 			-- hide GEMNewFrame
 			GuildListAdCustomEventFrame:Hide();
 			GEMNewFrame:Hide();
+			
+			-- hide GEMPlayersFrame
+			GuildListAdMemberFrame:Hide();
+			GEMPlayersFrame:Hide();
 			
 			-- select config tab on GEM window
 			GEMMain_SelectTab(3);
@@ -155,18 +169,34 @@ GuildAdsGEMEvent = {
 		if (tab == GuildAdsGEMEvent.GUILDADSEVENT_TAB_EVENTLIST) then
 			PanelTemplates_SelectTab(GuildAds_GEMEventTab1);
 			PanelTemplates_DeselectTab(GuildAds_GEMEventTab2);
+			PanelTemplates_DeselectTab(GuildAds_GEMEventTab3);
 			GuildListAdCustomEventFrame:Hide();
 			GEMNewFrame:Hide();
 			GuildListAdEventListFrame:Show();
 			GEMNew_CheckResetEdit();
 			GEMListFrame:Show();
+			GuildListAdMemberFrame:Hide();
+			GEMPlayersFrame:Hide();
 		elseif (tab == GuildAdsGEMEvent.GUILDADSEVENT_TAB_NEW) then 
 			PanelTemplates_SelectTab(GuildAds_GEMEventTab2);
 			PanelTemplates_DeselectTab(GuildAds_GEMEventTab1);
+			PanelTemplates_DeselectTab(GuildAds_GEMEventTab3);
 			GuildListAdEventListFrame:Hide();
 			GEMListFrame:Hide();
 			GuildListAdCustomEventFrame:Show();
 			GEMNewFrame:Show();
+			GuildListAdMemberFrame:Hide();
+			GEMPlayersFrame:Hide();
+		elseif (tab == GuildAdsGEMEvent.GUILDADSEVENT_TAB_PLAYERS) then 
+			PanelTemplates_DeselectTab(GuildAds_GEMEventTab1);
+			PanelTemplates_DeselectTab(GuildAds_GEMEventTab2);
+			PanelTemplates_SelectTab(GuildAds_GEMEventTab3);
+			GuildListAdEventListFrame:Hide();
+			GEMListFrame:Hide();
+			GuildListAdCustomEventFrame:Hide();
+			GEMNewFrame:Hide();
+			GuildListAdMemberFrame:Show();
+			GEMPlayersFrame:Show();
 		end
 	end;
 }

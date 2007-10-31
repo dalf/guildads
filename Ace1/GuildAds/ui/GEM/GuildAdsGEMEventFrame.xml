@@ -45,6 +45,20 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 					</OnClick>
 				</Scripts>
 			</Button>
+			<Button name="GuildAds_GEMEventTab3" inherits="TabButtonTemplate" text="GEM_TAB_PLAYERS" id="3" hidden="false">
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="GuildAds_GEMEventTab2" relativePoint="RIGHT">
+						<Offset>
+							<AbsDimension x="0" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						GuildAdsGEMEvent.selectTab(GuildAdsGEMEvent.GUILDADSEVENT_TAB_PLAYERS);
+					</OnClick>
+				</Scripts>
+			</Button>
 			
 
 			<Frame name="GuildListAdEventListFrame" hidden="false" enableMouse="true">
@@ -59,6 +73,11 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 							<AbsDimension x="20" y="5"/>
 						</Offset>
 					</Anchor>
+				</Anchors>
+			</Frame>
+			<Frame name="GuildListAdMemberFrame" hidden="true" enableMouse="true">
+				<Anchors>
+					<Anchor point="TOPLEFT" />
 				</Anchors>
 			</Frame>
 			
