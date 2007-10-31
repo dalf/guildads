@@ -13,6 +13,7 @@
 ## X-Website: http://guildads.sf.net
 ## X-License: GPL v2
 ## X-Category: Guild
+lib\ChatThrottler\ChatThrottler.lua
 revision.lua
 localization.lua
 localization.de.lua

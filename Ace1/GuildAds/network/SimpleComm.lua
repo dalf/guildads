@@ -10,14 +10,12 @@
 
 SIMPLECOMM_DEBUG = false;				-- output debug information
 
-SIMPLECOMM_CHARACTERSPERTICK_MAX = 100;		-- char per tick			300
-SIMPLECOMM_OUTBOUND_TICK_DELAY = 0.5;		-- delay in second between tick		1
+SIMPLECOMM_CHARACTERSPERTICK_MAX = 200;		-- char per tick			300
+SIMPLECOMM_OUTBOUND_TICK_DELAY = 1;		-- delay in second between tick		1
 
 SIMPLECOMM_INBOUND_TICK_DELAY = 0.125;	-- TODO : change from 0.125 to 0.5 according to FPS
 
 SIMPLECOMM_SENDCHATMESSAGE_TICK_DELAY = 0.5;
-SimpleComm_SendChatMessage_Queue ={};
-SimpleComm_NoThrottleMonitor={ SAY=true, WHISPER=true, PARTY=true, YELL=true, RAID=true  };
 
 local PIPE_ENTITIE = "\127p";
 
@@ -121,7 +119,6 @@ local function SimpleComm_SetAliasChannel()
 		if (not SimpleComm_oldSendChatMessage) then
 			SimpleComm_oldSendChatMessage = SendChatMessage;
 			SendChatMessage = SimpleComm_newSendChatMessage;
-			SimpleCommFrame.message_delay = SIMPLECOMM_SENDCHATMESSAGE_TICK_DELAY; -- enabling this line enables chat throttle
 		end
 		SimpleComm_aliasMustBeSet = false;
 	end
@@ -146,50 +143,16 @@ local function SimpleComm_UnsetAliasChannel()
 	end
 end
 
-function SimpleComm_newSendChatMessage(msg, sys, lang, name, noafkclear)
+function SimpleComm_newSendChatMessage(msg, sys, lang, name)
 	if (sys == SimpleComm_chanSlashCmdUpper) then
-		return SimpleComm_Queue_SendChatMessage(string.gsub(msg, "|", PIPE_ENTITIE), "CHANNEL", lang, GetChannelName( SimpleComm_Channel ), noafkclear);
-	elseif SimpleComm_NoThrottleMonitor[sys] then
-		SimpleComm_oldSendChatMessage(msg, sys, lang, name);
+		return SimpleComm_oldSendChatMessage(string.gsub(msg, "|", PIPE_ENTITIE), "CHANNEL", lang, GetChannelName( SimpleComm_Channel ));
 	else
-		return SimpleComm_Queue_SendChatMessage(msg, sys, lang, name, noafkclear);
+		return SimpleComm_oldSendChatMessage(msg, sys, lang, name);
 	end
 end
 
 function SimpleComm_test()
 	DEBUG_MSG("ok");
-end
-
-function SimpleComm_Queue_SendChatMessage(msg, sys, lang, name, noafkclear)
-	if SimpleCommFrame.message_delay then
-		--DEBUG_MSG("Queuing message "..msg); -- careful, % signs wreck output: cause errors.
-		if SimpleCommFrame.message_delay <= 0 then
-			SimpleComm_oldSendChatMessage(msg, sys, lang, name);
-			SimpleCommFrame.message_delay = SIMPLECOMM_SENDCHATMESSAGE_TICK_DELAY;
-		else
-			tinsert(SimpleComm_SendChatMessage_Queue, {msg=msg, sys=sys, lang=lang, name=name, noafkclear=noafkclear});
-		end
-	else
-		--DEBUG_MSG("Sending message "..msg);
-		return SimpleComm_oldSendChatMessage(msg, sys, lang, name);
-	end
-end
-
-function SimpleComm_SendChatMessage_Tick()
-	local q=SimpleComm_SendChatMessage_Queue[1];
-	local noafkclear=q.noafkclear;
-	local clearAFK;
-	if noafkclear then
-		clearAFK = GetCVar("autoClearAFK");
-		SetCVar("autoClearAFK", 0);
-	end
-
-	SimpleComm_oldSendChatMessage(q.msg, q.sys, q.lang, q.name); -- call original SendChatMessage
-	tremove(SimpleComm_SendChatMessage_Queue,1);
-
-	if noafkclear then
-		SetCVar("autoClearAFK", clearAFK);
-	end
 end
 
 ---------------------------------------------------------------------------------
@@ -312,7 +275,7 @@ local function SimpleComm_SendQueue(elapsed)
 			end
 		else
 			-- DEBUG_MSG("Envois a tous de("..message.text..")");
-			SendChatMessage(message.text, "CHANNEL", nil, SimpleComm_channelId, true);
+			SendChatMessage(message.text, "CHANNEL", nil, SimpleComm_channelId);
 			SimpleComm_sentBytes = SimpleComm_sentBytes + string.len(message.text);
 			num_messages = num_messages + 1;
 		end
@@ -582,14 +545,6 @@ function SimpleComm_OnUpdate(elapsed)
 				this.inbound = nil;
 			end
 			SimpleComm_Handler(message[1], message[2], message[3]);
-		end
-	end
-
-	if (this.message_delay) then
-		this.message_delay = this.message_delay - elapsed;
-		if (this.message_delay <=0 and #SimpleComm_SendChatMessage_Queue > 0) then
-			SimpleComm_SendChatMessage_Tick();
-			this.message_delay = SIMPLECOMM_SENDCHATMESSAGE_TICK_DELAY;
 		end
 	end
 end
