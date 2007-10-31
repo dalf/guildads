@@ -410,6 +410,12 @@ GuildAdsGuild = {
 				GameTooltip:AddLine("<"..guild..">", 1, 1, 1);
 			end
 			
+			-- Add GuildAds version
+			if GuildAdsComm and GuildAdsComm.playerMeta and GuildAdsComm.playerMeta[owner] then
+				local versionString = GuildAdsComm.playerMeta[owner].versionString;
+				GameTooltip:AddLine(string.format("GuildAds %s", versionString or ""), 0.8, 0.5, 0.2);
+			end
+			
 			-- Add AFK/DND flag
 			local flag, message = GuildAdsComm:GetChatFlag(owner);
 			if flag and flag~="" then

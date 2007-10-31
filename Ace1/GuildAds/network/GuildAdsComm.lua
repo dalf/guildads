@@ -748,6 +748,7 @@ function GuildAdsComm:ReceiveMeta(channelName, personName, revision, revisionStr
 	self.playerMeta[personName] = {
 		onlineSince = startTime;
 		version = revision;
+		versionString = revisionString;
 		databaseId = databaseId
 	}
 	if revision and self.latestRevision and revision>self.latestRevision then
