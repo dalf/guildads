@@ -82,6 +82,18 @@ function GuildAdsWindow:InitializeTab(currTab, id, info, previousTab)
 	end
 end
 
+function GuildAdsWindow:SelectFrame(frameName)
+    for id, info in pairs(self.tabDescription) do
+		if frameName == info.frame then
+			getglobal(info.frame):Show();
+			self:SelectTab(getglobal(info.tab));
+		else
+			getglobal(info.frame):Hide();
+			self:DeselectTab(getglobal(info.tab));
+		end
+	end
+end
+
 function GuildAdsWindow:TabOnClick(tab)	
     for id, info in pairs(self.tabDescription) do
 		if id == tab then

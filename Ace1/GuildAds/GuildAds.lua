@@ -158,6 +158,15 @@ function GuildAds:HideWindow(name)
 	end
 end
 
+function GuildAds:SelectWindowFrame(name, frameName)
+	if (self.channelName) then
+		getglobal(self.windows[name].frame):Show();
+		self.windows[name]:SelectFrame(frameName);
+	else
+		self.cmd:error(GUILDADS_ERROR_NOTINITIALIZED);
+	end	
+end
+
 function GuildAds:ToggleDebugOn()
 	GuildAds_DebugPlugin.logMessages(true);
 	self.cmd:status("Debug tab", TRUE, ACEG_MAP_ONOFF)
