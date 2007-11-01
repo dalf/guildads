@@ -2,13 +2,13 @@
 --
 -- GuildAds.lua
 --
--- Author: Zarkan, Fkaï of European Ner'zhul (Horde)
+-- Author: Zarkan@Ner'zhul-EU, Fkaï@Ner'zhul-EU, Galmok@Stormrage-EU
 -- URL : http://guildads.sourceforge.net
 -- Email : guildads@gmail.com
 -- Licence: GPL version 2 (General Public License)
 ----------------------------------------------------------------------------------
 
-GUILDADS_VERSION          = 200.1;
+GUILDADS_REVISION_NUMBER = tonumber((GUILDADS_REVISION or "1"):match("(%d+)"))
 
 GA_DEBUG_GLOBAL = 1;
 GA_DEBUG_CHANNEL = 2;
@@ -24,7 +24,7 @@ GuildAds = AceAddon:new({
     version       = GUILDADS_REVISION_STRING or "2.0 beta",
     releaseDate   = GUILDADS_REVISION_DATE or "??",
     aceCompatible = 103,
-    author        = "Zarkan, Fkai",
+    author        = "Zarkan@Ner'zhul-EU, Fkaï@Ner'zhul-EU, Galmok@Stormrage-EU",
     email         = "guildads@gmail.com",
     website       = "http://guildads.sourceforge.net",
     category      = "guild",
@@ -181,7 +181,7 @@ function GuildAds:DisplayDebugInfo()
 	local status, message = GuildAdsComm:GetChannelStatus();
 	message = message and status.."("..message..")" or status;
 	self.cmd:report({
-		{text="version", val=GUILDADS_VERSION },
+		{text="version", val=GUILDADS_REVISION_STRING },
 		{text="player name", val=tostring(self.playerName) },
 		{text="guild name", val=tostring(self.guildName) },
 		{text="account", val=tostring(GuildAdsDB.account) },

@@ -80,7 +80,7 @@ GuildAdsPlugin = {
 				return false, "Plugin name check failed.";
 			end
 			-- check version
-			if type(metainfo.guildadsCompatible)~="number" or metainfo.guildadsCompatible>GUILDADS_VERSION then
+			if type(metainfo.guildadsCompatible)~="number" or metainfo.guildadsCompatible>GUILDADS_REVISION_NUMBER then
 				return false, "Plugin incompatible with this version of GuildAds";
 			end
 		else
