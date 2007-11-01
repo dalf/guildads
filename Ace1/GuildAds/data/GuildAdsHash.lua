@@ -108,19 +108,20 @@ function GuildAdsHash:CreateHashTree()
 	numIDs=0;
 	numHashes=0;
 	for playerName in pairs(players) do
-		--print(playerName)
 		for dataTypeName, dataType in pairs(self.DT) do
-			ID=GuildAdsHash:getID(playerName,dataTypeName);
-			hashID=GuildAdsHash:CalculateHash(ID);
-			--hashID=bit.band(hashID,hashMask);
-			if not tmp[hashID] then
-				tmp[hashID]={ { hashID=hashID, ID=ID, p=playerName, dt=dataType } };
-				numHashes=numHashes+1;
-			else
-				tinsert(tmp[hashID],{ hashID=hashID, ID=ID, p=playerName, dt=dataType });
-				--sort(tmp[hashID],function(a,b) if a.ID<b.ID then return true; else return false; end; end);
+			if dataType:getRevision(playerName) > 0 then
+				ID=GuildAdsHash:getID(playerName,dataTypeName);
+				hashID=GuildAdsHash:CalculateHash(ID);
+				--hashID=bit.band(hashID,hashMask);
+				if not tmp[hashID] then
+					tmp[hashID]={ { hashID=hashID, ID=ID, p=playerName, dt=dataType } };
+					numHashes=numHashes+1;
+				else
+					tinsert(tmp[hashID],{ hashID=hashID, ID=ID, p=playerName, dt=dataType });
+					--sort(tmp[hashID],function(a,b) if a.ID<b.ID then return true; else return false; end; end);
+				end
+				numIDs=numIDs+1;
 			end
-			numIDs=numIDs+1;
 		end
 	end
 	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "Number of IDs: %i",numIDs)
@@ -242,16 +243,20 @@ function GuildAdsHash:UpdateTree(tree, playerName, dataTypeName)
 			end
 		end
 		-- hashID exists but ID wasn't there. Add ID to leaf (hashID) and sort them. Then recalculate leaf and path checksum.
-		tinsert(treepath.d,{ hashID=hashID, ID=ID, p=playerName, dt=self.DT[dataTypeName] });
-		sort(treepath.d, function(a,b) if a.ID<b.ID then return true; else return false; end; end);
-		treepath.h=GuildAdsHash:CalculateLeafChecksum(treepath.d);
-		GuildAdsHash:CalculatePathChecksums(tree,path);
+		if self.DT[dataTypeName]:getRevision(playerName) > 0 then
+			tinsert(treepath.d,{ hashID=hashID, ID=ID, p=playerName, dt=self.DT[dataTypeName] });
+			sort(treepath.d, function(a,b) if a.ID<b.ID then return true; else return false; end; end);
+			treepath.h=GuildAdsHash:CalculateLeafChecksum(treepath.d);
+			GuildAdsHash:CalculatePathChecksums(tree,path);
+		end
 	else
 		-- hashID doesn't exist: Create leaf (hashID) and add ID to it. Then calculate leaf and path checksum.
-		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "Path %s is not found.",table.concat(path,","));
-		tree[path]={ d={ { hashID=hashID, ID=ID, p=playerName, dt=self.DT[dataTypeName] } } };
-		tree[path].h=GuildAdsHash:CalculateLeafChecksum(tree[path].d);
-		GuildAdsHash:CalculatePathChecksums(tree,path);
+		if self.DT[dataTypeName]:getRevision(playerName) > 0 then
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "Path %s is not found.",table.concat(path,","));
+			tree[path]={ d={ { hashID=hashID, ID=ID, p=playerName, dt=self.DT[dataTypeName] } } };
+			tree[path].h=GuildAdsHash:CalculateLeafChecksum(tree[path].d);
+			GuildAdsHash:CalculatePathChecksums(tree,path);
+		end
 	end
 end
 
@@ -265,21 +270,21 @@ function GuildAdsHash:RemoveID(tree,playerName,dataTypeName)
 	path=GuildAdsHash:SplitHash(hashID);
 	
 	if tree then
-	treepath=tree[path]; -- just an optimisation
-	if treepath and treepath.d then
-		for k,v in pairs(treepath.d) do -- small loop, with 12 bit hash (path length = 3), 500 unique ids usually gives no more than 2 loops.
-			if v.ID == ID then
-				treepath.d[k]=nil; -- removing an ID does not change the order. No sort necessary.
-				if #treepath.d>0 then
-					treepath.h=GuildAdsHash:CalculateLeafChecksum(treepath.d); -- update leaf checksum
-				else
-					tree[path]=nil; -- delete leaf
+		treepath=tree[path]; -- just an optimisation
+		if treepath and treepath.d then
+			for k,v in pairs(treepath.d) do -- small loop, with 12 bit hash (path length = 3), 500 unique ids usually gives no more than 2 loops.
+				if v.ID == ID then
+					treepath.d[k]=nil; -- removing an ID does not change the order. No sort necessary.
+					if #treepath.d>0 then
+						treepath.h=GuildAdsHash:CalculateLeafChecksum(treepath.d); -- update leaf checksum
+					else
+						tree[path]=nil; -- delete leaf
+					end
+					GuildAdsHash:CalculatePathChecksums(tree,path);
+					return;
 				end
-				GuildAdsHash:CalculatePathChecksums(tree,path);
-				return;
 			end
 		end
-	end
 	end
 end
 
