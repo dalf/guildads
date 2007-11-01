@@ -12,23 +12,13 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 				GuildAdsMinimapButtonCore.onLoad();
 			</OnLoad>
 			<OnClick>
-				if (arg1 == "LeftButton") then
-					GuildAds:ToggleMainWindow()
-				else
-					GuildAds:ToggleOptionsWindow()
-				end
+				GuildAdsMinimapButtonCore.onClick();
 			</OnClick>
 			<OnEnter>
-				GameTooltip:SetOwner(this, "ANCHOR_LEFT");
-				GameTooltip:SetText(GUILDADS_TITLE);
-				local status, message = GuildAdsComm:GetChannelStatus();
-				if status=="Error" then
-					GameTooltip:AddLine(message);
-					GameTooltip:Show();
-				end
+				GuildAdsMinimapButtonCore.onEnter();
 			</OnEnter>
 			<OnLeave>
-				GameTooltip:Hide();
+				GuildAdsMinimapButtonCore.onLeave();
 			</OnLeave>
 		</Scripts>
 		<NormalTexture file="Interface\AddOns\GuildAds\ui\minimapButton\GuildAdsMinimapButton"/>

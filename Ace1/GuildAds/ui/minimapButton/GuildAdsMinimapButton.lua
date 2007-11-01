@@ -23,6 +23,9 @@ GuildAdsMinimapButtonCore = {
 		}
 	};
 	
+	alerts = {
+	};
+	
 	onLoad = function()
 		-- support for ButtonHole
 		if ButtonHole then
@@ -48,7 +51,7 @@ GuildAdsMinimapButtonCore = {
 		
 		if not ButtonHole then
 			GuildAdsMinimapButtonCore.update();
-			-- has GuildAds object : wait 8 seconds before initialization...
+			-- as GuildAds object : wait 8 seconds before initialization...
 			GuildAdsTask:AddNamedSchedule("GuildAdsMinimapButtonShow", 8, nil, nil, GuildAdsMinimapButton.Show, GuildAdsMinimapButton)
 		end
 	end;
@@ -64,6 +67,125 @@ GuildAdsMinimapButtonCore = {
 	onConfigChanged = function(path, key, value)
 		GuildAdsMinimapButtonCore.update();
 	end;
+	
+	onEnter = function()
+		local this = GuildAdsMinimapButton;
+		GameTooltip:SetOwner(this, "ANCHOR_LEFT");
+		GameTooltip:SetText(GUILDADS_TITLE);
+		local thereIsNoAlert = true;
+		for i, alert in ipairs(GuildAdsMinimapButtonCore.alerts) do
+			local text = alert.text;
+			local r = alert.r;
+			local g = alert.g;
+			local b = alert.b;
+			if not text and type(alert.func)=="function" then
+				local rf, gf, bf;
+				text, rf, gf, bf = alert.func();
+				r = rf or r;
+				g = gf or g;
+				b = bf or b;
+			end
+			GameTooltip:AddLine(text, r, g, b);
+			thereIsNoAlert = false;
+		end
+		if thereIsNoAlert then
+			local status, message = GuildAdsComm:GetChannelStatus();
+			if status~="Connected" then
+				if GuildAds.channelName then
+					GameTooltip:AddLine(GuildAds.channelName..": "..(status or ""), 1, 0, 0);
+				else
+					GameTooltip:AddLine(status or "", 1, 0, 0);
+				end
+				if message then
+					GameTooltip:AddLine(GuildAdsComm.message, 1, 0, 0);
+				end
+			else
+				GameTooltip:AddLine(GuildAds.channelName..": "..(status or ""), 0, 1, 0);
+			end			
+		end
+		GameTooltip:Show();
+		GuildAdsTask:AddNamedSchedule("GuildAdsMinimapButtonUpdate", 1, true, nil, GuildAdsMinimapButtonCore.onEnter)
+	end;
+	
+	onLeave = function()
+		GuildAdsTask:DeleteNamedSchedule("GuildAdsMinimapButtonUpdate");
+		GameTooltip:Hide();
+	end;
+	
+	onClick = function()
+		if (arg1 == "LeftButton") then
+			local alert = GuildAdsMinimapButtonCore.alerts[1];
+			if alert and type(alert.onClick)=="function" then
+				alert.onClick(unpack(alert.onClickArgs or {}));
+			else
+				GuildAds:ToggleMainWindow();
+			end
+			GuildAdsMinimapButtonCore.removeAllAlerts();
+		else
+			GuildAds:ToggleOptionsWindow()
+		end
+	end;
+	
+	onBlink = function()
+		if GuildAdsMinimapButton.s then
+			GuildAdsMinimapButton:UnlockHighlight();
+			GuildAdsMinimapButton.s = nil
+		else
+			GuildAdsMinimapButton:LockHighlight();
+			GuildAdsMinimapButton.s = 1;
+		end
+	end;
+	
+	addAlertText = function(text, r, g, b, onClick, ...)
+		GuildAdsMinimapButtonCore.addAlert(text, nil, r, g, b, onClick, ...);
+	end;
+	
+	addAlertFunction = function(func, onClick, ...)
+		GuildAdsMinimapButtonCore.addAlert(nil, func, nil, nil, nil, onClick, ...);
+	end;
+	
+	addAlert = function(text, func, r, g, b, onClick, ...)
+		GuildAdsTask:AddNamedSchedule("GuildAdsMinimapButtonBlink", 1, true, nil, GuildAdsMinimapButtonCore.onBlink)
+		local alert = {};
+		GuildAdsMinimapButtonCore.updateAlert(alert, text, func, r, g, b, onClick, ...)
+		table.insert(GuildAdsMinimapButtonCore.alerts, alert);
+		return alert;
+	end;
+	
+	updateAlert = function(alert, text, func, r, g, b, onClick, ...)
+		alert = alert or {};
+		alert.text = text;
+		alert.func = func;
+		alert.r = r or 1;
+		alert.g = g or 1;
+		alert.b = b or 1;
+		alert.onClick = onClick;
+		alert.onClickArgs = { select(1, ...) };
+	end;
+	
+	removeAlert = function(alert)
+		local t = GuildAdsMinimapButtonCore.alerts;
+		if #t > 1 then
+			for i,a in pairs(t) do
+				if a==alert then
+					table.remove(t, i);
+				end
+			end
+		else
+			GuildAdsMinimapButtonCore.removeAllAlerts();
+		end
+	end;
+	
+	removeAllAlerts = function()
+		GuildAdsMinimapButtonCore.alerts = {};
+		GuildAdsMinimapButton.s = nil;
+		GuildAdsMinimapButton:UnlockHighlight();
+		GuildAdsTask:DeleteNamedSchedule("GuildAdsMinimapButtonBlink");
+	end;
+	
+	-------------------------------------------------------------
+	-- options
+	-------------------------------------------------------------
 	
 	update = function()
 		local radius = GuildAdsMinimapButtonCore.getConfigValue(nil, "RadiusOffset", 77);
