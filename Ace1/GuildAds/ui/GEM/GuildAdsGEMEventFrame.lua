@@ -105,6 +105,11 @@ GuildAdsGEMEvent = {
 			-- hook GEMMain_SelectTab
 			oldGEMMain_SelectTab = GEMMain_SelectTab;
 			GEMMain_SelectTab = GuildAdsGEMEvent.GEMSelectTab;
+			
+			-- hook GEMList_NotifyNewEvent
+			if GuildAdsMinimapButtonCore then
+				GEMList_NotifyNewEvent = GuildAdsGEMEvent.GEMList_NotifyNewEvent;
+			end
 		else
 			-- hide GEM messages
 			GuildAdsGEMEvent.oldChatFrame_OnEvent =ChatFrame_OnEvent;
@@ -155,6 +160,21 @@ GuildAdsGEMEvent = {
 --~ 			GuildAdsGEMEvent.debug("   - leave : "..channelName..","..tostring(GEM_COM_Channels[channelName]));
 --~ 			GEMOptions_RemoveChannel(GuildAdsGEMEvent.getProfileValue(nil, "ChannelAddedByGA"));
 --~ 		end
+	end;
+	
+	showNewEvents = function()
+		GuildAds:SelectWindowFrame("main", GuildAdsGEMEvent.metaInformations.ui.main.frame);
+		GuildAdsGEMEvent.selectTab(GuildAdsGEMEvent.GUILDADSEVENT_TAB_EVENTLIST);
+	end;
+	
+	getNewEventsText = function()
+		return GEM_TEXT_NEW_EVENTS_AVAILABLE..#GEM_NewEvents;
+	end;
+	
+	GEMList_NotifyNewEvent = function()
+		GuildAdsMinimapButtonCore.addAlertFunction(
+			GuildAdsGEMEvent.getNewEventsText, 
+			GuildAdsGEMEvent.showNewEvents);
 	end;
 	
 	GEMSelectTab = function(tab)
