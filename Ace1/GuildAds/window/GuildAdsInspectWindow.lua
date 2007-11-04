@@ -36,3 +36,7 @@ function GuildAdsInspectWindow:Inspect(playerName)
 	self:SetTime(nil);
 	GuildAds:ShowWindow("inspect");
 end
+
+function GuildAdsInspectWindow:GetTabPosition()
+	return 65, -13
+end

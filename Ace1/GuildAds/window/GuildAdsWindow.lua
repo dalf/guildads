@@ -67,12 +67,16 @@ function GuildAdsWindow:InitializeTabs()
 	end
 end
 
+function GuildAdsWindow:GetTabPosition()
+	return 65, -27
+end
+
 function GuildAdsWindow:InitializeTab(currTab, id, info, previousTab)
 	currTab:SetID(id);
 	currTab:ClearAllPoints();
 	currTab:SetParent(self.frame);
 	if (previousTab == nil) then
-		currTab:SetPoint("CENTER", self.frame, "BOTTOMLEFT", 65, -27);
+		currTab:SetPoint("CENTER", self.frame, "BOTTOMLEFT", self:GetTabPosition());
 		getglobal(info.frame):Show();
 		self:SelectTab(currTab);
 	else

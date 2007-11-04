@@ -2,9 +2,9 @@
 ..\FrameXML\UI.xsd">
     <Script file="GuildAdsInspectWindow.lua"/>
     
-    <Frame name="GuildAdsInspectWindowFrame" frameStrata="HIGH" setAllPoints="true" parent="UIParent" hidden="true" enableMouse="true" movable="true" resizable="true">
+    <Frame name="GuildAdsInspectWindowFrame" frameStrata="HIGH" setAllPoints="true" parent="UIParent" hidden="true" enableMouse="true" movable="true">
         <Size>
-            <AbsDimension x="250" y="380"/>
+            <AbsDimension x="344" y="488"/>
         </Size>
         <Anchors>
             <Anchor point="TOPLEFT" relativeTo="GuildAdsMainWindowFrame" relativePoint="TOPRIGHT">

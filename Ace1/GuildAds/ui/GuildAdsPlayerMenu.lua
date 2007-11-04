@@ -84,6 +84,7 @@ GuildAdsPlayerMenu = {
 		if owner then
 			GuildAdsInspectWindow:Inspect(owner);
 			GuildAdsInventory:Update(true);
+			GuildAdsTalentUI:Update();
 		end
 	end;
 	

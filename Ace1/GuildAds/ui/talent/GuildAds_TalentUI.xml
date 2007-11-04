@@ -1,0 +1,497 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+..\..\FrameXML\UI.xsd">
+	<Script file="GuildAdsTalentFrame.lua"/>
+	<Include file="GuildAds_TalentUITemplates.xml"/>
+	<Frame name="GuildAdsTalentFrame" parent="GuildAdsInspectWindowFrame" hidden="false">
+		<Size>
+			<AbsDimension x="384" y="512"/>
+		</Size>
+		<Anchors>
+			<Anchor point="TOPLEFT">
+			<!--
+				<Offset>
+					<AbsDimension x="0" y="-104"/>
+				</Offset>
+				-->
+				<Offset>
+					<AbsDimension x="-10" y="-20"/>
+				</Offset>
+
+			</Anchor>
+		</Anchors>
+		<HitRectInsets>
+			<AbsInset left="0" right="30" top="0" bottom="45"/>
+		</HitRectInsets>
+		<Layers>
+			<Layer level="BACKGROUND">
+				<Texture name="GuildAdsTalentFramePortrait">
+					<Size>
+						<AbsDimension x="60" y="60"/>
+					</Size>
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset>
+								<AbsDimension x="7" y="-6"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</Texture>
+			</Layer>
+			<Layer level="BORDER">
+				<Texture file="Interface\PaperDollInfoFrame\UI-Character-General-TopLeft">
+					<Size>
+						<AbsDimension x="256" y="256"/>
+					</Size>
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset>
+								<AbsDimension x="2" y="-1"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</Texture>
+				<Texture file="Interface\PaperDollInfoFrame\UI-Character-General-TopRight">
+					<Size>
+						<AbsDimension x="128" y="256"/>
+					</Size>
+					<Anchors>
+						<Anchor point="TOPRIGHT">
+							<Offset>
+								<AbsDimension x="2" y="-1"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</Texture>
+				<Texture file="Interface\TalentFrame\UI-TalentFrame-BotLeft">
+					<Size>
+						<AbsDimension x="256" y="256"/>
+					</Size>
+					<Anchors>
+						<Anchor point="BOTTOMLEFT">
+							<Offset>
+								<AbsDimension x="2" y="-1"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</Texture>
+				<Texture file="Interface\TalentFrame\UI-TalentFrame-BotRight">
+					<Size>
+						<AbsDimension x="128" y="256"/>
+					</Size>
+					<Anchors>
+						<Anchor point="BOTTOMRIGHT">
+							<Offset>
+								<AbsDimension x="2" y="-1"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</Texture>
+			</Layer>
+			<Layer level="ARTWORK">
+				<Texture name="GuildAdsTalentFrameBackgroundTopLeft">
+					<Size>
+						<AbsDimension x="256" y="256"/>
+					</Size>
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset>
+								<AbsDimension x="23" y="-77"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</Texture>
+				<Texture name="GuildAdsTalentFrameBackgroundTopRight">
+					<Size>
+						<AbsDimension x="64" y="256"/>
+					</Size>
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeTo="GuildAdsTalentFrameBackgroundTopLeft" relativePoint="TOPRIGHT">
+							<Offset>
+								<AbsDimension x="0" y="0"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</Texture>
+				<Texture name="GuildAdsTalentFrameBackgroundBottomLeft">
+					<Size>
+						<AbsDimension x="256" y="128"/>
+					</Size>
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeTo="GuildAdsTalentFrameBackgroundTopLeft" relativePoint="BOTTOMLEFT">
+							<Offset>
+								<AbsDimension x="0" y="0"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</Texture>
+				<Texture name="GuildAdsTalentFrameBackgroundBottomRight">
+					<Size>
+						<AbsDimension x="64" y="128"/>
+					</Size>
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeTo="GuildAdsTalentFrameBackgroundTopLeft" relativePoint="BOTTOMRIGHT">
+							<Offset>
+								<AbsDimension x="0" y="0"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</Texture>
+			</Layer>
+			<Layer level="OVERLAY">
+				<FontString name="GuildAdsTalentFrameTitleText" inherits="GameFontNormal" text="TALENTS">
+					<Anchors>
+						<Anchor point="TOP">
+							<Offset>
+								<AbsDimension x="0" y="-16"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+				<Texture name="GuildAdsTalentFramePointsLeft" file="Interface\Common\Common-Input-Border">
+					<Size>
+						<AbsDimension x="8" y="20"/>
+					</Size>
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeTo="GuildAdsTalentFrame">
+							<Offset>
+								<AbsDimension x="75" y="-48"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+					<TexCoords left="0" right="0.0625" top="0" bottom="0.625"/>
+				</Texture>
+				<Texture name="GuildAdsTalentFramePointsMiddle" file="Interface\Common\Common-Input-Border">
+					<Size>
+						<AbsDimension x="248" y="20"/>
+					</Size>
+					<Anchors>
+						<Anchor point="LEFT" relativeTo="GuildAdsTalentFramePointsLeft" relativePoint="RIGHT"/>
+					</Anchors>
+					<TexCoords left="0.0625" right="0.9375" top="0" bottom="0.625"/>
+				</Texture>
+				<Texture name="GuildAdsTalentFramePointsRight" file="Interface\Common\Common-Input-Border">
+					<Size>
+						<AbsDimension x="8" y="20"/>
+					</Size>
+					<Anchors>
+						<Anchor point="LEFT" relativeTo="GuildAdsTalentFramePointsMiddle" relativePoint="RIGHT"/>
+					</Anchors>
+					<TexCoords left="0.9375" right="1.0" top="0" bottom="0.625"/>
+				</Texture>
+				<FontString name="GuildAdsTalentFrameSpentPoints" inherits="GameFontNormalSmall">
+					<Anchors>
+						<Anchor point="TOP" relativeTo="GuildAdsTalentFramePointsMiddle">
+							<Offset>
+								<AbsDimension x="0" y="-5"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+				<FontString name="GuildAdsTalentFrameTalentPointsText" inherits="GameFontHighlightSmall">
+					<Anchors>
+						<Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMLEFT">
+							<Offset>
+								<AbsDimension x="252" y="87"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+				<FontString name="GuildAdsTalentFrameTalentPoints" inherits="GameFontNormalSmall" text="CHARACTER_POINTS1_COLON">
+					<Anchors>
+						<Anchor point="RIGHT" relativeTo="GuildAdsTalentFrameTalentPointsText" relativePoint="LEFT">
+							<Offset>
+								<AbsDimension x="-3" y="0"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		<Frames>
+			<Button name="GuildAdsTalentFrameCloseButton" inherits="UIPanelCloseButton">
+				<Anchors>
+					<Anchor point="CENTER" relativePoint="TOPRIGHT">
+						<Offset>
+							<AbsDimension x="-44" y="-25"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						--HideUIPanel(this:GetParent());
+						GuildAdsInspectWindowFrame:Hide();
+					</OnClick>
+				</Scripts>
+			</Button>
+			<Button name="GuildAdsTalentFrameCancelButton" inherits="UIPanelButtonTemplate" text="CLOSE">
+				<Size>
+					<AbsDimension x="80" y="22"/>
+				</Size>
+				<Anchors>
+					<Anchor point="CENTER" relativePoint="TOPLEFT">
+						<Offset>
+							<AbsDimension x="305" y="-420"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						--HideUIPanel(this:GetParent());
+						GuildAdsInspectWindowFrame:Hide();
+					</OnClick>
+				</Scripts>
+			</Button>
+			<Button name="GuildAdsTalentFrameTab1" inherits="GuildAdsTalentTabTemplate" id="1">
+				<Anchors>
+					<Anchor point="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="15" y="46"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Button>
+			<Button name="GuildAdsTalentFrameTab2" inherits="GuildAdsTalentTabTemplate" id="2">
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="GuildAdsTalentFrameTab1" relativePoint="RIGHT">
+						<Offset>
+							<AbsDimension x="-15" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Button>
+			<Button name="GuildAdsTalentFrameTab3" inherits="GuildAdsTalentTabTemplate" id="3">
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="GuildAdsTalentFrameTab2" relativePoint="RIGHT">
+						<Offset>
+							<AbsDimension x="-15" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Button>
+			<Button name="GuildAdsTalentFrameTab4" inherits="GuildAdsTalentTabTemplate" id="4">
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="GuildAdsTalentFrameTab3" relativePoint="RIGHT">
+						<Offset>
+							<AbsDimension x="-15" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Button>
+			<Button name="GuildAdsTalentFrameTab5" inherits="GuildAdsTalentTabTemplate" id="5">
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="GuildAdsTalentFrameTab4" relativePoint="RIGHT">
+						<Offset>
+							<AbsDimension x="-15" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Button>
+			<ScrollFrame name="GuildAdsTalentFrameScrollFrame" inherits="UIPanelScrollFrameTemplate">
+				<Size>
+					<AbsDimension x="296" y="332"/>
+				</Size>
+				<Anchors>
+					<Anchor point="TOPRIGHT">
+						<Offset>
+							<AbsDimension x="-65" y="-77"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Layers>
+					<Layer level="ARTWORK">
+						<Texture file="Interface\PaperDollInfoFrame\UI-Character-ScrollBar">
+							<Size>
+								<AbsDimension x="31" y="256"/>
+							</Size>
+							<Anchors>
+								<Anchor point="TOPLEFT" relativePoint="TOPRIGHT">
+									<Offset>
+										<AbsDimension x="-2" y="5"/>
+									</Offset>
+								</Anchor>
+							</Anchors>
+							<TexCoords left="0" right="0.484375" top="0" bottom="1.0"/>
+						</Texture>
+						<Texture file="Interface\PaperDollInfoFrame\UI-Character-ScrollBar">
+							<Size>
+								<AbsDimension x="31" y="106"/>
+							</Size>
+							<Anchors>
+								<Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT">
+									<Offset>
+										<AbsDimension x="-2" y="-2"/>
+									</Offset>
+								</Anchor>
+							</Anchors>
+							<TexCoords left="0.515625" right="1.0" top="0" bottom="0.4140625"/>
+						</Texture>
+					</Layer>
+				</Layers>
+				<ScrollChild>
+					<Frame name="GuildAdsTalentFrameScrollChildFrame">
+						<Size>
+							<AbsDimension x="320" y="50"/>
+						</Size>
+						<Anchors>
+							<Anchor point="TOPLEFT"/>
+						</Anchors>
+						<Layers>
+							<Layer level="BACKGROUND">
+								<Texture name="GuildAdsTalentFrameBranch1" inherits="GuildAdsTalentBranchTemplate"/>
+								<Texture name="GuildAdsTalentFrameBranch2" inherits="GuildAdsTalentBranchTemplate"/>
+								<Texture name="GuildAdsTalentFrameBranch3" inherits="GuildAdsTalentBranchTemplate"/>
+								<Texture name="GuildAdsTalentFrameBranch4" inherits="GuildAdsTalentBranchTemplate"/>
+								<Texture name="GuildAdsTalentFrameBranch5" inherits="GuildAdsTalentBranchTemplate"/>
+								<Texture name="GuildAdsTalentFrameBranch6" inherits="GuildAdsTalentBranchTemplate"/>
+								<Texture name="GuildAdsTalentFrameBranch7" inherits="GuildAdsTalentBranchTemplate"/>
+								<Texture name="GuildAdsTalentFrameBranch8" inherits="GuildAdsTalentBranchTemplate"/>
+								<Texture name="GuildAdsTalentFrameBranch9" inherits="GuildAdsTalentBranchTemplate"/>
+								<Texture name="GuildAdsTalentFrameBranch10" inherits="GuildAdsTalentBranchTemplate"/>
+								<Texture name="GuildAdsTalentFrameBranch11" inherits="GuildAdsTalentBranchTemplate"/>
+								<Texture name="GuildAdsTalentFrameBranch12" inherits="GuildAdsTalentBranchTemplate"/>
+								<Texture name="GuildAdsTalentFrameBranch13" inherits="GuildAdsTalentBranchTemplate"/>
+								<Texture name="GuildAdsTalentFrameBranch14" inherits="GuildAdsTalentBranchTemplate"/>
+								<Texture name="GuildAdsTalentFrameBranch15" inherits="GuildAdsTalentBranchTemplate"/>
+								<Texture name="GuildAdsTalentFrameBranch16" inherits="GuildAdsTalentBranchTemplate"/>
+								<Texture name="GuildAdsTalentFrameBranch17" inherits="GuildAdsTalentBranchTemplate"/>
+								<Texture name="GuildAdsTalentFrameBranch18" inherits="GuildAdsTalentBranchTemplate"/>
+								<Texture name="GuildAdsTalentFrameBranch19" inherits="GuildAdsTalentBranchTemplate"/>
+								<Texture name="GuildAdsTalentFrameBranch20" inherits="GuildAdsTalentBranchTemplate"/>
+								<Texture name="GuildAdsTalentFrameBranch21" inherits="GuildAdsTalentBranchTemplate"/>
+								<Texture name="GuildAdsTalentFrameBranch22" inherits="GuildAdsTalentBranchTemplate"/>
+								<Texture name="GuildAdsTalentFrameBranch23" inherits="GuildAdsTalentBranchTemplate"/>
+								<Texture name="GuildAdsTalentFrameBranch24" inherits="GuildAdsTalentBranchTemplate"/>
+								<Texture name="GuildAdsTalentFrameBranch25" inherits="GuildAdsTalentBranchTemplate"/>
+								<Texture name="GuildAdsTalentFrameBranch26" inherits="GuildAdsTalentBranchTemplate"/>
+								<Texture name="GuildAdsTalentFrameBranch27" inherits="GuildAdsTalentBranchTemplate"/>
+								<Texture name="GuildAdsTalentFrameBranch28" inherits="GuildAdsTalentBranchTemplate"/>
+								<Texture name="GuildAdsTalentFrameBranch29" inherits="GuildAdsTalentBranchTemplate"/>
+								<Texture name="GuildAdsTalentFrameBranch30" inherits="GuildAdsTalentBranchTemplate"/>
+							</Layer>
+						</Layers>
+						<Frames>
+							<Button name="GuildAdsTalentFrameTalent1" inherits="GuildAdsTalentButtonTemplate" id="1"/>
+							<Button name="GuildAdsTalentFrameTalent2" inherits="GuildAdsTalentButtonTemplate" id="2"/>
+							<Button name="GuildAdsTalentFrameTalent3" inherits="GuildAdsTalentButtonTemplate" id="3"/>
+							<Button name="GuildAdsTalentFrameTalent4" inherits="GuildAdsTalentButtonTemplate" id="4"/>
+							<Button name="GuildAdsTalentFrameTalent5" inherits="GuildAdsTalentButtonTemplate" id="5"/>
+							<Button name="GuildAdsTalentFrameTalent6" inherits="GuildAdsTalentButtonTemplate" id="6"/>
+							<Button name="GuildAdsTalentFrameTalent7" inherits="GuildAdsTalentButtonTemplate" id="7"/>
+							<Button name="GuildAdsTalentFrameTalent8" inherits="GuildAdsTalentButtonTemplate" id="8"/>
+							<Button name="GuildAdsTalentFrameTalent9" inherits="GuildAdsTalentButtonTemplate" id="9"/>
+							<Button name="GuildAdsTalentFrameTalent10" inherits="GuildAdsTalentButtonTemplate" id="10"/>
+							<Button name="GuildAdsTalentFrameTalent11" inherits="GuildAdsTalentButtonTemplate" id="11"/>
+							<Button name="GuildAdsTalentFrameTalent12" inherits="GuildAdsTalentButtonTemplate" id="12"/>
+							<Button name="GuildAdsTalentFrameTalent13" inherits="GuildAdsTalentButtonTemplate" id="13"/>
+							<Button name="GuildAdsTalentFrameTalent14" inherits="GuildAdsTalentButtonTemplate" id="14"/>
+							<Button name="GuildAdsTalentFrameTalent15" inherits="GuildAdsTalentButtonTemplate" id="15"/>
+							<Button name="GuildAdsTalentFrameTalent16" inherits="GuildAdsTalentButtonTemplate" id="16"/>
+							<Button name="GuildAdsTalentFrameTalent17" inherits="GuildAdsTalentButtonTemplate" id="17"/>
+							<Button name="GuildAdsTalentFrameTalent18" inherits="GuildAdsTalentButtonTemplate" id="18"/>
+							<Button name="GuildAdsTalentFrameTalent19" inherits="GuildAdsTalentButtonTemplate" id="19"/>
+							<Button name="GuildAdsTalentFrameTalent20" inherits="GuildAdsTalentButtonTemplate" id="20"/>
+							<Button name="GuildAdsTalentFrameTalent21" inherits="GuildAdsTalentButtonTemplate" id="21"/>
+							<Button name="GuildAdsTalentFrameTalent22" inherits="GuildAdsTalentButtonTemplate" id="22"/>
+							<Button name="GuildAdsTalentFrameTalent23" inherits="GuildAdsTalentButtonTemplate" id="23"/>
+							<Button name="GuildAdsTalentFrameTalent24" inherits="GuildAdsTalentButtonTemplate" id="24"/>
+							<Button name="GuildAdsTalentFrameTalent25" inherits="GuildAdsTalentButtonTemplate" id="25"/>
+							<Button name="GuildAdsTalentFrameTalent26" inherits="GuildAdsTalentButtonTemplate" id="26"/>
+							<Button name="GuildAdsTalentFrameTalent27" inherits="GuildAdsTalentButtonTemplate" id="27"/>
+							<Button name="GuildAdsTalentFrameTalent28" inherits="GuildAdsTalentButtonTemplate" id="28"/>
+							<Button name="GuildAdsTalentFrameTalent29" inherits="GuildAdsTalentButtonTemplate" id="29"/>
+							<Button name="GuildAdsTalentFrameTalent30" inherits="GuildAdsTalentButtonTemplate" id="30"/>
+							<Button name="GuildAdsTalentFrameTalent31" inherits="GuildAdsTalentButtonTemplate" id="31"/>
+							<Button name="GuildAdsTalentFrameTalent32" inherits="GuildAdsTalentButtonTemplate" id="32"/>
+							<Button name="GuildAdsTalentFrameTalent33" inherits="GuildAdsTalentButtonTemplate" id="33"/>
+							<Button name="GuildAdsTalentFrameTalent34" inherits="GuildAdsTalentButtonTemplate" id="34"/>
+							<Button name="GuildAdsTalentFrameTalent35" inherits="GuildAdsTalentButtonTemplate" id="35"/>
+							<Button name="GuildAdsTalentFrameTalent36" inherits="GuildAdsTalentButtonTemplate" id="36"/>
+							<Button name="GuildAdsTalentFrameTalent37" inherits="GuildAdsTalentButtonTemplate" id="37"/>
+							<Button name="GuildAdsTalentFrameTalent38" inherits="GuildAdsTalentButtonTemplate" id="38"/>
+							<Button name="GuildAdsTalentFrameTalent39" inherits="GuildAdsTalentButtonTemplate" id="39"/>
+							<Button name="GuildAdsTalentFrameTalent40" inherits="GuildAdsTalentButtonTemplate" id="40"/>
+
+							<Frame name="GuildAdsTalentFrameArrowFrame" setAllPoints="true">
+								<Layers>
+									<Layer level="OVERLAY">
+										<Texture name="GuildAdsTalentFrameArrow1" inherits="GuildAdsTalentArrowTemplate"/>
+										<Texture name="GuildAdsTalentFrameArrow2" inherits="GuildAdsTalentArrowTemplate"/>
+										<Texture name="GuildAdsTalentFrameArrow3" inherits="GuildAdsTalentArrowTemplate"/>
+										<Texture name="GuildAdsTalentFrameArrow4" inherits="GuildAdsTalentArrowTemplate"/>
+										<Texture name="GuildAdsTalentFrameArrow5" inherits="GuildAdsTalentArrowTemplate"/>
+										<Texture name="GuildAdsTalentFrameArrow6" inherits="GuildAdsTalentArrowTemplate"/>
+										<Texture name="GuildAdsTalentFrameArrow7" inherits="GuildAdsTalentArrowTemplate"/>
+										<Texture name="GuildAdsTalentFrameArrow8" inherits="GuildAdsTalentArrowTemplate"/>
+										<Texture name="GuildAdsTalentFrameArrow9" inherits="GuildAdsTalentArrowTemplate"/>
+										<Texture name="GuildAdsTalentFrameArrow10" inherits="GuildAdsTalentArrowTemplate"/>
+										<Texture name="GuildAdsTalentFrameArrow11" inherits="GuildAdsTalentArrowTemplate"/>
+										<Texture name="GuildAdsTalentFrameArrow12" inherits="GuildAdsTalentArrowTemplate"/>
+										<Texture name="GuildAdsTalentFrameArrow13" inherits="GuildAdsTalentArrowTemplate"/>
+										<Texture name="GuildAdsTalentFrameArrow14" inherits="GuildAdsTalentArrowTemplate"/>
+										<Texture name="GuildAdsTalentFrameArrow15" inherits="GuildAdsTalentArrowTemplate"/>
+										<Texture name="GuildAdsTalentFrameArrow16" inherits="GuildAdsTalentArrowTemplate"/>
+										<Texture name="GuildAdsTalentFrameArrow17" inherits="GuildAdsTalentArrowTemplate"/>
+										<Texture name="GuildAdsTalentFrameArrow18" inherits="GuildAdsTalentArrowTemplate"/>
+										<Texture name="GuildAdsTalentFrameArrow19" inherits="GuildAdsTalentArrowTemplate"/>
+										<Texture name="GuildAdsTalentFrameArrow20" inherits="GuildAdsTalentArrowTemplate"/>
+										<Texture name="GuildAdsTalentFrameArrow21" inherits="GuildAdsTalentArrowTemplate"/>
+										<Texture name="GuildAdsTalentFrameArrow22" inherits="GuildAdsTalentArrowTemplate"/>
+										<Texture name="GuildAdsTalentFrameArrow23" inherits="GuildAdsTalentArrowTemplate"/>
+										<Texture name="GuildAdsTalentFrameArrow24" inherits="GuildAdsTalentArrowTemplate"/>
+										<Texture name="GuildAdsTalentFrameArrow25" inherits="GuildAdsTalentArrowTemplate"/>
+										<Texture name="GuildAdsTalentFrameArrow26" inherits="GuildAdsTalentArrowTemplate"/>
+										<Texture name="GuildAdsTalentFrameArrow27" inherits="GuildAdsTalentArrowTemplate"/>
+										<Texture name="GuildAdsTalentFrameArrow28" inherits="GuildAdsTalentArrowTemplate"/>
+										<Texture name="GuildAdsTalentFrameArrow29" inherits="GuildAdsTalentArrowTemplate"/>
+										<Texture name="GuildAdsTalentFrameArrow30" inherits="GuildAdsTalentArrowTemplate"/>
+									</Layer>
+								</Layers>
+							</Frame>
+						</Frames>
+					</Frame>
+				</ScrollChild>
+			</ScrollFrame>
+			<Frame name="GuildAdsTalentScrollButtonOverlay" parent="GuildAdsTalentFrameScrollFrameScrollBarScrollDownButton" hidden="true">
+				<Size>
+					<AbsDimension x="32" y="32"/>
+				</Size>
+				<Anchors>
+					<Anchor point="CENTER">
+						<Offset>
+							<AbsDimension x="0" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Layers>
+					<Layer level="OVERLAY">
+						<Texture file="Interface\Buttons\UI-ScrollBar-Button-Overlay" setAllPoints="true" alphaMode="ADD"/>
+					</Layer>
+				</Layers>
+			</Frame>
+		</Frames>
+		<Scripts>
+			<OnShow>
+				GuildAdsTalentUI.onShow();
+				--TalentFrame_OnShow();
+			</OnShow>
+			<OnHide>
+				--TalentFrame_OnHide();
+			</OnHide>
+			<OnLoad>
+				--TalentFrame_OnLoad();
+			</OnLoad>
+			<OnEvent>
+				--TalentFrame_OnEvent();
+			</OnEvent>
+		</Scripts>
+	</Frame>
+	<Button name="GuildAdsTalentTab" inherits="GuildAdsWindowTabTemplate" text="TALENTS" hidden="false">
+		<Anchors>
+			<Anchor point="TOPLEFT" relativeTo="GuildAdsTalentFrame" relativePoint="BOTTOMLEFT">
+				<Offset>
+					<AbsDimension x="0" y="-60"/>
+				</Offset>
+			</Anchor>
+		</Anchors>
+	</Button>
+</Ui>

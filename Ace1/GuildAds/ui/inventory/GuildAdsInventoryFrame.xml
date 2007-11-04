@@ -191,14 +191,14 @@
 		</Frames>
 	</Frame>
 	
-	<Button name="GuildAdsInventoryTab" inherits="GuildAdsWindowTabTemplate" text="-- Equipement" hidden="true">
+	<Button name="GuildAdsInventoryTab" inherits="GuildAdsWindowTabTemplate" text="GUILDADS_EQUIPMENT">
         <Anchors>
-			<Anchor point="TOPLEFT" relativeTo="GuildAdsInventoryFrame" relativePoint="BOTTOMLEFT">
-				<Offset>
-					<AbsDimension x="0" y="-60"/>
-				</Offset>
-			</Anchor>
-		</Anchors>
+		<Anchor point="TOPLEFT" relativeTo="GuildAdsInventoryFrame" relativePoint="BOTTOMLEFT">
+			<Offset>
+				<AbsDimension x="0" y="-60"/>
+			</Offset>
+		</Anchor>
+	</Anchors>
     </Button>
 	
 </Ui>

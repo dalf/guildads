@@ -294,7 +294,7 @@ end
 -------------------------------------------
 GuildAdsCodecTexture = GuildAdsCodec:new({}, "Texture", 1);
 
-function GuildAdsCodecTexture.encode(str)
+function GuildAdsCodecTexture.encode(obj)
 	if obj == nil then
 		return "";
 	else

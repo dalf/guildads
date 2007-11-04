@@ -41,6 +41,7 @@ data\datatypes\GuildAdsTradeNeedData.lua
 data\datatypes\GuildAdsTradeOfferData.lua
 data\datatypes\GuildAdsInventoryData.lua
 data\datatypes\GuildAdsTradeSkillData.lua
+data\datatypes\GuildAdsTalentData.lua
 network\DataChannelLib.lua
 network\SimpleComm.xml
 network\GuildAdsCodecs.lua
@@ -67,3 +68,4 @@ ui\faction\GuildAdsFactionFrame.xml
 ui\inventory\GuildAdsInventoryFrame.xml
 ui\GEM\GuildAdsGEMEventFrame.xml
 ui\minimapButton\GuildAdsMinimapButton.xml
+ui\Talent\GuildAds_TalentUI.xml
