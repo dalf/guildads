@@ -66,6 +66,8 @@ SimpleComm_Disconnected = {};
 
 local SimpleComm_messageStack = {};
 
+local SimpleCommFrame
+
 -- for stats
 local SimpleComm_totalSentMessages = 0;
 local SimpleComm_totalSentBytes = 0;
@@ -102,12 +104,58 @@ local rawget = _G.rawget
 
 ---------------------------------------------------------------------------------
 --
+-- new/del/deep
+-- 
+---------------------------------------------------------------------------------
+local new, del, deepDel
+do
+	local list = setmetatable({},{__mode='k'})
+	function new(...)
+		local t = next(list)
+		if t then
+			list[t] = nil
+			for i = 1, select('#', ...) do
+				t[i] = select(i, ...)
+			end
+			return t
+		else
+			return {...}
+		end
+	end
+	function del(t)
+		for k in pairs(t) do
+			t[k] = nil
+		end
+		t[''] = true
+		t[''] = nil
+		list[t] = true
+		return nil
+	end
+	function deepDel(t)
+		for k,v in pairs(t) do
+			if type(v) == "table" then
+				deepDel(v)
+			end
+			t[k] = nil
+		end
+		t[''] = true
+		t[''] = nil
+		list[t] = true
+		return nil
+	end
+end
+
+---------------------------------------------------------------------------------
+--
 -- On load
 -- 
 ---------------------------------------------------------------------------------
 function SimpleComm_OnLoad()
-	this:RegisterEvent("CHAT_MSG_ADDON");
-	this:RegisterEvent("CHAT_MSG_CHANNEL");
+	SimpleCommFrame = CreateFrame("Frame", nil, UIParent)
+	SimpleCommFrame:SetScript("OnEvent", SimpleComm_ParseEvent)
+	SimpleCommFrame:SetScript("OnUpdate", SimpleComm_OnUpdate)
+	SimpleCommFrame:RegisterEvent("CHAT_MSG_ADDON");
+	SimpleCommFrame:RegisterEvent("CHAT_MSG_CHANNEL");
 end
 
 ---------------------------------------------------------------------------------
@@ -375,7 +423,7 @@ end
 -- Envois
 -- 
 ---------------------------------------------------------------------------------
-local function SimpleComm_SendQueue(elapsed)
+local function SimpleComm_SendQueue()
 	local clearAFK = GetCVar("autoClearAFK");
 	SetCVar("autoClearAFK", 0);
 	-- GetLanguageByIndex(1), GetDefaultLanguage()
@@ -453,7 +501,7 @@ local function SimpleComm_ParseMessage(author, text, channel, drunk)
 	-- is it a packed message ?
 	local isPacked = false;
 	for _, onePacket in SimpleComm_UnpackIterator(text) do
-		tinsert(SimpleComm_inboundMessageQueue, { author, Decode(onePacket, drunk), channel });
+		tinsert(SimpleComm_inboundMessageQueue, new(author, Decode(onePacket, drunk), channel ));
 		SimpleComm_totalReceivedMessages = SimpleComm_totalReceivedMessages + 1
 		isPacked = true;
 	end
@@ -506,9 +554,9 @@ local function SimpleComm_ParseMessage(author, text, channel, drunk)
 	
 		-- unserialize message from the packet.
 		if packet then
-			tinsert(SimpleComm_inboundMessageQueue, { author, packet, channel });
+			tinsert(SimpleComm_inboundMessageQueue, new(author, packet, channel))
 			if not SimpleCommFrame.inbound then
-				SimpleCommFrame.inbound = SIMPLECOMM_INBOUND_TICK_DELAY;
+				SimpleCommFrame.inbound = SIMPLECOMM_INBOUND_TICK_DELAY
 			end
 			SimpleComm_totalReceivedMessages = SimpleComm_totalReceivedMessages + 1
 			SimpleComm_totalReceivedBytes = SimpleComm_totalReceivedBytes + text:len()
@@ -516,7 +564,7 @@ local function SimpleComm_ParseMessage(author, text, channel, drunk)
 	end
 end
 
-function SimpleComm_ParseEvent(event)
+function SimpleComm_ParseEvent(this, event)
 	if (SimpleComm_Channel) then
 		SimpleComm_channelId = GetChannelName(SimpleComm_Channel);
 		
@@ -696,30 +744,31 @@ end
 -- Timer
 -- 
 ---------------------------------------------------------------------------------
-function SimpleComm_OnUpdate(elapsed)
-	if (this.outbound) then
+function SimpleComm_OnUpdate(this, elapsed)
+	if this.outbound then
 		this.outbound = this.outbound - elapsed;
-		if (this.outbound <=0) then
+		if this.outbound <=0 then
 			SimpleComm_SendQueue(SIMPLECOMM_OUTBOUND_TICK_DELAY - this.outbound);
 			this.outbound = SIMPLECOMM_OUTBOUND_TICK_DELAY;
 		end
 	end
 	
-	if (this.inbound) then
+	if this.inbound then
 		this.inbound = this.inbound - elapsed;
-		if (this.inbound <= 0) and (SimpleComm_inboundMessageQueue[1]) then
-			local message = SimpleComm_inboundMessageQueue[1];
-			table.remove(SimpleComm_inboundMessageQueue, 1);
+		if this.inbound <= 0 then
+			this.inbound = nil;
 			if SimpleComm_inboundMessageQueue[1] then
-				this.inbound = SIMPLECOMM_INBOUND_TICK_DELAY;
-			else
-				this.inbound = nil;
+				local message = SimpleComm_inboundMessageQueue[1];
+				table.remove(SimpleComm_inboundMessageQueue, 1);
+				if SimpleComm_inboundMessageQueue[1] then
+					this.inbound = SIMPLECOMM_INBOUND_TICK_DELAY
+				end
+				SimpleComm_Handler(message[1], message[2], message[3]);
+				del(message)
 			end
-			SimpleComm_Handler(message[1], message[2], message[3]);
 		end
 	end
 end
-
 ---------------------------------------------------------------------------------
 --
 -- Public functions
@@ -880,3 +929,5 @@ end
 function SimpleComm_GetStats()
 	return SimpleComm_totalSentMessages, SimpleComm_totalSentBytes, SimpleComm_totalReceivedMessages, SimpleComm_totalReceivedBytes;
 end
+
+SimpleComm_OnLoad()

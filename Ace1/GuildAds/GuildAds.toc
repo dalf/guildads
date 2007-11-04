@@ -43,7 +43,7 @@ data\datatypes\GuildAdsInventoryData.lua
 data\datatypes\GuildAdsTradeSkillData.lua
 data\datatypes\GuildAdsTalentData.lua
 network\DataChannelLib.lua
-network\SimpleComm.xml
+network\SimpleComm.lua
 network\GuildAdsCodecs.lua
 network\GuildAdsDTS.lua
 network\GuildAdsComm.lua
