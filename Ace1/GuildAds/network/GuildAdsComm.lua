@@ -19,13 +19,17 @@ Todo :
 		Replace some "if ... error... end" by "assert"
 ]]
 
-GUILDADS_VERSION_PROTOCOL = "4";
+GUILDADS_VERSION_PROTOCOL = "5";
 GUILDADS_MSG_PREFIX_NOVERSION = "GA\t";
 
 GUILDADS_MSG_PREFIX1= GUILDADS_MSG_PREFIX_NOVERSION..GUILDADS_VERSION_PROTOCOL;
 GUILDADS_MSG_PREFIX = GUILDADS_MSG_PREFIX1..":";
 	
 GUILDADS_MSG_PREFIX_REGEX_UNSPLIT = GUILDADS_MSG_PREFIX.."([0-9]+)([\.|\:])(.*)";
+GUILDADS_MSG_PREFIX_PACK = GUILDADS_MSG_PREFIX.."&";
+GUILDADS_MSG_PACK_SEPARATOR = "\007";
+GUILDADS_MSG_REGEX_PACK_ITERATOR = "([^"..GUILDADS_MSG_PACK_SEPARATOR.."]+)";
+assert(GUILDADS_MSG_PACK_SEPARATOR:len() == 1, "GUILDADS_MSG_PACK_SEPARATOR:()len > 1")
 
 --------------------------------------------------------------------------------
 --
@@ -162,6 +166,9 @@ GuildAdsComm = AceModule:new({
 	channelName = "",
 	channelPassword = "",
 	
+	minimumRevision = GUILDADS_REVISION_NUMBER,
+	maximumRevision = GUILDADS_REVISION_NUMBER,
+	
 	DTS = {},
 	
 	transactions = {},
@@ -215,6 +222,8 @@ function GuildAdsComm:Initialize()
 		self.FilterMessage,
 		self.SplitSerialize,
 		self.UnsplitSerialize,
+		self.PackedMessages,
+		self.UnpackMessagesIterator,
 		self.OnJoin,
 		self.OnLeave,
 		self.OnMessage,
@@ -256,6 +265,27 @@ end
 
 function GuildAdsComm.FilterMessage(text)
 	return string.sub(text, 1, string.len(GUILDADS_MSG_PREFIX)) == GUILDADS_MSG_PREFIX;
+end
+
+function GuildAdsComm.PackedMessages(messages)
+	return GUILDADS_MSG_PREFIX_PACK..table.concat(messages, GUILDADS_MSG_PACK_SEPARATOR);
+end
+
+local unpackIterator = function(text, start)
+	if not start then
+		if text:sub(1, GUILDADS_MSG_PREFIX_PACK:len()) ~= GUILDADS_MSG_PREFIX_PACK then
+			return
+		end
+		start = GUILDADS_MSG_PREFIX_PACK:len()+1;
+	end
+	local s, e = string.find(text, GUILDADS_MSG_REGEX_PACK_ITERATOR, start);
+	if s and e then
+		return e+1, text:sub(s, e);
+	end
+end
+
+function GuildAdsComm.UnpackMessagesIterator(text)
+	return unpackIterator, text;
 end
 
 function GuildAdsComm.SplitSerialize(packetNumber, last, obj)
@@ -307,6 +337,10 @@ function GuildAdsComm.OnJoin(self)
 	-- create hash tree. This will unfortunately cause a noticable lag spike (probably 0.3 - 1 seconds depending on number of players in database)
 	GuildAdsHash:Initialize();
 	GuildAdsHash.tree=GuildAdsHash:CreateHashTree();
+	
+	-- reset the minimum and maximum version on the channel (updated when the M message is received from other players)
+	self.minimumRevision = GUILDADS_REVISION_NUMBER;
+	self.maximumRevision = GUILDADS_REVISION_NUMBER;
 	
 	-- Send Meta
 	self:SendMeta();
@@ -751,6 +785,11 @@ function GuildAdsComm:ReceiveMeta(channelName, personName, revision, revisionStr
 		versionString = revisionString;
 		databaseId = databaseId
 	}
+	-- update minimumRevision/maximumRevision.
+	local revision_number = tonumber((revision or "1"):match("(%d+)"));
+	self.minimumRevision = math.min(revision_number, self.minimumRevision);
+	self.maximumRevision = math.max(revision_number, self.maximumRevision);
+	-- warn the player if there is new version.
 	if revision and self.latestRevision and revision>self.latestRevision then
 		self.latestRevision = revision;
 		GuildAds.cmd:msg("There is a newer version of GuildAds available: "..tostring(revisionString));

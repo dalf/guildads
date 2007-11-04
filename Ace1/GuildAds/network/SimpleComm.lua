@@ -8,14 +8,10 @@
 -- Licence: GPL version 2 (General Public License)
 ----------------------------------------------------------------------------------
 
-SIMPLECOMM_DEBUG = false;				-- output debug information
-
-SIMPLECOMM_CHARACTERSPERTICK_MAX = 200;		-- char per tick			300
-SIMPLECOMM_OUTBOUND_TICK_DELAY = 1;		-- delay in second between tick		1
+SIMPLECOMM_CHARACTERSPERTICK_MAX = 239;		-- char per tick
+SIMPLECOMM_OUTBOUND_TICK_DELAY = 1.2;		-- delay in second between tick
 
 SIMPLECOMM_INBOUND_TICK_DELAY = 0.125;	-- TODO : change from 0.125 to 0.5 according to FPS
-
-SIMPLECOMM_SENDCHATMESSAGE_TICK_DELAY = 0.5;
 
 local PIPE_ENTITIE = "\127p";
 
@@ -32,6 +28,8 @@ SimpleComm_aliasMustBeSet = false;
 local SimpleComm_Handler;
 local SimpleComm_FilterText;
 local SimpleComm_FilterMessage;
+local SimpleComm_PackMessage;
+local SimpleComm_UnpackIterator;
 
 local SimpleComm_Status = "Starting";
 local SimpleComm_StatusMessage;
@@ -44,16 +42,15 @@ local SimpleComm_chanSlashCmdUpper;
 
 local SimpleComm_FlagListener;
 
-local SimpleComm_messageQueueHeader = {};
+local SimpleComm_messageQueueHeader = { who=false, length=32768 };
 local SimpleComm_messageQueueLast = SimpleComm_messageQueueHeader;
 	-- .delay
 	-- .to
 	-- .text
+	-- .length
 	-- .next
 	
 local SimpleComm_inboundMessageQueue = {};
-	
-local SimpleComm_sentBytes = 0;
 local SimpleComm_extraBytes = 0;
 local SimpleComm_channelId;
 SimpleComm_YouAreDrunk = false;
@@ -69,20 +66,39 @@ SimpleComm_Disconnected = {};
 
 local SimpleComm_messageStack = {};
 
+-- for stats
+local SimpleComm_totalSentMessages = 0;
+local SimpleComm_totalSentBytes = 0;
+local SimpleComm_totalReceivedMessages = 0;
+local SimpleComm_totalReceivedBytes = 0;
+
+
+-- dataChannelLib
 local dataChannelLib = DataChannelLib:GetInstance("1");
 
----------------------------------------------------------------------------------
---
--- Debug
--- 
----------------------------------------------------------------------------------
-local function DEBUG_MSG(msg, high)
-	if high then
-		GuildAds_ChatDebug(GA_DEBUG_CHANNEL, msg);
-	else
-		GuildAds_ChatDebug(GA_DEBUG_CHANNEL_HIGH, msg);
-	end
-end
+--------------------------------------------------
+local _G = _G
+
+local math_floor = _G.math.floor
+local string_char = _G.string.char
+local math_min = _G.math.min
+local table_concat = _G.table.concat
+local type = _G.type
+local unpack = _G.unpack
+local ipairs = _G.ipairs
+local pairs = _G.pairs
+local next = _G.next
+local select = _G.select
+local UnitName = _G.UnitName
+local setmetatable = _G.setmetatable
+local GetTime = _G.GetTime
+local tostring = _G.tostring
+local tonumber = _G.tonumber
+local error = _G.error
+local pcall = _G.pcall
+local GetCVar = _G.GetCVar
+local SetCVar = _G.SetCVar
+local rawget = _G.rawget
 
 ---------------------------------------------------------------------------------
 --
@@ -152,7 +168,7 @@ function SimpleComm_newSendChatMessage(msg, sys, lang, name)
 end
 
 function SimpleComm_test()
-	DEBUG_MSG("ok");
+	GuildAds_ChatDebug(GA_DEBUG_CHANNEL, "ok");
 end
 
 ---------------------------------------------------------------------------------
@@ -175,63 +191,183 @@ end
 -- Encode / Decode
 -- 
 ---------------------------------------------------------------------------------
-
--- depuis AceComm-2.0
-local string_gsub = string.gsub
-function SimpleComm_Encode(text, drunk)
-	text = string_gsub(text, "°", "°±")
-	if drunk then
-		text = string_gsub(text, "\020", "°\021")
-		text = string_gsub(text, "\015", "°\016")
-		text = string_gsub(text, "S", "\020")
-		text = string_gsub(text, "s", "\015")
-		text = string_gsub(text, "`", "``");
-		-- change S and s to a different set of character bytes.
+local Encode, EncodeByte
+do
+	local drunkHelper_t = {
+		[7]  = "\029\008",
+		[29] = "\029\030",
+		[31] = "\029\032",
+		[20] = "\029\021",
+		[15] = "\029\016",
+		[("S"):byte()] = "\020", -- change S and s to a different set of character bytes.
+		[("s"):byte()] = "\015",
+		[127] = "\029\126", -- \127 (this is here because \000 is more common)
+		[0] = "\127", -- \000
+		[10] = "\029\011", -- \n
+		[124] = "\029\125", -- |
+		[("%"):byte()] = "\029\038", -- %
+	}
+	for c = 128, 255 do
+		local num = c
+		num = num - 127
+		if num >= 9 then
+			num = num + 2
+		end
+		if num >= 29 then
+			num = num + 2
+		end
+		if num >= 128 then
+			drunkHelper_t[c] = string_char(29, num - 127) -- 1, 2, 3, 4, 5
+		else
+			drunkHelper_t[c] = string_char(31, num)
+		end
 	end
-	text = string_gsub(text, "\255", "°\254") -- \255 (this is here because \000 is more common)
-	text = string_gsub(text, "%z", "\255") -- \000
-	text = string_gsub(text, "\010", "°\011") -- \n
-	text = string_gsub(text, "\124", "°\125") -- |
-	text = string_gsub(text, "%%", "°\038") -- %
-	-- encode assorted prohibited characters
-	return text
-end
-
-local func
--- Clean a received message
-function SimpleComm_Decode(text, drunk)
-	if drunk then
-		text = string_gsub(text, "^(.*)°.-$", "%1")
-		-- get rid of " ...hic!"
+	local function drunkHelper(char)
+		return drunkHelper_t[char:byte()]
 	end
-	if not func then
-		func = function(text)
-			if text == "\016" then
-				return "\015"
-			elseif text == "\021" then
-				return "\020"
-			elseif text == "±" then
-				return "°"
-			elseif text == "\254" then
-				return "\255"
-			elseif text == "\011" then
-				return "\010"
-			elseif text == "\125" then
-				return "\124"
-			elseif text == "\038" then
-				return "\037"
+	local soberHelper_t = {
+		[7] = "\176\008",
+		[176] = "\176\177",
+		[255] = "\176\254", -- \255 (this is here because \000 is more common)
+		[0] = "\255", -- \000
+		[10] = "\176\011", -- \n
+		[124] = "\176\125", -- |
+		[("%"):byte()] = "\176\038", -- %
+	}
+	local function soberHelper(char)
+		return soberHelper_t[char:byte()]
+	end
+	-- Package a message for transmission
+	function Encode(text, drunk)
+		if drunk then
+			return text:gsub("([\007\010\015\020\029%%\031Ss\124\127-\255])", drunkHelper)
+		else
+			if not text then
+				DEFAULT_CHAT_FRAME:AddMessage(debugstack())
+			end
+			return text:gsub("([\007\176\255%z\010\124%%])", soberHelper)
+		end
+	end
+	
+	function EncodeByte(num, drunk)
+		local t
+		if drunk then
+			t = drunkHelper_t
+		else
+			t = soberHelper_t
+		end
+		
+		local value = t[num]
+		if value then
+			return value
+		else
+			return string_char(num)
+		end
+	end
+	
+	local function EncodeBytes_helper(drunk, ...)
+		local n = select('#', ...)
+		if n == 0 then
+			return
+		end
+		local t
+		if drunk then
+			t = drunkHelper_t
+		else
+			t = soberHelper_t
+		end
+		local num = (...)
+		local value = t[num]
+		if not value then
+			return num, EncodeBytes_helper(drunk, select(2, ...))
+		else
+			local len = #value
+			if len == 1 then
+				return value:byte(1), EncodeBytes_helper(drunk, select(2, ...))
+			else -- 2
+				local a, b = value:byte(1, 2)
+				return a, b, EncodeBytes_helper(drunk, select(2, ...))
 			end
 		end
 	end
-	text = string_gsub(text, "\255", "\000")
-	if drunk then
-		text = string_gsub(text, "\020", "S")
-		text = string_gsub(text, "\015", "s")
-		text = string_gsub(text, "``", "`");
+	function EncodeBytes(drunk, ...)
+		return string_char(EncodeBytes_helper(drunk, ...))
 	end
-	text = string_gsub(text, drunk and "°([\016\021±\254\011\125\038])" or "°([±\254\011\125\038])", func)
-	-- remove the hidden character and refix the prohibited characters.
-	return text
+end
+
+local Decode
+do
+	local t = {
+		["\008"] = "\007",
+		["\177"] = "\176",
+		["\254"] = "\255",
+		["\011"] = "\010",
+		["\125"] = "\124",
+		["\038"] = "\037",
+	}
+	local function soberHelper(text)
+		return t[text]
+	end
+	
+	local t = {
+		["\127"] = "\000",
+		["\015"] = "s",
+		["\020"] = "S",
+	}
+	local function drunkHelper1(text)
+		return t[text]
+	end
+	
+	local t = setmetatable({}, {__index=function(self, c)
+		local num = c:byte()
+		if num >= 29 then
+			num = num - 2
+		end
+		if num >= 9 then
+			num = num - 2
+		end
+		num = num + 127
+		self[c] = string_char(num)
+		return self[c]
+	end})
+	local function drunkHelper2(text)
+		return t[text]
+	end
+
+	local t = {
+		["\008"] = "\007",
+		["\038"] = "%",
+		["\125"] = "\124",
+		["\011"] = "\010",
+		["\126"] = "\127",
+		["\016"] = "\015",
+		["\021"] = "\020",
+		["\001"] = "\251",
+		["\002"] = "\252",
+		["\003"] = "\253",
+		["\004"] = "\254",
+		["\005"] = "\255",
+		["\032"] = "\031",
+		["\030"] = "\029",
+	}
+	local function drunkHelper3(text)
+		return t[text]
+	end
+	
+	-- Clean a received message
+	function Decode(text, drunk)
+		if drunk then
+			text = text:gsub("([\127\015\020])", drunkHelper1)
+			text = text:gsub("\031(.)", drunkHelper2)
+			text = text:gsub("\029([\008\038\125\011\126\016\021\001\002\003\004\005\032\030])", drunkHelper3)
+		else
+			text = text:gsub("\255", "\000")
+		
+			text = text:gsub("\176([\008\177\254\011\125\038])", soberHelper)
+		end
+		-- remove the hidden character and refix the prohibited characters.
+		return text
+	end
 end
 
 ---------------------------------------------------------------------------------
@@ -244,7 +380,8 @@ local function SimpleComm_SendQueue(elapsed)
 	SetCVar("autoClearAFK", 0);
 	-- GetLanguageByIndex(1), GetDefaultLanguage()
 	
-	SimpleComm_sentBytes = 0;
+	local sentBytes = 0;
+	
 	SimpleComm_channelId = GetChannelName(SimpleComm_Channel);
 	
 	local previousMessage = SimpleComm_messageQueueHeader;
@@ -256,27 +393,30 @@ local function SimpleComm_SendQueue(elapsed)
 	while message do
 		
 		-- check chat traffic
-		if (SimpleComm_sentBytes+SimpleComm_extraBytes) > SIMPLECOMM_CHARACTERSPERTICK_MAX or num_messages>0 then
+		if (sentBytes+SimpleComm_extraBytes) > SIMPLECOMM_CHARACTERSPERTICK_MAX or num_messages>0 then
 			previousMessage = SimpleComm_messageQueueLast;
 			break;
 		end
 		
+		-- is it a packed message ?
+		local text = message.text
+		if not text then
+			text = SimpleComm_PackMessage(message)
+		end
+		text = text .. "\029"
+		
 		-- send message
 		if message.to then
 			if not SimpleComm_Disconnected[message.to] then
-				-- DEBUG_MSG("Envois a("..message.to..") de("..message.text..")");
-				SendAddonMessage("GuildAds",message.text,"WHISPER",message.to);
-				--SimpleComm_AddWhisper(message.to);
-				SimpleComm_sentBytes = SimpleComm_sentBytes + string.len(message.text);
+				-- GuildAds_ChatDebug(GA_DEBUG_CHANNEL, "Sending to "..message.to..": "..message.text..")");
+				SendAddonMessage("GuildAds", text, "WHISPER", message.to);
+				sentBytes = sentBytes + string.len(text);
 				num_messages = num_messages + 1;
-			else
-				-- Ignore the message since the player is offline.
-				--SimpleComm_sentBytes = SimpleComm_sentBytes - string.len(message.text);
 			end
 		else
-			-- DEBUG_MSG("Envois a tous de("..message.text..")");
-			SendChatMessage(message.text, "CHANNEL", nil, SimpleComm_channelId);
-			SimpleComm_sentBytes = SimpleComm_sentBytes + string.len(message.text);
+			-- GuildAds_ChatDebug(GA_DEBUG_CHANNEL, "Send to the channel: %s", text);
+			SendChatMessage(text, "CHANNEL", nil, SimpleComm_channelId);
+			sentBytes = sentBytes + string.len(text);
 			num_messages = num_messages + 1;
 		end
 		
@@ -287,60 +427,91 @@ local function SimpleComm_SendQueue(elapsed)
 		message = message.next
 	end
 	
-	SimpleComm_extraBytes = SimpleComm_extraBytes + SimpleComm_sentBytes - SIMPLECOMM_CHARACTERSPERTICK_MAX;
+	SimpleComm_extraBytes = SimpleComm_extraBytes + sentBytes - SIMPLECOMM_CHARACTERSPERTICK_MAX;
 	
 	SimpleComm_messageQueueLast = previousMessage;
 	
 	SetCVar("autoClearAFK", clearAFK);
-	if (SimpleComm_sentBytes> 0) then
-		DEBUG_MSG(SimpleComm_sentBytes.." bytes sent", true);
+	if (sentBytes> 0) then
+		GuildAds_ChatDebug(GA_DEBUG_CHANNEL_HIGH, "%i bytes sent", sentBytes)
+		SimpleComm_totalSentBytes = SimpleComm_totalSentBytes + sentBytes
+		SimpleComm_totalSentMessages = SimpleComm_totalSentMessages + num_messages
 	end
 end
 
 ---------------------------------------------------------------------------------
 --
--- Reception
+-- Received message
 -- 
 ---------------------------------------------------------------------------------
-local function SimpleComm_ParseMessage(author, text, channel)
-	local packet, packetNumber, last = SimpleComm_UnsplitSerialize(text);
-	-- fragmented packet ?
-	if packetNumber then
-		local id = author.."@"..(channel or "Whisper");
-		local newText;
-		
-		-- set newText if this is a valid packet
-		if packetNumber == 1 then
-			newText = packet;
-		elseif SimpleComm_messageStack[id] then
-			if SimpleComm_messageStack[id].number+1 == packetNumber then
-				newText = SimpleComm_messageStack[id].text .. packet;
-			end
-		end
-		
-		-- update packet and SimpleComm_messageStack
-		if newText then
-			if last then
-				SimpleComm_messageStack[id] = nil;
-				packet = newText;
-			else
-				SimpleComm_messageStack[id] = {
-					text = newText;
-					number = packetNumber;
-				};
-				packet = nil;
-			end
-		else
-			SimpleComm_messageStack[id] = nil;
-			packet = nil;
-		end
+local function SimpleComm_ParseMessage(author, text, channel, drunk)
+	if not SimpleComm_FilterMessage(text) then
+		return
 	end
-	
-	-- unserialize message from the packet.
-	if packet and SimpleComm_FilterMessage(packet) then
-		tinsert(SimpleComm_inboundMessageQueue, { author, packet, channel });
+	-- get rid of " ...hic!"
+	text = text:gsub("^(.*)\029.-$", "%1")
+	-- is it a packed message ?
+	local isPacked = false;
+	for _, onePacket in SimpleComm_UnpackIterator(text) do
+		tinsert(SimpleComm_inboundMessageQueue, { author, Decode(onePacket, drunk), channel });
+		SimpleComm_totalReceivedMessages = SimpleComm_totalReceivedMessages + 1
+		isPacked = true;
+	end
+	if isPacked then
+		-- yes, it is a packed message
 		if not SimpleCommFrame.inbound then
 			SimpleCommFrame.inbound = SIMPLECOMM_INBOUND_TICK_DELAY;
+		end
+		packet = nil
+		SimpleComm_totalReceivedBytes = SimpleComm_totalReceivedBytes + text:len()
+	else
+		-- now, it's safe to decode the message
+		text = Decode(text, drunk)
+		-- is it a fragmented message ?
+		local packets = nil;
+		local packet, packetNumber, last = SimpleComm_UnsplitSerialize(text);
+		
+		if packetNumber then
+			-- fragmented message
+			local id = author.."@"..(channel or "Whisper");
+			local newText;
+		
+			-- set newText if this is a valid packet
+			if packetNumber == 1 then
+				newText = packet;
+			elseif SimpleComm_messageStack[id] then
+				if SimpleComm_messageStack[id].number+1 == packetNumber then
+					newText = SimpleComm_messageStack[id].text .. packet;
+				end
+			end
+		
+			-- update packet and SimpleComm_messageStack
+			if newText then
+				if last then
+					SimpleComm_messageStack[id] = nil;
+					packet = newText;
+				else
+					SimpleComm_messageStack[id] = {
+						text = newText;
+						number = packetNumber;
+					};
+					packet = nil;
+					SimpleComm_totalReceivedBytes = SimpleComm_totalReceivedBytes + text:len()
+				end
+			else
+				SimpleComm_messageStack[id] = nil;
+				packet = nil;
+			end
+		end
+	
+		-- unserialize message from the packet.
+		if packet then
+			tinsert(SimpleComm_inboundMessageQueue, { author, packet, channel });
+			if not SimpleCommFrame.inbound then
+				SimpleCommFrame.inbound = SIMPLECOMM_INBOUND_TICK_DELAY;
+			end
+			SimpleComm_totalReceivedMessages = SimpleComm_totalReceivedMessages + 1
+			SimpleComm_totalReceivedBytes = SimpleComm_totalReceivedBytes + text:len()
 		end
 	end
 end
@@ -352,11 +523,11 @@ function SimpleComm_ParseEvent(event)
 		-- event=CHAT_MSG_CHANNEL; arg1=chat message; arg2=author; arg3=language; arg4=channel name with number; arg8=channel number; arg9=channel name without number
 		if ((event == "CHAT_MSG_CHANNEL") and (arg8 == SimpleComm_channelId)) then
 			SimpleComm_Disconnected[arg2] = nil;
-			SimpleComm_ParseMessage(arg2, SimpleComm_Decode(arg1, true), arg9);
+			SimpleComm_ParseMessage(arg2, arg1, arg9, true);
 		
 		elseif (event == "CHAT_MSG_ADDON") and (arg1=="GuildAds") and (arg3=="WHISPER") then
 			SimpleComm_Disconnected[arg4] = nil;
-			SimpleComm_ParseMessage(arg4, SimpleComm_Decode(arg2, true), nil);
+			SimpleComm_ParseMessage(arg4, arg2, nil, false);
 			
 		end
 		
@@ -414,12 +585,12 @@ function SimpleComm_New_ChatFrame_MessageEventHandler(event)
 		end
 		
 		if (event == "CHAT_MSG_CHANNEL_NOTICE") and (arg8 == SimpleComm_channelId) then
-			DEBUG_MSG(arg1, true);
+			GuildAds_ChatDebug(GA_DEBUG_CHANNEL_HIGH,  arg1);
 			return;
 		end
 		
 		if (event == "CHAT_MSG_CHANNEL_NOTICE_USER") and (arg8 == SimpleComm_channelId) then
-			DEBUG_MSG(arg1.."("..arg5..")", true);
+			GuildAds_ChatDebug(GA_DEBUG_CHANNEL_HIGH,  "%s (%s)", arg1, arg5);
 			return;
 		end
 		
@@ -556,20 +727,37 @@ end
 ---------------------------------------------------------------------------------
 function SimpleComm_SendMessage(who, text)
 	if not(who and SimpleComm_Disconnected[who]) then
-		text = SimpleComm_Encode(text, true);
-		if strlen(text)<240 then
-			SimpleComm_messageQueueLast.next = {to=who; text=text };
+		local queueLast = SimpleComm_messageQueueLast
+		text = Encode(text, who==nil)
+		local textLength = text:len()
+		if (textLength + queueLast.length < 239 and queueLast.to == who) then
+			if queueLast.text then
+				table.insert(queueLast, queueLast.text);
+				queueLast.text=nil;
+			end
+			-- pack message with the previous one
+			table.insert(queueLast, text)
+			queueLast.length = queueLast.length + textLength + 1
+		elseif textLength<239 then
+			-- normal message
+			SimpleComm_messageQueueLast.next = {
+				to=who, 
+				text=text,
+				length=textLength
+			};
 			SimpleComm_messageQueueLast = SimpleComm_messageQueueLast.next;
 		else
+			-- split the message into smaller one.
 			local packetNumber = 1;
 			while text~="" do
 				-- take first 240 char
-				local tmp = string.sub(text, 1, 239);
-				text = string.sub(text, 240);
+				local tmp = string.sub(text, 1, 238);
+				text = string.sub(text, 239);
 				-- add a packet
 				SimpleComm_messageQueueLast.next = {
 					to = who;
 					text = SimpleComm_SplitSerialize(packetNumber, text=="", tmp);
+					length = text:len();
 				};
 				SimpleComm_messageQueueLast = SimpleComm_messageQueueLast.next;
 				-- next packet
@@ -591,7 +779,12 @@ function SimpleComm_GetChannelStatus()
 	return SimpleComm_Status, SimpleComm_StatusMessage;
 end
 
-function SimpleComm_Initialize(FilterText, FilterMessage, SplitSerialize, UnsplitSerialize, OnJoin, OnLeave, OnMessage, FlagListener, StatusListener)
+function SimpleComm_Initialize(
+					FilterText, FilterMessage, 
+					SplitSerialize, UnsplitSerialize, 
+					PackMessage, UnpackIterator,
+					OnJoin, OnLeave, OnMessage, 
+					FlagListener, StatusListener)
 	SetCVar("spamFilter", 0)
 	
 	SimpleComm_FilterText = FilterText;
@@ -599,6 +792,9 @@ function SimpleComm_Initialize(FilterText, FilterMessage, SplitSerialize, Unspli
 	
 	SimpleComm_SplitSerialize = SplitSerialize;
 	SimpleComm_UnsplitSerialize = UnsplitSerialize;
+	
+	SimpleComm_PackMessage = PackMessage;
+	SimpleComm_UnpackIterator = UnpackIterator;
 	
 	SimpleComm_Handler = OnMessage;
 	SimpleComm_JoinHandler = OnJoin;
@@ -624,12 +820,12 @@ function SimpleComm_Initialize(FilterText, FilterMessage, SplitSerialize, Unspli
 end
 
 function SimpleComm_Join(Channel, Password)
-	DEBUG_MSG("[SimpleComm_Join] begin");
+	GuildAds_ChatDebug(GA_DEBUG_CHANNEL, "[SimpleComm_Join] begin");
 	
 	-- some sanity check
 	local typePassword = type(Password);
 	if not ( type(Channel) == "string" and (typePassword == "string" or typePassword == "nil") ) then
-		DEBUG_MSG("Can't join channel ("..tostring(Channel)..","..tostring(Password)..")", true);
+		GuildAds_ChatDebug(GA_DEBUG_CHANNEL_HIGH,  "Can't join channel (%s,%s)", tostring(Channel), tostring(Password));
 		error("SimpleComm_Join([channelName], [channelPassword])", 2);
 	end
 	
@@ -646,13 +842,13 @@ function SimpleComm_Join(Channel, Password)
 		SimpleCommFrame:Show();
 	end
 	
-	DEBUG_MSG("[SimpleComm_Join] end");
+	GuildAds_ChatDebug(GA_DEBUG_CHANNEL, "[SimpleComm_Join] end");
 	
 	return result;
 end
 
 function SimpleComm_Leave()
-	DEBUG_MSG("[SimpleComm_Leave] begin");
+	GuildAds_ChatDebug(GA_DEBUG_CHANNEL, "[SimpleComm_Leave] begin");
 	-- leave channel
 	SimpleCommFrame.outbound = nil;
 	
@@ -661,11 +857,11 @@ function SimpleComm_Leave()
 	-- set channel
 	SimpleComm_Channel = nil;
 	SimpleComm_Password = nil;
-	DEBUG_MSG("[SimpleComm_Leave] end");
+	GuildAds_ChatDebug(GA_DEBUG_CHANNEL, "[SimpleComm_Leave] end");
 end
 
 function SimpleComm_SetAlias(chanSlashCmd, chanAlias)
-	DEBUG_MSG("[SimpleComm_SetAlias] begin");
+	GuildAds_ChatDebug(GA_DEBUG_CHANNEL, "[SimpleComm_SetAlias] begin");
 	-- unset previous alias
 	if (SimpleComm_chanSlashCmd) then
 		SimpleComm_UnsetAliasChannel();
@@ -678,5 +874,9 @@ function SimpleComm_SetAlias(chanSlashCmd, chanAlias)
 
 	SimpleComm_aliasMustBeSet = true;
 	SimpleComm_SetAliasChannel();
-	DEBUG_MSG("[SimpleComm_SetAlias] end");
+	GuildAds_ChatDebug(GA_DEBUG_CHANNEL, "[SimpleComm_SetAlias] end");
+end
+
+function SimpleComm_GetStats()
+	return SimpleComm_totalSentMessages, SimpleComm_totalSentBytes, SimpleComm_totalReceivedMessages, SimpleComm_totalReceivedBytes;
 end
