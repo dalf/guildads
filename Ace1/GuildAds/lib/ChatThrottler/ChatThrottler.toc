@@ -1,6 +1,6 @@
 ## Interface: 20200
 ## Title: ChatThrottler
-## Version: 0.11
+## Version: 0.12
 ## Author: Galmok@Stormrage-EU
 ## Notes: This addon throttles messages sent with SendChatMessage in case the spam limit is hit.
 ## DefaultState: Enabled

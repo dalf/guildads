@@ -9,7 +9,7 @@
 -- "SAY", "WHISPER", "EMOTE", "CHANNEL", "PARTY", "BATTLEGROUND", "GUILD", "OFFICER", "YELL", "RAID", "RAID_WARNING", "AFK", "DND"
 
 --local CT_Version = tonumber(GetAddOnMetadata("ChatThrottler", "Version"))
-local CT_Version = 0.11
+local CT_Version = 0.12
 
 -- following code is borrowed from ChatThrottleLib
 if _G.ChatThrottler and _G.ChatThrottler.Version >= CT_Version then
@@ -97,7 +97,7 @@ function ChatThrottler.Command(msg)
 	ChatFrame1:AddMessage("/chatthrottler called with argument "..tostring(msg));
 	if msg=="hook" then
 		self.SendChatMessage_Queue=ChatThrottlerList:new();
-		self.LastMessageReceived = self.SendChatMessage_Queue.first;
+		
 		self.SentChatMessage_Queue=ChatThrottlerList:new(); -- messages that were actually sent properly
 		-- hook only one time
 		if (not self.oldSendChatMessage) then
@@ -333,18 +333,15 @@ function ChatThrottler.OnUpdate(this, elapsed)
 end
 
 function ChatThrottler:SendChatMessage_Tick()
-		
-	--if self.LastMessageReceived and self.LastMessageReceived.next and self.LastMessageReceived.next.obj then
 	if self.SendChatMessage_Queue:First() then
 		if self.Queueing and not self.Throttled then
-			--local q=self.LastMessageReceived.next.obj;
 			local q=self.SendChatMessage_Queue:First().obj;
 			local clearAFK = GetCVar("autoClearAFK");
 			
 			SetCVar("autoClearAFK", q.autoclearafk); -- set clear afk option as it was when SendChatMessage was called.
 			--ChatFrame1:AddMessage("TICK ORIGINAL SendChatMessage "..q.msg);
-			self.oldSendChatMessage(q.msg, q.sys, q.lang, q.name); -- call original SendChatMessage
 			self.SentMessageTime = self.Time;
+			self.oldSendChatMessage(q.msg, q.sys, q.lang, q.name); -- call original SendChatMessage
 			self.Throttled=true; -- is set to false once the message is echoed back from the server
 			
 			SetCVar("autoClearAFK", clearAFK);
