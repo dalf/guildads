@@ -61,8 +61,28 @@ GuildAdsTalentUI = {
 	
 	talentButtonOnEnter = function(id)
 		local self=GuildAdsTalentUI;
+		local selectedTab = PanelTemplates_GetSelectedTab(GuildAdsTalentFrame);
+		local talentName, iconPath, tier, column, currentRank, maxRank = self.GetTalentInfo(selectedTab, id);
 		GameTooltip:SetOwner(this, "ANCHOR_RIGHT");
-		GameTooltip:SetText(self.GetTalentInfo(PanelTemplates_GetSelectedTab(GuildAdsTalentFrame), id));
+		GameTooltip:SetText(HIGHLIGHT_FONT_COLOR_CODE..talentName..FONT_COLOR_CODE_CLOSE);
+		GameTooltip:AddLine(HIGHLIGHT_FONT_COLOR_CODE.."Rank "..tostring(currentRank).."/"..tostring(maxRank)..FONT_COLOR_CODE_CLOSE);
+		if GuildAdsTalentFrame.pointsSpent then
+			local ptier,pcolumn = self.GetTalentPrereqs(selectedTab, id);
+			if ptier then
+				local pname, _, _, _, pcurrentRank, pmaxRank = self.GetTalentInfo(selectedTab, self.TALENT_BRANCH_ARRAY[ptier][pcolumn].id);
+				if pcurrentRank == 0 then
+					local points = " points ";
+					if pmaxRank == 1 then
+						points = " point ";
+					end
+					GameTooltip:AddLine(RED_FONT_COLOR_CODE.."Requires "..tostring(pmaxRank)..points.."in "..pname..FONT_COLOR_CODE_CLOSE);
+				end
+			end
+			if GuildAdsTalentFrame.pointsSpent < (tier-1)*5 then
+				local name = GetTalentTabInfo(PanelTemplates_GetSelectedTab(GuildAdsTalentFrame));
+				GameTooltip:AddLine(RED_FONT_COLOR_CODE.."Requires "..tostring((tier-1)*5).." points in "..name.. " Talents"..FONT_COLOR_CODE_CLOSE);
+			end
+		end
 		GameTooltip:Show();
 	end;
 	
@@ -85,12 +105,10 @@ GuildAdsTalentUI = {
 	GetTalentTabInfo = function(tabIndex)
 		if GuildAdsInspectWindow.playerName then
 			local data = GuildAdsDB.profile.Talent:get(GuildAdsInspectWindow.playerName, tostring(tabIndex)..":0");
-			--local data = GuildAdsDatabase["Data"]["Stormrage"]["profiles"]["Galmok"]["talent"][tostring(tabIndex)..":0"];
 			if data and data.n then
 				local pointsSpent=0; -- to be calculated
 				for talentIndex=1,data.nt do
 					local d=GuildAdsDB.profile.Talent:get(GuildAdsInspectWindow.playerName, tostring(tabIndex)..":"..tostring(talentIndex));
-					--local d=GuildAdsDatabase["Data"]["Stormrage"]["profiles"]["Galmok"]["talent"][tostring(tabIndex)..":"..tostring(talentIndex)];
 					pointsSpent=pointsSpent+(d.cr or 0);
 				end
 				return data.n or "", data.t or "", pointsSpent, data.b or "";
@@ -102,7 +120,6 @@ GuildAdsTalentUI = {
 	GetNumTalents = function(tabIndex)
 		if GuildAdsInspectWindow.playerName then
 			local data = GuildAdsDB.profile.Talent:get(GuildAdsInspectWindow.playerName, tostring(tabIndex)..":0");
-			--local data = GuildAdsDatabase["Data"]["Stormrage"]["profiles"]["Galmok"]["talent"][ tostring(tabIndex)..":0"];
 			if data and data.nt then
 				return data.nt;
 			end
@@ -113,7 +130,6 @@ GuildAdsTalentUI = {
 	GetTalentInfo = function(tabIndex, talentIndex)
 		if GuildAdsInspectWindow.playerName then
 			local data = GuildAdsDB.profile.Talent:get(GuildAdsInspectWindow.playerName, tostring(tabIndex)..":"..tostring(talentIndex));
-			--local data = GuildAdsDatabase["Data"]["Stormrage"]["profiles"]["Galmok"]["talent"][tostring(tabIndex)..":"..tostring(talentIndex)];
 			if data and data.n then
 				return data.n, data.t, data.ti, data.co, data.cr, data.mr, 0, data.p;
 			end
@@ -124,7 +140,6 @@ GuildAdsTalentUI = {
 	GetTalentPrereqs = function(tabIndex , talentIndex )
 		if GuildAdsInspectWindow.playerName then
 			local data = GuildAdsDB.profile.Talent:get(GuildAdsInspectWindow.playerName, tostring(tabIndex)..":"..tostring(talentIndex));
-			--local data = GuildAdsDatabase["Data"]["Stormrage"]["profiles"]["Galmok"]["talent"][tostring(tabIndex)..":"..tostring(talentIndex)];
 			if data and data.pt then
 				return data.pt, data.pc, data.pl;
 			end
@@ -179,7 +194,7 @@ GuildAdsTalentUI = {
 		
 		-- Just a reminder error if there are more talents than available buttons
 		if ( numTalents > MAX_NUM_TALENTS ) then
-			message("Too many talents in talent frame!");
+			message("GuildAds: Too many talents in talent frame!");
 		end
 
 		self.ResetBranches();
