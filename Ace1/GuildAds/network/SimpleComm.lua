@@ -779,7 +779,7 @@ function SimpleComm_SendMessage(who, text)
 		local queueLast = SimpleComm_messageQueueLast
 		text = Encode(text, who==nil)
 		local textLength = text:len()
-		if (textLength + queueLast.length < 239 and queueLast.to == who and queueLast.dontPack) then
+		if (textLength + queueLast.length < 239) and (queueLast.to == who) and (not queueLast.dontPack) then
 			if queueLast.text then
 				table.insert(queueLast, queueLast.text);
 				queueLast.text=nil;
