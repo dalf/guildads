@@ -32,8 +32,7 @@ GuildAdsTradeTooltip = {
 	onInit = function()
 		-- Hook SetItemRef
 		-- TODO : add support for LootLink, ItemMatrix, KC_Items 
-		GuildAdsTradeTooltip.hookSetItemRef = SetItemRef;
-		SetItemRef = GuildAdsTradeTooltip.SetItemRef;
+		hooksecurefunc("SetItemRef", GuildAdsTradeTooltip.SetItemRef);
 	end;
 	
 	onChannelJoin = function()
@@ -152,7 +151,6 @@ GuildAdsTradeTooltip = {
 	end;
 		
 	SetItemRef = function(itemLink, text, button)
-		GuildAdsTradeTooltip.hookSetItemRef(itemLink, text, button);
 		GuildAdsTradeTooltip.addInformations(ItemRefTooltip);
 	end;
 	
