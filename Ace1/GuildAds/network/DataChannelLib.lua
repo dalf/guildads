@@ -6,7 +6,7 @@
 -- change (And check LibActivate is still valid!)
 ---------------------------------------------------------------------------
 
-local vmajor, vminor = "1", 2
+local vmajor, vminor = "1", 3
 local stubvarname = "DataChannelLibStub"
 local libvarname = "DataChannelLib"
 
@@ -143,6 +143,15 @@ local joinWaitingChannels = function()
 	end
 end
 
+-- onUpdate
+local onUpdate = function(this, e)
+	this.t = this.t-e
+	if this.t <= 0 then
+		this:SetScript("OnUpdate", nil)
+		joinWaitingChannels()
+	end
+end
+
 -- onEvent
 local onEvent = function()
 	if event=="CHAT_MSG_CHANNEL_NOTICE" then
@@ -208,6 +217,9 @@ function lib:LibActivate(stub, oldLib, oldList)
 	
 	if GetChannelList()==1 then
 		joinWaitingChannels();
+	else
+		self.Frame.t = 7
+		self.Frame:SetScript("OnUpdate", onUpdate);
 	end
     -- nil return makes stub do object copy
 end
