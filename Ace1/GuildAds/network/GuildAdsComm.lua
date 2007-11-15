@@ -575,7 +575,7 @@ function GuildAdsComm:MoveTokenDelayed(index)
 	GuildAdsTask:DeleteNamedSchedule("SendSearch");
 	GuildAdsTask:DeleteNamedSchedule("SendHashSearch");
 	GuildAdsTask:DeleteNamedSchedule("MoveToken"); -- necessary? dont think so
-	GuildAdsTask:AddNamedSchedule("MoveToken", self.delay.MoveToken, nil, nil, self.MoveAndDeleteToken self, nil, nil);
+	GuildAdsTask:AddNamedSchedule("MoveToken", self.delay.MoveToken, nil, nil, self.MoveAndDeleteToken, self, nil, nil);
 end
 
 function GuildAdsComm:MoveAndDeleteToken()
