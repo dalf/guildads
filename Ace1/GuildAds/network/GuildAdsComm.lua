@@ -565,10 +565,23 @@ function GuildAdsComm:MoveToken(index)
 end
 
 function GuildAdsComm:MoveTokenDelayed(index)
+	if self.moveToken then
+		if index<self.moveToken then
+			self.moveToken=index;
+		end
+	else
+		self.moveToken=index;
+	end
+	GuildAdsTask:DeleteNamedSchedule("SendSearch");
+	GuildAdsTask:DeleteNamedSchedule("SendHashSearch");
+	GuildAdsTask:DeleteNamedSchedule("MoveToken"); -- necessary? dont think so
+	GuildAdsTask:AddNamedSchedule("MoveToken", self.delay.MoveToken, nil, nil, self.MoveAndDeleteToken self, nil, nil);
+end
+
+function GuildAdsComm:MoveAndDeleteToken()
 	self:MoveToken(self.moveToken);
 	self.moveToken=nil;
 end
-
 --------------------------------------------------------------------------------
 --
 -- Tick
@@ -584,8 +597,6 @@ function GuildAdsComm:Tick()
 			if self.searchQueue:Length() > 0 then
 				-- uses searches from the revision search queue first
 				nextSearch = self.searchQueue:First();
-				--nextSearch = self.searchQueue[1];
-				--table.remove(self.searchQueue, 1);
 				self.searchQueue:Delete(nextSearch);
 				nextSearchP = nextSearch.data.playerName;
 				nextSearchDT = nextSearch.data.DTS.dataType;
@@ -1015,7 +1026,7 @@ function GuildAdsComm:ReceiveCloseTransaction(channelName, personName)
 		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "|cffff1e00Ignore|r CLOSE TRANSACTION from %s (no transaction)", personName);
 	end
 end
---[[
+
 function GuildAdsComm:ReceiveMoveToken(channelName, personName, index)
 	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"ReceiveMoveToken(%s)", tostring(index));
 	if index then
@@ -1024,29 +1035,7 @@ function GuildAdsComm:ReceiveMoveToken(channelName, personName, index)
 		assert(index<=#self.playerList, "Invalid token (> #self.playerList)"); -- this occurs when e.g. making /reloadui and another player sends the MoveToken command. 
 	end
 	-- move the token
-	self:MoveToken(index);
-end
-]]
-function GuildAdsComm:ReceiveMoveToken(channelName, personName, index)
-	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"ReceiveMoveToken(%s)", tostring(index));
-	if index then
-		index = tonumber(index);
-		assert(index>=0, "Invalid token (<0)");
-		assert(index<=#self.playerList, "Invalid token (> #self.playerList)"); -- this occurs when e.g. making /reloadui and another player sends the MoveToken command. 
-	end
-	-- move the token
-	if self.moveToken then
-		if index<self.moveToken then
-			self.moveToken=index;
-		end
-	else
-		self.moveToken=index;
-	end
-	GuildAdsTask:DeleteNamedSchedule("SendSearch");
-	GuildAdsTask:DeleteNamedSchedule("SendHashSearch");
-	GuildAdsTask:DeleteNamedSchedule("MoveToken"); -- necessary? dont think so
-	GuildAdsTask:AddNamedSchedule("MoveToken", self.delay.MoveToken, nil, nil, self.MoveTokenDelayed, self, self.moveToken, nil);
-	--self:MoveToken(index);
+	self:MoveTokenDelayed(index);
 	self:SetState("MOVETOKEN", self.delay.MoveToken+self.delay.Timeout);
 end
 
