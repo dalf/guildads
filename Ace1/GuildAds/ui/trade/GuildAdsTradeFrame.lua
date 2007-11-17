@@ -1354,7 +1354,6 @@ GuildAdsTrade = {
 		filterUpdateSubClasses = function(...) 
 			local subClass;
 			for i=1, select("#", ...) do
-				GuildAdsTrade.debug("XXX========= "..tostring(i)..","..tostring(select(i, ...)));
 				subClass = HIGHLIGHT_FONT_COLOR_CODE..select(i, ...)..FONT_COLOR_CODE_CLOSE; 
 				if ( GuildAdsTrade.filterClass.selectedSubclass and GuildAdsTrade.filterClass.selectedSubclass == subClass ) then
 					tinsert(GuildAdsTrade.filterClass.OPEN_FILTER_LIST, {select(i, ...), "subclass", i, 1});
@@ -1369,7 +1368,6 @@ GuildAdsTrade = {
 		filterUpdateInvTypes = function(...)
 			local invType, isLast;
 			for i=1, select("#", ...), 2 do
-				GuildAdsTrade.debug("============ "..tostring(i)..","..tostring(select(i, ...)));
 				invType = HIGHLIGHT_FONT_COLOR_CODE..TEXT(getglobal(select(i, ...)))..FONT_COLOR_CODE_CLOSE; 
 				if ( i == select("#", ...) ) then
 					isLast = 1;
