@@ -11,6 +11,36 @@
 --[[
     Debug module
 ]]
+local usageStats = {};
+local scriptProfile = GetCVar("scriptProfile") == "1"
+local startTime = GetTime()
+local lastTime, lastSentMessages, lastSentBytes, lastReceivedMessages, lastReceivedBytes = 0, 0,0,0,0
+local instantMeasure = false
+
+local getObjectCPUUsage = function(obj, includeSubroutines)
+	local t, c = 0,0
+	for _, f in pairs(obj) do
+		if type(f) == "function" then
+			local tt, cc = GetFunctionCPUUsage(f, includeSubroutines);
+			t = t + tt
+			c = c + cc
+		end
+	end
+	return t,c
+end
+
+local getStatColor = function(main, includeSub, included)
+	local r, g, b
+	if main then
+		r, g, b = 1, 1, 0
+	elseif included then
+		r, g, b = 0.6, 0.6, 0.6
+	else
+		r, g, b = 1, 1, 1
+	end
+	return r, g, b
+end
+
 GuildAds_DebugPlugin = {
 	metaInformations = { 
 		name = "Debug",
@@ -59,6 +89,19 @@ GuildAds_DebugPlugin = {
 		else
 			GuildAds_DebugPlugin.logMessages(false);
 		end;
+		
+		GuildAds_DebugPlugin.addAddonUsage("GuildAds");
+		GuildAds_DebugPlugin.addObjectUsage("Show debug informations", GuildAds_DebugPlugin, false, false);
+		GuildAds_DebugPlugin.addObjectUsage("GuildAdsComm", GuildAdsComm, false, false);
+		GuildAds_DebugPlugin.addObjectUsage("GuildAdsDTS", GuildAdsDTS, false, false);
+		if GuildAdsTask.GetOnUpdate then
+			GuildAds_DebugPlugin.addFunctionUsage("GuildAdsTask (onUpdate)", GuildAdsTask:GetOnUpdate(), false);
+		end
+		if SimpleComm_OnUpdate then
+			GuildAds_DebugPlugin.addFunctionUsage("SimpleComm_OnUpdate", SimpleComm_OnUpdate, true);
+		end
+		GuildAds_DebugPlugin.addFunctionUsage("SimpleComm (hide messages)", SimpleComm_New_ChatFrame_MessageEventHandler, false);
+		GuildAds_DebugPlugin.addFrameUsage("GuildAdsITT", GuildAdsITT, false, true);
 	end;
 	
 	logMessages = function(mode)
@@ -84,5 +127,188 @@ GuildAds_DebugPlugin = {
 	
 	addDebugMessageReal = function(dbg_type, fmt, ...)
 		GuildAdsDebug_Log:AddMessage(date("[%H:%M:%S] ")..string.format(fmt, select(1, ...)), GuildAds_DebugPlugin.colors[dbg_type][1], GuildAds_DebugPlugin.colors[dbg_type][2], GuildAds_DebugPlugin.colors[dbg_type][3]);
+	end;
+	
+	addObjectUsage = function(name, obj, includeSubroutines, included)
+		local r, g, b = getStatColor(false, includeSubroutines, included)
+		table.insert(usageStats, {
+			func = getObjectCPUUsage,
+			args = { obj, includeSubroutines },
+			name = name,
+			included = included,
+			kind = "addon",
+			t = 0,
+			c = 0,
+			colorR = r,
+			colorG = g,
+			colorB = b
+		});		
+	end;
+	-- for accurate result on the GuildAds_DebugPlugin
+	getObjectCPUUsage = getObjectCPUUsage;
+	
+	addAddonUsage = function(name)
+		local r, g, b = getStatColor(true, false, false)
+		table.insert(usageStats, {
+			func = GetAddOnCPUUsage,
+			args = { name },
+			name = name,
+			included = true,
+			kind = "addon",
+			t = 0,
+			c = 0,
+			colorR = r,
+			colorG = g,
+			colorB = b
+		});
+	end;
+	
+	addFrameUsage = function(name, frame, includeChildren, included)
+		local r, g, b = getStatColor(false, includeChildren, included)
+		table.insert(usageStats, {
+			func = GetFrameCPUUsage,
+			args = { frame, includeChildren},
+			name = name,
+			included = included,
+			kind = "frame",
+			t = 0,
+			c = 0,
+			colorR = r,
+			colorG = g,
+			colorB = b
+		});
+	end;
+	
+	addFunctionUsage = function(name, func, includeSubroutines, included)
+		local r, g, b = getStatColor(false, includeSubroutines, included)
+		table.insert(usageStats, {
+			func = GetFunctionCPUUsage,
+			args = { func, includeSubroutines},
+			name = name,
+			included = included,
+			kind = "function",
+			t = 0,
+			c = 0,
+			colorR = r,
+			colorG = g,
+			colorB = b
+		});
+	end;
+	
+	onClickStats = function()
+		if (arg1 == "LeftButton") then
+			GuildAdsStatsTooltip:SetOwner(UIParent,"ANCHOR_PRESERVE")
+			if not scriptProfile then
+				GuildAdsSwitchMeasureButton:Hide();
+			end
+			GuildAds_DebugPlugin.displayStats()
+		else
+			GuildAds_DebugPlugin.toggleScriptProfile();
+		end
+	end;
+	
+	onClickSwitchMeasure = function()
+		instantMeasure = not instantMeasure;
+		if instantMeasure then
+			GuildAdsSwitchMeasureButton:SetText("Cumulative");
+		else
+			GuildAdsSwitchMeasureButton:SetText("Instant");
+		end
+	end;
+	
+	toggleScriptProfile = function()
+		if scriptProfile then
+			SetCVar("scriptProfile", "0")
+		else
+			SetCVar("scriptProfile", "1")
+		end
+		ReloadUI()
+	end;
+	
+	displayStats = function()
+		local tooltip = GuildAdsStatsTooltip
+		tooltip:SetText("GuildAds");
+		local sessionTime = GetTime() - startTime;  -- in second
+		local sentMessages, sentBytes, receivedMessages, receivedBytes = SimpleComm_GetStats()
+		local sentBytesPerSecond = sentBytes / sessionTime
+		local receivedBytesPerSecond = receivedBytes / sessionTime
+		
+		local since = sessionTime - lastTime
+		local instantSentMessages, instantSentBytes, instantReceivedMessages, instantReceivedBytes = 
+				sentMessages-lastSentMessages, sentBytes-lastSentBytes, receivedMessages-lastReceivedMessages, receivedBytes-lastReceivedBytes;
+		
+		local instantSentBytesPerSecond, instantReceivedBytesPerSecond = -1, -1
+		if since>0 then
+			instantSentBytesPerSecond, instantReceivedBytesPerSecond = instantSentBytes / since, instantReceivedBytes / since
+		end
+		
+		lastSentMessages, lastSentBytes, lastReceivedMessages, lastReceivedBytes =
+				sentMessages, sentBytes, receivedMessages, receivedBytes;
+		lastTime = sessionTime
+		
+		tooltip:AddLine(string.format("Session duration: %i seconds", sessionTime), 1, 1, 0);
+		tooltip:AddLine("Messages during the session", 1, 0.75, 0);
+		tooltip:AddDoubleLine(string.format("Sent: %i messages, %i bytes", sentMessages, sentBytes), string.format("%.2f bytes/sec ", sentBytesPerSecond), 1, 1, 1, 1, 1, 1)
+		tooltip:AddDoubleLine(string.format("Received: %i messages, %i bytes", receivedMessages, receivedBytes), string.format("%.2f bytes/sec", receivedBytesPerSecond), 1, 1, 1, 1, 1, 1)
+		tooltip:AddLine(string.format("Messages in %i seconds", since), 1, 0.75, 0);
+		tooltip:AddDoubleLine(string.format("Sent: %i messages, %i bytes", instantSentMessages, instantSentBytes), string.format("%.2f bytes/sec ", instantSentBytesPerSecond), 1, 1, 1, 1, 1, 1)
+		tooltip:AddDoubleLine(string.format("Received: %i messages, %i bytes", instantReceivedMessages, instantReceivedBytes), string.format("%.2f bytes/sec", instantReceivedBytesPerSecond), 1, 1, 1, 1, 1, 1)
+		if not scriptProfile then
+			tooltip:Show();
+			return
+		end
+		
+		if instantMeasure then
+			tooltip:AddLine("CPU Usage (Instant)", 1, 0.75, 0);
+		else
+			tooltip:AddLine("CPU Usage (Cumulative)", 1, 0.75, 0);
+		end
+		UpdateAddOnCPUUsage();
+		local baseTime, other, toPercent
+		for lineNumber, spec in ipairs(usageStats) do
+			local t, c = spec.func(unpack(spec.args))
+			c = c or 0
+			local dt, dc = t-spec.t, c-spec.c
+			local p
+			local misc = ""
+			local tt, cc
+			if instantMeasure then
+				tt, cc = dt, dc
+			else
+				tt, cc = t, c
+			end
+			
+			if lineNumber>1 then
+				p = t / toPercent
+				dp = dt / toPercent
+			else
+				baseTime = tt
+				other = baseTime
+				toPercent = baseTime / 100
+				p = 100
+				dp = 0
+				misc = string.format(", %.4f%% of the session", (t/10) / sessionTime); -- sessionTime in second, t in millesecond
+			end
+			
+			if not spec.included then
+				other = other - tt
+			end
+			
+			local r, g, b = spec.colorR, spec.colorG, spec.colorB
+			if instantMeasure then
+				tooltip:AddDoubleLine(string.format("%s %s",spec.name, misc), string.format("[%i] %.4f ms", dc, dt), r, g, b, r, g, b);
+			else
+				tooltip:AddDoubleLine(string.format("%s %s",spec.name, misc), string.format("[%i] %ims %00i%%", c, t, p), r, g, b, r, g, b);
+			end
+			
+			spec.t, spec.c = t, c
+		end
+		
+		if instantMeasure then
+			tooltip:AddDoubleLine("Other functions", string.format("%.4f ms", other, 1, 1, 1,1,1,1));
+		else
+			tooltip:AddDoubleLine("Other functions", string.format("%ims %i%%", other, (other*100)/baseTime), 1, 1, 1,1,1,1);
+		end
+		tooltip:Show();
 	end;
 }

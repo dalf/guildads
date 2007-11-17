@@ -158,6 +158,34 @@
 				</Scripts>
 			</Button>
 			
+			<Button name="GuildAdsDebugUsage" inherits="UIPanelButtonTemplate" text="Stats">
+				<Size>
+					<AbsDimension x="100" y="20"/>
+				</Size>
+				<Anchors>
+					<Anchor point="TOPLEFT">
+						<Offset>
+							<AbsDimension x="100" y="30"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						this:RegisterForClicks("LeftButtonDown", "RightButtonDown");
+					</OnLoad>
+					<OnClick>
+						GuildAds_DebugPlugin.onClickStats();
+					</OnClick>
+					<OnEnter>
+						GameTooltip:SetOwner(this, "ANCHOR_RIGHT");
+						GameTooltip:SetText("Right click to enable/disable CPU usage monitoring. It will reload the UI");
+					</OnEnter>
+					<OnLeave>
+						GameTooltip:Hide();
+					</OnLeave>
+				</Scripts>
+			</Button>
+			
 			<Button name="GuildAdsDebugTab" inherits="GuildAdsWindowTabTemplate" text="Debug" />
 		</Frames>
 		<Scripts>
@@ -170,7 +198,7 @@
 		</Scripts>
 	</Frame>
 	
-	<Frame name="GuildAdsDebugFloatingFrame" frameStrata="HIGH" setAllPoints="true" parent="UIParent" hidden="true" enableMouse="true" movable="true">
+	<Frame name="GuildAdsDebugFloatingFrame" frameStrata="HIGH" parent="UIParent" hidden="true" enableMouse="true" movable="true">
         <Size>
             <AbsDimension x="500" y="480"/>
         </Size>
@@ -229,5 +257,80 @@
 			</OnHide>
 		</Scripts>
 	</Frame>
+	<GameTooltip name="GuildAdsStatsTooltip" inherits="GameTooltipTemplate" parent="UIParent" enableMouse="true" toplevel="true" movable="true" frameStrata="HIGH" hidden="true">
+		<Size>
+			<AbsDimension x="256" y="128"/>
+		</Size>
+		<Anchors>
+			<Anchor point="BOTTOM">
+				<Offset>
+					<AbsDimension x="0" y="80"/>
+				</Offset>
+			</Anchor>
+		</Anchors>
+		<Frames>
+			<Button name="GuildAdsStatsCloseButton">
+				<Size>
+					<AbsDimension x="32" y="32"/>
+				</Size>
+				<Anchors>
+					<Anchor point="TOPRIGHT">
+						<Offset>
+							<AbsDimension x="1" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						HideUIPanel(GuildAdsStatsTooltip);
+					</OnClick>
+				</Scripts>
+				<NormalTexture file="Interface\Buttons\UI-Panel-MinimizeButton-Up"/>
+				<PushedTexture file="Interface\Buttons\UI-Panel-MinimizeButton-Down"/>
+				<HighlightTexture file="Interface\Buttons\UI-Panel-MinimizeButton-Highlight" alphaMode="ADD"/>
+			</Button>
+			<Button name="GuildAdsSwitchMeasureButton" inherits="OptionsButtonTemplate" text="Instant">
+				<Anchors>
+					<Anchor point="RIGHT" relativeTo="GuildAdsStatsCloseButton" relativePoint="LEFT">
+						<Offset>
+							<AbsDimension x="1" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						GuildAds_DebugPlugin.onClickSwitchMeasure();
+					</OnClick>
+				</Scripts>
+			</Button>
+		</Frames>
+		<Scripts>
+			<OnLoad>
+				GameTooltip_OnLoad();
+				this:SetPadding(16);
+				this:RegisterForDrag("LeftButton");
+				this:SetOwner(UIParent,"ANCHOR_PRESERVE")
+				this:SetScale(0.8)
+				this:SetUserPlaced(true);
+			</OnLoad>
+			<OnDragStart>
+				this:StartMoving();
+			</OnDragStart>
+			<OnDragStop>
+				this:StopMovingOrSizing();
+				ValidateFramePosition(this);
+			</OnDragStop> 			
+			<OnShow>
+				this.t = GetTime()
+			</OnShow>
+			<OnUpdate>
+				local t = GetTime()
+				if t-this.t >=3 then
+					this.t = t
+					GuildAds_DebugPlugin.displayStats()
+				end
+			</OnUpdate>
+		</Scripts>
+	</GameTooltip>
   
 </Ui>
