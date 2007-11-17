@@ -28,6 +28,27 @@ UnitName = function(name)
 	end
 end
 
+UnitLevel = function(name)
+	if name=="player" then
+		return config.playerLevel;
+	end
+end
+
+UnitRace = function(name)
+	if name=="player" then
+		return config.playerRace;
+	end
+end
+
+UnitClass = function(name)
+	if name=="player" then
+		return config.playerClass;
+	end
+end
+
+GetInventoryItemLink = function(target,slot)
+end
+
 --
 -- About Ace
 --
@@ -46,7 +67,9 @@ dofile(config.wowPath.."Interface\\AddOns\\Ace\\AceModule.lua")
 --
 -- About GuildAds
 --
-GUILDADS_VERSION = 200;
+--GUILDADS_VERSION = 200;
+GUILDADS_REVISION = "200";
+GUILDADS_REVISION_NUMBER = tonumber((GUILDADS_REVISION or "1"):match("(%d+)"))
 
 GuildAdsTask = {
 	AddNamedSchedule = function(self, n, t, r, c, f, ...)
@@ -57,15 +80,22 @@ GuildAds_ChatDebug = function(t, m)
 end
 
 dofile(config.guildAdsDatabaseFile);
+dofile(config.wowPath.."Interface\\AddOns\\GuildAds\\Localization.lua");
 dofile(config.wowPath.."Interface\\AddOns\\GuildAds\\data\\GuildAdsDB.lua");
+dofile(config.wowPath.."Interface\\AddOns\\GuildAds\\data\\GuildAdsList.lua");
+dofile(config.wowPath.."Interface\\AddOns\\GuildAds\\data\\GuildAdsHash.lua");
 dofile(config.wowPath.."Interface\\AddOns\\GuildAds\\data\\GuildAdsDataType.lua");
 dofile(config.wowPath.."Interface\\AddOns\\GuildAds\\data\\GuildAdsFakeDataType.lua");
 dofile(config.wowPath.."Interface\\AddOns\\GuildAds\\data\\GuildAdsTableDataType.lua");
 dofile(config.wowPath.."Interface\\AddOns\\GuildAds\\data\\datatypes\\GuildAdsAdminData.lua");
+dofile(config.wowPath.."Interface\\AddOns\\GuildAds\\data\\datatypes\\GuildAdsMainData.lua");
+dofile(config.wowPath.."Interface\\AddOns\\GuildAds\\data\\datatypes\\GuildAdsTradeSkillData.lua");
+dofile(config.wowPath.."Interface\\AddOns\\GuildAds\\data\\datatypes\\GuildAdsFactionData.lua");
 dofile(config.wowPath.."Interface\\AddOns\\GuildAds\\data\\datatypes\\GuildAdsTradeNeedData.lua");
 dofile(config.wowPath.."Interface\\AddOns\\GuildAds\\data\\datatypes\\GuildAdsTradeOfferData.lua");
-dofile(config.wowPath.."Interface\\AddOns\\GuildAds\\data\\datatypes\\GuildAdsTradeSkillData.lua");
+dofile(config.wowPath.."Interface\\AddOns\\GuildAds\\data\\datatypes\\GuildAdsInventoryData.lua");
 dofile(config.wowPath.."Interface\\AddOns\\GuildAds\\data\\datatypes\\GuildAdsSkillData.lua");
+dofile(config.wowPath.."Interface\\AddOns\\GuildAds\\data\\datatypes\\GuildAdsTalentData.lua");
 
 GuildAds = {
 	playerName = config.playerName;
