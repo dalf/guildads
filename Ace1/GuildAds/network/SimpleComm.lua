@@ -450,8 +450,6 @@ do
 	-- Clean a received message
 	function Decode(text, drunk)
 		if drunk then
-			text = text:gsub("^(.*)\029.-$", "%1")
-			-- get rid of " ...hic!"
 			text = text:gsub("([\127\015\020])", drunkHelper1)
 			text = text:gsub("\031(.)", drunkHelper2)
 			text = text:gsub("\029([\008\038\125\011\126\016\021\040\041\042\043\044\045\046\047\048\049\050\051\032\030])", drunkHelper3)
