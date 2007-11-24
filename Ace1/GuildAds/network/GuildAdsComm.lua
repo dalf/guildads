@@ -8,28 +8,11 @@
 -- Licence: GPL version 2 (General Public License)
 ----------------------------------------------------------------------------------
 
---[[
-Bug
-	* Erreur ligne 148, et 168 dans le code lua de la réput (en faisant tous/aucun)
-Todo :
-	Add to field to SR/R messages : number of player ignoring this search (even if this is not fully implemented now, it's will avoid to break the protocol after)
-	The curse-gaming (etc..) zip : all ChatDebug are deleted to avoid memory/cpu usage.
-	Clean up :
-		Move GuildAdsDB:FormatTime to the UI
-		Replace some "if ... error... end" by "assert"
-]]
+GUILDADS_VERSION_PROTOCOL = "2";
+GUILDADS_MSG_PREFIX_NOVERSION = "GAds";
+GUILDADS_MSG_OLDPREFIX_NOVERSION = "GA\t";
 
-GUILDADS_VERSION_PROTOCOL = "5";
-GUILDADS_MSG_PREFIX_NOVERSION = "GA\t";
-
-GUILDADS_MSG_PREFIX1= GUILDADS_MSG_PREFIX_NOVERSION..GUILDADS_VERSION_PROTOCOL;
-GUILDADS_MSG_PREFIX = GUILDADS_MSG_PREFIX1..":";
-	
-GUILDADS_MSG_PREFIX_REGEX_UNSPLIT = GUILDADS_MSG_PREFIX.."([0-9]+)([\.|\:])(.*)";
-GUILDADS_MSG_PREFIX_PACK = GUILDADS_MSG_PREFIX.."&";
-GUILDADS_MSG_PACK_SEPARATOR = "\007";
-GUILDADS_MSG_REGEX_PACK_ITERATOR = "([^"..GUILDADS_MSG_PACK_SEPARATOR.."]+)";
-assert(GUILDADS_MSG_PACK_SEPARATOR:len() == 1, "GUILDADS_MSG_PACK_SEPARATOR:()len > 1")
+GUILDADS_MSG_PREFIX = GUILDADS_MSG_PREFIX_NOVERSION..GUILDADS_VERSION_PROTOCOL;
 
 --------------------------------------------------------------------------------
 --
@@ -218,12 +201,8 @@ function GuildAdsComm:Initialize()
 	self.latestRevisionString = GUILDADS_REVISION_STRING;
 
 	SimpleComm_Initialize(
+		GUILDADS_MSG_PREFIX,
 		self.FilterText,
-		self.FilterMessage,
-		self.SplitSerialize,
-		self.UnsplitSerialize,
-		self.PackedMessages,
-		self.UnpackMessagesIterator,
 		self.OnJoin,
 		self.OnLeave,
 		self.OnMessage,
@@ -260,48 +239,10 @@ function GuildAdsComm:GetChannelStatus()
 end
 
 function GuildAdsComm.FilterText(text)
-	return string.sub(text, 1, string.len(GUILDADS_MSG_PREFIX_NOVERSION)) == GUILDADS_MSG_PREFIX_NOVERSION;
-end
-
-function GuildAdsComm.FilterMessage(text)
-	return string.sub(text, 1, string.len(GUILDADS_MSG_PREFIX)) == GUILDADS_MSG_PREFIX;
-end
-
-function GuildAdsComm.PackedMessages(messages)
-	return GUILDADS_MSG_PREFIX_PACK..table.concat(messages, GUILDADS_MSG_PACK_SEPARATOR);
-end
-
-local unpackIterator = function(text, start)
-	if not start then
-		if text:sub(1, GUILDADS_MSG_PREFIX_PACK:len()) ~= GUILDADS_MSG_PREFIX_PACK then
-			return
-		end
-		start = GUILDADS_MSG_PREFIX_PACK:len()+1;
-	end
-	local s, e = string.find(text, GUILDADS_MSG_REGEX_PACK_ITERATOR, start);
-	if s and e then
-		return e+1, text:sub(s, e);
-	end
-end
-
-function GuildAdsComm.UnpackMessagesIterator(text)
-	return unpackIterator, text;
-end
-
-function GuildAdsComm.SplitSerialize(packetNumber, last, obj)
-	if last then
-		return GUILDADS_MSG_PREFIX .. packetNumber ..":".. obj;
-	else
-		return GUILDADS_MSG_PREFIX .. packetNumber ..".".. obj;
-	end
-end
-
-function GuildAdsComm.UnsplitSerialize(str)
-	local iStart, _ , packetNumber, last, packet = string.find(str, GUILDADS_MSG_PREFIX_REGEX_UNSPLIT);
-	if iStart then
-		return packet, tonumber(packetNumber), last==":";
-	end
-	return str;
+	return 
+		(string.sub(text, 1, string.len(GUILDADS_MSG_PREFIX_NOVERSION)) == GUILDADS_MSG_PREFIX_NOVERSION)
+	or 
+		(string.sub(text, 1, string.len(GUILDADS_MSG_OLDPREFIX_NOVERSION)) == GUILDADS_MSG_OLDPREFIX_NOVERSION)
 end
 
 function GuildAdsComm.OnJoin(self)
@@ -650,75 +591,75 @@ end
 --------------------------------------------------------------------------------
 function GuildAdsComm:SendMeta(toPlayerName)
 	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendMeta");
-	SimpleComm_SendMessage(toPlayerName, GUILDADS_MSG_PREFIX.."M>"..GUILDADS_REVISION..">"..GUILDADS_REVISION_STRING..">"..self.startTime..">"..(#self.playerList)..">"..GuildAdsDB.databaseId..">");
+	SimpleComm_SendMessage(toPlayerName, "M>"..GUILDADS_REVISION..">"..GUILDADS_REVISION_STRING..">"..self.startTime..">"..(#self.playerList)..">"..GuildAdsDB.databaseId);
 	self:SendChatFlag(toPlayerName);
 end
 
 function GuildAdsComm:SendChatFlag(toPlayerName)
 	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendChatFlag");
 	local flag, message = SimpleComm_GetFlag(GuildAds.playerName);
-	SimpleComm_SendMessage(toPlayerName, string.format("%sCF>%s>%s>", GUILDADS_MSG_PREFIX, (flag or ""), (message or "")));
+	SimpleComm_SendMessage(toPlayerName, string.format("CF>%s>%s", (flag or ""), (message or "")));
 end
 
 function GuildAdsComm:SendHashSearch(path)
 	local hashSequence = GuildAdsHash:GetBase64Hash(GuildAdsHash.tree[path]); -- always use the newest hash key
 	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendHashSearch(%s, %s)", path, hashSequence);
-	SimpleComm_SendMessage(nil, string.format("%sHS>%s>%s>", GUILDADS_MSG_PREFIX, path, hashSequence));
+	SimpleComm_SendMessage(nil, string.format("HS>%s>%s", path, hashSequence));
 end
 
 function GuildAdsComm:SendHashSearchResultToParent(parentPlayerName, path, hashChanged, who, amount, numplayers)
 	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendHashSearchResultWhisper[%s](%s, %i)", parentPlayerName, path, hashChanged);
-	SimpleComm_SendMessage(parentPlayerName, string.format("%sHR>%s>%i>%i>%i>%i>", GUILDADS_MSG_PREFIX, path, hashChanged, who, amount, numplayers));
+	SimpleComm_SendMessage(parentPlayerName, string.format("HR>%s>%i>%i>%i>%i", path, hashChanged, who, amount, numplayers));
 end
 
 function GuildAdsComm:SendHashSearchResult(path, hashChanged, who, amount)
 	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendHashSearchResult(%s, %i)", path, hashChanged);
-	SimpleComm_SendMessage(nil, string.format("%sHSR>%s>%i>%i>%i>", GUILDADS_MSG_PREFIX, path, hashChanged, who, amount));
+	SimpleComm_SendMessage(nil, string.format("HSR>%s>%i>%i>%i", path, hashChanged, who, amount));
 end
 
 function GuildAdsComm:SendSearch(dataType, playerName)
 	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendSearch(%s, %s)", dataType.metaInformations.name, playerName);
-	SimpleComm_SendMessage(nil, string.format("%sS>%s>%s>", GUILDADS_MSG_PREFIX, dataType.metaInformations.name, playerName));
+	SimpleComm_SendMessage(nil, string.format("S>%s>%s", dataType.metaInformations.name, playerName));
 end
 
 function GuildAdsComm:SendSearchResultToParent(parentPlayerName, dataType, playerName, who, revision, weight, worstRevision, version)
 	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendRevisionWhisper[%s](%s, %s)", parentPlayerName, dataType.metaInformations.name, playerName);
-	SimpleComm_SendMessage(parentPlayerName, string.format("%sR>%s>%s>%s>%s>%i>%i>%i>", GUILDADS_MSG_PREFIX, dataType.metaInformations.name, playerName, who, revision, weight, worstRevision, version));
+	SimpleComm_SendMessage(parentPlayerName, string.format("R>%s>%s>%s>%s>%i>%i>%i", dataType.metaInformations.name, playerName, who, revision, weight, worstRevision, version));
 end
 
 function GuildAdsComm:SendSearchResult(dataType, playerName, who, revision, worstRevision)
 	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendSearchResult(%s, %s)", dataType.metaInformations.name, playerName);
-	SimpleComm_SendMessage(nil, string.format("%sSR>%s>%s>%s>%i>%i>", GUILDADS_MSG_PREFIX, dataType.metaInformations.name, playerName, who, revision, worstRevision));
+	SimpleComm_SendMessage(nil, string.format("SR>%s>%s>%s>%i>%i", dataType.metaInformations.name, playerName, who, revision, worstRevision));
 end
 
 function GuildAdsComm:SendOpenTransaction(dataType, playerName, fromRevision, toRevision)
-	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendOpenTransaction(%s, %s)", dataType.metaInformations.name, playerName);
-	SimpleComm_SendMessage(nil, GUILDADS_MSG_PREFIX.."OT>"..dataType.metaInformations.name..">"..playerName..">"..fromRevision..">"..toRevision..">"..dataType.metaInformations.version..">");
+	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendOpenTransaction(%s, %s, %s->%s, v%s)", dataType.metaInformations.name, playerName, fromRevision, toRevision,dataType.metaInformations.version);
+	SimpleComm_SendMessage(nil, string.format("OT>%s>%s>%s>%s>%s", dataType.metaInformations.name, playerName, fromRevision, toRevision, dataType.metaInformations.version) );
 end
 
 function GuildAdsComm:SendRevision(dataType, playerName, revision, id, data)
 	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendNewRevision(%s, %s, %s)", dataType.metaInformations.name, playerName, tostring(id));
-	SimpleComm_SendMessage(nil, GUILDADS_MSG_PREFIX.."N>"..revision..">"..GuildAdsCodecs[dataType.schema.id].encode(id)..">"..GuildAdsCodecs[dataType.metaInformations.name.."Data"].encode(data)..">");
+	SimpleComm_SendMessage(nil, string.format("N>%s>%s>%s", revision, GuildAdsCodecs[dataType.schema.id].encode(id), GuildAdsCodecs[dataType.metaInformations.name.."Data"].encode(data) ) );
 end
 
 function GuildAdsComm:SendKeys(dataType, playerName, keys)
 	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendKeys(%s, %s)", dataType.metaInformations.name, playerName);
-	SimpleComm_SendMessage(nil, GUILDADS_MSG_PREFIX.."K>"..GuildAdsCodecs[dataType.metaInformations.name.."Keys"].encode(keys)..">");
+	SimpleComm_SendMessage(nil, string.format("K>%s", GuildAdsCodecs[dataType.metaInformations.name.."Keys"].encode(keys)) );
 end
 
 function GuildAdsComm:SendOldRevision(dataType, playerName, revisions)
 	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendOldRevision(%s, %s)", dataType.metaInformations.name, playerName);
-	SimpleComm_SendMessage(nil, GUILDADS_MSG_PREFIX.."O>"..table.concat(revisions, "/")..">");
+	SimpleComm_SendMessage(nil, "O>"..table.concat(revisions, "/"));
 end
 
 function GuildAdsComm:SendCloseTransaction(dataType, playerName)
 	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendCloseTransaction(%s, %s)", dataType.metaInformations.name, playerName);
-	SimpleComm_SendMessage(nil, GUILDADS_MSG_PREFIX.."CT>");
+	SimpleComm_SendMessage(nil, "CT");
 end
 
 function GuildAdsComm:SendMoveToken(index)
 	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendMoveToken");
-	SimpleComm_SendMessage(nil, string.format("%sT>%s>", GUILDADS_MSG_PREFIX, index or ""));
+	SimpleComm_SendMessage(nil, string.format("T>%s", index or ""));
 end
 
 --------------------------------------------------------------------------------
@@ -753,10 +694,6 @@ function GuildAdsComm:CallReceive(channelName, personName, command, ...)
 end
 
 function GuildAdsComm.OnMessage(personName, text, channelName)
-	local prefix, text = strsplit(":", text, 2);
-	if prefix ~= GUILDADS_MSG_PREFIX1 then
-		return;
-	end
 	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, text);
 	GuildAdsComm:CallReceive(channelName, personName, strsplit(">", text));
 end
