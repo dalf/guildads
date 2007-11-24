@@ -163,8 +163,8 @@ function GuildAdsInternalTooltip_ItemReady()
 	-- next item if there is one
 	local itemRef = next(GuildAdsITT.itemRefs);
 	if itemRef then
---~ 		GuildAdsTask:AddNamedSchedule("GuildAdsInternalTooltip_SetItem", 2, nil, nil, GuildAdsInternalTooltip_SetItem, itemRef);
-		GuildAdsInternalTooltip_SetItem(itemRef);
+		GuildAdsTask:AddNamedSchedule("GuildAdsInternalTooltip_SetItem", 0.5, nil, nil, GuildAdsInternalTooltip_SetItem, itemRef);
+		-- GuildAdsInternalTooltip_SetItem(itemRef);
 	else
 		GuildAdsPlugin_OnEvent(GAS_EVENT_ITEMINFOREADY);
 	end
