@@ -65,6 +65,7 @@ local SimpleComm_messageStack = {};
 
 local SimpleCommFrame
 
+local maxMessageLength = 0
 local SimpleCommPrefix = ""
 local drunkMessageTemplate = { "\t", "", "\029" }
 
@@ -551,6 +552,7 @@ local function SimpleComm_SendQueue()
 		if message.to then
 			if not SimpleComm_Disconnected[message.to] then
 				-- GuildAds_ChatDebug(GA_DEBUG_CHANNEL, "Sending to "..message.to..": "..message.text..")");
+				assert(text:len() + SimpleCommPrefix:len() + 1<=255, "Too long addon message");
 				SendAddonMessage(SimpleCommPrefix, text, "WHISPER", message.to);
 				sentBytes = sentBytes + string.len(text);
 				num_messages = num_messages + 1
@@ -559,6 +561,7 @@ local function SimpleComm_SendQueue()
 			drunkMessageTemplate[2] = text
 			text = table_concat(drunkMessageTemplate)
 			-- GuildAds_ChatDebug(GA_DEBUG_CHANNEL, "Send to the channel: %s", text);
+			assert(text:len()<=255, "Too long chat message");
 			SendChatMessage(text, "CHANNEL", nil, SimpleComm_channelId);
 			sentBytes = sentBytes + string.len(text);
 			num_messages = num_messages + 1
@@ -868,7 +871,7 @@ function SimpleComm_SendMessage(who, text)
 		local queueLast = SimpleComm_messageQueueLast
 		text = Encode(text, who==nil)
 		local textLength = text:len()
-		if (textLength + queueLast.length < 239 and queueLast.to == who) then
+		if (textLength + queueLast.length <= maxMessageLength and queueLast.to == who) then
 			if queueLast.text then
 				table.insert(queueLast, queueLast.text);
 				queueLast.text=nil;
@@ -876,7 +879,7 @@ function SimpleComm_SendMessage(who, text)
 			-- pack message with the previous one
 			table.insert(queueLast, text)
 			queueLast.length = queueLast.length + textLength + 1
-		elseif textLength<239 then
+		elseif textLength<= maxMessageLength then
 			-- normal message
 			SimpleComm_messageQueueLast.next = {
 				to=who, 
@@ -888,9 +891,9 @@ function SimpleComm_SendMessage(who, text)
 			-- split the message into smaller one.
 			local packetNumber = 1;
 			while text~="" do
-				-- take first 240 char
-				local tmp = string.sub(text, 1, 238);
-				text = string.sub(text, 239);
+				-- take the first characters
+				local tmp = string.sub(text, 1, maxMessageLength);
+				text = string.sub(text, maxMessageLength+1);
 				-- add a packet
 				SimpleComm_messageQueueLast.next = {
 					to = who;
@@ -926,6 +929,12 @@ function SimpleComm_Initialize(
 	
 	SimpleCommPrefix = Prefix
 	drunkMessageTemplate[1] = Prefix.."\t"
+	--[[
+		1 "\t" 
+		1 "\029"
+		3 for split message
+	]]
+	maxMessageLength = 254-SimpleCommPrefix:len()-5
 	
 	SimpleComm_FilterText = FilterText
 	

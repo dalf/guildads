@@ -9,8 +9,8 @@
 ----------------------------------------------------------------------------------
 
 GUILDADS_VERSION_PROTOCOL = "2";
-GUILDADS_MSG_PREFIX_NOVERSION = "GAds";
-GUILDADS_MSG_OLDPREFIX_NOVERSION = "GA\t";
+GUILDADS_MSG_PREFIX_NOVERSION = "GA";
+GUILDADS_MSG_PREFIX_REGEX = "GA.*\t";
 
 GUILDADS_MSG_PREFIX = GUILDADS_MSG_PREFIX_NOVERSION..GUILDADS_VERSION_PROTOCOL;
 
@@ -239,10 +239,7 @@ function GuildAdsComm:GetChannelStatus()
 end
 
 function GuildAdsComm.FilterText(text)
-	return 
-		(string.sub(text, 1, string.len(GUILDADS_MSG_PREFIX_NOVERSION)) == GUILDADS_MSG_PREFIX_NOVERSION)
-	or 
-		(string.sub(text, 1, string.len(GUILDADS_MSG_OLDPREFIX_NOVERSION)) == GUILDADS_MSG_OLDPREFIX_NOVERSION)
+	return text:find(GUILDADS_MSG_PREFIX_REGEX, 1) ~= nil
 end
 
 function GuildAdsComm.OnJoin(self)
@@ -694,7 +691,7 @@ function GuildAdsComm:CallReceive(channelName, personName, command, ...)
 end
 
 function GuildAdsComm.OnMessage(personName, text, channelName)
-	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, text);
+	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "%i:%s", text:len(), text);
 	GuildAdsComm:CallReceive(channelName, personName, strsplit(">", text));
 end
 
