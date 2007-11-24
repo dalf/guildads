@@ -483,14 +483,14 @@ function GuildAdsDB:Initialize()
 	setmetatable(GuildAdsDB.profile, GuildAdsDBprofileMT);
 	
 	-- prioritize data types
-	priority=100
-	list = {}
+	local priority=100
+	local list = {}
 	while true do
 		-- check dependency of every module
 		tmp = {}
 		for _, dataType in pairs(self._load) do
 			if not list[dataType.metaInformations.name] then
-				dependencyFailed=false;
+				local dependencyFailed=false;
 				for _, dependency in pairs(dataType.metaInformations.depend) do
 					if not list[dependency] then
 						dependencyFailed=true;
@@ -505,7 +505,7 @@ function GuildAdsDB:Initialize()
 			break
 		end
 		-- pick one from tmp at random
-		i=math.random(#tmp)
+		local i=math.random(#tmp)
 		list[tmp[i]]=priority;
 		priority=priority+100;
 	end

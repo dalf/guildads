@@ -176,7 +176,7 @@ GuildAdsPlugin = {
 	end;
 	
 	UIregister = function(plugin)
-		status, errorMessage = GuildAdsPlugin.register(plugin);
+		local status, errorMessage = GuildAdsPlugin.register(plugin);
 		if not status then
 			if errorMessage then
 				error(errorMessage,2);

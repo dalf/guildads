@@ -8,7 +8,7 @@
 -- Licence: GPL version 2 (General Public License)
 ----------------------------------------------------------------------------------
 
-local slot, link, item, count, data, playerInventory;
+local slot, link, item, count, data, playerInventory, _
 
 GuildAdsInventoryDataType = GuildAdsTableDataType:new({
 	metaInformations = {
