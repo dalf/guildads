@@ -247,15 +247,14 @@ end
 -------------------------------------------
 GuildAdsCodecString = GuildAdsCodec:new({}, "String", 1);
 
-GuildAdsCodecString.SpecialChars = "|>/\31\n";
+GuildAdsCodecString.SpecialChars = ">/\002";
 GuildAdsCodecString.SpecialCharsRegex = "(["..GuildAdsCodecString.SpecialChars.."])";
 
 GuildAdsCodecString.SpecialCharMap =
 {
 	gt = ">",		-- separator for serialized command
 	s = "/",		-- separator for serialized table
-	ei = "\31",		-- \31 for nil value
-	n = "\n",		-- \n forbidden in chat
+	ei = "\002",	-- \002 for nil value
 };
 
 local encodeChar = function(pField)
@@ -274,7 +273,7 @@ function GuildAdsCodecString.encode(pString)
 						GuildAdsCodecString.SpecialCharsRegex,
 						encodeChar);
 	end
-	return "\31";
+	return "\002";
 end
 
 local decodeChar = function (pField)
@@ -283,7 +282,7 @@ local decodeChar = function (pField)
 end
 
 function GuildAdsCodecString.decode(pString)
-	if pString ~= "\31" then
+	if pString ~= "\002" then
 		return string.gsub(
 						pString,
 						"&(%w+);", 
