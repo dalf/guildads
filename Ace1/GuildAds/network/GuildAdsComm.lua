@@ -691,7 +691,7 @@ function GuildAdsComm:CallReceive(channelName, personName, command, ...)
 end
 
 function GuildAdsComm.OnMessage(personName, text, channelName)
-	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "%i:%s", text:len(), text);
+	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, text);
 	GuildAdsComm:CallReceive(channelName, personName, strsplit(">", text));
 end
 
