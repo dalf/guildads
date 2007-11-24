@@ -14,7 +14,9 @@
 local usageStats = {};
 local scriptProfile = GetCVar("scriptProfile") == "1"
 local startTime = GetTime()
-local lastTime, lastSentMessages, lastSentBytes, lastReceivedMessages, lastReceivedBytes = 0, 0,0,0,0
+local lastTime = 0
+local lastSentMessages, lastSentBytes, lastReceivedMessages, lastReceivedBytes = 0,0,0,0
+local lastBandwidthOut, lastBandwidthIn = 0,0
 local instantMeasure = false
 
 local getObjectCPUUsage = function(obj, includeSubroutines)
@@ -96,6 +98,7 @@ GuildAds_DebugPlugin = {
 		GuildAds_DebugPlugin.addObjectUsage("GuildAdsDTS", GuildAdsDTS, false, false);
 		if GuildAdsTask.GetOnUpdate then
 			GuildAds_DebugPlugin.addFunctionUsage("GuildAdsTask (onUpdate)", GuildAdsTask:GetOnUpdate(), false);
+			GuildAds_DebugPlugin.addObjectUsage("GuildAdsTask", GuildAdsTask, false);
 		end
 		if SimpleComm_OnUpdate then
 			GuildAds_DebugPlugin.addFunctionUsage("SimpleComm_OnUpdate", SimpleComm_OnUpdate, true);
@@ -144,6 +147,7 @@ GuildAds_DebugPlugin = {
 			colorB = b
 		});		
 	end;
+	
 	-- for accurate result on the GuildAds_DebugPlugin
 	getObjectCPUUsage = getObjectCPUUsage;
 	
@@ -242,6 +246,11 @@ GuildAds_DebugPlugin = {
 			instantSentBytesPerSecond, instantReceivedBytesPerSecond = instantSentBytes / since, instantReceivedBytes / since
 		end
 		
+		local bandwidthIn, bandwidthOut, latency = GetNetStats()
+		local instantBandwidthIn  = (sessionTime*bandwidthIn  - lastTime*lastBandwidthIn) / since
+		local instantBandwidthOut = (sessionTime*bandwidthOut - lastTime*lastBandwidthOut) / since
+		lastBandwidthIn, lastBandwidthOut = bandwidthIn, bandwidthOut
+		
 		lastSentMessages, lastSentBytes, lastReceivedMessages, lastReceivedBytes =
 				sentMessages, sentBytes, receivedMessages, receivedBytes;
 		lastTime = sessionTime
@@ -253,6 +262,16 @@ GuildAds_DebugPlugin = {
 		tooltip:AddLine(string.format("Messages in %i seconds", since), 1, 0.75, 0);
 		tooltip:AddDoubleLine(string.format("Sent: %i messages, %i bytes", instantSentMessages, instantSentBytes), string.format("%.2f bytes/sec ", instantSentBytesPerSecond), 1, 1, 1, 1, 1, 1)
 		tooltip:AddDoubleLine(string.format("Received: %i messages, %i bytes", instantReceivedMessages, instantReceivedBytes), string.format("%.2f bytes/sec", instantReceivedBytesPerSecond), 1, 1, 1, 1, 1, 1)
+		
+		tooltip:AddLine("Network (Instant)", 1, 0.75, 0)
+		tooltip:AddDoubleLine("Bandwidth - out", string.format("%i bytes/sec", instantBandwidthOut*1024), 1, 1, 1, 1, 1, 1)
+		tooltip:AddDoubleLine("Bandwidth - in ", string.format("%i bytes/sec", instantBandwidthIn*1024), 1, 1, 1, 1, 1, 1)
+		
+		tooltip:AddLine("Database", 1, 0.75, 0)
+		
+		local t = GuildAdsComm.hashSearchQueue[1]:Length()  * 17 + GuildAdsComm.hashSearchQueue[2]:Length()  
+		tooltip:AddDoubleLine("Max hash searches left", string.format("%i/288", t), 1, 1, 1, 1, 1, 1) -- 288=17*16+16 or may be 272 =15*17+16+1 ?
+		
 		if not scriptProfile then
 			tooltip:Show();
 			return
