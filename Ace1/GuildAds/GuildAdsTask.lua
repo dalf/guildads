@@ -115,7 +115,7 @@ GuildAdsTask.HeapBubbleUp = HeapBubbleUp
 GuildAdsTask.HeapBubbleDown = HeapBubbleDown
 
 function GuildAdsTask:AddNamedSchedule(name, t, r, count, func, ...)
-	assert(c==nil, "c~=nil not implemented");
+	assert(count==nil, "count~=nil not implemented");
 	self:ScheduleTimer(name, func, t, ...)
 	if r then
 		timers[name].repeating = t
