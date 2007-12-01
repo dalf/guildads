@@ -943,8 +943,6 @@ function SimpleComm_Initialize(
 	SimpleComm_FlagListener = FlagListener
 	SimpleComm_StatusListener = StatusListener
 	
-	SimpleComm_ChatFrame = DEFAULT_CHAT_FRAME
-	
 	-- AFK/DND test for myself (usefull when the UI was reloaded)
 	if SimpleComm_GetFlag(UnitName("player"))==nil then
 		if UnitIsAFK("player") then
@@ -960,7 +958,7 @@ function SimpleComm_Initialize(
 end
 
 function SimpleComm_Join(Channel, Password)
-	GuildAds_ChatDebug(GA_DEBUG_CHANNEL, "[SimpleComm_Join] begin");
+	GuildAds_ChatDebug(GA_DEBUG_CHANNEL, "[SimpleComm_Join] begin(%s)", Channel);
 	
 	-- some sanity check
 	local typePassword = type(Password);
@@ -970,8 +968,9 @@ function SimpleComm_Join(Channel, Password)
 	end
 	
 	-- Init Channel
-	SimpleComm_Channel = Channel;
-	SimpleComm_Password = Password;
+	SimpleComm_Channel = Channel
+	SimpleComm_Password = Password
+	SimpleComm_ChatFrame = DEFAULT_CHAT_FRAME
 	
 	local result = dataChannelLib:OpenChannel("GuildAds", SimpleComm_Channel, SimpleComm_Password, SimpleComm_ChatFrame);
 	

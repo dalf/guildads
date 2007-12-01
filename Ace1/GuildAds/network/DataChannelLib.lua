@@ -190,6 +190,25 @@ local onEvent = function()
 	end
 end
 
+-- getChatFrame
+local function getChatFrame(lookForChannelName) 
+	lookForChannelName = strupper(lookForChannelName)
+	local i=1
+	while getglobal("ChatFrame"..i) ~= nil do
+		local chatFrame = getglobal("ChatFrame"..i)
+		local channelList = chatFrame.channelList
+		if type(channelList)=="table" then
+			for _, channelName in ipairs(channelList) do
+				if strupper(channelName) == lookForChannelName then
+					return chatFrame
+				end
+			end
+		end
+		i = i + 1
+	end
+	return nil
+end
+
 -- Activate a new instance of this library
 function lib:LibActivate(stub, oldLib, oldList)
     local maj, min = self:GetLibraryVersion()
@@ -257,7 +276,7 @@ function lib:OpenChannel(addonName, channelName, password, chatFrame)
 			Addons = {},
 			ID = channelId;
 		}
-		addChannelToChatFrame = chatFrame and true;
+		addChannelToChatFrame = chatFrame and (getChatFrame(normalChannelName)==nil) and true;
 	end
 	
 	-- add the addon
@@ -309,7 +328,7 @@ function lib:OpenChannel(addonName, channelName, password, chatFrame)
 	-- add the channel to chatFrame
 	if addChannelToChatFrame then
 		-- BUG si la chatframe est differente
-		ChatFrame_AddChannel(chatFrame, channelName);
+		ChatFrame_AddChannel(chatFrame, normalChannelName);
 		self.Channels[channelName].ChatFrame = chatFrame;
 	end
 	
