@@ -4,7 +4,7 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 	<Script file="GuildAdsFactionFrame.lua"/>
 	<Include file="GuildAdsFactionFrameTemplates.xml"/>
 		
-	<!-- <frame name="GuildAdsFactionFrame" parent="GuildAdsMainWindowFrame" hidden="true" setAllPoints="true">
+	<!-- <frame name="GuildAdsFactionFrame" parent="GuildAdsMainWindowFrame" hidden="true">
 		<Anchors>
 			<Anchor point="TOPLEFT">
 				<Offset>
@@ -13,7 +13,7 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 			</Anchor>
 		</Anchors> enableMouse="true"  -->
 			
-	<Frame name="GuildAdsFactionFrame" parent="GuildAdsMainWindowFrame" hidden="true" setAllPoints="true">
+	<Frame name="GuildAdsFactionFrame" parent="GuildAdsMainWindowFrame" hidden="true">
 		<Size>
 			<AbsDimension x="500" y="420"/>
 		</Size>

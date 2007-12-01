@@ -3,7 +3,7 @@
 	<Script file="GuildAdsTradeFrame.lua"/>
     <Include file="GuildAdsTradeFrameTemplates.xml"/>
 
-	<Frame name="GuildAdsTradeFrame" parent="GuildAdsMainWindowFrame" hidden="false" setAllPoints="true">
+	<Frame name="GuildAdsTradeFrame" parent="GuildAdsMainWindowFrame" hidden="false">
 		<Anchors>
 			<Anchor point="TOPLEFT">
 				<Offset>
@@ -74,7 +74,7 @@
 				</Scripts>
 			</Button>
 			
-			<Frame name="GuildListAdExchangeListFrame" hidden="false" setAllPoints="true">
+			<Frame name="GuildListAdExchangeListFrame" hidden="false">
 				<Frames>
 					<Button name="GuildAdsTradeColumnHeader1" inherits="GuildAdsTradeColumnHeaderTemplate" text="GUILDADS_TRADE_OBJECT">
 						<Anchors>
@@ -383,7 +383,7 @@
 				</Frames>
 			</Frame>
 
-			<Frame name="GuildListAdMyAdsFrame" hidden="true" setAllPoints="true">
+			<Frame name="GuildListAdMyAdsFrame" hidden="true">
 				<Anchors>
 					<Anchor point="TOPLEFT" relativeTo="GuildAdsMainWindowFrame">
 						<Offset>

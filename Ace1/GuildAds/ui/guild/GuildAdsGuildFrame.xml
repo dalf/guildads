@@ -4,7 +4,7 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 	<Script file="GuildAdsGuildFrame.lua"/>
 	<Include file="GuildAdsGuildFrameTemplates.xml"/>
 	
-    <Frame name="GuildAdsGuildFrame" parent="GuildAdsMainWindowFrame" hidden="true" setAllPoints="true">
+    <Frame name="GuildAdsGuildFrame" parent="GuildAdsMainWindowFrame" hidden="true">
 		<Anchors>
 			<Anchor point="TOPLEFT">
 				<Offset>

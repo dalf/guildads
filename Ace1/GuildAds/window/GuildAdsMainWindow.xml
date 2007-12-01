@@ -221,9 +221,6 @@
 			</Button>
 		</Frames>
 		<Scripts>
-			<OnEscapePressed>
-				this:Hide();
-			</OnEscapePressed>
 			<OnMouseUp>
 				if ( this.isMoving ) then
 					this:StopMovingOrSizing();

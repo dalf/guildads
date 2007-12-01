@@ -4,7 +4,7 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 	<Script file="GuildAdsSkillFrame.lua"/>
 	<Include file="GuildAdsSkillFrameTemplates.xml"/>
 		
-	<Frame name="GuildAdsSkillFrame" parent="GuildAdsMainWindowFrame" hidden="true" setAllPoints="true">
+	<Frame name="GuildAdsSkillFrame" parent="GuildAdsMainWindowFrame" hidden="true">
 		<Anchors>
 			<Anchor point="TOPLEFT">
 				<Offset>
@@ -65,7 +65,7 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 			</Button>
 			
 
-			<Frame name="GuildListAdProfessionListFrame" hidden="false" setAllPoints="true">
+			<Frame name="GuildListAdProfessionListFrame" hidden="false">
 				<Size>
 					<AbsDimension x="296" y="332"/>
 				</Size>
@@ -357,7 +357,7 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 				</Frames>
 			</Frame>
 
-			<Frame name="GuildListAdSkillFrame" hidden="true" setAllPoints="true">
+			<Frame name="GuildListAdSkillFrame" hidden="true">
 				<Anchors>
 					<Anchor point="TOPLEFT" relativeTo="GuildAdsMainWindowFrame">
 						<Offset>

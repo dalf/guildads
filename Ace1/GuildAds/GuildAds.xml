@@ -7,9 +7,6 @@
 			<OnShow>
 				GuildAdsInternalTooltip_ItemReady();
 			</OnShow>
-			<OnClick>
-				GuildAdsITT:Hide();
-			</OnClick>
 		</Scripts>
 	</GameTooltip>
 	
