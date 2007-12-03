@@ -869,7 +869,7 @@ function SimpleComm_SendMessage(who, text)
 		local queueLast = SimpleComm_messageQueueLast
 		text = Encode(text, who==nil)
 		local textLength = text:len()
-		if (textLength + queueLast.length <= maxMessageLength and queueLast.to == who) then
+		if (textLength + queueLast.length + 1 <= maxMessageLength and queueLast.to == who) then
 			if queueLast.text then
 				table.insert(queueLast, queueLast.text);
 				queueLast.text=nil;
@@ -892,11 +892,12 @@ function SimpleComm_SendMessage(who, text)
 				-- take the first characters
 				local tmp = string.sub(text, 1, maxMessageLength);
 				text = string.sub(text, maxMessageLength+1);
+				tmp = SimpleComm_SplitSerialize(packetNumber, text=="", tmp)
 				-- add a packet
 				SimpleComm_messageQueueLast.next = {
 					to = who;
-					text = SimpleComm_SplitSerialize(packetNumber, text=="", tmp);
-					length = text:len();
+					text = tmp;
+					length = tmp:len();
 				};
 				SimpleComm_messageQueueLast = SimpleComm_messageQueueLast.next;
 				-- next packet
