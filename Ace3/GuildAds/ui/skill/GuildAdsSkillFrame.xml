@@ -1,0 +1,381 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
+
+	<Script file="GuildAdsSkillFrame.lua"/>
+	<Include file="GuildAdsSkillFrameTemplates.xml"/>
+		
+	<Frame name="GuildAdsSkillFrame" parent="GuildAdsMainWindowFrame" hidden="true">
+		<Anchors>
+			<Anchor point="TOPLEFT">
+				<Offset>
+					<AbsDimension x="0" y="0"/>
+				</Offset>
+			</Anchor>
+		</Anchors>
+		<!--
+        <Layers>
+				<Layer level="BACKGROUND">
+		
+        <FontString name="Underconstruction" inherits="GameFontNormalSmall" text="Skill tab will be rewrited to be more usefull">
+							<Anchors>
+								<Anchor point="TOPLEFT" relativeTo="GuildAdsMainWindowFrame"  relativePoint="BOTTOMLEFT">
+									<Offset>
+										<AbsDimension x="55" y="70"/>
+									</Offset>
+								</Anchor>
+							</Anchors>
+						</FontString>	
+						</Layer>
+                        
+				</Layers>
+                -->
+		<Frames>
+			<Button name="GuildAds_MySkillTab1" inherits="TabButtonTemplate" text="TRADE_SKILLS" id="1">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsMainWindowFrame">
+						<Offset>
+							<AbsDimension x="70" y="-46"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						PanelTemplates_SelectTab(this);
+						PanelTemplates_TabResize(0);
+						getglobal(this:GetName().."HighlightTexture"):SetWidth(this:GetTextWidth() + 31);
+					</OnLoad>
+					<OnClick>
+						GuildAdsSkill.selectTab(GUILDADSSKILL_TAB_PROFESSION);
+					</OnClick>
+				</Scripts>
+			</Button>
+			<Button name="GuildAds_MySkillTab2" inherits="TabButtonTemplate" text="SKILLS" id="2" hidden="false">
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="GuildAds_MySkillTab1" relativePoint="RIGHT">
+						<Offset>
+							<AbsDimension x="0" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						GuildAdsSkill.selectTab(GUILDADSSKILL_TAB_SKILL);
+					</OnClick>
+				</Scripts>
+			</Button>
+			
+
+			<Frame name="GuildListAdProfessionListFrame" hidden="false">
+				<Size>
+					<AbsDimension x="296" y="332"/>
+				</Size>
+				<Anchors>
+					<Anchor point="TOPLEFT" />
+				</Anchors>
+				<Frames>
+					<Button name="GuildAdsProfessionButton1" inherits="GuildAdsProfessionTemplate" id="1"/>
+					<Button name="GuildAdsProfessionButton2" inherits="GuildAdsProfessionTemplate" id="2"/>
+					<Button name="GuildAdsProfessionButton3" inherits="GuildAdsProfessionTemplate" id="3"/>
+					<Button name="GuildAdsProfessionButton4" inherits="GuildAdsProfessionTemplate" id="4"/>
+					<Button name="GuildAdsProfessionButton5" inherits="GuildAdsProfessionTemplate" id="5"/>
+					<Button name="GuildAdsProfessionButton6" inherits="GuildAdsProfessionTemplate" id="6"/>
+					<Button name="GuildAdsProfessionButton7" inherits="GuildAdsProfessionTemplate" id="7"/>
+					<Button name="GuildAdsProfessionButton8" inherits="GuildAdsProfessionTemplate" id="8"/>
+					<Button name="GuildAdsProfessionButton9" inherits="GuildAdsProfessionTemplate" id="9"/>
+					<Button name="GuildAdsProfessionButton10" inherits="GuildAdsProfessionTemplate" id="10"/>
+					<Button name="GuildAdsProfessionButton11" inherits="GuildAdsProfessionTemplate" id="11"/>
+					<Button name="GuildAdsProfessionButton12" inherits="GuildAdsProfessionTemplate" id="12"/>
+					<Button name="GuildAdsProfessionButton13" inherits="GuildAdsProfessionTemplate" id="13"/>
+					<Button name="GuildAdsProfessionButton14" inherits="GuildAdsProfessionTemplate" id="14"/>
+					<Button name="GuildAdsProfessionButton15" inherits="GuildAdsProfessionTemplate" id="15"/>
+					<Button name="GuildAdsProfessionButton16" inherits="GuildAdsProfessionTemplate" id="16"/>
+					<Button name="GuildAdsProfessionButton17" inherits="GuildAdsProfessionTemplate" id="17"/>
+					<Button name="GuildAdsProfessionButton18" inherits="GuildAdsProfessionTemplate" id="18"/>
+					
+					
+					<Button name="GuildAdsSkillAdButton1" inherits="GuildAdsSkillAdButtonTemplate" id="1">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="GuildAdsMainWindowFrame">
+								<Offset>
+									<AbsDimension x="220" y="-100"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</Button>
+			
+					<Button name="GuildAdsSkillAdButton2" inherits="GuildAdsSkillAdButtonTemplate" id="2">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="GuildAdsSkillAdButton1" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y=""/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</Button>
+					
+					<Button name="GuildAdsSkillAdButton3" inherits="GuildAdsSkillAdButtonTemplate" id="3">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="GuildAdsSkillAdButton2" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</Button>
+					
+					<Button name="GuildAdsSkillAdButton4" inherits="GuildAdsSkillAdButtonTemplate" id="4">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="GuildAdsSkillAdButton3" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</Button>
+					
+					<Button name="GuildAdsSkillAdButton5" inherits="GuildAdsSkillAdButtonTemplate" id="5">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="GuildAdsSkillAdButton4" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</Button>
+					
+					<Button name="GuildAdsSkillAdButton6" inherits="GuildAdsSkillAdButtonTemplate" id="6">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="GuildAdsSkillAdButton5" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</Button>
+					
+					<Button name="GuildAdsSkillAdButton7" inherits="GuildAdsSkillAdButtonTemplate" id="7">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="GuildAdsSkillAdButton6" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</Button>
+					
+					<Button name="GuildAdsSkillAdButton8" inherits="GuildAdsSkillAdButtonTemplate" id="8">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="GuildAdsSkillAdButton7" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</Button>
+					
+					<Button name="GuildAdsSkillAdButton9" inherits="GuildAdsSkillAdButtonTemplate" id="9">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="GuildAdsSkillAdButton8" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</Button>
+					
+					<Button name="GuildAdsSkillAdButton10" inherits="GuildAdsSkillAdButtonTemplate" id="10">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="GuildAdsSkillAdButton9" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</Button>
+					
+					<Button name="GuildAdsSkillAdButton11" inherits="GuildAdsSkillAdButtonTemplate" id="11">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="GuildAdsSkillAdButton10" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</Button>
+					
+					<Button name="GuildAdsSkillAdButton12" inherits="GuildAdsSkillAdButtonTemplate" id="12">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="GuildAdsSkillAdButton11" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</Button>
+					
+					<Button name="GuildAdsSkillAdButton13" inherits="GuildAdsSkillAdButtonTemplate" id="13">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="GuildAdsSkillAdButton12" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</Button>
+					
+					<Button name="GuildAdsSkillAdButton14" inherits="GuildAdsSkillAdButtonTemplate" id="14">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="GuildAdsSkillAdButton13" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</Button>
+					
+					<Button name="GuildAdsSkillAdButton15" inherits="GuildAdsSkillAdButtonTemplate" id="15">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="GuildAdsSkillAdButton14" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</Button>
+					
+					<Button name="GuildAdsSkillAdButton16" inherits="GuildAdsSkillAdButtonTemplate" id="16">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="GuildAdsSkillAdButton15" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</Button>
+					
+					<Button name="GuildAdsSkillAdButton17" inherits="GuildAdsSkillAdButtonTemplate" id="17">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="GuildAdsSkillAdButton16" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</Button>
+					
+					<Button name="GuildAdsSkillAdButton18" inherits="GuildAdsSkillAdButtonTemplate" id="18">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="GuildAdsSkillAdButton17" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</Button>
+					
+					<Button name="GuildAdsSkillAdButton19" inherits="GuildAdsSkillAdButtonTemplate" id="19">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="GuildAdsSkillAdButton18" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</Button>
+					
+					<Button name="GuildAdsSkillAdButton20" inherits="GuildAdsSkillAdButtonTemplate" id="20">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="GuildAdsSkillAdButton19" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</Button>
+					
+					<Button name="GuildAdsSkillAdButton21" inherits="GuildAdsSkillAdButtonTemplate" id="21">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="GuildAdsSkillAdButton20" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+					</Button>
+					
+					<ScrollFrame name="GuildAdsSkillAdScrollFrame" inherits="FauxScrollFrameTemplate">
+						<Size>
+							<AbsDimension x="260" y="353"/>
+						</Size>
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="GuildAdsSkillAdButton1" relativePoint="TOPLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnVerticalScroll>
+								FauxScrollFrame_OnVerticalScroll(GuildAdsSkill.GUILDADS_ADBUTTONSIZEY, GuildAdsSkill.skillButton.updateAll);
+							</OnVerticalScroll>
+						</Scripts>
+					</ScrollFrame>
+					<Button name="GuildAdsSkillRemoveButton" inherits="UIPanelButtonTemplate" text="NONE">
+						<Size>
+							<AbsDimension x="100" y="21"/>
+						</Size>
+						<Anchors>
+							<Anchor point="TOPRIGHT" relativeTo="GuildAdsProfessionButton18" relativePoint="BOTTOMRIGHT">
+								<Offset>
+									<AbsDimension x="20" y="-20"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnClick>
+								GuildAdsSkill.filterBySkillButton.set(nil, false);
+							</OnClick>
+						</Scripts>
+					</Button>
+					<Button name="GuildAdsAllButton" inherits="UIPanelButtonTemplate" text="ALL">
+						<Size>
+							<AbsDimension x="100" y="21"/>
+						</Size>
+						<Anchors>
+							<Anchor point="TOPRIGHT" relativeTo="GuildAdsSkillRemoveButton" relativePoint="TOPLEFT">
+								<Offset>
+									<AbsDimension x="-5" y="0"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnClick>
+								GuildAdsSkill.filterBySkillButton.set(nil, true);
+							</OnClick>
+						</Scripts>
+					</Button>
+				</Frames>
+			</Frame>
+
+			<Frame name="GuildListAdSkillFrame" hidden="true">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsMainWindowFrame">
+						<Offset>
+							<AbsDimension x="0" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Frames>
+					<Button name="GuildAdsSkillTab" inherits="GuildAdsWindowTabTemplate" text="GUILDADS_HEADER_SKILL" />
+				</Frames>
+			</Frame>
+			
+		</Frames>
+		<Scripts>
+			<OnShow>
+				GuildAdsSkill.onShow();
+			</OnShow>
+		</Scripts>
+	</Frame>
+	
+</Ui>

@@ -1,0 +1,212 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
+
+	<Button name="GuildAdsReputationHeaderTemplate" virtual="true">
+		<Size>
+			<AbsDimension x="302" y="13"/>
+		</Size>
+		<Scripts>
+			<OnClick>
+				if (this.isCollapsed) then
+					GuildAdsFaction.filters.ExpandFactionHeader(this.id);
+				else
+					GuildAdsFaction.filters.CollapseFactionHeader(this.id);
+				end
+			</OnClick>
+		</Scripts>
+		<NormalTexture file="Interface\Buttons\UI-MinusButton-UP">
+			<Size>
+				<AbsDimension x="16" y="16"/>
+			</Size>
+			<Anchors>
+				<Anchor point="LEFT">
+					<Offset>
+						<AbsDimension x="3" y="0"/>
+					</Offset>
+				</Anchor>
+			</Anchors>
+		</NormalTexture>
+		<HighlightTexture name="$parentHighlight" file="Interface\Buttons\UI-PlusButton-Hilight" alphaMode="ADD">
+			<Size>
+				<AbsDimension x="16" y="16"/>
+			</Size>
+			<Anchors>
+				<Anchor point="LEFT">
+					<Offset>
+						<AbsDimension x="3" y="0"/>
+					</Offset>
+				</Anchor>
+			</Anchors>
+		</HighlightTexture>
+		<ButtonText name="$parentNormalText">
+			<Size>
+				<AbsDimension x="275" y="12"/>
+			</Size>
+			<Anchors>
+				<Anchor point="LEFT">
+					<Offset>
+						<AbsDimension x="20" y="0"/>
+					</Offset>
+				</Anchor>
+			</Anchors> 
+		</ButtonText>
+		<NormalFont inherits="GameFontNormal" justifyH="LEFT"/>
+		<HighlightFont inherits="GameFontHighlight" justifyH="LEFT"/>
+		<DisabledFont inherits="GameFontHighlight" justifyH="LEFT"/>
+	</Button>
+	<StatusBar name="GuildAdsReputationBarTemplate" virtual="true" drawLayer="BACKGROUND" minValue="0" maxValue="1" defaultValue="1">
+		<Size>
+			<AbsDimension x="137" y="13"/>
+		</Size>
+		<HitRectInsets>
+			<AbsInset left="-126" right="3" top="-2" bottom="-2"/>
+		</HitRectInsets>
+		<Layers>
+			<Layer level="ARTWORK">
+				<Texture name="$parentReputationBarLeft" file="Interface\PaperDollInfoFrame\UI-Character-ReputationBar">
+					<Size>
+						<AbsDimension x="256" y="22"/>
+					</Size>
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset>
+								<AbsDimension x="-126" y="4"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+					<TexCoords left="0" right="1.0" top="0" bottom="0.34375"/>
+				</Texture>
+				<Texture name="$parentReputationBarRight" file="Interface\PaperDollInfoFrame\UI-Character-ReputationBar">
+					<Size>
+						<AbsDimension x="16" y="24"/>
+					</Size>
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeTo="$parentReputationBarLeft" relativePoint="TOPRIGHT">
+							<Offset>
+								<AbsDimension x="0" y="0"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+					<TexCoords left="0" right="0.0625" top="0.34375" bottom="0.71875"/>
+				</Texture>
+				<FontString name="$parentFactionName" inherits="GameFontHighlightSmall" justifyH="LEFT">
+					<Size x="100" y="10"/>
+					<Anchors>
+						<Anchor point="LEFT">
+							<Offset>
+								<AbsDimension x="-119" y="0"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+				<FontString name="$parentFactionStanding" inherits="GameFontHighlightSmall" text="Revered">
+					<Anchors>
+						<Anchor point="CENTER">
+							<Offset>
+								<AbsDimension x="0" y="0"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+			</Layer>
+			<Layer level="OVERLAY">
+				<Texture name="$parentHighlight1" file="Interface\PaperDollInfoFrame\UI-Character-ReputationBar-Highlight" alphaMode="ADD" hidden="true">
+					<Size>
+						<AbsDimension x="256" y="28"/>
+					</Size>
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeTo="$parentReputationBarLeft">
+							<Offset>
+								<AbsDimension x="-2" y="3"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+					<TexCoords left="0" right="1" top="0" bottom="0.4375"/>
+				</Texture>
+				<Texture name="$parentHighlight2" file="Interface\PaperDollInfoFrame\UI-Character-ReputationBar-Highlight" alphaMode="ADD" hidden="true">
+					<Size>
+						<AbsDimension x="17" y="28"/>
+					</Size>
+					<Anchors>
+						<Anchor point="LEFT" relativeTo="$parentHighlight1" relativePoint="RIGHT"/>
+					</Anchors>
+					<TexCoords left="0" right="0.06640625" top="0.4375" bottom="0.875"/>
+				</Texture>
+				<Texture name="$parentCheck" file="Interface\Buttons\UI-CheckBox-Check" hidden="true">
+					<Size>
+						<AbsDimension x="16" y="16"/>
+					</Size>
+					<Anchors>
+						<Anchor point="LEFT" relativeTo="$parentFactionName" relativePoint="RIGHT">
+							<Offset>
+								<AbsDimension x="0" y="0"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</Texture>
+			</Layer>
+		</Layers>
+		<Frames>
+			<Frame name="$parentAtWarCheck" hidden="true">
+				<Size>
+					<AbsDimension x="24" y="22"/>
+				</Size>
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parentReputationBarRight" relativePoint="RIGHT">
+						<Offset>
+							<AbsDimension x="-2" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Layers>
+					<Layer level="BACKGROUND">
+						<Texture file="Interface\PaperDollInfoFrame\UI-Character-ReputationBar">
+							<Size>
+								<AbsDimension x="24" y="22"/>
+							</Size>
+							<Anchors>
+								<Anchor point="TOPLEFT">
+									<Offset>
+										<AbsDimension x="0" y="0"/>
+									</Offset>
+								</Anchor>
+							</Anchors>
+							<TexCoords left="0.0625" right="0.15625" top="0.34375" bottom="0.71875"/>
+						</Texture>
+					</Layer>
+				</Layers>
+				<!-- <Scripts>
+					<OnEnter>
+						GameTooltip:SetOwner(this, "ANCHOR_RIGHT");
+						GameTooltip:SetText(REPUTATION_STATUS_AT_WAR, nil, nil, nil, nil, 1);
+					</OnEnter>
+					<OnLeave>
+						GameTooltip:Hide();
+					</OnLeave>
+				</Scripts> -->
+			</Frame>
+		</Frames>
+		<Scripts>
+			<OnEnter>
+				if (this.tooltip) then
+					getglobal(this:GetName().."FactionStanding"):SetText(this.tooltip);
+				end
+				getglobal(this:GetName().."Highlight1"):Show();
+				getglobal(this:GetName().."Highlight2"):Show();
+			</OnEnter>
+			<OnLeave>
+				getglobal(this:GetName().."FactionStanding"):SetText(this.standingText);
+				--if (GetSelectedFaction() ~= this.id) then
+					getglobal(this:GetName().."Highlight1"):Hide();
+					getglobal(this:GetName().."Highlight2"):Hide();
+				--end
+			</OnLeave>
+			<OnMouseUp>
+				-- ReputationBar_OnClick();
+			</OnMouseUp>
+		</Scripts>
+		<BarTexture file="Interface\PaperDollInfoFrame\UI-Character-Skills-Bar"/>
+		<BarColor r=".25" g=".25" b=".75"/>
+	</StatusBar>
+	
+</Ui>

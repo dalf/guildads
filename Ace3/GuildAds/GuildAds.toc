@@ -1,0 +1,79 @@
+## Interface: 20300
+## Title: GuildAds
+## Author: Zarkan, Fkaï, Galmok
+## Version: 2.1
+## Notes: Guild Ads
+## Notes-frFR: Les annonces de la guilde
+## OptionalDeps: ReagentData,GuildEventManager2
+## DefaultState: Enabled
+## LoadOnDemand: 0
+## SavedVariables: GuildAdsDatabase
+## X-eMail: guildads AT gmail DOT com
+## X-Website: http://guildads.sf.net
+## X-License: GPL v2
+## X-Category: Guild
+lib\Ace1\GAAceDB.lua
+lib\LibStub\LibStub.lua
+lib\AceAddon-3.0\AceAddon-3.0.xml
+lib\CallbackHandler-1.0\CallbackHandler-1.0.xml
+lib\AceEvent-3.0\AceEvent-3.0.xml
+lib\AceConsole-3.0\AceConsole-3.0.xml
+lib\AceGUI-3.0\AceGUI-3.0.xml
+#lib\AceConfig-3.0\AceConfigRegistry-3.0\AceConfigRegistry-3.0.lua
+#lib\AceConfig-3.0\AceConfigCmd-3.0\AceConfigCmd-3.0.lua
+lib\AceConfig-3.0\AceConfig-3.0.xml
+revision.lua
+localization.lua
+localization.de.lua
+localization.fr.lua
+localization.es.lua
+localization.tw.lua
+localization.cn.lua
+localization.kr.lua
+GuildAds.lua
+GuildAdsTask.lua
+GuildAds.xml
+GuildAdsConfig.xml
+data\GuildAdsItem.lua
+data\GuildAdsDataType.lua
+data\GuildAdsFakeDataType.lua
+data\GuildAdsTableDataType.lua
+data\GuildAdsDB.lua
+data\GuildAdsList.lua
+data\GuildAdsHash.lua
+data\datatypes\GuildAdsAdminData.lua
+data\datatypes\GuildAdsMainData.lua
+data\datatypes\GuildAdsSkillData.lua
+data\datatypes\GuildAdsFactionData.lua
+data\datatypes\GuildAdsTradeNeedData.lua
+data\datatypes\GuildAdsTradeOfferData.lua
+data\datatypes\GuildAdsInventoryData.lua
+data\datatypes\GuildAdsTradeSkillData.lua
+data\datatypes\GuildAdsTalentData.lua
+network\DataChannelLib.lua
+network\SimpleComm.lua
+network\GuildAdsCodecs.lua
+network\GuildAdsDTS.lua
+network\GuildAdsComm.lua
+window\GuildAdsWindow.xml
+window\GuildAdsMainWindow.xml
+window\GuildAdsOptionsWindow.xml
+window\GuildAdsInspectWindow.xml
+ui\GuildAdsPlugin.lua
+ui\GuildAdsUITools.lua
+ui\GuildAdsPlayerMenu.lua
+ui\debug\GuildAdsDebug.xml
+ui\channelOptions\GuildAdsChannelOptions.xml
+#ui\adminOptions\GuildAdsAdminOptions.xml
+ui\guild\GuildAdsGuildFrame.xml
+ui\trade\GuildAdsTradeFrame.xml
+ui\trade\GuildAdsTradeOptionsFrame.xml
+ui\trade\GuildAdsShiftClick.xml
+ui\tradeCraft\GuildAdsCraftFrame.xml
+ui\tradeTooltip\GuildAdsTooltip.xml
+ui\skill\GuildAdsSkillFrame.xml
+ui\faction\GuildAdsFactionFrame.xml
+ui\inventory\GuildAdsInventoryFrame.xml
+ui\GEM\GuildAdsGEMEventFrame.xml
+ui\minimapButton\GuildAdsMinimapButton.xml
+ui\Talent\GuildAds_TalentUI.xml

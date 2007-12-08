@@ -1,0 +1,861 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
+
+	<Script file="GuildAdsFactionFrame.lua"/>
+	<Include file="GuildAdsFactionFrameTemplates.xml"/>
+		
+	<!-- <frame name="GuildAdsFactionFrame" parent="GuildAdsMainWindowFrame" hidden="true">
+		<Anchors>
+			<Anchor point="TOPLEFT">
+				<Offset>
+					<AbsDimension x="0" y="0"/>
+				</Offset>
+			</Anchor>
+		</Anchors> enableMouse="true"  -->
+			
+	<Frame name="GuildAdsFactionFrame" parent="GuildAdsMainWindowFrame" hidden="true">
+		<Size>
+			<AbsDimension x="500" y="420"/>
+		</Size>
+		<Anchors>
+			<Anchor point="TOPLEFT">
+				<Offset>
+					<AbsDimension x="0" y="0"/>
+				</Offset>
+			</Anchor>
+		</Anchors>
+		
+		<!-- <HitRectInsets>
+			<AbsInset left="0" right="30" top="0" bottom="75"/>
+		</HitRectInsets>
+		<Layers>
+			<Layer level="BACKGROUND">
+				<Texture file="Interface\PaperDollInfoFrame\UI-Character-General-TopLeft">
+					<Size>
+						<AbsDimension x="256" y="256"/>
+					</Size>
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset>
+								<AbsDimension x="2" y="-1"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</Texture>
+				<Texture file="Interface\PaperDollInfoFrame\UI-Character-General-TopRight">
+					<Size>
+						<AbsDimension x="128" y="256"/>
+					</Size>
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset>
+								<AbsDimension x="258" y="-1"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</Texture>
+				<Texture file="Interface\PaperDollInfoFrame\UI-Character-General-BottomLeft">
+					<Size>
+						<AbsDimension x="256" y="256"/>
+					</Size>
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset>
+								<AbsDimension x="2" y="-257"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</Texture>
+				<Texture file="Interface\PaperDollInfoFrame\UI-Character-General-BottomRight">
+					<Size>
+						<AbsDimension x="128" y="256"/>
+					</Size>
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset>
+								<AbsDimension x="258" y="-257"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</Texture>
+				<FontString name="GuildAdsReputationFrameFactionLabel" inherits="GameFontHighlight" text="FACTION">
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset>
+								<AbsDimension x="70" y="-57"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+				<FontString name="GuildAdsReputationFrameStandingLabel" inherits="GameFontHighlight" text="STANDING">
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset>
+								<AbsDimension x="215" y="-59"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers> -->
+		<Frames>
+			<StatusBar name="GuildAdsReputationBar1" inherits="GuildAdsReputationBarTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT">
+						<Offset>
+							<AbsDimension x="150" y="-86"/>
+							<!-- <AbsDimension x="0" y="0"/> -->
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</StatusBar>
+			<Button  name="GuildAdsReputationHeader1" inherits="GuildAdsReputationHeaderTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsReputationBar1">
+						<Offset>
+							<AbsDimension x="-125" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Button>
+			<StatusBar name="GuildAdsReputationBar2" inherits="GuildAdsReputationBarTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsReputationBar1" relativePoint="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="0" y="-10"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</StatusBar>
+			<Button  name="GuildAdsReputationHeader2" inherits="GuildAdsReputationHeaderTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsReputationBar2">
+						<Offset>
+							<AbsDimension x="-125" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Button>
+			<StatusBar name="GuildAdsReputationBar3" inherits="GuildAdsReputationBarTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsReputationBar2" relativePoint="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="0" y="-10"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</StatusBar>
+			<Button  name="GuildAdsReputationHeader3" inherits="GuildAdsReputationHeaderTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsReputationBar3">
+						<Offset>
+							<AbsDimension x="-125" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Button>
+			<StatusBar name="GuildAdsReputationBar4" inherits="GuildAdsReputationBarTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsReputationBar3" relativePoint="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="0" y="-10"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</StatusBar>
+			<Button  name="GuildAdsReputationHeader4" inherits="GuildAdsReputationHeaderTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsReputationBar4">
+						<Offset>
+							<AbsDimension x="-125" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Button>
+			<StatusBar name="GuildAdsReputationBar5" inherits="GuildAdsReputationBarTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsReputationBar4" relativePoint="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="0" y="-10"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</StatusBar>
+			<Button  name="GuildAdsReputationHeader5" inherits="GuildAdsReputationHeaderTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsReputationBar5">
+						<Offset>
+							<AbsDimension x="-125" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Button>
+			<StatusBar name="GuildAdsReputationBar6" inherits="GuildAdsReputationBarTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsReputationBar5" relativePoint="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="0" y="-10"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</StatusBar>
+			<Button  name="GuildAdsReputationHeader6" inherits="GuildAdsReputationHeaderTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsReputationBar6">
+						<Offset>
+							<AbsDimension x="-125" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Button>
+			<StatusBar name="GuildAdsReputationBar7" inherits="GuildAdsReputationBarTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsReputationBar6" relativePoint="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="0" y="-10"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</StatusBar>
+			<Button  name="GuildAdsReputationHeader7" inherits="GuildAdsReputationHeaderTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsReputationBar7">
+						<Offset>
+							<AbsDimension x="-125" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Button>
+			<StatusBar name="GuildAdsReputationBar8" inherits="GuildAdsReputationBarTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsReputationBar7" relativePoint="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="0" y="-10"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</StatusBar>
+			<Button  name="GuildAdsReputationHeader8" inherits="GuildAdsReputationHeaderTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsReputationBar8">
+						<Offset>
+							<AbsDimension x="-125" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Button>
+			<StatusBar name="GuildAdsReputationBar9" inherits="GuildAdsReputationBarTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsReputationBar8" relativePoint="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="0" y="-10"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</StatusBar>
+			<Button  name="GuildAdsReputationHeader9" inherits="GuildAdsReputationHeaderTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsReputationBar9">
+						<Offset>
+							<AbsDimension x="-125" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Button>
+			<StatusBar name="GuildAdsReputationBar10" inherits="GuildAdsReputationBarTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsReputationBar9" relativePoint="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="0" y="-10"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</StatusBar>
+			<Button  name="GuildAdsReputationHeader10" inherits="GuildAdsReputationHeaderTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsReputationBar10">
+						<Offset>
+							<AbsDimension x="-125" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Button>
+			<StatusBar name="GuildAdsReputationBar11" inherits="GuildAdsReputationBarTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsReputationBar10" relativePoint="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="0" y="-10"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</StatusBar>
+			<Button  name="GuildAdsReputationHeader11" inherits="GuildAdsReputationHeaderTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsReputationBar11">
+						<Offset>
+							<AbsDimension x="-125" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Button>
+			<StatusBar name="GuildAdsReputationBar12" inherits="GuildAdsReputationBarTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsReputationBar11" relativePoint="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="0" y="-10"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</StatusBar>
+			<Button  name="GuildAdsReputationHeader12" inherits="GuildAdsReputationHeaderTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsReputationBar12">
+						<Offset>
+							<AbsDimension x="-125" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Button>
+			<StatusBar name="GuildAdsReputationBar13" inherits="GuildAdsReputationBarTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsReputationBar12" relativePoint="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="0" y="-10"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</StatusBar>
+			<Button  name="GuildAdsReputationHeader13" inherits="GuildAdsReputationHeaderTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsReputationBar13">
+						<Offset>
+							<AbsDimension x="-125" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Button>
+			<StatusBar name="GuildAdsReputationBar14" inherits="GuildAdsReputationBarTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsReputationBar13" relativePoint="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="0" y="-10"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</StatusBar>
+			<Button  name="GuildAdsReputationHeader14" inherits="GuildAdsReputationHeaderTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsReputationBar14">
+						<Offset>
+							<AbsDimension x="-125" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Button>
+			<StatusBar name="GuildAdsReputationBar15" inherits="GuildAdsReputationBarTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsReputationBar14" relativePoint="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="0" y="-10"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</StatusBar>
+			<Button  name="GuildAdsReputationHeader15" inherits="GuildAdsReputationHeaderTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsReputationBar15">
+						<Offset>
+							<AbsDimension x="-125" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Button>
+			<StatusBar name="GuildAdsReputationBar16" inherits="GuildAdsReputationBarTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsReputationBar15" relativePoint="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="0" y="-10"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</StatusBar>
+			<Button  name="GuildAdsReputationHeader16" inherits="GuildAdsReputationHeaderTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsReputationBar16">
+						<Offset>
+							<AbsDimension x="-125" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Button>
+			<StatusBar name="GuildAdsReputationBar17" inherits="GuildAdsReputationBarTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsReputationBar16" relativePoint="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="0" y="-10"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</StatusBar>
+			<Button  name="GuildAdsReputationHeader17" inherits="GuildAdsReputationHeaderTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsReputationBar17">
+						<Offset>
+							<AbsDimension x="-125" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Button>
+			<StatusBar name="GuildAdsReputationBar18" inherits="GuildAdsReputationBarTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsReputationBar17" relativePoint="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="0" y="-10"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</StatusBar>
+			<Button  name="GuildAdsReputationHeader18" inherits="GuildAdsReputationHeaderTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsReputationBar18">
+						<Offset>
+							<AbsDimension x="-125" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Button>
+			<StatusBar name="GuildAdsReputationBar19" inherits="GuildAdsReputationBarTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsReputationBar18" relativePoint="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="0" y="-10"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</StatusBar>
+			<Button  name="GuildAdsReputationHeader19" inherits="GuildAdsReputationHeaderTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsReputationBar19">
+						<Offset>
+							<AbsDimension x="-125" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Button>
+
+			<ScrollFrame name="GuildAdsReputationListScrollFrame" inherits="FauxScrollFrameTemplate">
+				<Size>
+					<AbsDimension x="296" y="434"/>
+				</Size>
+				<Anchors>
+					<!-- <Anchor point="TOPRIGHT"> -->
+					<Anchor point="TOPLEFT">
+						<Offset>
+							<!-- <AbsDimension x="-66" y="-76"/> -->
+							<AbsDimension x="0" y="-80"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnVerticalScroll>
+						FauxScrollFrame_OnVerticalScroll(GuildAdsSkill.GUILDADS_ADBUTTONSIZEY, GuildAdsFaction.factionButton.updateAll);
+					</OnVerticalScroll>
+				</Scripts>
+				<Layers>
+					<Layer level="BACKGROUND">
+						<Texture file="Interface\PaperDollInfoFrame\UI-Character-ScrollBar">
+							<Size>
+								<AbsDimension x="31" y="256"/>
+							</Size>
+							<Anchors>
+								<Anchor point="TOPLEFT" relativePoint="TOPRIGHT">
+									<Offset>
+										<AbsDimension x="-2" y="5"/>
+									</Offset>
+								</Anchor>
+							</Anchors>
+							<TexCoords left="0" right="0.484375" top="0" bottom="1.0"/>
+						</Texture>
+						<Texture file="Interface\PaperDollInfoFrame\UI-Character-ScrollBar">
+							<Size>
+								<!-- <AbsDimension x="31" y="108"/> -->
+								<AbsDimension x="31" y="79"/>
+							</Size>
+							<Anchors>
+								<Anchor point="TOPLEFT" relativePoint="TOPRIGHT">
+									<Offset>
+										<AbsDimension x="-2" y="-251"/>
+									</Offset>
+								</Anchor>
+							</Anchors>
+							<!-- <TexCoords left="0.515625" right="1.0" top="0" bottom="0.421875"/> -->
+							<TexCoords left="0" right="0.484375" top="0.25" bottom="0.55859375"/>
+						</Texture>
+						<Texture file="Interface\PaperDollInfoFrame\UI-Character-ScrollBar">
+							<Size>
+								<AbsDimension x="31" y="108"/>
+							</Size>
+							<Anchors>
+								<Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT">
+									<Offset>
+										<AbsDimension x="-2" y="-4"/>
+									</Offset>
+								</Anchor>
+							</Anchors>
+							<TexCoords left="0.515625" right="1.0" top="0" bottom="0.421875"/>
+						</Texture>
+					</Layer>
+				</Layers>
+			</ScrollFrame>
+			<Button name="GuildAdsFactionNoneButton" inherits="UIPanelButtonTemplate" text="NONE">
+				<Size>
+					<AbsDimension x="100" y="21"/>
+				</Size>
+				<Anchors>
+					<Anchor point="TOPRIGHT" relativeTo="GuildAdsReputationHeader19" relativePoint="BOTTOMRIGHT">
+						<Offset>
+							<AbsDimension x="-60" y="-15"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						GuildAdsFaction.filters.CollapseAllFactionHeaders();
+					</OnClick>
+				</Scripts>
+			</Button>
+			<Button name="GuildAdsFactionAllButton" inherits="UIPanelButtonTemplate" text="ALL">
+				<Size>
+					<AbsDimension x="100" y="21"/>
+				</Size>
+				<Anchors>
+					<Anchor point="TOPRIGHT" relativeTo="GuildAdsFactionNoneButton" relativePoint="TOPLEFT">
+						<Offset>
+							<AbsDimension x="-5" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						GuildAdsFaction.filters.ExpandAllFactionHeaders();
+					</OnClick>
+				</Scripts>
+			</Button>
+			<Frame name="GuildAdsFactionOptionsFrame" inherits="GuildAdsConfig_OptionFrameBoxTemplate" parent="GuildAdsFactionFrame">
+				<Size>
+					<AbsDimension x="200" y="214"/>
+				</Size>
+				<Anchors>
+					<!-- <Anchor point="TOP"> -->
+					<Anchor POINT="TOPLEFT" relativeTo="GuildAdsReputationBar1" relativePoint="TOPRIGHT">
+						<Offset>
+							<AbsDimension x="44" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Layers>
+					<Layer level="ARTWORK">
+						<FontString name="$parentTitleLabel" inherits="GameFontHighlightSmall" text="GUILDADS_FACTION_OPTIONS">
+							<Anchors>
+								<Anchor point="TOP" relativePoint="TOP">
+									<Offset>
+										<AbsDimension x="0" y="-10"/>
+									</Offset>
+								</Anchor>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+				<Frames>
+			
+					<CheckButton name="GuildAds_FactionHideCollapsedCheckButton" inherits="GuildAdsConfig_CheckButton">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="20" y="-25"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Layers>
+							<Layer level="ARTWORK">
+								<FontString name="$parentLabel" inherits="GameFontNormalSmall" text="GUILDADS_FACTION_HIDE_COLLAPSED" >
+									<Anchors>
+										<Anchor point="LEFT" relativePoint="RIGHT">
+											<Offset>
+												<AbsDimension x="5" y="1"/>
+											</Offset>
+										</Anchor>
+									</Anchors>
+								</FontString>
+							</Layer>
+						</Layers>
+						<Scripts>
+							<OnClick>
+								GuildAdsFaction.filters.checkButtonSetProfile(this,"HideCollapsed");
+							</OnClick>
+						</Scripts>
+					</CheckButton>
+					
+					<CheckButton name="GuildAds_FactionOnlyLevel70CheckButton" inherits="GuildAdsConfig_CheckButton">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="GuildAds_FactionHideCollapsedCheckButton" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Layers>
+							<Layer level="ARTWORK">
+								<FontString name="$parentLabel" inherits="GameFontNormalSmall" text="GUILDADS_FACTION_ONLY_LEVEL_70" >
+									<Anchors>
+										<Anchor point="LEFT" relativePoint="RIGHT">
+											<Offset>
+												<AbsDimension x="5" y="1"/>
+											</Offset>
+										</Anchor>
+									</Anchors>
+								</FontString>
+							</Layer>
+						</Layers>
+						<Scripts>
+							<OnClick>
+								GuildAdsFaction.filters.checkButtonSetProfile(this,"OnlyLevel70");
+							</OnClick>
+						</Scripts>
+					</CheckButton>
+					
+					<CheckButton name="GuildAds_FactionShowFactionCheckButton" inherits="GuildAdsConfig_CheckButton">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="GuildAds_FactionOnlyLevel70CheckButton" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="-20" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Layers>
+							<Layer level="ARTWORK">
+								<FontString name="$parentLabel" inherits="GameFontNormalSmall" text="GUILDADS_FACTION_SHOWFACTION">
+									<Anchors>
+										<Anchor point="LEFT" relativePoint="RIGHT">
+											<Offset>
+												<AbsDimension x="5" y="1"/>
+											</Offset>
+										</Anchor>
+									</Anchors>
+								</FontString>
+							</Layer>
+						</Layers>
+						<Scripts>
+							<OnClick>
+								GuildAdsFaction.filters.checkButtonSetProfile(this,"ShowFaction");
+							</OnClick>
+						</Scripts>
+					</CheckButton>
+
+					<CheckButton name="GuildAds_FactionShowFactionForcesCheckButton" inherits="GuildAdsConfig_CheckButton">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="GuildAds_FactionShowFactionCheckButton" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Layers>
+							<Layer level="ARTWORK">
+								<FontString name="$parentLabel" inherits="GameFontNormalSmall" text="GUILDADS_FACTION_SHOWFACTIONFORCES">
+									<Anchors>
+										<Anchor point="LEFT" relativePoint="RIGHT">
+											<Offset>
+												<AbsDimension x="5" y="1"/>
+											</Offset>
+										</Anchor>
+									</Anchors>
+								</FontString>
+							</Layer>
+						</Layers>
+						<Scripts>
+							<OnClick>
+								GuildAdsFaction.filters.checkButtonSetProfile(this,"ShowFactionForces");
+							</OnClick>
+						</Scripts>
+					</CheckButton>
+
+					<CheckButton name="GuildAds_FactionShowOutlandCheckButton" inherits="GuildAdsConfig_CheckButton">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="GuildAds_FactionShowFactionForcesCheckButton" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Layers>
+							<Layer level="ARTWORK">
+								<FontString name="$parentLabel" inherits="GameFontNormalSmall" text="GUILDADS_FACTION_SHOWOUTLAND">
+									<Anchors>
+										<Anchor point="LEFT" relativePoint="RIGHT">
+											<Offset>
+												<AbsDimension x="5" y="1"/>
+											</Offset>
+										</Anchor>
+									</Anchors>
+								</FontString>
+							</Layer>
+						</Layers>
+						<Scripts>
+							<OnClick>
+								GuildAdsFaction.filters.checkButtonSetProfile(this,"ShowOutland");
+							</OnClick>
+						</Scripts>
+					</CheckButton>
+
+					<CheckButton name="GuildAds_FactionShowShattrathCityCheckButton" inherits="GuildAdsConfig_CheckButton">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="GuildAds_FactionShowOutlandCheckButton" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Layers>
+							<Layer level="ARTWORK">
+								<FontString name="$parentLabel" inherits="GameFontNormalSmall" text="GUILDADS_FACTION_SHOWSHATTRATHCITY">
+									<Anchors>
+										<Anchor point="LEFT" relativePoint="RIGHT">
+											<Offset>
+												<AbsDimension x="5" y="1"/>
+											</Offset>
+										</Anchor>
+									</Anchors>
+								</FontString>
+							</Layer>
+						</Layers>
+						<Scripts>
+							<OnClick>
+								GuildAdsFaction.filters.checkButtonSetProfile(this,"ShowShattrathCity");
+							</OnClick>
+						</Scripts>
+					</CheckButton>
+
+					<CheckButton name="GuildAds_FactionShowSteamwheedleCartelCheckButton" inherits="GuildAdsConfig_CheckButton">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="GuildAds_FactionShowShattrathCityCheckButton" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Layers>
+							<Layer level="ARTWORK">
+								<FontString name="$parentLabel" inherits="GameFontNormalSmall" text="GUILDADS_FACTION_SHOWSTEAMWHEEDLECARTEL">
+									<Anchors>
+										<Anchor point="LEFT" relativePoint="RIGHT">
+											<Offset>
+												<AbsDimension x="5" y="1"/>
+											</Offset>
+										</Anchor>
+									</Anchors>
+								</FontString>
+							</Layer>
+						</Layers>
+						<Scripts>
+							<OnClick>
+								GuildAdsFaction.filters.checkButtonSetProfile(this,"ShowSteamwheedleCartel");
+							</OnClick>
+						</Scripts>
+					</CheckButton>
+
+					<CheckButton name="GuildAds_FactionShowOtherCheckButton" inherits="GuildAdsConfig_CheckButton">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="GuildAds_FactionShowSteamwheedleCartelCheckButton" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Layers>
+							<Layer level="ARTWORK">
+								<FontString name="$parentLabel" inherits="GameFontNormalSmall" text="GUILDADS_FACTION_SHOWOTHER">
+									<Anchors>
+										<Anchor point="LEFT" relativePoint="RIGHT">
+											<Offset>
+												<AbsDimension x="5" y="1"/>
+											</Offset>
+										</Anchor>
+									</Anchors>
+								</FontString>
+							</Layer>
+						</Layers>
+						<Scripts>
+							<OnClick>
+								GuildAdsFaction.filters.checkButtonSetProfile(this,"ShowOther");
+							</OnClick>
+						</Scripts>
+					</CheckButton>
+					<!--
+					<CheckButton name="GuildAds_ChatShowNewHaveCheckButton" inherits="GuildAdsConfig_CheckButton">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="GuildAds_ChatShowNewAskCheckButton" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Layers>
+							<Layer level="ARTWORK">
+								<FontString name="$parentLabel" inherits="GameFontNormalSmall" text="GUILDADS_CHAT_SHOW_NEWHAVE">
+									<Anchors>
+										<Anchor point="LEFT" relativePoint="RIGHT">
+											<Offset>
+												<AbsDimension x="5" y="1"/>
+											</Offset>
+										</Anchor>
+									</Anchors>
+								</FontString>
+							</Layer>
+						</Layers>
+						<Scripts>
+							<OnClick>
+								if ( this:GetChecked() ) then
+									GuildAdsTrade.setProfileValue(nil, "ShowNewHave", true);
+									PlaySound("igMainMenuOptionCheckBoxOn");
+								else
+									GuildAdsTrade.setProfileValue(nil, "ShowNewHave", nil);
+									PlaySound("igMainMenuOptionCheckBoxOff");
+								end
+							</OnClick>
+						</Scripts>
+					</CheckButton>
+					-->
+				</Frames>
+				<!-- <Scripts>
+					<OnShow>
+						GuildAdsTrade.onShowOptions();
+					</OnShow>
+				</Scripts> -->
+			</Frame>
+			<!-- <Button name="GuildAdsFactionDettach" inherits="UIPanelButtonTemplate" text="Dettach">
+				<Size>
+					<AbsDimension x="100" y="20"/>
+				</Size>
+				<Anchors>
+					<Anchor point="TOPRIGHT">
+						<Offset>
+							<AbsDimension x="-10" y="30"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Button> -->
+			<Button name="GuildAdsFactionTab" inherits="GuildAdsWindowTabTemplate" text="GUILDADS_HEADER_FACTION" />
+		</Frames>
+		<Scripts>
+			<OnShow>
+				GuildAdsFaction.onShow();
+			</OnShow>
+			<OnMouseWheel>
+				return;
+			</OnMouseWheel>
+		</Scripts>
+	</Frame>
+	
+	
+</Ui>
