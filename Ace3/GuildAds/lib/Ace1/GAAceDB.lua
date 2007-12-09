@@ -1,4 +1,7 @@
--- Class Setup
+-- from AceDB.lua (Ace1)
+
+TRUE = 1
+FALSE = nil
 GAAceDatabase = {}
 
 -- 
