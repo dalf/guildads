@@ -824,7 +824,7 @@ function SimpleComm_SendMessage(who, text)
 				-- take the first characters
 				local tmp = string.sub(text, 1, currentChannel.maxMessageLength);
 				text = string.sub(text, currentChannel.maxMessageLength+1);
-				tmp = SimpleComm_SplitSerialize(packetNumber, text=="", tmp)
+				tmp = splitSerialize(packetNumber, text=="", tmp)
 				-- add a packet
 				currentChannel.outboundQueueLast.next = {
 					to = who;
