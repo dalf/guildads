@@ -8,7 +8,7 @@
 -- Licence: GPL version 2 (General Public License)
 ----------------------------------------------------------------------------------
 
-GuildAdsUITools = {}  -- AceModule:new();
+GuildAdsUITools = {}
 
 GuildAdsUITools.onlineColor = {
 	[true]				= { ["r"] = 1,    ["g"] = 0.86, ["b"] = 0 },
@@ -37,6 +37,25 @@ GuildAdsUITools.invalid   = { ["r"] = 1.0,	["g"] = 0.5, 	["b"] = 0.5 };
 GuildAdsUITools.invalidHex = string.format("|cff%02x%02x%02x", GuildAdsUITools.invalid.r*255, GuildAdsUITools.invalid.g*255, GuildAdsUITools.invalid.b*255);
 
 GuildAdsUITools.MAX_LINE_SIZE = 60;
+
+-- getChatFrame	 
+local function getChatFrame(lookForChannelName)	 
+	lookForChannelName = strupper(lookForChannelName)	 
+	local i=1	 
+	while getglobal("ChatFrame"..i) ~= nil do	 
+		local chatFrame = getglobal("ChatFrame"..i)	 
+	    local channelList = chatFrame.channelList	 
+	    if type(channelList)=="table" then	 
+			for _, channelName in ipairs(channelList) do	 
+				if strupper(channelName) == lookForChannelName then	 
+					return chatFrame	 
+				end	 
+			end	 
+		end	 
+	    i = i + 1	 
+	end	 
+	return nil	 
+end
 
 -- Add a long text to a tooltip : word wrap each line to GuildAdsUITools.MAX_LINE_SIZE char.
 function GuildAdsUITools:TooltipAddText(tooltip, text, r, g, b)
@@ -69,13 +88,14 @@ function GuildAdsUITools:TooltipAddTT(tooltip, color, ref, name, count)
 end
 
 function GuildAdsUITools:AddChatMessage(message)
-	local info = ChatTypeInfo["CHANNEL"..GetChannelName( SimpleComm_Channel )];
-	SimpleComm_ChatFrame:AddMessage(message, info.r, info.g, info.b, info.id);
+	local info = ChatTypeInfo["CHANNEL"..GetChannelName( GuildAds.channelName )]
+	local frame = getChatFrame(GuildAds.channelName) or DEFAULT_CHAT_FRAME
+	frame:AddMessage(message, info.r, info.g, info.b, info.id);
 end
 
 function GuildAdsUITools:AddSystemMessage(message)
 	local info = ChatTypeInfo["SYSTEM"];
-	SimpleComm_ChatFrame:AddMessage(message, info.r, info.g, info.b, info.id);
+	DEFAULT_CHAT_FRAME:AddMessage(message, info.r, info.g, info.b, info.id);
 end
 
 function GuildAdsUITools:HexaToRGBColor(hexaColor)
