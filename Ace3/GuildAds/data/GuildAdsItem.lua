@@ -2,7 +2,7 @@
 --
 -- GuildAdsItem.lua
 --
--- Author: Zarkan, Fkaï of European Ner'zhul (Horde)
+-- Author: Zarkan@Ner'zhul-EU, Fkaï@Ner'zhul-EU, Galmok@Stormrage-EU
 -- URL : http://guildads.sourceforge.net
 -- Email : guildads@gmail.com
 -- Licence: GPL version 2 (General Public License)
@@ -106,7 +106,6 @@ function GuildAdsInternalTooltip_SetItem(itemRef)
 	GuildAdsITT.currentItemRef = itemRef;
 	GuildAdsITT:ClearLines();
 	GuildAdsITT:SetOwner(WorldFrame, "ANCHOR_NONE"); 
-	GuildAdsITT:SetPoint("BOTTOMRIGHT", "UIParent", "BOTTOMRIGHT", -13, 80);
 	
 	GuildAdsITT:SetHyperlink(itemRef);
 	GuildAdsTask:AddNamedSchedule("GuildAdsInternalTooltip_Timeout", 2, nil, nil, GuildAdsInternalTooltip_Timeout);
@@ -115,6 +114,15 @@ end
 function GuildAdsInternalTooltip_Timeout()
 	if next(GuildAdsITT.itemRefs) then
 		GuildAds_ChatDebug(GA_DEBUG_STORAGE, "  - Timeout:"..GuildAdsITT.currentItemRef);
+		
+		if GuildAdsITT.itemRefs[GuildAdsITT.currentItemRef] < 3 then
+			GuildAdsITT.itemRefs[GuildAdsITT.currentItemRef] = (GuildAdsITT.itemRefs[GuildAdsITT.currentItemRef] or 0) + 1;
+		else
+			-- hide tooltip
+            GuildAdsITT.itemRefs[GuildAdsITT.currentItemRef] = nil;
+            GuildAdsITT.count = GuildAdsITT.count-1;
+			GuildAdsITT:Hide();
+		end
 		local itemRef = next(GuildAdsITT.itemRefs);
 		GuildAdsInternalTooltip_SetItem(itemRef);
 	end
@@ -128,10 +136,10 @@ function GuildAdsInternalTooltip_AddItem(itemRef)
 		end
 		if not GuildAdsITT.itemRefs[itemRef] then
 			-- GuildAds_ChatDebug(GA_DEBUG_STORAGE, "AddItem:"..itemRef);
-			GuildAdsITT.itemRefs[itemRef] = true;
+			GuildAdsITT.itemRefs[itemRef] = 1;
 			GuildAdsITT.count = 1 + GuildAdsITT.count;
 			if GuildAdsITT.count == 1 then
-				GuildAdsInternalTooltip_SetItem(itemRef);
+				GuildAdsTask:AddNamedSchedule("GuildAdsInternalTooltip_SetItem", 0.5, nil, nil, GuildAdsInternalTooltip_SetItem, itemRef);
 			end
 		end
 	end
@@ -139,7 +147,7 @@ end
 
 -- patch 2.0.2 : to be call be OnTooltipSetItem handler
 function GuildAdsInternalTooltip_ItemReady()
-	GuildAds_ChatDebug(GA_DEBUG_STORAGE, "  - ItemReady:"..GuildAdsITT.currentItemRef);
+	GuildAds_ChatDebug(GA_DEBUG_STORAGE, "  - ItemReady: %s", GuildAdsITT.currentItemRef);
 	
 	-- GetItemInfo again
 	GuildAds_GetItemInfo(GuildAdsITT.currentItemRef);
