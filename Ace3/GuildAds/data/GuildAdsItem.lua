@@ -124,7 +124,11 @@ function GuildAdsInternalTooltip_Timeout()
 			GuildAdsITT:Hide();
 		end
 		local itemRef = next(GuildAdsITT.itemRefs);
-		GuildAdsInternalTooltip_SetItem(itemRef);
+		if itemRef then
+			GuildAdsInternalTooltip_SetItem(itemRef);
+		else
+			GuildAdsPlugin_OnEvent(GAS_EVENT_ITEMINFOREADY);
+		end
 	end
 end
 
