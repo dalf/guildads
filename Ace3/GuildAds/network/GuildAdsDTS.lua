@@ -252,7 +252,10 @@ function GuildAdsDTS:ReceiveOpenTransaction(transaction, playerName, fromRevisio
 	local currentRevision = self.dataType:getRevision(playerName);
 	if currentRevision<toRevision and currentRevision>=fromRevision then
 		transaction._valid = true;
+		transaction.newKeys = {};		-- tables should come from a table re-use pool
+		transaction.deletedKeys = {};
 	end
+	
 end
 
 function GuildAdsDTS:ReceiveCloseTransaction(transaction)
@@ -265,6 +268,7 @@ function GuildAdsDTS:ReceiveCloseTransaction(transaction)
 			if self.dataType.metaInformations.name=="Admin" then
 				GuildAdsDB.channel[GuildAds.channelName]:deletePlayers();
 			end
+			self.dataType:triggerTransactionReceived(transaction.playerName, transaction.newKeys, transaction.deletedKeys);
 		end
 	end
 end
@@ -273,6 +277,7 @@ function GuildAdsDTS:ReceiveNewRevision(transaction, revision, id, data)
 	if transaction._valid then
 		if id then
 			self.dataType:setRaw(transaction.playerName, id, data, revision);
+			tinsert(transaction.newKeys, id);
 			if revision>transaction.toRevision then
 				GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "|cffff1e00Invalid new revision|r "..tostring(revision).." >"..tostring(transaction.toRevision));
 			end
@@ -285,12 +290,13 @@ end
 
 function GuildAdsDTS:ReceiveOldRevisions(transaction, revisions)
 	if transaction._valid then
-		ga_table_erase(self.deleteTable);
+		--ga_table_erase(self.deleteTable);
+		ga_table_erase(transaction.deletedKeys);
 		
 		-- find which id to delete
 		for id, _, data, revision in self.dataType:iterator(transaction.playerName) do
 			if revision<=transaction.fromRevision and not revisions[revision] then
-				tinsert(self.deleteTable, id);
+				tinsert(transaction.deletedKeys, id);
 			end
 			-- to check integrity after
 			revisions[revision] = nil;
@@ -303,11 +309,11 @@ function GuildAdsDTS:ReceiveOldRevisions(transaction, revisions)
 		end
 		
 		-- delete them
-		for _, id in pairs(self.deleteTable) do
+		for _, id in pairs(transaction.deletedKeys) do
 			self.dataType:setRaw(transaction.playerName, id, nil, nil)
 		end
 		
-		ga_table_erase(self.deleteTable);
+		--ga_table_erase(self.deleteTable);
 	end
 end
 
@@ -315,6 +321,7 @@ function GuildAdsDTS:ReceiveKeys(transaction, keys)
 	if transaction._valid then
 		for key, data in pairs(keys) do
 			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"  - ["..tostring(key).."]="..tostring(data));
+			tinsert(transaction.newKeys, key);
 			self.dataType:setRaw(transaction.playerName, key, data);
 		end
 	end

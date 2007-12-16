@@ -179,6 +179,38 @@ function GuildAdsDataType:unregisterUpdate(obj)
 	end
 end
 
+--[[ triggered when valid transactions are received ]]
+function GuildAdsDataType:triggerTransactionReceived(playerName, newKeys, deletedKeys)
+	if self.transactionReceivedRegistry then
+		GuildAds_ChatDebug(GA_DEBUG_STORAGE, "["..self.metaInformations.name..","..playerName..","..tostring(id).."] triggerTransactionReceived - begin");
+		for obj, method in pairs(self.transactionReceivedRegistry) do
+			if method == true then
+				GuildAds_ChatDebug(GA_DEBUG_STORAGE, "  - function");
+				obj(self, playerName, newKeys, deletedKeys)
+			else
+				if( obj[method] ) then 
+					GuildAds_ChatDebug(GA_DEBUG_STORAGE, "  - method");
+					obj[method](obj, self, playerName, newKeys, deletedKeys);
+				end
+			end
+		end
+		GuildAds_ChatDebug(GA_DEBUG_STORAGE, "["..self.metaInformations.name..","..playerName..","..tostring(id).."] triggerTransactionReceived - end");
+	end
+end
+
+function GuildAdsDataType:registerTransactionReceived(obj, method)
+	if not self.transactionReceivedRegistry then
+		self.transactionReceivedRegistry= {};
+	end
+	self.transactionReceivedRegistry[obj] = method or true;
+end
+
+function GuildAdsDataType:unregisterTransactionReceived(obj)
+	if self.transactionReceivedRegistry then
+		self.transactionReceivedRegistry[obj] = nil;
+	end
+end
+
 --[[ isValid() returns true if the data type is valid ]]
 function GuildAdsDataType:isValid()
     -- Check metainformations

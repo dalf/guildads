@@ -61,6 +61,15 @@ end
 function GuildAdsFakeDataType:unregisterUpdate(obj)
 end
 
+function GuildAdsFakeDataType:triggerTransactionReceived(playerName, newKeys, deletedKeys)
+end
+
+function GuildAdsFakeDataType:registerTransactionReceived(obj, method)
+end
+
+function GuildAdsDataType:unregisterTransactionReceived(obj)
+end
+
 --[[ about version ]]
 -- herited from GuildAdsDataType
 
