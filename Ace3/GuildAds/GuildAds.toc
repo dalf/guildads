@@ -32,7 +32,6 @@ localization.cn.lua
 localization.kr.lua
 GuildAds.lua
 GuildAdsTask.lua
-GuildAds.xml
 GuildAdsConfig.xml
 data\GuildAdsItem.lua
 data\GuildAdsDataType.lua
