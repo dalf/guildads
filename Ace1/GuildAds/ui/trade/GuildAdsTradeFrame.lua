@@ -193,12 +193,16 @@ GuildAdsTrade = {
 		-- Register for events
 		GuildAdsDB.channel[GuildAds.channelName].TradeNeed:registerUpdate(GuildAdsTrade.onDBUpdate);
 		GuildAdsDB.channel[GuildAds.channelName].TradeOffer:registerUpdate(GuildAdsTrade.onDBUpdate);
+		GuildAdsDB.channel[GuildAds.channelName].TradeNeed:registerTransactionReceived(GuildAdsTrade.onReceivedTransaction);
+		GuildAdsDB.channel[GuildAds.channelName].TradeOffer:registerTransactionReceived(GuildAdsTrade.onReceivedTransaction);
 	end;
 	
 	onChannelLeave = function()
 		-- Unregister for events
 		GuildAdsDB.channel[GuildAds.channelName].TradeNeed:unregisterUpdate(GuildAdsTrade.onDBUpdate);
 		GuildAdsDB.channel[GuildAds.channelName].TradeOffer:unregisterUpdate(GuildAdsTrade.onDBUpdate);
+		GuildAdsDB.channel[GuildAds.channelName].TradeNeed:unregisterTransactionReceived(GuildAdsTrade.onReceivedTransaction);
+		GuildAdsDB.channel[GuildAds.channelName].TradeOffer:unregisterTransactionReceived(GuildAdsTrade.onReceivedTransaction);
 	end;
 	
 	onConfigChanged = function(path, key, value)
@@ -228,16 +232,17 @@ GuildAdsTrade = {
 		-- refresh tabs (offer, need, my ads)
 		GuildAdsTrade.data.resetCache();
 		GuildAdsTrade.delayedUpdate();
-		
-		-- 
-		if playerName ~= GuildAds.playerName then
+	end;
+	
+	onReceivedTransaction = function(dataType, playerName, newKeys, deletedKeys)
+		for _, item in pairs(newKeys) do
 			local tochat;
 			local data = dataType:get(playerName, item);
 			if data then
-				if dataType.metaInformations.name=="Need" and GuildAdsTrade.getProfileValue(nil, "ShowNewAsk") then
+				if dataType.metaInformations.name=="TradeNeed" and GuildAdsTrade.getProfileValue(nil, "ShowNewAsk") then
 					tochat = GUILDADS_HEADER_REQUEST..": ";
 				end
-				if dataType.metaInformations.name=="Offer" and GuildAdsTrade.getProfileValue(nil, "ShowNewHave") then
+				if dataType.metaInformations.name=="TradeOffer" and GuildAdsTrade.getProfileValue(nil, "ShowNewHave") then
 					tochat = GUILDADS_HEADER_AVAILABLE..": ";
 				end
 			end
@@ -248,7 +253,8 @@ GuildAdsTrade = {
 				if data.q then
 					tochat = tochat.." x "..data.q;
 				end
-				GuildAdsUITools:AddChatMessage("["..playerName.."]\32"..tochat);
+				GuildAdsMinimapButtonCore.addAlertText("["..playerName.."]\32"..tochat);
+				--GuildAdsUITools:AddChatMessage("["..playerName.."]\32"..tochat);
 			end			
 		end
 	end;

@@ -96,6 +96,9 @@ GuildAds_DebugPlugin = {
 		GuildAds_DebugPlugin.addObjectUsage("Show debug informations", GuildAds_DebugPlugin, false, false);
 		GuildAds_DebugPlugin.addObjectUsage("GuildAdsComm", GuildAdsComm, false, false);
 		GuildAds_DebugPlugin.addObjectUsage("GuildAdsDTS", GuildAdsDTS, false, false);
+		GuildAds_DebugPlugin.addObjectUsage("GuildAdsHash", GuildAdsHash, false, false);
+		GuildAds_DebugPlugin.addObjectUsage("GuildAdsList", GuildAdsList, false, false);
+		
 		if GuildAdsTask.GetOnUpdate then
 			GuildAds_DebugPlugin.addFunctionUsage("GuildAdsTask (onUpdate)", GuildAdsTask:GetOnUpdate(), false);
 			GuildAds_DebugPlugin.addObjectUsage("GuildAdsTask", GuildAdsTask, false);
