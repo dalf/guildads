@@ -229,8 +229,63 @@ GUILDADS_SKILLS	= {
 	[34] = "Varitas"
 };
 
-
-
+-- Reputation
+GUILDADS_FACTIONS = {
+	[1]  = "Darnassus";
+	[2]  = "Exodar";
+	[3]  = "Exiliados de Gnomeregan";
+	[4]  = "Forjaz";
+	[5]  = "Ventormenta";
+	[6] = "Centinelas Ala de Plata";
+	[7] = "Guardia Pico Tormenta";
+	[8] = "Liga de Arathor";
+	[9]  = "Trols Lanza Negra";
+	[10] = "Orgrimmar";
+	[11] = "Ciudad de Lunargenta";
+	[12] = "Cima del Trueno";
+	[13] = "Entrañas";
+	[14] = "Clan Lobo Gélido";
+	[15] = "Los Rapiñadores";
+	[16] = "Escoltas Grito de Guerra";
+	[17] = "Bastión del Honor";
+	[18] = "Thrallmar";
+	[19] = "Kurenai";
+	[20] = "Los Mag'har";
+	[21] = "Expedición Cenarion";
+	[22] = "Esporaggar";
+	[23] = "El Consorcio";
+	[24] = "Ala Abisal";
+	[25] = "Ogri'la";
+	[26] = "Juramorte Lengua de ceniza";
+	[27] = "Bajo Arrabal";
+	[28] = "Guardia del cielo Sha'tari";
+	[29] = "Los Aldor";
+	[30] = "Los Arúspices";
+	[31] = "Los Sha'tar";
+	[32] = "Bahía del Botín";
+	[33] = "Vista Eterna";
+	[34] = "Gadgetzan";
+	[35] = "Trinquete";
+	[36] = "El Alba Argenta";
+	[37] = "Bucaneros Velasangre";
+	[38] = "Linaje de Nozdormu";
+	[39] = "Círculo Cenarion";
+	[40] = "Feria de la Luna Negra";
+	[41] = "Gelkis Clan Centaur";
+	[42] = "Srs. del Agua de Hydraxis";
+	[43] = "Magram Clan Centaur";
+	[44] = "Ravenholdt";
+	[45] = "Shen'dralar";
+	[46] = "Syndicate"; -- to translate
+	[47] = "Hermandad del torio";
+	[48] = "Bastión Fauces de Madera";
+	[49] = "Entrenadores Sable de Invierno"; -- to check
+	[50] = "Tribu Zandalar";
+	[51] = "Vigilantes del tiempo";
+	[52] = "La Escama de las Arenas";
+	[53] = "Tranquillien";
+	[54] = "El Ojo Violeta";
+};
 
 GUILDADSTOOLTIPS_ADS_TITLE = TRADE;
 GUILDADSTOOLTIPS_ADS =  "Te permite ver los anuncios actuales de tus compañeros de GuildAds";
