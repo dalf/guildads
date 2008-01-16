@@ -462,7 +462,7 @@ function GuildAdsDB:Initialize()
 	
 	-- initialize database id
 	self.databaseId = GuildAds.db:get({ }, "DatabaseId");
-	if not self.computerId then
+	if not self.databaseId then
 		self.databaseId = GuildAds.db:set({ }, "DatabaseId", self:CreateDatabaseId());
 	end
 	
