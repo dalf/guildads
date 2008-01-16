@@ -2,28 +2,28 @@ if GetLocale() == "esES" then
 GUILDADS_TITLE			= "GuildAds";
 
 -- Minimap button
-GUILDADS_BUTTON_TIP		= "Click aquí para mostrar/ocultar GuildAds.";
+GUILDADS_BUTTON_TIP		= "Click aqu\195\173 para mostrar/ocultar GuildAds.";
 
 -- Options frame
 GUILDADS_OPTIONS_TITLE		= "Opciones de GuildAds";
-GUILDADS_CHAT_OPTIONS		= "Configuración de chat";
+GUILDADS_CHAT_OPTIONS		= "Configuraci\195\179n de chat";
 GUILDADS_CHAT_USETHIS		= "Usar este canal :";
 GUILDADS_CHAT_CHANNEL		= "Nombre";
 GUILDADS_CHAT_PASSWORD		= "Password";
 GUILDADS_CHAT_COMMAND		= "Comando de barra";
 GUILDADS_CHAT_ALIAS 		= "Alias de Canal";
-GUILDADS_CHAT_SHOW_NEWEVENT	= "Mostrar noticias de 'Eventos'"
-GUILDADS_CHAT_SHOW_NEWASK	= "Mostrar noticias de 'Pedir'";
-GUILDADS_CHAT_SHOW_NEWHAVE	= "Mostrar noticias de 'Ofrecer'";
-GUILDADS_ADS_OPTIONS		= "Configuración de Anuncios";
+GUILDADS_CHAT_SHOW_NEWEVENT	= "Mostrar noticias de \239\191\189Eventos\239\191\189"
+GUILDADS_CHAT_SHOW_NEWASK	= "Mostrar noticias de \239\191\189Pedir\239\191\189";
+GUILDADS_CHAT_SHOW_NEWHAVE	= "Mostrar noticias de \239\191\189Ofrecer\239\191\189";
+GUILDADS_ADS_OPTIONS		= "Configuraci\195\179n de Anuncios";
 GUILDADS_PUBLISH		= "Publicar mis anuncios";
 GUILDADS_VIEWMYADS		= "Mostrar mis anuncios";
 GUILDADS_ICON_OPTIONS		= "Configurar icono del minimapa";
 GUILDADS_ICON			= "Icono del minimapa";
-GUILDADS_ADJUST_ANGLE		= "Ajustar ángulo";
+GUILDADS_ADJUST_ANGLE		= "Ajustar \195\161ngulo";
 GUILDADS_ADJUST_RADIUS		= "Ajustar radio";
 
-GUILDADS_AUTOCHANNELCONFIG	= "Configurar canal automáticamente";
+GUILDADS_AUTOCHANNELCONFIG	= "Configurar canal autom\195\161ticamente";
 GUILDADS_MANUALCHANNELCONFIG	= "Configurar canal manualmente";
 
 GUILDADS_ERROR_NOTINITIALIZED 	= "GuildAds no se ha iniciado."
@@ -50,7 +50,7 @@ GUILDADS_TRADE_NUMBER		= "Num";
 GUILDADS_TRADE_OBJECT		= "Item";
 GUILDADS_TRADE_ACTIVE		= "Activo";
 GUILDADS_TRADE_TYPE		= "Tipo";
-GUILDADS_TRADE_SHIFTCLICKHELP 	= "Para poner un objeto aquí, haz shift+click en él con esta ventana abierta";
+GUILDADS_TRADE_SHIFTCLICKHELP 	= "Para poner un objeto aqu\195\173, haz shift+click en \195\169l con esta ventana abierta";
 
 -- Column headers
 GUILDADS_HEADER_REQUEST		= "Pedir";
@@ -66,7 +66,7 @@ GUILDADS_GUILD_DEGROUP			= "Desagrupar de la cuenta";
 -- Item
 GUILDADS_ITEMS = {
 	everything = "Todod",
-	everythingelse = "Todo lo demás",
+	everythingelse = "Todo lo dem\195\161s",
 	monster = "Loot de monstruo",
 	classReagent = "Materiales de clases",
 	tradeReagent = "Materiales de profesiones",
@@ -93,7 +93,7 @@ GUILDADS_TS_ASKITEMS_TT	= "Modifica el numero de objetos a crear para establecer
 -- Binding
 BINDING_HEADER_GUILDADS	= GUILDADS_TITLE;
 BINDING_NAME_SHOW = "Mostrar GuildAds";
-BINDING_NAME_SHOW_CONFIG = "Mostrar configuración de GuildAds"
+BINDING_NAME_SHOW_CONFIG = "Mostrar configuraci\195\179n de GuildAds"
 
 GUILDADS_CMD = { "/guildads" }
 GUILDADS_CMD_OPTIONS = {
@@ -123,7 +123,7 @@ GUILDADS_CMD_OPTIONS = {
 			},
 			{
 				option = "info",
-				desc = "Muestra información general de debug",
+				desc = "Muestra informaci\195\179n general de debug",
 				method = "DisplayDebugInfo"
 			}
 		}
@@ -134,7 +134,7 @@ GUILDADS_CMD_OPTIONS = {
 		args = {
 			{
 				option = "all",
-				desc = "Reinicias todas las bases de datos excepto información de cuenta",
+				desc = "Reinicias todas las bases de datos excepto informaci\195\179n de cuenta",
 				method = "ResetAll"
 			},
 			{
@@ -144,7 +144,7 @@ GUILDADS_CMD_OPTIONS = {
 			},
 			{
 				option = "others",
-				desc = "Reiniciar toda la información sobre otros jugadores",
+				desc = "Reiniciar toda la informaci\195\179n sobre otros jugadores",
 				method = "ResetOthers"
 			}
 		}
@@ -184,10 +184,10 @@ GUILDADS_RACES_TO_FACTION = {
 -- Class				
 GUILDADS_CLASSES = {
 	[1] = "Guerrero",
-	[2] = "Chamán",
-	[3] = "Paladín",
+	[2] = "Cham\195\161n",
+	[3] = "Palad\195\173n",
 	[4] = "Druida",
-	[5] = "Pícaro",
+	[5] = "P\195\173caro",
 	[6] = "Cazador",
 	[7] = "Brujo",
 	[8] = "Mago",
@@ -197,20 +197,20 @@ GUILDADS_CLASSES = {
 
 -- Skill
 GUILDADS_SKILLS	= {
-	[1]  = "Herbalismo",
-	[2]  = "Minería",
+	[1]  = "Bot\195\161nica",
+	[2]  = "Miner\195\173a",
 	[3]  = "Desollar",
 	[4]  = "Alquimia",
-	[5]  = "Herrería",
-	[6]  = "Ingeniería",
-	[7]  = "Peletería",
-	[8]  = "Sastrería",
+	[5]  = "Herrer\195\173a",
+	[6]  = "Ingenier\195\173a",
+	[7]  = "Peleter\195\173a",
+	[8]  = "Sastrer\195\173a",
 	[9]  = "Encantamiento",
 	[10] = "Pesca",
 	[11] = "Primeros Auxilios",
 	[12] = "Cocina",
-	[13] = "Ganzúa",
-	[14] = "Joyería",
+	[13] = "Ganz\195\186a",
+	[14] = "Joyer\195\173a",
 	
 	[20] = "Armas de puño",
 	[21] = "Dagas",
@@ -244,41 +244,41 @@ GUILDADS_FACTIONS = {
 	[11] = "Ciudad de Lunargenta";
 	[12] = "Cima del Trueno";
 	[13] = "Entrañas";
-	[14] = "Clan Lobo Gélido";
+	[14] = "Clan Lobo G\195\169lido";
 	[15] = "Los Rapiñadores";
 	[16] = "Escoltas Grito de Guerra";
-	[17] = "Bastión del Honor";
+	[17] = "Basti\195\179n del Honor";
 	[18] = "Thrallmar";
 	[19] = "Kurenai";
-	[20] = "Los Mag'har";
-	[21] = "Expedición Cenarion";
+	[20] = "Los Mag\239\191\189har";
+	[21] = "Expedici\195\179n Cenarion";
 	[22] = "Esporaggar";
 	[23] = "El Consorcio";
 	[24] = "Ala Abisal";
-	[25] = "Ogri'la";
+	[25] = "Ogri\239\191\189la";
 	[26] = "Juramorte Lengua de ceniza";
 	[27] = "Bajo Arrabal";
-	[28] = "Guardia del cielo Sha'tari";
+	[28] = "Guardia del cielo Sha\239\191\189tari";
 	[29] = "Los Aldor";
-	[30] = "Los Arúspices";
-	[31] = "Los Sha'tar";
-	[32] = "Bahía del Botín";
+	[30] = "Los Ar\195\186spices";
+	[31] = "Los Sha\239\191\189tar";
+	[32] = "Bah\195\173a del Bot\195\173n";
 	[33] = "Vista Eterna";
 	[34] = "Gadgetzan";
 	[35] = "Trinquete";
 	[36] = "El Alba Argenta";
 	[37] = "Bucaneros Velasangre";
 	[38] = "Linaje de Nozdormu";
-	[39] = "Círculo Cenarion";
+	[39] = "C\195\173rculo Cenarion";
 	[40] = "Feria de la Luna Negra";
 	[41] = "Gelkis Clan Centaur";
 	[42] = "Srs. del Agua de Hydraxis";
 	[43] = "Magram Clan Centaur";
 	[44] = "Ravenholdt";
-	[45] = "Shen'dralar";
+	[45] = "Shen\239\191\189dralar";
 	[46] = "Syndicate"; -- to translate
 	[47] = "Hermandad del torio";
-	[48] = "Bastión Fauces de Madera";
+	[48] = "Basti\195\179n Fauces de Madera";
 	[49] = "Entrenadores Sable de Invierno"; -- to check
 	[50] = "Tribu Zandalar";
 	[51] = "Vigilantes del tiempo";
