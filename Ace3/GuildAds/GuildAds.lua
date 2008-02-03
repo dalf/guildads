@@ -221,19 +221,19 @@ function GuildAds:ShowACL()
 	GuildAdsDBChannel:ShowACL();
 end
 
-function GuildAds:DenyPlayerGuild(id)
+function GuildAds:DenyPlayerGuild(_,id)
 	GuildAdsDBChannel:DenyPlayerGuild(id);
 end
 
-function GuildAds:AllowPlayerGuild(id)
+function GuildAds:AllowPlayerGuild(_,id)
 	GuildAdsDBChannel:AllowPlayerGuild(id);
 end
 
-function GuildAds:RemoveFromACL(id)
+function GuildAds:RemoveFromACL(_,id)
 	GuildAdsDBChannel:RemoveFromACL(id);
 end
 
-function GuildAds:CheckACL(id)
+function GuildAds:CheckACL(_,id)
 	GuildAdsDBChannel:CheckACL(id);
 end
 
@@ -418,30 +418,30 @@ GuildAds.options = {
 				deny = {
 					name = "deny",
 					desc = "Deny player or @guild access (deletes player data)",
-					type = "execute",
+					type = "input",
 					handler = GuildAds,
-					func = "DenyPlayerGuild"
+					set = "DenyPlayerGuild"
 				},
 				allow = {
 					name = "allow",
 					desc = "Allow player or @guild access (deletes player data)",
-					type = "execute",
+					type = "input",
 					handler = GuildAds,
-					func = "AllowPlayerGuild"
+					set = "AllowPlayerGuild"
 				},
 				remove = {
 					name = "remove",
 					desc = "Remove player or @guild from access control list",
-					type = "execute",
+					type = "input",
 					handler = GuildAds,
-					func = "RemoveFromACL"
+					set = "RemoveFromACL"
 				},
 				allowed = {
 					name = "allowed",
 					desc = "Checks if a player is allowed access",
-					type = "execute",
+					type = "input",
 					handler = GuildAds,
-					func = "CheckACL"
+					set = "CheckACL"
 				}	
 			}
 		},
