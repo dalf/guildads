@@ -170,6 +170,21 @@ GuildAdsComm = GuildAds:NewModule("GuildAdsComm", {
 		MoveToken				= 5			-- delay to wait before actually moving the token
 	},
 	
+	stats = {
+		Tick					= 0,
+		RevisionSearch 			= 0,
+		HashSearch				= {},
+		Transaction				= 0,
+		TokenProblem			= 0,
+		Join					= 0,
+		Leave					= 0,
+		Timeout					= {},
+		TransactionPerDatabase	= {
+			count = {},
+			db = {}
+		}
+	},
+	
 	-- to check the token
 	state = "Init",
 	stateTime = 0,
@@ -414,6 +429,7 @@ end
 --------------------------------------------------------------------------------
 function GuildAdsComm:SetOnlineStatus(playerName, status)
 	if status then
+		self.stats.Join = self.stats.Join + 1
 		-- change to online
 		if (not self.playerTree[playerName]) then
 			table.insert(self.playerList, playerName);
@@ -426,6 +442,7 @@ function GuildAdsComm:SetOnlineStatus(playerName, status)
 			GuildAdsPlugin_OnEvent(GAS_EVENT_ONLINE, playerName, true);
 		end
 	else
+		self.stats.Leave = self.stats.Leave + 1
 		-- change to offline
 		if (self.playerTree[playerName]) then
 			self.playerTree[playerName] = nil;
@@ -464,6 +481,7 @@ end
 
 function GuildAdsComm:CheckTimeout(state, stateTime)
 	if state==self.state and stateTime==self.stateTime then
+		self.stats.Timeout[state] = (self.stats.Timeout[state] or 0) + 1
 		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "Timeout for state: %s", state);
 		-- move token to the next 
 		local newToken = 1;
@@ -526,6 +544,7 @@ end
 -- 
 --------------------------------------------------------------------------------
 function GuildAdsComm:Tick()
+	self.stats.Tick = self.stats.Tick + 1
 	if  #self.playerList>1 then
 		if self.playerList[self.token]==GuildAds.playerName then
 			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "Tick: I have the token");
@@ -737,7 +756,7 @@ function GuildAdsComm:ReceiveMeta(channelName, personName, revision, revisionStr
 	-- warn the player if there is new version.
 	if revision and self.latestRevision and revision>self.latestRevision then
 		self.latestRevision = revision;
-		GuildAds.cmd:msg("There is a newer version of GuildAds available: "..tostring(revisionString));
+		GuildAds:Print("There is a newer version of GuildAds available: "..tostring(revisionString));
 	end
 	if personName ~= GuildAds.playerName then
 		-- Add this player to the current channel
@@ -774,6 +793,7 @@ function GuildAdsComm:ReceiveHashSearch(channelName, personName, path, hashSeque
 	local lasttoken=(self.playerTree[personName] or { i=1 }).i;
 	if self.token~=lasttoken then
 		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "GuildAdsComm:ReceiveHashSearch TOKEN MISMATCH: Should be %i, but %i is sending.",self.token, lasttoken );
+		self.stats.TokenProblem = self.stats.TokenProblem + 1
 	end
 	self.token=(self.playerTree[personName] or { i=1 }).i; -- the last to send a hash search. Used to get clients back on track
 end
@@ -785,6 +805,10 @@ end
 
 function GuildAdsComm:ReceiveHashSearchResult(channelName, personName, path, hashChanged, who, amount)
 	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "ReceiveHashSearchResult(%s, %i) = %s", path, hashChanged, who, amount);
+	
+	local depth = (path=="" and 0) or select("#", strsplit(",",path))
+	-- local pathTable=GuildAdsHash:stringToPath(path); local depth=#pathTable;
+	self.stats.HashSearch[depth] = (self.stats.HashSearch[depth] or 0) + 1
 	
 	GuildAdsHash:ReceiveHashSearchResult(path, hashChanged, who, amount, self.DTS);
 	
@@ -818,6 +842,7 @@ function GuildAdsComm:ReceiveSearch(channelName, personName, dataTypeName, playe
 	local lasttoken=(self.playerTree[personName] or { i=1 }).i;
 	if self.token~=lasttoken then
 		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "GuildAdsComm:ReceiveSearch TOKEN MISMATCH: Should be %i, but %i is sending.",self.token, lasttoken );
+		self.stats.TokenProblem = self.stats.TokenProblem + 1
 	end
 	self.token=(self.playerTree[personName] or { i=1 }).i;
 	-- removing my own queued search for the same datatype/player
@@ -833,6 +858,8 @@ end
 function GuildAdsComm:ReceiveSearchResult(channelName, personName, dataTypeName, playerName, who, toRevision, fromRevision)
 	assert(fromRevision<=toRevision, "fromRevsion>toRevision");
 	
+	self.stats.RevisionSearch = self.stats.RevisionSearch + 1
+	
 	local DTS = self.DTS[dataTypeName];
 	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "ReceiveSearchResult(%s, %s) = %s (%i->%i)", tostring(DTS), playerName, who, fromRevision, toRevision);
 	-- parse message
@@ -846,6 +873,17 @@ function GuildAdsComm:ReceiveSearchResult(channelName, personName, dataTypeName,
 end
 
 function GuildAdsComm:ReceiveOpenTransaction(channelName, personName, dataTypeName, playerName, fromRevision, toRevision, version)
+	self.stats.Transaction = self.stats.Transaction + 1
+	local databaseId = self.playerMeta[personName].databaseId
+	local statsPerDB = self.stats.TransactionPerDatabase
+	statsPerDB.changed = true
+	if statsPerDB.count[databaseId] then
+		statsPerDB.count[databaseId] = statsPerDB.count[databaseId] + 1
+	else
+		statsPerDB.count[databaseId] = 1
+		table.insert(statsPerDB.db, { databaseId, personName })
+	end
+	
 	local DTS = self.DTS[dataTypeName];
 	if personName~=GuildAds.playerName then
 		if self.transactions[personName] then
