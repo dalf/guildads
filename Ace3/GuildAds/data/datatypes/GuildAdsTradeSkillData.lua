@@ -8,6 +8,14 @@
 -- Licence: GPL version 2 (General Public License)
 ----------------------------------------------------------------------------------
 
+--[[
+	Implementation problem : 
+		an item can't craft be two two different recipes.
+		if this is the case (as for small primatic shard, item:22448), each time the player opens the craft/trade frame,
+		the datatype is updated
+	For now, the revision updates are avoided : an item is set only one time for the craft frame; but only recipe is stored.
+]]
+
 GuildAdsTradeSkillDataType = GuildAdsTableDataType:new({
 	metaInformations = {
 		name = "TradeSkill",
@@ -60,7 +68,8 @@ function GuildAdsTradeSkillDataType:onEventSpecial()
 		_, kind = GetCraftInfo(i);
 		if (kind ~= "header") then
 			item = GetCraftItemLink(i);
-			minMade, maxMade = GetTradeSkillNumMade(i);
+			minMade, maxMade = GetCraftNumMade(i);
+			-- cooldown = GetCraftCooldown(i);
 			itemRecipe = GetCraftRecipeLink(i);
 			if item then
 				_, item = GuildAds_ExplodeItemRef(item);
@@ -72,7 +81,8 @@ function GuildAdsTradeSkillDataType:onEventSpecial()
 						q=q.."-"..tostring(maxMade);
 					end
 				end
-				if not (t[item] and t[item].e and t[item].q) then  -- q will proabbly be nil for most items...
+				-- if not(t[item] and skillId==t[item].s and itemRecipe==t[item].e and q==t[item].q) then
+				if not(t[item]) then
 					self:set(GuildAds.playerName, item, { s=skillId, e=itemRecipe, q=q });
 				end
 			end
@@ -94,12 +104,14 @@ function GuildAdsTradeSkillDataType:onEvent()
 			itemRecipe = GetTradeSkillRecipeLink(i);
 			if item then
 				_, item = GuildAds_ExplodeItemRef(item);
-				colddown = GetTradeSkillCooldown(i);
-				if colddown then
-					colddown = colddown / 60 + GuildAdsDB:GetCurrentTime();
+				-- don't share cooldown, causes too much update
+				--[[
+				cooldown = GetTradeSkillCooldown(i) 
+				if cooldown then
+					cooldown = cooldown / 60 + GuildAdsDB:GetCurrentTime();
 				end;
+				]]
 				_, itemRecipe = GuildAds_ExplodeItemRef(itemRecipe);
-				--if not (t[item] and t[item].cd==colddown) then
 				q=nil;
 				if minMade~=1 or maxMade~=1 then
 					q=tostring(minMade);
@@ -107,8 +119,10 @@ function GuildAdsTradeSkillDataType:onEvent()
 						q=q.."-"..tostring(maxMade);
 					end
 				end
-				if not (t[item] and t[item].e and t[item].q) then
-					self:set(GuildAds.playerName, item, { cd = colddown, s=skillId, e=itemRecipe, q=q });
+				
+				-- if not (t[item] and t[item].e and t[item].q) then
+				if not (t[item]) then
+					self:set(GuildAds.playerName, item, { s=skillId, e=itemRecipe, q=q });
 				end
 			end
 		end
@@ -268,8 +282,6 @@ end
 function GuildAdsTradeSkillDataType:set(author, id, info)
 	local craft = self.profile:getRaw(author).craft;
 	if info then
-		-- don't share cooldown (causes to much update, needs a rework)
-		--if craft[id]==nil or info.s ~= craft[id].s or info.cd ~= craft[id].cd or info.e ~= craft[id].e or into.q ~= craft[id].q then
 		if craft[id]==nil or info.s ~= craft[id].s or info.e ~= craft[id].e or info.q ~= craft[id].q then
 			craft._u = 1 + (craft._u or 0);
 			info._u = craft._u;
