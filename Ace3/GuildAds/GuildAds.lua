@@ -37,6 +37,9 @@ end
 -- GuildAds addon
 -- 
 ---------------------------------------------------------------------------------
+local ccmd = assert(LibStub("AceConfigCmd-3.0"))
+local creg = assert(LibStub("AceConfigRegistry-3.0"))
+
 GuildAds = LibStub("AceAddon-3.0"):NewAddon("GuildAds", "AceEvent-3.0", "AceConsole-3.0")
 GuildAds.channelName = nil
 GuildAds.channelPassword = nil
@@ -49,9 +52,8 @@ GuildAds.db = GAAceDatabase:new("GuildAdsDatabase")
 function GuildAds:OnInitialize()
 	GuildAds_ChatDebug(GA_DEBUG_GLOBAL,"[GuildAds:Initialize] begin");
 	
-	local creg = LibStub("AceConfigRegistry-3.0")
-	local ccmd = LibStub("AceConfigCmd-3.0") 
-	creg:RegisterOptionsTable("GuildAds", self.options)
+	-- Initialize options
+	creg:RegisterOptionsTable("GuildAds", GuildAds.options)
 	ccmd:CreateChatCommand("guildads", "GuildAds")
 	
 	-- Initialize GuildAdsTask
@@ -334,21 +336,21 @@ GuildAds.options = {
 	args = {
 		toggle = {
 			name = "toggle",
-			desc = BINDING_NAME_SHOW,
+			desc = GUILDADS_OPTIONS["toggle"],
 			type = "execute",
 			handler = GuildAds,
 			func = "ToggleMainWindow"
 		},
 		options = {
 			name = "options",
-			desc = BINDING_NAME_SHOW_CONFIG,
+			desc = GUILDADS_OPTIONS["options"],
 			type = "execute",
 			handler = GuildAds,
 			func = "ToggleOptionsWindow"
 		},
 		debug = {
 			name = "debug",
-			desc = "Toggle on or off debug message",
+			desc = GUILDADS_OPTIONS["debug"],
 			type = "toggle",
 			handler = GuildAds,
 			get  = "DebugToggleGet",
@@ -356,33 +358,33 @@ GuildAds.options = {
 		},
 		info = {
 			name = "info",
-			desc = "Show general debug information",
+			desc = GUILDADS_OPTIONS["info"],
 			type = "execute",
 			handler = GuildAds,
 			func = "DebugDisplayInfo"
 		},
 		reset = {
 			name = "reset",
-			desc = "Reset database",
+			desc = GUILDADS_OPTIONS["reset"],
 			type = "group",
 			args = {
 				all = {
 					name = "all",
-					desc = "Reset all database except account information",
+					desc = GUILDADS_OPTIONS["reset all"],
 					type = "execute",
 					handler = GuildAds,
 					func = "ResetAll"
 				},
 				channel = {
 					name = "channel",
-					desc = "Reset all channel datas",
+					desc = GUILDADS_OPTIONS["reset channel"],
 					type = "execute",
 					handler = GuildAds,
 					func = "ResetChannel"
 				},
 				others = {
 					name = "others",
-					desc = "Reset all informations about others players",
+					desc = GUILDADS_OPTIONS["reset others"],
 					type = "execute",
 					handler = GuildAds,
 					func = "ResetOthers"
@@ -391,12 +393,12 @@ GuildAds.options = {
 		},
 		clean = {
 			name = "clean",
-			desc = "Clean the database",
+			desc = GUILDADS_OPTIONS["clean"],
 			type = "group",
 			args = {
 				other = {
 					name = "other",
-					desc = "Delete tradeskill information from other accounts that doesn't have recipe links",
+					desc = GUILDADS_OPTIONS["clean other"],
 					type = "execute",
 					handler = GuildAds,
 					func = "CleanOther"
@@ -405,40 +407,40 @@ GuildAds.options = {
 		},
 		admin = {
 			name = "admin",
-			desc = "Handle access control of players and guilds",
+			desc = GUILDADS_OPTIONS["admin"],
 			type = "group",
 			args = {
 				show = {
 					name = "show",
-					desc = "Show current access control list",
+					desc = GUILDADS_OPTIONS["admin show"],
 					type = "execute",
 					handler = GuildAds,
 					func = "ShowACL"
 				},
 				deny = {
 					name = "deny",
-					desc = "Deny player or @guild access (deletes player data)",
+					desc = GUILDADS_OPTIONS["admin deny"],
 					type = "input",
 					handler = GuildAds,
 					set = "DenyPlayerGuild"
 				},
 				allow = {
 					name = "allow",
-					desc = "Allow player or @guild access (deletes player data)",
+					desc = GUILDADS_OPTIONS["admin allow"],
 					type = "input",
 					handler = GuildAds,
 					set = "AllowPlayerGuild"
 				},
 				remove = {
 					name = "remove",
-					desc = "Remove player or @guild from access control list",
+					desc = GUILDADS_OPTIONS["admin remove"],
 					type = "input",
 					handler = GuildAds,
 					set = "RemoveFromACL"
 				},
 				allowed = {
 					name = "allowed",
-					desc = "Checks if a player is allowed access",
+					desc = GUILDADS_OPTIONS["admin allowed"],
 					type = "input",
 					handler = GuildAds,
 					set = "CheckACL"

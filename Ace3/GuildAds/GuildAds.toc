@@ -19,8 +19,6 @@ lib\CallbackHandler-1.0\CallbackHandler-1.0.xml
 lib\AceEvent-3.0\AceEvent-3.0.xml
 lib\AceConsole-3.0\AceConsole-3.0.xml
 lib\AceGUI-3.0\AceGUI-3.0.xml
-#lib\AceConfig-3.0\AceConfigRegistry-3.0\AceConfigRegistry-3.0.lua
-#lib\AceConfig-3.0\AceConfigCmd-3.0\AceConfigCmd-3.0.lua
 lib\AceConfig-3.0\AceConfig-3.0.xml
 revision.lua
 localization.lua

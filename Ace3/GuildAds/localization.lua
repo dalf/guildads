@@ -265,3 +265,22 @@ GUILDADS_FACTION_SHOWOUTLAND = "Show Outland";
 GUILDADS_FACTION_SHOWSHATTRATHCITY = "Show Shattrath City";
 GUILDADS_FACTION_SHOWSTEAMWHEEDLECARTEL = "Show Steamwheedle Cartel";
 GUILDADS_FACTION_SHOWOTHER = "Show Other";
+
+GUILDADS_OPTIONS = {
+	["toggle"]			= BINDING_NAME_SHOW;
+	["options"]			= BINDING_NAME_SHOW_CONFIG;
+	["debug"] 			= "Toggle on or off debug message";
+	["info"] 			= "Show general debug information";
+	["reset"]			= "Reset database";
+	["reset all"]		= "Reset all database except account information";
+	["reset channel"]	= "Reset all channel datas";
+	["reset others"]	= "Reset all informations about others players";
+	["clean"]			= "Clean the database";
+	["clean other"]		= "Delete tradeskill information from other accounts that doesn't have recipe links";
+	["admin"]			= "Handle access control of players and guilds";
+	["admin show"]		= "Show current access control list";
+	["admin deny"]		= "Deny player or @guild access (deletes player data)";
+	["admin allow"]		= "Allow player or @guild access (deletes player data)";
+	["admin remove"]	= "Remove player or @guild from access control list";
+	["admin allowed"]	= "Checks if a player is allowed access";
+}

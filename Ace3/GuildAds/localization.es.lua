@@ -95,60 +95,23 @@ BINDING_HEADER_GUILDADS	= GUILDADS_TITLE;
 BINDING_NAME_SHOW = "Mostrar GuildAds";
 BINDING_NAME_SHOW_CONFIG = "Mostrar configuraci\195\179n de GuildAds"
 
-GUILDADS_CMD = { "/guildads" }
-GUILDADS_CMD_OPTIONS = {
-	{
-		option = "toggle",
-		desc = BINDING_NAME_SHOW,
-		method = "ToggleMainWindow"
-	},
-	{
-		option = "options",
-		desc = BINDING_NAME_SHOW_CONFIG,
-		method = "ToggleOptionsWindow"
-	},
-	{
-		option = "debug",
-		desc = "Activa/desactiva mensajes de debug",
-		args = {
-			{
-				option = "on",
-				desc = "Activa mensajes de debug",
-				method = "ToggleDebugOn",
-			},
-			{
-				option = "off",
-				desc = "Desactiva mensajes de debug",
-				method = "ToggleDebugOff"
-			},
-			{
-				option = "info",
-				desc = "Muestra informaci\195\179n general de debug",
-				method = "DisplayDebugInfo"
-			}
-		}
-	},
-	{
-		option = "reset",
-		desc = "Reiniciar base de datos",
-		args = {
-			{
-				option = "all",
-				desc = "Reinicias todas las bases de datos excepto informaci\195\179n de cuenta",
-				method = "ResetAll"
-			},
-			{
-				option = "channel",
-				desc = "Reiniciar datos de canales",
-				method = "ResetChannel"
-			},
-			{
-				option = "others",
-				desc = "Reiniciar toda la informaci\195\179n sobre otros jugadores",
-				method = "ResetOthers"
-			}
-		}
-	},
+GUILDADS_OPTIONS = {
+	["toggle"]			= BINDING_NAME_SHOW;
+	["options"]			= BINDING_NAME_SHOW_CONFIG;
+	["debug"] 			= "Activa/desactiva mensajes de debug";
+	["info"] 			= "Muestra informaci\195\179n general de debug";
+	["reset"]			= "Reiniciar base de datos";
+	["reset all"]		= "Reinicias todas las bases de datos excepto informaci\195\179n de cuenta";
+	["reset channel"]	= "Reiniciar datos de canales";
+	["reset others"]	= "Reiniciar toda la informaci\195\179n sobre otros jugadores";
+	["clean"]			= "Clean the database";
+	["clean other"]		= "Delete tradeskill information from other accounts that doesn't have recipe links";
+	["admin"]			= "Handle access control of players and guilds";
+	["admin show"]		= "Show current access control list";
+	["admin deny"]		= "Deny player or @guild access (deletes player data)";
+	["admin allow"]		= "Allow player or @guild access (deletes player data)";
+	["admin remove"]	= "Remove player or @guild from access control list";
+	["admin allowed"]	= "Checks if a player is allowed access";
 }
 
 -- Race
