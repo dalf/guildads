@@ -142,17 +142,20 @@ do
 		end
 		_ItemInfo[itemRef].soulbound = false;
 		_ItemInfo[itemRef].questitem = false;
-		-- TODO : add ITEM_CREATED_BY, ITEM_CLASSES_ALLOWED, ITEM_CONJURED, ITEM_RACES_ALLOWED, ITEM_STARTS_QUEST
+		-- TODO : add ITEM_CREATED_BY
+		-- ITEM_CLASSES_ALLOWED, ITEM_RACES_ALLOWED, ITEM_REQ_REPUTATION, ITEM_REQ_SKILL, LOCKED_WITH_SPELL_KNOWN, ITEM_MIN_SKILL, 
 		for idx = 2, 5 do
 			local ttext = _G["GuildAdsITTTextLeft"..idx];
 			if(ttext and ttext:GetText() ~= nil) then
 				local textLeft = ttext:GetText();
 				if textLeft==ITEM_BIND_ON_PICKUP or textLeft==ITEM_SOULBOUND then
 					_ItemInfo[itemRef].soulbound = true;
-				elseif textLeft==ITEM_BIND_QUEST then
+				elseif textLeft==ITEM_BIND_QUEST or textLeft==ITEM_STARTS_QUEST then
 					_ItemInfo[itemRef].questitem = true;
 				elseif textLeft==ITEM_SPELL_KNOWN then
 					_ItemInfo[itemRef].spellKnown = true;
+				elseif textLeft==ITEM_CONJURED then
+					_ItemInfo[itemRef].conjured = true;
 				end
 			end
 		end
