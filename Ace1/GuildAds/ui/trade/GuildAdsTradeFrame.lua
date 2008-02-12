@@ -249,7 +249,11 @@ GuildAdsTrade = {
 			if (tochat ~= nil) then
 				local info = GuildAds_ItemInfo[item] or {};
 				local _, _, _, hex = GuildAds_GetItemQualityColor(info.quality or 1)
-				tochat = tochat .. hex.."|H"..item.."|h["..info.name.."]|r";
+				if info.name then
+					tochat = tochat .. hex.."|H"..item.."|h["..info.name.."]|r";
+				else
+					tochat = tochat .. item;
+				end
 				if data.q then
 					tochat = tochat.." x "..data.q;
 				end
