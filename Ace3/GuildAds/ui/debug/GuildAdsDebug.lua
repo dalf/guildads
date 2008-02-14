@@ -43,6 +43,13 @@ local getStatColor = function(main, includeSub, included)
 	return r, g, b
 end
 
+local predicateDB = function(db1, db2)
+	local count = GuildAdsComm.stats.TransactionPerDatabase.count
+	local c1 = db1 and db1[1] and count[db1[1]] or 0
+	local c2 = db2 and db2[1] and count[db2[1]] or 0
+	return c1>c2
+end
+
 GuildAds_DebugPlugin = {
 	metaInformations = { 
 		name = "Debug",
@@ -274,6 +281,44 @@ GuildAds_DebugPlugin = {
 		
 		local t = GuildAdsComm.hashSearchQueue[1]:Length()  * 17 + GuildAdsComm.hashSearchQueue[2]:Length()  
 		tooltip:AddDoubleLine("Max hash searches left", string.format("%i/288", t), 1, 1, 1, 1, 1, 1) -- 288=17*16+16 or may be 272 =15*17+16+1 ?
+		
+		local gacs = GuildAdsComm.stats
+		tooltip:AddLine("GuildAdsComm", 1, 0.75, 0)
+		tooltip:AddDoubleLine("Tick", gacs.Tick, 								1, 1, 1, 1, 1, 1)
+		tooltip:AddDoubleLine("Level 0 hash search", gacs.HashSearch[0], 		0.5, 1, 1, 0.5, 1, 1)
+		tooltip:AddDoubleLine("Level 1 hash search", gacs.HashSearch[1], 		1, 1, 1, 1, 1, 1)
+		tooltip:AddDoubleLine("Level 2 hash search", gacs.HashSearch[2], 		0.5, 1, 1, 0.5, 1, 1)
+		tooltip:AddDoubleLine("Revision search", gacs.RevisionSearch, 			1, 1, 1, 1, 1, 1)
+		tooltip:AddDoubleLine("Transaction", gacs.Transaction, 					0.5, 1, 1, 0.5, 1, 1)
+		tooltip:AddDoubleLine("Join", gacs.Join, 								0.5, 1, 1, 0.5, 1, 1)
+		tooltip:AddDoubleLine("Leave", gacs.Leave, 								1, 1, 1, 1, 1, 1)
+		tooltip:AddDoubleLine("Token problem", gacs.TokenProblem, 				0.5, 1, 1, 0.5, 1, 1)
+		
+		local odd = true
+		local r, g, b
+		for name, count in pairs(gacs.Timeout) do
+			if odd then
+				r, g, b = 0.5, 1, 1
+			else
+				r, g , b = 1, 1, 1
+			end
+			odd = not odd
+			tooltip:AddDoubleLine("Timeout "..name, count, 		r, g, b)
+		end
+		local statsPerDB = gacs.TransactionPerDatabase
+		if #statsPerDB.db > 0 then
+			if statsPerDB.changed then
+				table.sort(statsPerDB.db, predicateDB)
+				statsPerDB.changed = nil
+			end
+			local tmp = "Transactions send by "
+			local n = math.min(#statsPerDB.db, 5)
+			for i=1,n,1 do
+				local db = statsPerDB.db[i]
+				tmp = tmp..string.format("%s (%i), ", db[2], statsPerDB.count[db[1]])
+			end
+			tooltip:AddLine(tmp, 1, 1, 1)
+		end
 		
 		if not scriptProfile then
 			tooltip:Show();
