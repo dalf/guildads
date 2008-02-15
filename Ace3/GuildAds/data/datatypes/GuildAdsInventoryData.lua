@@ -33,7 +33,7 @@ AceEvent:Embed(GuildAdsInventoryDataType)
 
 function GuildAdsInventoryDataType:Initialize()
 	playerInventory = self:getTableForPlayer(GuildAds.playerName);
-	self:onEvent();
+	GuildAdsTask:AddNamedSchedule("GuildAdsInventoryDataTypeInit", 7, nil, nil, self.onEvent, self)
 	self:RegisterEvent("UNIT_INVENTORY_CHANGED");
 	self:RegisterEvent("PLAYER_ENTERING_WORLD");
 	self:RegisterEvent("PLAYER_LEAVING_WORLD");

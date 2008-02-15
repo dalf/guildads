@@ -40,7 +40,11 @@ GuildAdsMainDataType = GuildAdsTableDataType:new({
 local AceEvent = LibStub("AceEvent-3.0")
 AceEvent:Embed(GuildAdsMainDataType)
 
-function GuildAdsMainDataType:Initialize()
+function GuildAdsMainDataType:Initialize()	
+	GuildAdsTask:AddNamedSchedule("GuildAdsMainDataTypeInit", 7.5, nil, nil, self.onInitialize, self)
+end
+
+function GuildAdsMainDataType:onInitialize()
 	self:set(GuildAds.playerName, self.Level, UnitLevel("player"));
 	self:set(GuildAds.playerName, self.Race, self:getRaceIdFromName(UnitRace("player")));
 	self:set(GuildAds.playerName, self.Class, self:getClassIdFromName(UnitClass("player")));
