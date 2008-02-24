@@ -370,7 +370,7 @@ GuildAdsSkill = {
 		
 		update = function(button, selected, info)
 			local buttonName= button:GetName();
-			local ownerColor = GuildAdsUITools.onlineColor[GuildAdsComm:IsOnLine(info.p)];
+			local ownerColor = GuildAdsUITools:GetPlayerColor(info.p);
 
 			local ownerField = buttonName.."Owner";
 			local skillBar = buttonName.."SkillBar";
@@ -378,7 +378,7 @@ GuildAdsSkill = {
 			local skillRank = skillBar.."SkillRank";
 			
 			getglobal(ownerField):SetText(info.p);
-			getglobal(ownerField):SetTextColor(ownerColor["r"], ownerColor["g"], ownerColor["b"]);
+			getglobal(ownerField):SetTextColor(ownerColor.r, ownerColor.g, ownerColor.b);
 			getglobal(skillName):SetText(GuildAdsSkillDataType:getNameFromId(info.i));
 			
 			if (info.v) then

@@ -383,16 +383,7 @@ GuildAdsFaction = {
 							local factionName = getglobal("GuildAdsReputationBar"..i.."FactionName");
 							factionName:SetText(linear[j].p); -- playername
 							
-							local online = GuildAdsGuild.isOnline(linear[j].p);
-							local ocolor, lcolor;
-							local account = GuildAdsDB.profile.Main:get(linear[j].p, GuildAdsDB.profile.Main.Account);
-							if online then
-								ocolor = GuildAdsUITools.onlineColor[online];
-								lcolor = GuildAdsUITools.white;
-							else
-								ocolor = GuildAdsUITools.accountOnlineColor[GuildAdsGuild.isAccountOnline(account)];
-								lcolor = ocolor;
-							end
+							local ocolor = GuildAdsUITools:GetPlayerColor(linear[j].p)
 							factionName:SetTextColor(ocolor.r, ocolor.g, ocolor.b);
 							
 							-- Normalize values

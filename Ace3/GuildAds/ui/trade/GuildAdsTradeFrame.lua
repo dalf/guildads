@@ -154,6 +154,7 @@ GuildAdsTrade = {
 			UIDropDownMenu_Initialize( GuildAds_Filter_ZoneDropDown, GuildAdsTrade.ItemFilter.init);
 			UIDropDownMenu_SetText(FILTER, GuildAds_Filter_ZoneDropDown);
 			UIDropDownMenu_SetWidth(100,  GuildAds_Filter_ZoneDropDown);
+			GuildAds_Filter_ZoneDropDown:Show();
 		else
 			GuildAds_Filter_ZoneDropDown:Hide();
 		end
@@ -780,18 +781,26 @@ GuildAdsTrade = {
 			
 			-- online/offline highlight
 			if type(playerName)=="string" then
-				ownerColor = GuildAdsUITools.onlineColor[GuildAdsComm:IsOnLine(playerName)];
+				ownerColor = GuildAdsUITools:GetPlayerColor(playerName)
 				getglobal(ownerField):SetText(playerName);
 			else
 				ga_table_erase(GuildAdsTrade.exchangeButton.t);
-				local online;
-				local atLeastOneOnline;
+				local online, accountOnline, atLeastOneOnline, atLeastOneOnlineAccount;
 				for _, name in pairs(playerName) do
 					online = GuildAdsComm:IsOnLine(name);
-					atLeastOneOnline = atLeastOneOnline or online;
-					tinsert(GuildAdsTrade.exchangeButton.t, GuildAdsUITools.onlineColorHex[online]..name.."|r");
+					accountOnline = GuildAdsUITools:IsAccountOnline(name)
+					atLeastOneOnline = atLeastOneOnline or online
+					atLeastOneOnlineAccount = atLeastOneOnlineAccount or accountOnline
+					local _, c = GuildAdsUITools:GetPlayerColor(name)
+					tinsert(GuildAdsTrade.exchangeButton.t, c..name.."|r")
 				end
-				ownerColor = GuildAdsUITools.onlineColor[atLeastOneOnline];
+				if atLeastOneOnline then
+					ownerColor = GuildAdsUITools.onlineColor[true]
+				elseif atLeastOneOnlineAccount then
+					ownerColor = GuildAdsUITools.accountOnlineColor[true]
+				else
+					ownerColor = GuildAdsUITools.onlineColor[false]
+				end
 				getglobal(ownerField):SetText(table.concat(GuildAdsTrade.exchangeButton.t, ", "));
 			end
 			getglobal(ownerField):SetTextColor(ownerColor.r, ownerColor.g, ownerColor.b);
@@ -1153,6 +1162,11 @@ GuildAdsTrade = {
 				if oa~=ob then
 					return oa and not ob;
 				end
+				oa = GuildAdsUITools:IsAccountOnline(a);
+				ob = GuildAdsUITools:IsAccountOnline(b);
+				if oa~=ob then
+					return oa and not ob;
+				end				
 				return a<b;
 			end;
 		
@@ -1197,6 +1211,20 @@ GuildAdsTrade = {
 			owner = function(a, b)
 				if a.p and b.p then
 					if type(a.p)=="table" then
+						-- take the first on the list (player online, account online, offline)
+						local ap = a.p[1]
+						local bp = b.p[1]
+						-- compare the online status on the first player
+						local oa = 	(GuildAdsComm:IsOnLine(ap) and 2) or 
+									(GuildAdsUITools:IsAccountOnline(ap) and 1) or
+									0
+						local ob = 	(GuildAdsComm:IsOnLine(bp) and 2) or 
+									(GuildAdsUITools:IsAccountOnline(bp) and 1) or
+									0
+						if oa~=ob then
+							return oa<ob
+						end
+						-- compare by name
 						local ap = table.concat(a.p,", ");	-- BUG : string/table problem
 						local bp = table.concat(b.p,", ");
 						if ap<bp then
@@ -1263,14 +1291,15 @@ GuildAdsTrade = {
 		};
 	
 		predicate = function(a, b)
+			local sortData = GuildAdsTrade.sortData
 			-- nil references are always less than
-			local result = GuildAdsTrade.sortData.byNilAA(a, b);
+			local result = sortData.byNilAA(a, b);
 			if result~=nil then
 				return result;
 			end
 			
-			result = GuildAdsTrade.sortData.predicateFunctions[GuildAdsTrade.sortData.current](a, b);
-			result = GuildAdsTrade.sortData.wayFunctions[GuildAdsTrade.sortData.currentWay[GuildAdsTrade.sortData.current]](result);
+			result = sortData.predicateFunctions[sortData.current](a, b);
+			result = sortData.wayFunctions[sortData.currentWay[sortData.current]](result);
 			
 			if result ~= nil then
 				return result;
@@ -1495,7 +1524,7 @@ GuildAdsTrade = {
 		end;
 		
 		addPlayer = function(playerName)
-			local online = GuildAdsComm:IsOnLine(playerName);
+			local color = GuildAdsUITools:GetPlayerColor(playerName);
 			local info = { };
 			info.text =  playerName;
 			info.notCheckable = 1;
@@ -1503,9 +1532,9 @@ GuildAdsTrade = {
 			info.hasArrow = 1;
 			info.func = ToggleDropDownMenu;
 			info.arg1 = 2;
-			info.textR = GuildAdsUITools.onlineColor[online].r;
-			info.textG = GuildAdsUITools.onlineColor[online].g;
-			info.textB = GuildAdsUITools.onlineColor[online].b;
+			info.textR = color.r;
+			info.textG = color.g;
+			info.textB = color.b;
 			if GuildAdsTrade.contextMenu.currentItem then
 				local item = GuildAdsTradeSkillDataType:get(playerName,GuildAdsTrade.contextMenu.currentItem);
 				if item and not item.e then
@@ -1528,86 +1557,7 @@ GuildAdsTrade = {
 					end
 				end
 			else
-				GuildAdsPlayerMenu.header(UIDROPDOWNMENU_MENU_VALUE, level);
-				GuildAdsPlayerMenu.menus(UIDROPDOWNMENU_MENU_VALUE, level);
-				GuildAdsPlayerMenu.footer(UIDROPDOWNMENU_MENU_VALUE, level);
-			end
-			if false then
-            info = { };
-		local online = GuildAdsComm:IsOnLine(UIDROPDOWNMENU_MENU_VALUE);
-		
-		info = { };
-		info.text =  UIDROPDOWNMENU_MENU_VALUE;
-		info.notCheckable = 1;
-		info.textR = GuildAdsUITools.onlineColor[online].r;
-		info.textG = GuildAdsUITools.onlineColor[online].g;
-		info.textB = GuildAdsUITools.onlineColor[online].b;
-		UIDropDownMenu_AddButton(info, level);
-        
-		info = { };
-		info.text =  WHISPER_MESSAGE;
-		info.notCheckable = 1;
-		info.value = UIDROPDOWNMENU_MENU_VALUE;
-		info.func = GuildAdsPlayerMenu.whisper;
-		UIDropDownMenu_AddButton(info, level);
-
-		info = { };
-		info.text =  INSPECT;
-		info.notCheckable = 1;
-		info.value = UIDROPDOWNMENU_MENU_VALUE;
-		if GuildAdsInspectWindow then
-			info.func = GuildAdsPlayerMenu.inspect;
-		else
---~ 			info.func = GuildAdsPlayerMenu.inspectDefault;
-		end
-		UIDropDownMenu_AddButton(info, level);
-
-
-		info = { };
-		info.text =  CHAT_INVITE_SEND;
-		info.notCheckable = 1;
-		info.value = UIDROPDOWNMENU_MENU_VALUE;
-		info.func = GuildAdsPlayerMenu.invite;
-		UIDropDownMenu_AddButton(info, level);
-		
---~ 		info = { };
---~ 		info.text =  TEXT(TRADE);
---~ 		info.notCheckable = 1;
---~ 		info.value = owner;
---~ 		info.func = GuildAdsPlayerMenu.trade;
---~ 		UIDropDownMenu_AddButton(info, level);
---~ 		
---~ 		info = { };
---~ 		info.text =  TEXT(FOLLOW);
---~ 		info.notCheckable = 1;
---~ 		info.value = owner;
---~ 		info.func = GuildAdsPlayerMenu.follow;
---~ 		UIDropDownMenu_AddButton(info, level);
-	
-		info = { };
-		info.text =  WHO;
-		info.notCheckable = 1;
-		info.value = UIDROPDOWNMENU_MENU_VALUE;
-		info.func = GuildAdsPlayerMenu.who;
-		UIDropDownMenu_AddButton(info, level);
-
-		info = { };
-		info.text = CANCEL;
-		info.notCheckable = 1;
-		info.func = GuildAdsPlayerMenu.cancel;
-		UIDropDownMenu_AddButton(info, level);
---~ 				local info = {};
---~ 				info.text = "Joueur"..UIDROPDOWNMENU_MENU_VALUE;
---~ 				info.notCheckable = 1;
---~ 				UIDropDownMenu_AddButton(info, 2);
---~                 GuildAdsGuildContextMenu.initialize = GuildAdsGuild.contextMenu.initialize;
---~ 			    GuildAdsGuildContextMenu.displayMode = "MENU";
---~                 UIDropDownMenu_AddButton(GuildAdsGuildContextMenu, 2);
---~                GuildAdsPlayerMenu.initialize(UIDROPDOWNMENU_MENU_VALUE, 2);
---~                 HideDropDownMenu(1);
---~                 GuildAdsGuildContextMenu.name = "Title";
---~                 GuildAdsGuildContextMenu.owner = owner;
---~                 ToggleDropDownMenu(1, nil, GuildAdsGuildContextMenu, "cursor");
+				GuildAdsPlayerMenu.initialize(UIDROPDOWNMENU_MENU_VALUE, level);
 			end
 		end
 	};
@@ -1847,10 +1797,6 @@ GuildAdsTrade = {
 	
 	
 };
-
-
-
-
 
 ---------------------------------------------------------------------------------
 --

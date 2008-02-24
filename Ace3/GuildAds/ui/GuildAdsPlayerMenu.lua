@@ -2,33 +2,59 @@ local currentLevel;
 
 GuildAdsPlayerMenu = {
 
-	initialize = function(owner, level)
-		GuildAdsPlayerMenu.header(owner, level);
-		GuildAdsPlayerMenu.menus(owner, level);
-		GuildAdsPlayerMenu.footer(owner, level);
+	initialize = function(playerName, level)
+		local isOnline = GuildAdsComm:IsOnLine(playerName)
+		local onlinePlayerName = GuildAdsUITools:IsAccountOnline(playerName)
+		
+		GuildAdsPlayerMenu.header(playerName, level)
+		GuildAdsPlayerMenu.menus(playerName, level, isOnline)
+		
+		if isOnline or not onlinePlayerName then
+			GuildAdsPlayerMenu.footer(playerName, level)
+		else
+			GuildAdsPlayerMenu.empty(playerName, level)
+			GuildAdsPlayerMenu.header(onlinePlayerName, level)
+			GuildAdsPlayerMenu.menus(onlinePlayerName, level, true)
+			GuildAdsPlayerMenu.footer(onlinePlayerName, level)
+		end
+		
+	end;
+	
+	empty = function(owner, level)
+		info = { };
+		info.text =  "";
+		info.notClickable = 1;
+		info.notCheckable = 1;
+		UIDropDownMenu_AddButton(info, level);		
 	end;
 	
 	header = function(owner, level)
 		currentLevel = level;
-		local online = GuildAdsComm:IsOnLine(owner);
+		local color = GuildAdsUITools:GetPlayerColor(owner)
 		
 		info = { };
 		info.text =  owner;
 		info.notCheckable = 1;
-		info.textR = GuildAdsUITools.onlineColor[online].r;
-		info.textG = GuildAdsUITools.onlineColor[online].g;
-		info.textB = GuildAdsUITools.onlineColor[online].b;
+		info.textR = color.r;
+		info.textG = color.g;
+		info.textB = color.b;
 		UIDropDownMenu_AddButton(info, level);
 	end;
 	
-	menus = function(owner, level)
+	menus = function(owner, level, online)
 		currentLevel = level;
-		info = { };
-		info.text =  WHISPER_MESSAGE;
-		info.notCheckable = 1;
-		info.value = owner;
-		info.func = GuildAdsPlayerMenu.whisper;
-		UIDropDownMenu_AddButton(info, level);
+		if online == nil then
+			online = true
+		end
+		
+		if online then
+			info = { };
+			info.text =  WHISPER_MESSAGE;
+			info.notCheckable = 1;
+			info.value = owner;
+			info.func = GuildAdsPlayerMenu.whisper;
+			UIDropDownMenu_AddButton(info, level);
+		end
 
 		if GuildAdsInspectWindow then
 			info = { };
@@ -39,19 +65,21 @@ GuildAdsPlayerMenu = {
 			UIDropDownMenu_AddButton(info, level);
 		end
 
-		info = { };
-		info.text =  CHAT_INVITE_SEND;
-		info.notCheckable = 1;
-		info.value = owner;
-		info.func = GuildAdsPlayerMenu.invite;
-		UIDropDownMenu_AddButton(info, level);
+		if online then
+			info = { };
+			info.text =  CHAT_INVITE_SEND;
+			info.notCheckable = 1;
+			info.value = owner;
+			info.func = GuildAdsPlayerMenu.invite;
+			UIDropDownMenu_AddButton(info, level);
 	
-		info = { };
-		info.text =  WHO;
-		info.notCheckable = 1;
-		info.value = owner;
-		info.func = GuildAdsPlayerMenu.who;
-		UIDropDownMenu_AddButton(info, level);
+			info = { };
+			info.text =  WHO;
+			info.notCheckable = 1;
+			info.value = owner;
+			info.func = GuildAdsPlayerMenu.who;
+			UIDropDownMenu_AddButton(info, level);
+		end
 	end;
 	
 	footer = function(owner, level)

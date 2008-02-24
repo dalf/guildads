@@ -104,3 +104,42 @@ function GuildAdsUITools:HexaToRGBColor(hexaColor)
 	local blue = tonumber(strsub(hexaColor, 7, 8), 16) / 255;
 	return red, green, blue;
 end
+
+local accountOnline = {}
+local playerOnline = {}
+
+function GuildAdsUITools:IsAccountOnline(playerName)
+	local account = GuildAdsDB.profile.Main:get(playerName, GuildAdsDB.profile.Main.Account) or playerName
+	return accountOnline[account]
+end
+
+function GuildAdsUITools:GetPlayerColor(playerName)
+	if playerOnline[playerName] then
+		return self.onlineColor[true], self.onlineColorHex[true]
+	else 
+		local account = GuildAdsDB.profile.Main:get(playerName, GuildAdsDB.profile.Main.Account) or playerName
+		if accountOnline[account] then
+			return self.accountOnlineColor[true], self.accountOnlineColorHex[true]
+		else
+			return self.onlineColor[false], self.onlineColorHex[false]
+		end
+	end
+end
+
+local pluginForAccount = {
+
+	metaInformations = { 
+		name = "AccountLogger",
+        guildadsCompatible = 276,
+		ui = {
+		}
+	};
+
+	onOnline = function(playerName, status)
+		local account = GuildAdsDB.profile.Main:get(playerName, GuildAdsDB.profile.Main.Account) or playerName;
+		playerOnline[playerName] = status and true or nil
+		accountOnline[account] = status and playerName or nil
+	end;
+		
+}
+GuildAdsPlugin.UIregister(pluginForAccount);

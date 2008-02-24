@@ -996,7 +996,7 @@
 	
 	<Frame name="GuildAdsTradeFilterFrame" parent="GuildAdsTradeFrame" enableMouse="true" hidden="false" >
 		<Size>
-			<AbsDimension x="200" y="450"/>
+			<AbsDimension x="200" y="480"/>
 		</Size>
 		<Anchors>
 			<Anchor point="TOPLEFT" relativeTo="GuildAdsMainWindowFrame" relativePoint="TOPRIGHT" >
@@ -1009,7 +1009,7 @@
 			<Layer level="BACKGROUND">
 				<Texture file="Interface\QuestFrame\UI-Quest-TopRight">
 					<Size>
-							<AbsDimension x="200" y="200"/>
+							<AbsDimension x="200" y="250"/>
 					</Size>
 					<Anchors>
 						<Anchor point="TOPLEFT" relativeTo="GuildAdsTradeFilterFrame" >
@@ -1027,7 +1027,7 @@
 					<Anchors>
 						<Anchor point="TOPLEFT" relativeTo="GuildAdsTradeFilterFrame" >
 							<Offset>
-								<AbsDimension x="0" y="-200"/>
+								<AbsDimension x="0" y="-230"/>
 							</Offset>
 						</Anchor>
 					</Anchors>
@@ -1264,7 +1264,7 @@
 				<Anchors>
 					<Anchor point="TOPRIGHT" relativeTo="GuildAds_DateFilter" >
 						<Offset>
-							<AbsDimension x="-5" y="-60"/>
+							<AbsDimension x="-110" y="-60"/>
 						</Offset>
 					</Anchor>
 				</Anchors>
