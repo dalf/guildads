@@ -1,3 +1,13 @@
+﻿----------------------------------------------------------------------------------
+--
+-- localization.de.lua
+--
+-- Authors: T-Base, Gobaresch, Graurock, Cloudernia
+-- URL : http://guildads.sourceforge.net
+-- Email : guildads@gmail.com
+-- Licence: GPL version 2 (General Public License)
+----------------------------------------------------------------------------------
+
 if ( GetLocale() == "deDE" ) then
 
 GUILDADS_TITLE = "GuildAds";
@@ -152,7 +162,7 @@ GUILDADS_SKILLS = {
 	[29] = "St\195\164be",
 	[30] = "Wurfwaffen",
 	[31] = "Schusswaffen",
-	[32] = "B\195\182gen",
+	[32] = "Bogen",
 	[33] = "Armbr\195\188ste",
 	[34] = "Zauberst\195\164be"
 };
@@ -174,7 +184,7 @@ GUILDADS_FACTIONS = {
 	[3]  = "Gnomeregangnome";
 	[4]  = "Eisenschmiede";
 	[5]  = "Sturmwind";
-	[6]  = "Schildwachen der Silberschwingen";
+	[6]  = "Silberschwingen"; -- Alliance -PvP
 	[7]  = "Sturmlanzengarde";
 	[8]  = "Der Bund von Arathor";
 	[9]  = "Darkspear Trolls"; -- Horde
@@ -182,10 +192,10 @@ GUILDADS_FACTIONS = {
 	[11] = "Silbermond Stadt";
 	[12] = "Thunder Bluff";
 	[13] = "Unterstadt";
-	[14] = "Frostwolf Clan";
+	[14] = "Frostwolf Clan"; -- Horde - PvP
 	[15] = "The Defilers";
 	[16] = "Warsong Outriders";
-	[17] = "Honor Hold"; -- Outland
+	[17] = "Ehrenfeste"; -- Outland
 	[18] = "Thrallmar";
 	[19] = "Kurenai";
 	[20] = "Die Mag'har";
@@ -194,25 +204,25 @@ GUILDADS_FACTIONS = {
 	[23] = "Das Konsortium";
 	[24] = "Netherschwingen";
 	[25] = "Ogri'la";
-	[26] = "Ashtongue Deathsworn";
+	[26] = "Die Todesh\195\182rigen";
 	[27] = "Unteres Viertel"; -- Shattrath City
-	[28] = "Sha'tari Skyguard";
+	[28] = "Himmelswache der Sha'tari";
 	[29] = "Die Aldor";
 	[30] = "Die Seher";
 	[31] = "Die Sha'tar";
 	[32] = "Beutebucht"; -- Dampfdruckkartell
-	[33] = "Ehrenfeste";
+	[33] = "Ewige Warte";
 	[34] = "Gadgetzan";
 	[35] = "Ratschet";
-	[36] = "Ewige Warte"; -- Other
+	[36] = "Argentumd\195\164mmerung"; -- Other
 	[37] = "Blutsegelbukaniere";
 	[38] = "Brut Nozdormus";
 	[39] = "Zirkel des Cenarius";
 	[40] = "Dunkelmond-Jahrmarkt";
-	[41] = "Gelkis Clan Zentauren";
+	[41] = "Gelkisklan";
 	[42] = "Hydraxianer";
-	[43] = "Magram Clan Zentauren";
-	[44] = "Rabenwald";
+	[43] = "Magramklan";
+	[44] = "Rabenholdt";
 	[45] = "Shen'dralar";
 	[46] = "Syndikat";
 	[47] = "Thoriumbruderschaft";
