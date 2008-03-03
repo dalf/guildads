@@ -692,6 +692,8 @@ GuildAdsGuild = {
 			if GuildAdsGuild.data.cache==nil or updateData==true then
 				GuildAdsGuild.debug("recreate the cache");
 				
+				GuildAdsGuild.onlineCache = {}
+				
 				local players = GuildAdsDB.channel[GuildAds.channelName]:getPlayers();
 				
 			    -- in a guild a pseudo ads
