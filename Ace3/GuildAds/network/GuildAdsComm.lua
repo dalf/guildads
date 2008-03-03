@@ -188,7 +188,7 @@ GuildAdsComm = GuildAds:NewModule("GuildAdsComm", {
 	-- to check the token
 	state = "Init",
 	stateTime = 0,
-}, "AceEvent-3.0");
+});
 
 local DTSMT = {
 	__index = function(t, DTSName)
@@ -220,13 +220,12 @@ function GuildAdsComm:Initialize()
 		self.FilterText,
 		self.OnJoin,
 		self.OnLeave,
+		self.OnSomeoneJoin,
+		self.OnSomeoneLeave,
 		self.OnMessage,
 		self.ChatFlagListener,
 		self.ChannelStatusListener
 	);
-	
-	self:RegisterEvent("CHAT_MSG_CHANNEL_JOIN");
-	self:RegisterEvent("CHAT_MSG_CHANNEL_LEAVE");
 end
 
 function GuildAdsComm:JoinChannel(channel, password, command, alias)
@@ -341,19 +340,19 @@ function GuildAdsComm.ChannelStatusListener(status, message)
 	GuildAdsPlugin_OnEvent(GAS_EVENT_CHANNELSTATUSCHANGED, status, message);
 end
 
-function GuildAdsComm:CHAT_MSG_CHANNEL_JOIN()
-	if string.lower(self.channelName)==string.lower(arg9) then	-- test de arg9 et arg2
-		self.hasJoined[arg2] = GuildAdsDB:GetCurrentTime()
-	end
+function GuildAdsComm.OnSomeoneJoin(playerName, channelName)
+	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "[GuildAdsComm.OnSomeoneJoin(%s)]", playerName);
+	local self=GuildAdsComm
+	self.hasJoined[playerName] = GuildAdsDB:GetCurrentTime()
 end
 	
-function GuildAdsComm:CHAT_MSG_CHANNEL_LEAVE()
+function GuildAdsComm.OnSomeoneLeave(playerName, channelName)
+	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "[GuildAdsComm.OnSomeoneLeave(%s)]", playerName);
+	local self=GuildAdsComm;
 	-- Un joueur vient de quitter le channel  
 	-- Mise à jour du statut online
-	if string.lower(self.channelName)==string.lower(arg9) then	-- test de arg9 et arg2
-		GuildAdsComm:SetOnlineStatus(arg2, false)
-		self.hasJoined[arg2] = false
-	end
+	GuildAdsComm:SetOnlineStatus(playerName, false)
+	self.hasJoined[playerName] = false
 end
 
 --------------------------------------------------------------------------------
