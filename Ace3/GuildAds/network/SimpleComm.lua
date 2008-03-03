@@ -42,6 +42,8 @@ local currentChannel = {
 	-- onMessage
 	-- onJoin
 	-- onLeave
+	-- onSomeoneJoin
+	-- onSomeoneLeave
 	-- onStatusChange
 	-- onChatFlagChange
 	maxMessageLength = 0,
@@ -560,7 +562,7 @@ local function unqueueMessage()
 	if currentChannel.inboundQueue[1] then
 		local message = currentChannel.inboundQueue[1];
 		table.remove(currentChannel.inboundQueue, 1);
-		currentChannel.onMessage(message[1], message[2], message[3]);
+		message[1](message[2], message[3], message[4]);
 		del(message)
 		if currentChannel.inboundQueue[1] == nil then
 			GuildAdsTask:DeleteNamedSchedule("SimpleCommUnqueueMessage")
@@ -610,7 +612,7 @@ local function parseOneMessage(author, text, channel, drunk)
 	
 	-- unserialize message from the packet.
 	if packet then
-		tinsert(currentChannel.inboundQueue, new(author, packet, channel))
+		tinsert(currentChannel.inboundQueue, new(currentChannel.onMessage, author, packet, channel))
 		if not GuildAdsTask:NamedScheduleCheck("SimpleCommUnqueueMessage") then
 			GuildAdsTask:AddNamedSchedule("SimpleCommUnqueueMessage", SIMPLECOMM_INBOUND_TICK_DELAY, true, nil, unqueueMessage)
 		end
@@ -621,6 +623,13 @@ local function parseMessage(author, text, channel, drunk)
 	for _, onePacket in unpackMessagesIterator(text) do
 		parseOneMessage(author, onePacket, channel, drunk)
 	end
+end
+
+local function parseMetaMessage(author, callback, channel)
+	tinsert(currentChannel.inboundQueue, new(callback, author, channel))
+	if not GuildAdsTask:NamedScheduleCheck("SimpleCommUnqueueMessage") then
+		GuildAdsTask:AddNamedSchedule("SimpleCommUnqueueMessage", SIMPLECOMM_INBOUND_TICK_DELAY, true, nil, unqueueMessage)
+	end	
 end
 
 local function onEvent(this, event)
@@ -643,6 +652,12 @@ local function onEvent(this, event)
 			parseMessage(arg4, arg2, nil, false)
 			currentChannel.stats.totalReceivedBytes = currentChannel.stats.totalReceivedBytes + arg2:len()
 			currentChannel.stats.totalReceivedMessages = currentChannel.stats.totalReceivedMessages + 1
+		elseif (event == "CHAT_MSG_CHANNEL_JOIN") and (arg8 == currentChannel.id) then
+			currentChannel.disconnected[arg4] = nil
+			parseMetaMessage(arg2, currentChannel.onSomeoneJoin, currentChannel.name)
+		elseif (event == "CHAT_MSG_CHANNEL_LEAVE") and (arg8 == currentChannel.id) then
+			currentChannel.disconnected[arg2] = time()
+			parseMetaMessage(arg2, currentChannel.onSomeoneLeave, currentChannel.name)
 		end
 		
 	end
@@ -688,13 +703,10 @@ function SimpleComm_New_ChatFrame_MessageEventHandler(event)
 		end
 		
 		if (event == "CHAT_MSG_CHANNEL_JOIN") and (arg8 == currentChannel.id) then
-			currentChannel.disconnected[arg2] = nil;
 			return;
 		end
 		
 		if (event == "CHAT_MSG_CHANNEL_LEAVE") and (arg8 == currentChannel.id) then
-			-- to avoid bug #1315237 : guess that player is offline if he isn't on the channel
-			currentChannel.disconnected[arg2] = time();
 			return;
 		end
 		
@@ -854,7 +866,7 @@ end
 function SimpleComm_Initialize(
 					Prefix,
 					FilterText,
-					OnJoin, OnLeave, OnMessage, 
+					OnJoin, OnLeave, OnSomeoneJoin, OnSomeoneLeave, OnMessage, 
 					FlagListener, StatusListener)
 	SetCVar("spamFilter", 0)
 	
@@ -871,6 +883,8 @@ function SimpleComm_Initialize(
 	currentChannel.onMessage = OnMessage
 	currentChannel.onJoin = OnJoin
 	currentChannel.onLeave = OnLeave
+	currentChannel.onSomeoneJoin = OnSomeoneJoin
+	currentChannel.onSomeoneLeave = OnSomeoneLeave
 	currentChannel.onStatusChange = StatusListener
 	currentChannel.onChatFlagChange = FlagListener
 	
@@ -960,6 +974,8 @@ local function onLoad()
 	frame:SetScript("OnEvent", onEvent)
 	frame:RegisterEvent("CHAT_MSG_ADDON")
 	frame:RegisterEvent("CHAT_MSG_CHANNEL")
+	frame:RegisterEvent("CHAT_MSG_CHANNEL_JOIN")
+	frame:RegisterEvent("CHAT_MSG_CHANNEL_LEAVE")
 end
 
 onLoad()
