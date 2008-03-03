@@ -1527,11 +1527,13 @@ GuildAdsTrade = {
 			local color = GuildAdsUITools:GetPlayerColor(playerName);
 			local info = { };
 			info.text =  playerName;
+			info.value = playerName;
 			info.notCheckable = 1;
 			--info.notClickable = 1; --will make the button white...
 			info.hasArrow = 1;
-			info.func = ToggleDropDownMenu;
-			info.arg1 = 2;
+			-- info.func = ToggleDropDownMenu;
+			-- info.arg1 = 2;
+			-- info.arg2 = playerName
 			info.textR = color.r;
 			info.textG = color.g;
 			info.textB = color.b;
@@ -1548,9 +1550,8 @@ GuildAdsTrade = {
 		
 		initialize = function(level)
 			if level==1 then
-				--GuildAdsPlayerMenu.header(GuildAdsTradeContextMenu.owner, 1);
 				if type(GuildAdsTrade.currentPlayerName)=="string" then
-					GuildAdsTrade.contextMenu.addPlayer(GuildAdsTrade.currentPlayerName);
+					GuildAdsPlayerMenu.initialize(GuildAdsTrade.currentPlayerName, 1);
 				elseif type(GuildAdsTrade.currentPlayerName)=="table" then
 					for _, name in pairs(GuildAdsTrade.currentPlayerName) do
 						GuildAdsTrade.contextMenu.addPlayer(name);

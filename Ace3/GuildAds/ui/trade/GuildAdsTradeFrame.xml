@@ -1264,7 +1264,7 @@
 				<Anchors>
 					<Anchor point="TOPRIGHT" relativeTo="GuildAds_DateFilter" >
 						<Offset>
-							<AbsDimension x="-110" y="-60"/>
+							<AbsDimension x="-5" y="-60"/>
 						</Offset>
 					</Anchor>
 				</Anchors>
