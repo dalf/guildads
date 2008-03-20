@@ -755,7 +755,7 @@ function GuildAdsComm:ReceiveMeta(channelName, personName, revision, revisionStr
 	-- warn the player if there is new version.
 	if revision and self.latestRevision and revision>self.latestRevision then
 		self.latestRevision = revision;
-		GuildAds:Print("There is a newer version of GuildAds available: "..tostring(revisionString));
+		GuildAdsMinimapButtonCore.addAlertText(string.format("%s%s",GUILDADS_UPGRADE_TIP,tostring(revisionString)));
 	end
 	if personName ~= GuildAds.playerName then
 		-- Add this player to the current channel

@@ -2,6 +2,8 @@ GUILDADS_TITLE			= "GuildAds";
 
 -- Minimap button
 GUILDADS_BUTTON_TIP		= "Click here to show or hide GuildAds.";
+GUILDADS_UPGRADE_TIP		= "New GuildAds available: ";
+GUILDADS_UPGRADE_TIP		= "There is a newer version of GuildAds available: ";
 
 -- Options frame
 GUILDADS_OPTIONS_TITLE		= "GuildAds options";
