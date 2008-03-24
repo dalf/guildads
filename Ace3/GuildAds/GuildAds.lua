@@ -213,6 +213,10 @@ function GuildAds:ResetOthers()
 	GuildAdsDB:ResetOthers();
 end
 
+function GuildAds:ResetPlayer(_,playerName)
+	GuildAdsDB.channel[GuildAds.channelName]:deletePlayer(playerName);
+end
+
 function GuildAds:CleanOther()
 	if GuildAdsTradeSkillDataType then
 		GuildAdsTradeSkillDataType:deleteOtherTradeSkillItems();
@@ -388,6 +392,13 @@ GuildAds.options = {
 					type = "execute",
 					handler = GuildAds,
 					func = "ResetOthers"
+				},
+				player = {
+					name = "player",
+					desc = GUILDADS_OPTIONS["reset player"],
+					type = "input",
+					handler = GuildAds,
+					set = "ResetPlayer"
 				}
 			}
 		},

@@ -277,6 +277,7 @@ GUILDADS_OPTIONS = {
 	["reset all"]		= "Reset all database except account information";
 	["reset channel"]	= "Reset all channel datas";
 	["reset others"]	= "Reset all informations about others players";
+	["reset player"]	= "Reset all information about a particular player";
 	["clean"]			= "Clean the database";
 	["clean other"]		= "Delete tradeskill information from other accounts that doesn't have recipe links";
 	["admin"]			= "Handle access control of players and guilds";

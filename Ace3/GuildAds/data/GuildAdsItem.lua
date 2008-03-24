@@ -70,7 +70,8 @@ do
 				_ITT.itemRefs[itemRef] = 1;
 				_ITT.count = 1 + _ITT.count;
 				if _ITT.count == 1 then
-					GuildAdsTask:AddNamedSchedule("GuildAdsItem_SetItem", 0.1, nil, nil, SetItem, itemRef);
+					--GuildAdsTask:AddNamedSchedule("GuildAdsItem_SetItem", 0.1, nil, nil, SetItem, itemRef);
+					SetItem(itemRef);
 				end
 			end
 		end
@@ -102,7 +103,8 @@ do
 		-- next item if there is one
 		local itemRef = next(_ITT.itemRefs);
 		if itemRef then
-			GuildAdsTask:AddNamedSchedule("GuildAdsItem_SetItem", 0.1, nil, nil, SetItem, itemRef);
+			--GuildAdsTask:AddNamedSchedule("GuildAdsItem_SetItem", 0.1, nil, nil, SetItem, itemRef);
+			SetItem(itemRef);
 		else
 			GuildAdsPlugin_OnEvent(GAS_EVENT_ITEMINFOREADY);
 		end
