@@ -20,7 +20,8 @@ local GUILDADS_FACTION_GROUPS = {
 					[31] = 4, [32] = 5, [33] = 5, [34] = 5, [35] = 5, [36] = 6,
 					[37] = 6, [38] = 6, [39] = 6, [40] = 6, [41] = 6, [42] = 6,
 					[43] = 6, [44] = 6, [45] = 6, [46] = 6, [47] = 6, [48] = 6,
-					[49] = 6, [50] = 6, [51] = 6, [52] = 6, [53] = 6, [54] = 6
+					[49] = 6, [50] = 6, [51] = 6, [52] = 6, [53] = 6, [54] = 6,
+					[55] = 4
 				};
 local GUILDADS_FACTION_GROUP_OPTION = {
 					[1] = "ShowFaction";
@@ -62,7 +63,8 @@ GuildAdsFaction = {
 					[31] = true, [32] = true, [33] = true, [34] = true, [35] = true, [36] = true,
 					[37] = true, [38] = true, [39] = true, [40] = true, [41] = true, [42] = true,
 					[43] = true, [44] = true, [45] = true, [46] = true, [47] = true, [48] = true,
-					[49] = true, [50] = true, [51] = true, [52] = true, [53] = true, [54] = true
+					[49] = true, [50] = true, [51] = true, [52] = true, [53] = true, [54] = true,
+					[55] = true
 				}
 			);
 		end

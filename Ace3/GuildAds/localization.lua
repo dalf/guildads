@@ -227,6 +227,7 @@ GUILDADS_FACTIONS = {
 	[29] = "The Aldor";
 	[30] = "The Scryers";
 	[31] = "The Sha'tar";
+	[55] = "Shattered Sun Offensive";
 	[32] = "Booty Bay"; -- Steamwheedle Cartel
 	[33] = "Everlook";
 	[34] = "Gadgetzan";
@@ -250,7 +251,7 @@ GUILDADS_FACTIONS = {
 	[52] = "The Scale of the Sands";
 	[53] = "Tranquillien";
 	[54] = "The Violet Eye";
-};
+}; -- last one used is 55
 
 -- Left side: Profile options (do NOT modify), Right side: CheckButton label
 --GUILDADS_FACTION_GROUP_LABELS = {
