@@ -76,6 +76,7 @@ function GuildAds:OnInitialize()
 	-- RegisterEvent
 	self:RegisterEvent("PLAYER_GUILD_UPDATE");
 	self:RegisterEvent("GUILD_ROSTER_UPDATE");
+	self:RegisterEvent("PLAYER_ENTERING_WORLD");
 	
 	-- Initialize database
 	GuildAdsDB:Initialize(); 
@@ -247,6 +248,10 @@ function GuildAds:LoadGuildRosterTask()
 	if IsInGuild() then
 		GuildRoster();
 	end
+end
+
+function GuildAds:PLAYER_ENTERING_WORLD()
+	self:LoadGuildRosterTask();
 end
 
 function GuildAds:PLAYER_GUILD_UPDATE()
