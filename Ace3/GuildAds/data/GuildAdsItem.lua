@@ -41,6 +41,8 @@ do
 		if _ITT.currentItemRef then
 			GuildAds_ChatDebug(GA_DEBUG_STORAGE, "  - Timeout:".._ITT.currentItemRef);
 		
+			GuildAdsTask:DeleteNamedSchedule("GuildAdsItem_Itemready")
+		
 			if _ITT.itemRefs[_ITT.currentItemRef] < 3 then
 				_ITT.itemRefs[_ITT.currentItemRef] = (_ITT.itemRefs[_ITT.currentItemRef] or 0) + 1;
 			else
@@ -70,7 +72,6 @@ do
 				_ITT.itemRefs[itemRef] = 1;
 				_ITT.count = 1 + _ITT.count;
 				if _ITT.count == 1 then
-					--GuildAdsTask:AddNamedSchedule("GuildAdsItem_SetItem", 0.1, nil, nil, SetItem, itemRef);
 					SetItem(itemRef);
 				end
 			end
@@ -81,10 +82,16 @@ do
 	function ItemReady()
 		GuildAds_ChatDebug(GA_DEBUG_STORAGE, "  - ItemReady: %s", _ITT.currentItemRef);
 		
+		if (_G["GuildAdsITTTextLeft1"]:GetText() == RETRIEVING_ITEM_INFO) then
+			GuildAdsTask:AddNamedSchedule("GuildAdsItem_ItemReady", 0.3, nil, nil, ItemReady)
+			return
+		end
+		
 		-- GetItemInfo again
 		GuildAds_GetItemInfo(_ITT.currentItemRef);
 		-- parse tooltips
 		ParseTooltip(_ITT.currentItemRef);
+
 		-- for enchant link : create a fake texture, type, subtype
 		local found, _, itemLink1 = string.find(_ITT.currentItemRef, "enchant:(%d+)");
 		if found then
@@ -103,7 +110,6 @@ do
 		-- next item if there is one
 		local itemRef = next(_ITT.itemRefs);
 		if itemRef then
-			--GuildAdsTask:AddNamedSchedule("GuildAdsItem_SetItem", 0.1, nil, nil, SetItem, itemRef);
 			SetItem(itemRef);
 		else
 			GuildAdsPlugin_OnEvent(GAS_EVENT_ITEMINFOREADY);
