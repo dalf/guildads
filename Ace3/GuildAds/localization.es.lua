@@ -225,6 +225,7 @@ GUILDADS_FACTIONS = {
 	[29] = "Los Aldor";
 	[30] = "Los Ar\195\186spices";
 	[31] = "Los Sha\239\191\189tar";
+	[55] = "Ofensiva Sol Devastado";
 	[32] = "Bah\195\173a del Bot\195\173n";
 	[33] = "Vista Eterna";
 	[34] = "Gadgetzan";
@@ -248,7 +249,7 @@ GUILDADS_FACTIONS = {
 	[52] = "La Escama de las Arenas";
 	[53] = "Tranquillien";
 	[54] = "El Ojo Violeta";
-};
+}; -- last one used is 55
 
 GUILDADSTOOLTIPS_ADS_TITLE = TRADE;
 GUILDADSTOOLTIPS_ADS =  "Te permite ver los anuncios actuales de tus compañeros de GuildAds";

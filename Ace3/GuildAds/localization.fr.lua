@@ -191,6 +191,7 @@ GUILDADS_FACTIONS = {
 	[29] = "L'Aldor";
 	[30] = "Les Clairvoyants";
 	[31] = "Les Sha'tar";
+	[55] = "Op\195\169ration Soleil bris\195\169";
 	[32] = "Baie-du-Butin"; -- Cartel Gentepression
 	[33] = "Long-guet";
 	[34] = "Gadgetzan";
@@ -214,7 +215,7 @@ GUILDADS_FACTIONS = {
 	[52] = "La Balance des sables";
 	[53] = "Tranquillien";
 	[54] = "L'\197\146il pourpre";
-};
+}; -- last one used is 55
 
 GUILDADS_FACTION_SHOWFACTION = "Faction";
 GUILDADS_FACTION_SHOWFACTIONFORCES = "Force de la faction";

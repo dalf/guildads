@@ -210,6 +210,7 @@ GUILDADS_FACTIONS = {
 	[29] = "Die Aldor";
 	[30] = "Die Seher";
 	[31] = "Die Sha'tar";
+	[55] = "Zerschmetterte Sonne";
 	[32] = "Beutebucht"; -- Dampfdruckkartell
 	[33] = "Ewige Warte";
 	[34] = "Gadgetzan";
