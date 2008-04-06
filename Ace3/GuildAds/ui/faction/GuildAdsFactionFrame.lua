@@ -87,10 +87,17 @@ GuildAdsFaction = {
 		end
 		
 		GuildAdsDB.profile.Faction:registerUpdate(GuildAdsFaction.onDBUpdate);
+		GuildAdsDB.profile.Faction:registerTransactionReceived(GuildAdsFaction.onReceivedTransaction);
 	end;
 	
 	onDBUpdate = function(dataType, playerName, id)
 		GuildAdsFaction.factionButton.updateAll(true);
+	end;
+	
+	onReceivedTransaction = function(dataType, playerName, newKeys, deletedKeys)
+		if dataType.metaInformations.name=="Faction" then
+			GuildAdsFaction.factionButton.updateAll(true);
+		end
 	end;
 	
 	onShow = function()
