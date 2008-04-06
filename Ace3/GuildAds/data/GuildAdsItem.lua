@@ -41,7 +41,7 @@ do
 		if _ITT.currentItemRef then
 			GuildAds_ChatDebug(GA_DEBUG_STORAGE, "  - Timeout:".._ITT.currentItemRef);
 		
-			GuildAdsTask:DeleteNamedSchedule("GuildAdsItem_Itemready")
+			GuildAdsTask:DeleteNamedSchedule("GuildAdsItem_ItemReady")
 		
 			if _ITT.itemRefs[_ITT.currentItemRef] < 3 then
 				_ITT.itemRefs[_ITT.currentItemRef] = (_ITT.itemRefs[_ITT.currentItemRef] or 0) + 1;
