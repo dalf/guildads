@@ -709,13 +709,13 @@ GuildAdsGuild = {
 					local numAllGuildMembers = GetNumGuildMembers(true);
 					if (numAllGuildMembers>=0) then 
 						for currentplayer = 1,numAllGuildMembers do
-							local name, rank, rankIndex, level, class, zone, note, officernote, online, status = GetGuildRosterInfo(currentplayer);
+							local name, rank, rankIndex, level, class, zone, note, officernote, online, status, WoWClassId = GetGuildRosterInfo(currentplayer);
 							
 							if name then
 								if GuildAdsDB.profile.Main:getRevision(name)==0 then
 									-- update profile only it doesn't exist
 									GuildAdsDB.profile.Main:setRaw(name, GuildAdsDB.profile.Main.Guild, guildName);
-									GuildAdsDB.profile.Main:setRaw(name, GuildAdsDB.profile.Main.Class, GuildAdsDB.profile.Main:getClassIdFromName(class));
+									GuildAdsDB.profile.Main:setRaw(name, GuildAdsDB.profile.Main.Class, GuildAdsDB.profile.Main:getClassIdFromWoWClassId(WoWClassId));
 									GuildAdsDB.profile.Main:setRaw(name, GuildAdsDB.profile.Main.GuildRank, rank);
 									GuildAdsDB.profile.Main:setRaw(name, GuildAdsDB.profile.Main.GuildRankIndex, rankIndex);
 									GuildAdsDB.profile.Main:setRaw(name, GuildAdsDB.profile.Main.Level, level);

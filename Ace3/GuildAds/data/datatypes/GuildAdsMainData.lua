@@ -8,6 +8,32 @@
 -- Licence: GPL version 2 (General Public License)
 ----------------------------------------------------------------------------------
 
+local GAClasses = {
+	["WARRIOR"] = 1,
+	["SHAMAN"] = 2,
+	["PALADIN"] = 3,
+	["DRUID"] = 4,
+	["ROGUE"] = 5,
+	["HUNTER"] = 6,
+	["WARLOCK"] = 7,
+	["MAGE"] = 8,
+	["PRIEST"] = 9
+}
+
+local GARaces = {
+	["Human"] = 1,
+	["Dwarf"] = 2,
+	["NightElf"] = 3,
+	["Gnome"] = 4,
+	["Orc"] = 5,
+	["Scourge"] = 6,
+	["Tauren"] = 7,
+	["Troll"] = 8,
+	["Draenei"] = 9,
+	["BloodElf"] = 10
+}
+
+
 GuildAdsMainDataType = GuildAdsTableDataType:new({
 	metaInformations = {
 		name = "Main",
@@ -45,13 +71,15 @@ function GuildAdsMainDataType:Initialize()
 end
 
 function GuildAdsMainDataType:onInitialize()
-	self:set(GuildAds.playerName, self.Level, UnitLevel("player"));
-	self:set(GuildAds.playerName, self.Race, self:getRaceIdFromName(UnitRace("player")));
-	self:set(GuildAds.playerName, self.Class, self:getClassIdFromName(UnitClass("player")));
-	self:set(GuildAds.playerName, self.Account, GuildAdsDB.account);
+	local _, WoWRaceId = UnitRace("player")
+	local _, WoWClassId = UnitClass("player")
+	self:set(GuildAds.playerName, self.Level, UnitLevel("player"))
+	self:set(GuildAds.playerName, self.Race, GARaces[WoWRaceId])
+	self:set(GuildAds.playerName, self.Class, GAClasses[WoWClassId])
+	self:set(GuildAds.playerName, self.Account, GuildAdsDB.account)
 	
-	self:RegisterEvent("PLAYER_LEVEL_UP", "onLevelUp");
-	self:RegisterEvent("PLAYER_GUILD_UPDATE", "onGuildUpdate");
+	self:RegisterEvent("PLAYER_LEVEL_UP", "onLevelUp")
+	self:RegisterEvent("PLAYER_GUILD_UPDATE", "onGuildUpdate")
 end
 
 function GuildAdsMainDataType:onLevelUp()
@@ -64,6 +92,10 @@ function GuildAdsMainDataType:onGuildUpdate()
 	self:set(GuildAds.playerName, self.Guild, guildName);
 	self:set(GuildAds.playerName, self.GuildRank, guildRank);
 	self:set(GuildAds.playerName, self.GuildRankIndex, guildRankIndex);
+end
+
+function GuildAdsMainDataType:getClassIdFromWoWClassId(WoWClassId)
+	return GAClasses[WoWClassId]
 end
 
 function GuildAdsMainDataType:getClassIdFromName(ClassName)
