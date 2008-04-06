@@ -74,19 +74,14 @@ function GuildAds:OnInitialize()
 	end
 		
 	-- RegisterEvent
-	self:RegisterEvent("PLAYER_GUILD_UPDATE");
-	self:RegisterEvent("GUILD_ROSTER_UPDATE");
 	self:RegisterEvent("PLAYER_ENTERING_WORLD");
+	self:RegisterEvent("PLAYER_LEAVING_WORLD");
 	
 	-- Initialize database
 	GuildAdsDB:Initialize(); 
 		
 	-- Initialize network
 	GuildAdsComm:Initialize()
-	
-	-- LoadGuildRosterTask
-	self:LoadGuildRosterTask();
-	GuildAdsTask:AddNamedSchedule("LoadGuildRosterTask", 240, true, nil, self.LoadGuildRosterTask, self);
 	
 	-- Register plugins
 	GuildAds_ChatDebug(GA_DEBUG_GLOBAL,"[GuildAdsPlugin_RegisterPlugins] begin");
@@ -104,10 +99,7 @@ function GuildAds:OnInitialize()
 	GuildAds_ChatDebug(GA_DEBUG_GLOBAL,"[GuildAdsPlugin_OnInit] begin");
   	GuildAdsPlugin_OnInit();
   	GuildAds_ChatDebug(GA_DEBUG_GLOBAL,"[GuildAdsPlugin_OnInit] end");
-	
-	-- Call GuildAds:JoinChannel() in 8 seconds
-	GuildAdsTask:AddNamedSchedule("JoinChannel", 8, nil, nil, self.JoinChannel, self)
-	
+		
 	GuildAds_ChatDebug(GA_DEBUG_GLOBAL,"[GuildAds:Initialize] end");
 end
 
@@ -245,13 +237,25 @@ function GuildAds:CheckACL(_,id)
 end
 
 function GuildAds:LoadGuildRosterTask()
-	if IsInGuild() then
+	if IsInGuild() and not self.roster_updated then
 		GuildRoster();
 	end
 end
 
 function GuildAds:PLAYER_ENTERING_WORLD()
+	self:RegisterEvent("GUILD_ROSTER_UPDATE"); -- Only happens when in a guild and GuildRoster has been called. (may never happen)
+	self:RegisterEvent("PLAYER_GUILD_UPDATE"); -- Happens on change in guild or friendlist. (may never happen)
 	self:LoadGuildRosterTask();
+	GuildAdsTask:AddNamedSchedule("LoadGuildRosterTask", 240, true, nil, self.LoadGuildRosterTask, self); -- check guild roster every 4 minutes
+	if not IsInGuild() then
+		GuildAdsTask:AddNamedSchedule("CheckChannelConfigTask", 12, nil, nil, self.CheckChannelConfig, self); -- check channel config after 12 seconds
+	end
+end
+
+function GuildAds:PLAYER_LEAVING_WORLD()
+	self:UnregisterEvent("GUILD_ROSTER_UPDATE");
+	self:UnregisterEvent("PLAYER_GUILD_UPDATE");
+	GuildAdsTask:DeleteNamedSchedule("LoadGuildRosterTask")
 end
 
 function GuildAds:PLAYER_GUILD_UPDATE()
@@ -259,12 +263,20 @@ function GuildAds:PLAYER_GUILD_UPDATE()
 	if guildName ~= self.guildName then
 		self:LoadGuildRosterTask();
 	end
-	self:CheckChannelConfig();
 end
 
 function GuildAds:GUILD_ROSTER_UPDATE()
-	self.guildName = GetGuildInfo("player");
-	self:CheckChannelConfig();
+	if not self.roster_updated then
+		self.guildName = GetGuildInfo("player");
+		self.roster_updated=true;
+		GuildAdsTask:AddNamedSchedule("GuildInfoIsReadable", 10, nil, nil, self.GuildInfoIsReadable, self);
+		self:CheckChannelConfig();
+		GuildAdsTask:DeleteNamedSchedule("CheckChannelConfigTask");
+	end
+end
+
+function GuildAds:GuildInfoIsReadable()
+	self.roster_updated=nil;
 end
 
 function GuildAds:UnconfigureChannel()
@@ -278,9 +290,10 @@ end
 
 function GuildAds:CheckChannelConfig()
 	local channelName, channelPassword = self:GetDefaultChannel();
-	if 		self.channelName 
-		and (channelName ~= self.channelName or	channelPassword ~= self.channelPassword) then
-		GuildAdsComm:LeaveChannel()
+	if (channelName ~= self.channelName or channelPassword ~= self.channelPassword) then
+		if self.channelName then
+			GuildAdsComm:LeaveChannel()
+		end
 		if channelName then
 			GuildAdsTask:AddNamedSchedule("JoinChannel", 2, nil, nil, self.JoinChannel, self)
 		end
