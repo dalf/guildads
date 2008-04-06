@@ -115,10 +115,12 @@ GuildAdsTrade = {
 	end;
 	
 	saveOptions = function()
-		GuildAdsTrade.setProfileValue(nil, "HideOfflinePlayer", not GuildAds_ShowOfflinePlayerCheckButton:GetChecked() or nil);
-		GuildAdsTrade.setProfileValue(nil, "HideMyAds", not GuildAds_ShowMyAdsCheckButton:GetChecked() or nil);
-		GuildAdsTrade.setProfileValue(nil, "ShowNewAsk", GuildAds_ChatShowNewAskCheckButton:GetChecked() and true);
-		GuildAdsTrade.setProfileValue(nil, "ShowNewHave", GuildAds_ChatShowNewHaveCheckButton:GetChecked() and true);
+		if GuildAdsTradeOptionsFrame:IsVisible() then
+			GuildAdsTrade.setProfileValue(nil, "HideOfflinePlayer", not GuildAds_ShowOfflinePlayerCheckButton:GetChecked() or nil);
+			GuildAdsTrade.setProfileValue(nil, "HideMyAds", not GuildAds_ShowMyAdsCheckButton:GetChecked() or nil);
+			GuildAdsTrade.setProfileValue(nil, "ShowNewAsk", GuildAds_ChatShowNewAskCheckButton:GetChecked() and true);
+			GuildAdsTrade.setProfileValue(nil, "ShowNewHave", GuildAds_ChatShowNewHaveCheckButton:GetChecked() and true);
+		end
 	end;
 	
 	defaultsOptions = function()
