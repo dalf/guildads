@@ -167,7 +167,9 @@ GuildAdsComm = GuildAds:NewModule("GuildAdsComm", {
 		TransactionDelay		= 40,
 		Timeout					= 15,		-- timeout should now trigger for most portal crossings
 		HashDelay				= 60,		-- all databases are identical. Wait a while before searching again.
-		MoveToken				= 5			-- delay to wait before actually moving the token
+		MoveToken				= 5,		-- delay to wait before actually moving the token
+		GlobalTimeout			= 180		-- the delay before GuildAdsComm checks the player on the channel, send a new token.
+											-- WARNING : no transaction should be longer than this delay.
 	},
 	
 	stats = {
@@ -499,6 +501,44 @@ function GuildAdsComm:CheckTimeout(state, stateTime)
 	end
 end
 
+function GuildAdsComm:SetGlobalTimeout()
+	GuildAdsTask:AddNamedSchedule("CheckGlobalTimeout", self.delay.GlobalTimeout, nil, nil, self.GlobalTimeout, self);
+end
+
+function GuildAdsComm:UnsetGlobalTimeout()
+	GuildAdsTask:DeleteNamedSchedule("CheckGlobalTimeout");
+end
+
+function GuildAdsComm:GlobalTimeout()
+	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"== GuildAdsComm:GlobalTimeout() ==");
+	-- there is problem : nothing on network since a long time
+	
+	-- reset all timers
+	GuildAdsTask:DeleteNamedSchedule("MoveToken")
+	GuildAdsTask:DeleteNamedSchedule("CheckTimeout")
+	
+	-- GuildAdsComm guesses that player tree is broken : someone has disconnect, and it didn't catch it
+	SimpleComm_GetMembers(GuildAdsComm.ChannelListComplete)
+end
+
+function GuildAdsComm.ChannelListComplete(playerList)
+	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"Comparing GuildAds online playerlist with players on the channel");
+	local self = GuildAdsComm
+	
+	-- update the player list
+	for _,playerName in pairs(self.playerList) do
+		if not playerList[playerName] then
+			GuildAds_ChatDebug(GA_DEBUG_GLOBAL,"Player "..tostring(playerName).." is flagged online in GuildAds but is not on the GuildAds channel!");
+			self:SetOnlineStatus(playerName, false)
+		end
+	end
+	
+	-- tick again
+	if self.playerList[1]==GuildAds.playerName then
+		self:SendMoveToken(1)
+	end
+end
+
 --------------------------------------------------------------------------------
 --
 -- Move the token
@@ -584,6 +624,7 @@ function GuildAdsComm:Tick()
 	else
 		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "Tick: I'm alone");
 		self:SetState("ALONE");
+		self:UnsetGlobalTimeout();
 	end
 end
 
@@ -777,6 +818,8 @@ function GuildAdsComm:ReceiveMeta(channelName, personName, revision, revisionStr
 		-- after initialization : tick again
 		self:SetState("BUILDING_PLAYER_TREE");
 		GuildAdsTask:AddNamedSchedule("Initialise", self.delay.Init, nil, nil, self.EnableFullProtocol, self);
+		-- set the global time out
+		GuildAdsComm:SetGlobalTimeout()
 	end
 end
 
@@ -827,6 +870,9 @@ function GuildAdsComm:ReceiveHashSearchResult(channelName, personName, path, has
 			self:MoveToken();
 		end
 	end
+	
+	-- set the global time out
+	self:SetGlobalTimeout()
 end
 
 
@@ -869,6 +915,8 @@ function GuildAdsComm:ReceiveSearchResult(channelName, personName, dataTypeName,
 	else
 		self:SetState("WAITING_UPDATE", self.delay.Transaction+self.delay.Timeout);
 	end
+	-- set the global time out
+	self:SetGlobalTimeout()
 end
 
 function GuildAdsComm:ReceiveOpenTransaction(channelName, personName, dataTypeName, playerName, fromRevision, toRevision, version)

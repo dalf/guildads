@@ -555,6 +555,48 @@ end
 
 ---------------------------------------------------------------------------------
 --
+-- Get members list
+-- 
+---------------------------------------------------------------------------------
+function SimpleComm_GetMembers(callbackFunction)
+	if currentChannel.name then
+		currentChannel.members=true 						-- is true to signal that the table will be cleared.
+		currentChannel.onChannelListComplete= callbackFunction
+		frame:RegisterEvent("CHAT_MSG_CHANNEL_LIST")
+		ListChannelByName(currentChannel.name) 				-- need a way to hide the chatwindow output from this command ("/chatwho <guildadschannel>" output)
+	end
+end
+
+local function channelListComplete()
+	local callback = currentChannel.onChannelListComplete
+	frame:UnregisterEvent("CHAT_MSG_CHANNEL_LIST")
+	-- frame:UnregisterEvent("WORLD_MAP_UPDATE");
+	currentChannel.onChannelListComplete =nil
+	
+	callback(currentChannel.members)
+end
+
+local function channelListAddNames(...)
+  for i = 1, select('#', ...) do
+    local name = select(i, ...)
+	currentChannel.members[name]=true
+  end
+end
+
+local function CHAT_MSG_CHANNEL_LIST(list)
+	if currentChannel.members==true then
+		currentChannel.members={}
+	end
+		
+	local cleaned=string.gsub(list, "[ _*]", "")
+	channelListAddNames(strsplit(",",cleaned))
+		
+	GuildAdsTask:AddNamedSchedule("channelMembers", 2, nil, nil, channelListComplete, self)
+	-- frame:RegisterEvent("WORLD_MAP_UPDATE"); -- next WORLD_MAP_UPDATE happens after last CHAT_MSG_CHANNEL_LIST event.
+end
+
+---------------------------------------------------------------------------------
+--
 -- Received message
 -- 
 ---------------------------------------------------------------------------------
@@ -658,6 +700,8 @@ local function onEvent(this, event)
 		elseif (event == "CHAT_MSG_CHANNEL_LEAVE") and (arg8 == currentChannel.id) then
 			currentChannel.disconnected[arg2] = time()
 			parseMetaMessage(arg2, currentChannel.onSomeoneLeave, currentChannel.name)
+		elseif (event == "CHAT_MSG_CHANNEL_LIST") and (arg8 == currentChannel.id) then
+			CHAT_MSG_CHANNEL_LIST(arg1)
 		end
 		
 	end
@@ -718,6 +762,10 @@ function SimpleComm_New_ChatFrame_MessageEventHandler(event)
 		if (event == "CHAT_MSG_CHANNEL_NOTICE_USER") and (arg8 == currentChannel.id) then
 			GuildAds_ChatDebug(GA_DEBUG_CHANNEL_HIGH,  "%s (%s)", arg1, arg5);
 			return;
+		end
+		
+		if (event == "CHAT_MSG_CHANNEL_LIST") and (arg8 == currentChannel.id) and currentChannel.onChannelListComplete then
+			return
 		end
 		
 	else
