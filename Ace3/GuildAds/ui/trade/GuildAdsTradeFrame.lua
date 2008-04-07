@@ -250,19 +250,20 @@ GuildAdsTrade = {
 				end
 			end
 			if (tochat ~= nil) then
-				local info = GuildAds_ItemInfo[item] or {};
-				local _, _, _, hex = GuildAds_GetItemQualityColor(info.quality or 1)
-				if info.name then
-					tochat = tochat .. hex.."|H"..item.."|h["..info.name.."]|r";
-				else
-					tochat = tochat .. item;
-				end
-				if data.q then
-					tochat = tochat.." x "..data.q;
-				end
-				GuildAdsMinimapButtonCore.addAlertText("["..playerName.."]\32"..tochat);
-				--GuildAdsUITools:AddChatMessage("["..playerName.."]\32"..tochat);
-			end			
+				GuildAdsMinimapButtonCore.addAlertFunction(function ()
+					local info = GuildAds_ItemInfo[item] or {};
+					local quantity = "";
+					local itemlink = item;
+					local _, _, _, hex = GuildAds_GetItemQualityColor(info.quality or 1);
+					if info.name then
+						itemlink = hex.."|H"..item.."|h["..info.name.."]|r";
+					end
+					if data.q then
+						quantity = " x "..data.q;
+					end
+					return string.format("[%s]\32%s%s%s",playerName,tochat,itemlink,quantity);
+				end)
+			end
 		end
 	end;
 	
