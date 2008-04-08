@@ -851,6 +851,9 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 			<OnShow>
 				GuildAdsFaction.onShow();
 			</OnShow>
+			<OnHide>
+				GuildAdsFaction.onHide();
+			</OnHide>
 			<OnMouseWheel>
 				return;
 			</OnMouseWheel>

@@ -85,9 +85,6 @@ GuildAdsFaction = {
 				GuildAdsFaction.setProfileValue(nil, groupname, true); -- initialise all group settings to true (first run)
 			end
 		end
-		
-		GuildAdsDB.profile.Faction:registerUpdate(GuildAdsFaction.onDBUpdate);
-		GuildAdsDB.profile.Faction:registerTransactionReceived(GuildAdsFaction.onReceivedTransaction);
 	end;
 	
 	onDBUpdate = function(dataType, playerName, id)
@@ -95,9 +92,7 @@ GuildAdsFaction = {
 	end;
 	
 	onReceivedTransaction = function(dataType, playerName, newKeys, deletedKeys)
-		if dataType.metaInformations.name=="Faction" then
-			GuildAdsFaction.factionButton.updateAll(true);
-		end
+		GuildAdsFaction.factionButton.updateAll(true);
 	end;
 	
 	onShow = function()
@@ -113,8 +108,17 @@ GuildAdsFaction = {
 		GuildAdsFaction.updateCheckButton(GuildAds_FactionShowSteamwheedleCartelCheckButton, GuildAdsFaction.getProfileValue(nil, "ShowSteamwheedleCartel"));
 		GuildAdsFaction.updateCheckButton(GuildAds_FactionShowOtherCheckButton, GuildAdsFaction.getProfileValue(nil, "ShowOther"));
 		
+		GuildAdsDB.profile.Faction:registerUpdate(GuildAdsFaction.onDBUpdate);
+		GuildAdsDB.profile.Faction:registerTransactionReceived(GuildAdsFaction.onReceivedTransaction);
+		
 		GuildAdsFaction.factionButton.updateAll(false);
 		GuildAdsFactionFrame:Show();
+	end;
+
+	onHide = function()
+		GuildAdsFaction.debug("onHide()");
+		GuildAdsDB.profile.Faction:unregisterUpdate(GuildAdsFaction.onDBUpdate);
+		GuildAdsDB.profile.Faction:unregisterTransactionReceived(GuildAdsFaction.onReceivedTransaction);
 	end;
 	
 	updateCheckButton = function(button, state)
