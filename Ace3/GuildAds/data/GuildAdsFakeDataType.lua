@@ -67,7 +67,7 @@ end
 function GuildAdsFakeDataType:registerTransactionReceived(obj, method)
 end
 
-function GuildAdsDataType:unregisterTransactionReceived(obj)
+function GuildAdsFakeDataType:unregisterTransactionReceived(obj)
 end
 
 --[[ about version ]]
