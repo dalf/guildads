@@ -111,7 +111,7 @@ GuildAdsFaction = {
 		GuildAdsDB.profile.Faction:registerUpdate(GuildAdsFaction.onDBUpdate);
 		GuildAdsDB.profile.Faction:registerTransactionReceived(GuildAdsFaction.onReceivedTransaction);
 		
-		GuildAdsFaction.factionButton.updateAll(false);
+		GuildAdsFaction.factionButton.updateAll(true);
 		GuildAdsFactionFrame:Show();
 	end;
 
