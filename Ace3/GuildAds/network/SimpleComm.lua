@@ -695,7 +695,7 @@ local function onEvent(this, event)
 			currentChannel.stats.totalReceivedBytes = currentChannel.stats.totalReceivedBytes + arg2:len()
 			currentChannel.stats.totalReceivedMessages = currentChannel.stats.totalReceivedMessages + 1
 		elseif (event == "CHAT_MSG_CHANNEL_JOIN") and (arg8 == currentChannel.id) then
-			currentChannel.disconnected[arg4] = nil
+			currentChannel.disconnected[arg2] = nil
 			parseMetaMessage(arg2, currentChannel.onSomeoneJoin, currentChannel.name)
 		elseif (event == "CHAT_MSG_CHANNEL_LEAVE") and (arg8 == currentChannel.id) then
 			currentChannel.disconnected[arg2] = time()
