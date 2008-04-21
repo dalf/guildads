@@ -548,7 +548,7 @@ function GuildAdsComm:MoveToken(index)
 	-- move the token
 	if index then
 		-- sanity check
-		if index<1 or index>self.#playerList then
+		if index<1 or index>#self.playerList then
 			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "MoveToken %s |cffff1e00invalid|r", tostring(index));
 			self.token = 1
 		else
