@@ -547,7 +547,13 @@ end
 function GuildAdsComm:MoveToken(index)
 	-- move the token
 	if index then
-		self.token = index
+		-- sanity check
+		if index<1 or index>self.#playerList then
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "MoveToken %s |cffff1e00invalid|r", tostring(index));
+			self.token = 1
+		else
+			self.token = index
+		end
 	else
 		if self.token<#self.playerList then
 			self.token = self.token + 1;
@@ -1051,7 +1057,11 @@ function GuildAdsComm:ReceiveMoveToken(channelName, personName, index)
 	if index then
 		index = tonumber(index);
 		assert(index>=0, "Invalid token (<0)");
-		assert(index<=#self.playerList, "Invalid token (> #self.playerList)"); -- this occurs when e.g. making /reloadui and another player sends the MoveToken command. 
+		--assert(index<=#self.playerList, "Invalid token (> #self.playerList)"); -- this occurs when e.g. making /reloadui and another player sends the MoveToken command. 
+		if index>#self.playerList then
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"ReceiveMoveToken(%s) |cffff1e00invalid token|r", tostring(index));
+			index=1
+		end
 	end
 	-- move the token
 	self:MoveTokenDelayed(index);
