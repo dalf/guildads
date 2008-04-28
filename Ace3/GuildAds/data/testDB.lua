@@ -49,20 +49,15 @@ end
 GetInventoryItemLink = function(target,slot)
 end
 
---
--- About Ace
---
-AceEventFrame = {
-	RegisterEvent = function(event)
+CreateFrame = function()
+	local f={}
+	f.RegisterEvent = function()
 	end;
-}
+	f.SetScript = function()
+	end;
+	return f
+end
 
-dofile(config.wowPath.."Interface\\AddOns\\Ace\\Ace.lua")
-dofile(config.wowPath.."Interface\\AddOns\\Ace\\AceDB.lua")
-dofile(config.wowPath.."Interface\\AddOns\\Ace\\AceData.lua")
-dofile(config.wowPath.."Interface\\AddOns\\Ace\\AceEvent.lua")
-dofile(config.wowPath.."Interface\\AddOns\\Ace\\AceHook.lua")
-dofile(config.wowPath.."Interface\\AddOns\\Ace\\AceModule.lua")
 
 --
 -- About GuildAds
@@ -80,6 +75,17 @@ GuildAds_ChatDebug = function(t, m)
 end
 
 dofile(config.guildAdsDatabaseFile);
+dofile(config.wowPath.."Interface\\AddOns\\GuildAds\\lib\\Ace1\\GAAceDB.lua");
+dofile(config.wowPath.."Interface\\AddOns\\GuildAds\\lib\\LibStub\\LibStub.lua");
+dofile(config.wowPath.."Interface\\AddOns\\GuildAds\\lib\\AceAddon-3.0\\AceAddon-3.0.lua");
+dofile(config.wowPath.."Interface\\AddOns\\GuildAds\\lib\\CallbackHandler-1.0\\CallbackHandler-1.0.lua");
+dofile(config.wowPath.."Interface\\AddOns\\GuildAds\\lib\\AceEvent-3.0\\AceEvent-3.0.lua");
+dofile(config.wowPath.."Interface\\AddOns\\GuildAds\\lib\\AceConsole-3.0\\AceConsole-3.0.lua");
+dofile(config.wowPath.."Interface\\AddOns\\GuildAds\\lib\\AceGUI-3.0\\AceGUI-3.0.lua");
+dofile(config.wowPath.."Interface\\AddOns\\GuildAds\\lib\\AceConfig-3.0\\AceConfigRegistry-3.0\\AceConfigRegistry-3.0.lua");
+dofile(config.wowPath.."Interface\\AddOns\\GuildAds\\lib\\AceConfig-3.0\\AceConfigCmd-3.0\\AceConfigCmd-3.0.lua");
+dofile(config.wowPath.."Interface\\AddOns\\GuildAds\\lib\\AceConfig-3.0\\AceConfigDialog-3.0\\AceConfigDialog-3.0.lua");
+dofile(config.wowPath.."Interface\\AddOns\\GuildAds\\lib\\AceConfig-3.0\\AceConfig-3.0.lua");
 dofile(config.wowPath.."Interface\\AddOns\\GuildAds\\Localization.lua");
 dofile(config.wowPath.."Interface\\AddOns\\GuildAds\\data\\GuildAdsDB.lua");
 dofile(config.wowPath.."Interface\\AddOns\\GuildAds\\data\\GuildAdsList.lua");
@@ -102,7 +108,7 @@ GuildAds = {
 	channelName = config.channelName;
 	realmName = config.realmName;
 	factionName = config.faction;
-	db = AceDatabase:new("GuildAdsDatabase");
+	db = GAAceDatabase:new("GuildAdsDatabase");
 }
 
 GuildAds.db:Initialize();
