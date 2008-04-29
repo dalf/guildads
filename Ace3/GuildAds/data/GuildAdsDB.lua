@@ -188,7 +188,10 @@ end
 
 function GuildAdsDBChannel:ShowACL()
 	if GuildAds.channelName then
-		for _, id, author, data in GuildAdsDB.channel[GuildAds.channelName].Admin:iterator() do
+		local data;
+		local dataType=GuildAdsDB.channel[GuildAds.channelName].Admin;
+		for id in dataType:iteratorIds() do
+			data=dataType:getNewestData(id);
 			if GuildAdsDBChannel:IsGuildID(id) then
 				GuildAds:Print("Guild "..string.sub(id,2).." is "..(data.a and "whitelisted" or "blacklisted").." for "..GuildAdsDB:FormatTime(data.t or 0).." with reason: "..tostring(data.c));
 			else
@@ -238,19 +241,21 @@ function GuildAdsDBChannel:CheckACL(playerName)
 		local adminGuild=dataType:getNewestData("@"..guildName);
 		-- player can either be allowed, not allowed or undefined (=allowed)
 		if not adminPlayer and not adminGuild then	-- neither player nor guild mentioned in black- or whitelist
-			GuildAds:Print("not, not");
+			GuildAds:Print(string.format("ID %s is allowed (default)",playerName));
 			return true;
 		end
 		if adminPlayer and not adminGuild then		-- only player is mentioned
-			GuildAds:Print("player, not");
+			GuildAds:Print(string.format("Player %s is%s allowed",playerName,adminPlayer.a and "" or " not"));
 			return adminPlayer.a;
 		end
 		if not adminPlayer and adminGuild then		-- only guild is mentioned
-			GuildAds:Print("not, guild");
+			GuildAds:Print(string.format("Guild %s is%s allowed",playerName,adminGuild.a and "" or " not"));
 			return adminGuild.a;
 		end
 		-- both guild and player mentioned (both have to be allowed)
-		GuildAds:Print("player, guild");
+		GuildAds:Print(string.format("Player %s is%s allowed %s guild %s is%s allowed",playerName,adminPlayer.a and "" or " not",
+												(adminPlayer.a and adminGuild.a) and "and" or "but",
+												adminGuild.a and "" or " not"));
 		return adminPlayer.a and adminGuild.a;
 
 		--GuildAds:Print("Player "..id.." is "..(GuildAdsDB.channel[GuildAds.channelName]:isPlayerAllowed(id) and "allowed" or "not allowed").." access.");

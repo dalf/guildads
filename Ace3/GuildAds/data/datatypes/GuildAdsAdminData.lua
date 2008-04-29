@@ -124,6 +124,10 @@ function GuildAdsAdminDataType:set(author, id, info)
 	end
 end
 
+function GuildAdsAdminDataType:iteratorIds()
+	return self.nextAdminId, self, nil;
+end
+
 function GuildAdsAdminDataType:nextAdminId(id)
 	id = next(self.db.Admin, id);
 	while id and not (self.db.Admin[id] and next(self.db.Admin[id]))do
