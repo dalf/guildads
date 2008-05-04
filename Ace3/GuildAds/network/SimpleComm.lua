@@ -65,7 +65,6 @@ local currentChannel = {
 	}
 }
 currentChannel.outboundQueueLast = currentChannel.outboundQueueHeader
-	-- .delay
 	-- .to
 	-- .text
 	-- .length
@@ -703,77 +702,6 @@ local function onEvent(this, event)
 		elseif (event == "CHAT_MSG_CHANNEL_LIST") and (arg8 == currentChannel.id) then
 			CHAT_MSG_CHANNEL_LIST(arg1)
 		end
-		
-	end
-end
-
-function SimpleComm_New_ChatFrame_MessageEventHandler(event)
-	if (currentChannel.name) then
-		currentChannel.id = GetChannelName(currentChannel.name);
-		if ((event == "CHAT_MSG_CHANNEL") and (arg8 == currentChannel.id)) then
-			-- Hide if this is an internal message
-			if currentChannel.isChatMessageVisible(arg1) then
-				return;
-			end
-			
-			-- the message is shown in this ChatFrame ?
-			local info;
-			local found = 0;
-			local channelLength = strlen(arg4);
-			for index, value in pairs(this.channelList) do
-				if ( channelLength > strlen(value) ) then
-					-- arg9 is the channel name without the number in front...
-					if ( ((arg7 > 0) and (this.zoneChannelList[index] == arg7)) or (strupper(value) == strupper(arg9)) ) then
-						found = 1;
-						info = ChatTypeInfo["CHANNEL"..arg8];
-						break;
-					end
-				end
-			end
-			if (found==0) or not info then
-				return;
-			end
-			
-			-- unpack PIPE_ENTITIE
-			arg1 = string.gsub(arg1, PIPE_ENTITIE, "|")
-			
-			-- Hack to change the channel name :
-			-- ChatFrame_OnEvent shows "["..gsub(arg4, "%s%-%s.*", "").."] "..body
-			-- channelLength = strlen(arg4) is used to find if the channel is shown in this ChatFrame (as above)
-			-- -> arg4 is set to name we want to show concatenate with " -" and many spaces which will delete by the gsub call
-			if (currentChannel.slashCmdUpper) then
-				arg4 = currentChannel.aliasName.." -                                ";
-			end
-		end
-		
-		if (event == "CHAT_MSG_CHANNEL_JOIN") and (arg8 == currentChannel.id) then
-			return;
-		end
-		
-		if (event == "CHAT_MSG_CHANNEL_LEAVE") and (arg8 == currentChannel.id) then
-			return;
-		end
-		
-		if (event == "CHAT_MSG_CHANNEL_NOTICE") and (arg8 == currentChannel.id) then
-			GuildAds_ChatDebug(GA_DEBUG_CHANNEL_HIGH,  arg1);
-			return;
-		end
-		
-		if (event == "CHAT_MSG_CHANNEL_NOTICE_USER") and (arg8 == currentChannel.id) then
-			GuildAds_ChatDebug(GA_DEBUG_CHANNEL_HIGH,  "%s (%s)", arg1, arg5);
-			return;
-		end
-		
-		if (event == "CHAT_MSG_CHANNEL_LIST") and (arg8 == currentChannel.id) and currentChannel.onChannelListComplete then
-			return
-		end
-		
-	else
-		if event=="CHAT_MSG_CHANNEL" then
-			if currentChannel.isChatMessageVisible and currentChannel.isChatMessageVisible(arg1) then
-				return;
-			end
-		end
 	end
 	
 	-- update DND/AFK/Drunk status
@@ -808,12 +736,64 @@ function SimpleComm_New_ChatFrame_MessageEventHandler(event)
 			setFlag(nil, nil);
 		end
 	end
-	
-	-- call the default ChatFrame_OnEvent
-	SimpleComm_Old_ChatFrame_MessageEventHandler(event);
 end
-SimpleComm_Old_ChatFrame_MessageEventHandler = ChatFrame_MessageEventHandler;
-ChatFrame_MessageEventHandler = SimpleComm_New_ChatFrame_MessageEventHandler;
+
+---------------------------------------------------------------------------------
+--
+-- Chat frame filters
+-- 
+---------------------------------------------------------------------------------
+local function filter_message(msg)
+	-- Hide if this is an internal message
+	if currentChannel.isChatMessageVisible and currentChannel.isChatMessageVisible(msg) then
+		return true
+	end
+	
+	if (currentChannel.name) and (arg8 == currentChannel.id) then	
+		currentChannel.id = GetChannelName(currentChannel.name);
+		
+		-- unpack PIPE_ENTITIE
+		msg = string.gsub(msg, PIPE_ENTITIE, "|")
+			
+		-- Hack to change the channel name :
+		-- ChatFrame_OnEvent shows "["..gsub(arg4, "%s%-%s.*", "").."] "..body
+		-- channelLength = strlen(arg4) is used to find if the channel is shown in this ChatFrame (as above)
+		-- -> arg4 is set to name we want to show concatenate with " -" and many spaces which will delete by the gsub call
+		if (currentChannel.slashCmdUpper) then
+			arg4 = currentChannel.aliasName.." -                                ";
+		end
+		return false, msg
+	end
+end
+
+local function filter_hide(msg)
+	if (currentChannel.name) then
+		currentChannel.id = GetChannelName(currentChannel.name);
+		if (arg8 == currentChannel.id) then
+			GuildAds_ChatDebug(GA_DEBUG_CHANNEL_HIGH,  msg)
+			return true
+		end
+	end
+end
+
+local function filter_CHANNEL_NOTICE_USER(msg)
+	if (currentChannel.name) then
+		currentChannel.id = GetChannelName(currentChannel.name);
+		if (arg8 == currentChannel.id) then
+			GuildAds_ChatDebug(GA_DEBUG_CHANNEL_HIGH,  "%s (%s)", msg, arg5);
+			return true
+		end
+	end
+end
+
+local function filter_CHANNEL_LIST(msg)
+	if (currentChannel.name) then
+		currentChannel.id = GetChannelName(currentChannel.name);
+		if (arg8 == currentChannel.id) and currentChannel.onChannelListComplete then
+			return true
+		end
+	end
+end
 
 ---------------------------------------------------------------------------------
 --
@@ -964,6 +944,10 @@ function SimpleComm_Join(Channel, Password)
 	currentChannel.name = Channel;
 	currentChannel.password = Password;
 	
+	-- Reset out queue
+	currentChannel.outboundQueueLast = currentChannel.outboundQueueHeader
+	currentChannel.outboundQueueHeader.next = nil
+	
 	local result = dataChannelLib:OpenChannel("GuildAds", currentChannel.name, currentChannel.password, DEFAULT_CHAT_FRAME);
 	
 	if firstJoin then
@@ -1024,6 +1008,14 @@ local function onLoad()
 	frame:RegisterEvent("CHAT_MSG_CHANNEL")
 	frame:RegisterEvent("CHAT_MSG_CHANNEL_JOIN")
 	frame:RegisterEvent("CHAT_MSG_CHANNEL_LEAVE")
+	frame:RegisterEvent("CHAT_MSG_SYSTEM")
+	
+	ChatFrame_AddMessageEventFilter("CHAT_MSG_CHANNEL", filter_message)
+	ChatFrame_AddMessageEventFilter("CHAT_MSG_CHANNEL_JOIN", filter_hide)
+	ChatFrame_AddMessageEventFilter("CHAT_MSG_CHANNEL_LEAVE", filter_hide)
+	ChatFrame_AddMessageEventFilter("CHAT_MSG_CHANNEL_NOTICE", filter_hide)
+	ChatFrame_AddMessageEventFilter("CHAT_MSG_CHANNEL_NOTICE_USER", filter_CHANNEL_NOTICE_USER)
+	ChatFrame_AddMessageEventFilter("CHAT_MSG_CHANNEL_LIST", filter_CHANNEL_LIST)
 end
 
 onLoad()

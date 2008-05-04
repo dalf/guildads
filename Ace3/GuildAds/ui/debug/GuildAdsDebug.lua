@@ -110,10 +110,8 @@ GuildAds_DebugPlugin = {
 			GuildAds_DebugPlugin.addFunctionUsage("GuildAdsTask (onUpdate)", GuildAdsTask:GetOnUpdate(), false);
 			GuildAds_DebugPlugin.addObjectUsage("GuildAdsTask", GuildAdsTask, false);
 		end
-		if SimpleComm_OnUpdate then
-			GuildAds_DebugPlugin.addFunctionUsage("SimpleComm_OnUpdate", SimpleComm_OnUpdate, true);
-		end
-		GuildAds_DebugPlugin.addFunctionUsage("SimpleComm (hide messages)", SimpleComm_New_ChatFrame_MessageEventHandler, false);
+		
+		GuildAds_DebugPlugin.addFunctionUsage("GuildAdsComm.FilterText", GuildAdsComm.FilterText, false, true);
 		GuildAds_DebugPlugin.addFrameUsage("GuildAdsITT", GuildAdsITT, false, true);
 	end;
 	
