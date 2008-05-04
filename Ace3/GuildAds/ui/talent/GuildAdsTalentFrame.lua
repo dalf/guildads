@@ -70,12 +70,21 @@ GuildAdsTalentUI = {
 		end
 	end;
 	
+	isTalentLink = function(link)
+		-- "|cff71d5ff|Hspell:14785|h[Silent Resolve]|h|r"
+		return nil
+	end;
+	
 	talentButtonOnEnter = function(id)
 		local self=GuildAdsTalentUI;
 		local selectedTab = PanelTemplates_GetSelectedTab(GuildAdsTalentFrame);
 		local talentName, iconPath, tier, column, currentRank, maxRank = self.GetTalentInfo(selectedTab, id);
 		GameTooltip:SetOwner(this, "ANCHOR_RIGHT");
-		GameTooltip:SetText(HIGHLIGHT_FONT_COLOR_CODE..talentName..FONT_COLOR_CODE_CLOSE);
+		if GuildAds_ExplodeItemRef(talentName) then
+			GameTooltip:SetHyperlink(talentName);
+		else
+			GameTooltip:SetText(HIGHLIGHT_FONT_COLOR_CODE..talentName..FONT_COLOR_CODE_CLOSE);
+		end
 		GameTooltip:AddLine(HIGHLIGHT_FONT_COLOR_CODE.."Rank "..tostring(currentRank).."/"..tostring(maxRank)..FONT_COLOR_CODE_CLOSE);
 		if GuildAdsTalentFrame.pointsSpent then
 			local ptier,pcolumn = self.GetTalentPrereqs(selectedTab, id);
@@ -142,7 +151,13 @@ GuildAdsTalentUI = {
 		if GuildAdsInspectWindow.playerName then
 			local data = GuildAdsDB.profile.Talent:get(GuildAdsInspectWindow.playerName, tostring(tabIndex)..":"..tostring(talentIndex));
 			if data and data.n then
-				return data.n, data.t, data.ti, data.co, data.cr, data.mr, 0, data.p;
+				if not data.t then
+					local name, rank, texture = GetSpellInfo(data.n);
+					name="|cff71d5ff|Hspell:"..tostring(data.n).."|h["..tostring(name).."]|h|r"
+					return name, texture, data.ti, data.co, data.cr, data.mr, 0, data.p;
+				else
+					return data.n, data.t, data.ti, data.co, data.cr, data.mr, 0, data.p;
+				end
 			end
 		end
 		return "", "", 0,0, 0,0,0,0;
@@ -621,6 +636,17 @@ GuildAdsTalentUI = {
 		PlaySound("UChatScrollButton");
 		--UIFrameFlashStop(GuildAdsTalentScrollButtonOverlay);
 	end;
+	
+	TalentButton_OnClick = function()
+		local self=GuildAdsTalentUI;
+		if ( IsModifiedClick("CHATLINK") ) then
+			local link = self.GetTalentInfo(PanelTemplates_GetSelectedTab(GuildAdsTalentFrame), this:GetID());
+			if ( link ) then
+				ChatEdit_InsertLink(link);
+			end
+		end
+	end;
+
 }
 
 ---------------------------------------------------------------------------------

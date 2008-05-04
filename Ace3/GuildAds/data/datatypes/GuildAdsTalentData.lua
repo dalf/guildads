@@ -75,7 +75,7 @@ function GuildAdsTalentDataType:onEvent()
 
 	-- parse complete talent tree now
 	local name, iconTexture, pointsSpent, background, numTalents, tabIndex;
-	local talentIndex, nameTalent, iconPath, tier, column, currentRank, maxRank, isExceptional, meetsPrereq, ptier, pcolumn, isLearnable;
+	local talentIndex, nameTalent, talentLink, iconPath, tier, column, currentRank, maxRank, isExceptional, meetsPrereq, ptier, pcolumn, isLearnable;
 	for tabIndex=1,GetNumTalentTabs() do
 		name, iconTexture, pointsSpent, background = GetTalentTabInfo( tabIndex );
 		numTalents = GetNumTalents(tabIndex);
@@ -83,6 +83,16 @@ function GuildAdsTalentDataType:onEvent()
 		for talentIndex=1,numTalents do
 			nameTalent, iconPath, tier, column, currentRank, maxRank, isExceptional, meetsPrereq = GetTalentInfo(tabIndex, talentIndex);
 			ptier, pcolumn, isLearnable = GetTalentPrereqs( tabIndex , talentIndex );
+			talentLink=GetTalentLink(tabIndex, talentIndex);
+			if talentLink then
+				nameTalent=talentLink;
+				local color, spellId, spellName = GuildAds_ExplodeItemRef(talentLink);
+				local start,_,id = string.find(spellId,"spell:(.*)")
+				if start then
+					nameTalent=id
+					iconPath=nil
+				end
+			end
 			self:set(GuildAds.playerName, tostring(tabIndex)..":"..tostring(talentIndex), { n=nameTalent, 
 																t=iconPath,
 																ti=tier,

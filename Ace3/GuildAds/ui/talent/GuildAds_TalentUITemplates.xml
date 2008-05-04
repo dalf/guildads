@@ -98,7 +98,7 @@
 				GameTooltip:Hide();
 			</OnLeave>
 			<OnClick>
-				--TalentFrameTalent_OnClick();
+				GuildAdsTalentUI.TalentButton_OnClick();
 			</OnClick>
 		</Scripts>
 	</Button>
