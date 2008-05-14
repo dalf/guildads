@@ -80,7 +80,13 @@ do
 
 	-- patch 2.0.2 : to be call be OnTooltipSetItem handler
 	function ItemReady()
-		GuildAds_ChatDebug(GA_DEBUG_STORAGE, "  - ItemReady: %s", _ITT.currentItemRef);
+		GuildAds_ChatDebug(GA_DEBUG_STORAGE, "  - ItemReady: %s", tostring(_ITT.currentItemRef));
+		if not _ITT.currentItemRef then
+			-- unknown error occured. Drop remaining items from queue and signal iteminfo ready
+			-- This is just a crude workaround
+			_ITT.itemRefs = {}
+			GuildAdsPlugin_OnEvent(GAS_EVENT_ITEMINFOREADY);
+		end			
 		
 		if (_G["GuildAdsITTTextLeft1"]:GetText() == RETRIEVING_ITEM_INFO) then
 			GuildAdsTask:AddNamedSchedule("GuildAdsItem_ItemReady", 0.3, nil, nil, ItemReady)
