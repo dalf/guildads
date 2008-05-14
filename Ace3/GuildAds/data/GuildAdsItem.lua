@@ -86,6 +86,7 @@ do
 			-- This is just a crude workaround
 			_ITT.itemRefs = {}
 			GuildAdsPlugin_OnEvent(GAS_EVENT_ITEMINFOREADY);
+			return
 		end			
 		
 		if (_G["GuildAdsITTTextLeft1"]:GetText() == RETRIEVING_ITEM_INFO) then
