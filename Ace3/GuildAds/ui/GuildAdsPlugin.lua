@@ -14,20 +14,6 @@ Plugin = {
 		name = "GuildAdsPlayerTracker",
 		guildadsCompatible = 100,
 	}
-
-	getCommands = function()
-		return {
-			[GUILDADSPLAYERTRACKER_CMD_LOC] = {
-				[1] = { ["key"]="continent", 
-						["fout"]=GuildAdsPlugin.serializeInteger,
-						["fin"]=GuildAdsPlugin.unserializeInteger }
-					} ...
-			}
-			};
-	end;
-
-	getAdTypes = function()
-	end
 	
 	-- others functions that can be defined
 	-- those functions will be called when the event occured
@@ -44,27 +30,57 @@ GAS_EVENT_CHANNELSTATUSCHANGED = 9;	-- TODO : Event associé à network\GuildAdsCo
 
 local pluginsToRegister = {};
 
+-- Dispatcher ----------------------------------------------
+local xpcall = xpcall
+
+local function errorhandler(err)
+	return geterrorhandler()(err)
+end
+
+local function CreateDispatcher(argCount)
+	local code = [[
+		local xpcall, eh = ...	-- our arguments are received as unnamed values in "..." since we don't have a proper function declaration
+		local method, ARGS
+		local function call() return method(ARGS) end
+	
+		local function dispatch(func, ...)
+			 method = func
+			 if not method then return end
+			 ARGS = ...
+			 return xpcall(call, eh)
+		end
+	
+		return dispatch
+	]]
+	
+	local ARGS = {}
+	for i = 1, argCount do ARGS[i] = "arg"..i end
+	code = code:gsub("ARGS", table.concat(ARGS, ", "))
+	return assert(loadstring(code, "safecall Dispatcher["..argCount.."]"))(xpcall, errorhandler)
+end
+
+local Dispatchers = setmetatable({}, {
+	__index=function(self, argCount)
+		local dispatcher = CreateDispatcher(argCount)
+		rawset(self, argCount, dispatcher)
+		return dispatcher
+	end
+})
+Dispatchers[0] = function(func)
+	return xpcall(func, errorhandler)
+end
+ 
+local function safecall(func, ...)
+	return Dispatchers[select('#', ...)](func, ...)
+end
+
+-- GuildAdsPlugin ----------------------------------------------
+
 GuildAdsPlugin = {
 
 	debugOn = false;
 
 	PluginsList = {};
-	
-	-- SerializeObj
-	serializeObj = GAC_SerializeObj;
-	unserializeObj = GAC_UnserializeObj;
-	
-	-- SerializeString
-	serializeString = GAC_SerializeString;
-	unserializeString = GAC_UnserializeString;
-	
-	-- SerializeInteger
-	serializeInteger = GAC_SerializeInteger;
-	unserializeInteger = GAC_UnserializeInteger;
-	
-	-- SerializeColor
-	serializeColor = GAC_SerializeColor;
-	unserializeColor = GAC_UnserializeColor;
 	
 	isPluginValid  = function(plugin)
     	-- Every plugin needs to be a table
@@ -92,29 +108,7 @@ GuildAdsPlugin = {
 	
 	_register = function(plugin)
 		local valid, errorMessage = GuildAdsPlugin.isPluginValid(plugin);
-		if valid then
-			-- register commands
-			if type(plugin.getCommands)=="function" then
-				local commands = plugin.getCommands();
-				for command, spec in pairs(commands) do
-					local status, errorMessage = GuildAdsPlugin.registerCommand(command, spec[1], spec[2]);
-					if not status then
-						return false, errorMessage;
-					end
-				end
-			end
-			
-			-- register adtypes
-			if type(plugin.getAdTypes)=="function" then
-				local adtypes = plugin.getAdTypes();
-				for adtype, spec in pairs(adtypes) do
-					local status, errorMessage = GAC_RegisterAdtype(adtype, spec[1], spec[2]);
-					if not status then
-						return false, errorMessage;
-					end
-				end
-			end
-			
+		if valid then			
 			local pluginName = plugin.metaInformations.name;
 			
 			-- add plugin to GuildAdsPlugin.PluginsList
@@ -129,7 +123,7 @@ GuildAdsPlugin = {
 			plugin.setConfigValue = function(path, key, value)
 				if GuildAdsDB:SetConfigValue({ GuildAdsDB.CONFIG_PATH, pluginName, path }, key, value) then
 					if type(plugin.onConfigChanged) == "function" then
-						plugin.onConfigChanged(path, key, value);
+						safecall(plugin.onConfigChanged, path, key, value);
 					end
 				end
 				return value;
@@ -142,7 +136,7 @@ GuildAdsPlugin = {
 			plugin.setProfileValue = function(path, key, value)
 				if GuildAdsDB:SetConfigValue({ GuildAdsDB.PROFILE_PATH, pluginName, path}, key, value) then
 					if type(plugin.onConfigChanged) == "function" then
-						plugin.onConfigChanged(path, key, value);
+						safecall(plugin.onConfigChanged, path, key, value);
 					end
 				end
 				return value;
@@ -194,42 +188,6 @@ GuildAdsPlugin = {
 			return true;
 		else
 			return false, errorMessage;
-		end
-	end;
-	
-	registerCommand = function(command, serializeInfo, onMessage)
-		return GAC_RegisterCommand(command, serializeInfo, onMessage);
-	end;
-
-	deregisterCommand = function(command)
-		return GAC_UnregisterCommand(command);
-	end;
-
-	registerAdtype = function(adtype, serializeInfo, onMessage)
-		return GAC_RegisterAdtype(adtype, serializeInfo, onMessage);
-	end;
-
-	deregisterAdtype = function(adtype)
-		return GAC_UnregisterAdtype(adtype);
-	end;
-	
-	-- send(who, obj, delay)
-	send = function(who, obj)
-		if obj.command and GAC_IsRegisteredCommand(obj.command) then
-			SimpleComm_SendMessage(who, obj);
-			return true;
-		else
-			return false;
-		end
-	end;
-	
-	-- sendRaw
-	sendRaw = function(who, message, delay)
-		if type(message) == "string" then
-			SimpleComm_SendRawMessage(who, message, delay);
-			return true;
-		else
-			return false;
 		end
 	end;
 	
@@ -307,7 +265,7 @@ function GuildAdsPlugin_OnInit()
   	for pluginName, plugin in pairs(GuildAdsPlugin.PluginsList) do
 		if type(plugin.onInit) == "function" then
 			GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "onInit: "..pluginName);
-			plugin.onInit();
+			safecall(plugin.onInit)
 		end
 	end
 end
@@ -316,7 +274,7 @@ function GuildAdsPlugin_OnChannelJoin()
 	for pluginName, plugin in pairs(GuildAdsPlugin.PluginsList) do
 		if type(plugin.onChannelJoin) == "function" then
 			GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "onChannelJoin: "..pluginName);
-			plugin.onChannelJoin();
+			safecall(plugin.onChannelJoin)
 		end
 	end
 end
@@ -325,16 +283,16 @@ function GuildAdsPlugin_OnChannelLeave()
 	for pluginName, plugin in pairs(GuildAdsPlugin.PluginsList) do
 		if type(plugin.onChannelLeave) == "function" then
 			GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "onChannelLeave: "..pluginName);
-			plugin.onChannelLeave();
+			safecall(plugin.onChannelLeave)
 		end
 	end
 end
 
-function GuildAdsPlugin_OnEvent(ltype, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)
+function GuildAdsPlugin_OnEvent(ltype, ...)
 	local method = EventIdToMethod[ltype];
 	for pluginName, plugin in pairs(GuildAdsPlugin.PluginsList) do
 		if type(plugin[method]) == "function" then
-			plugin[method](arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
+			safecall(plugin[method], ...)
 		end
 	end
 end
@@ -370,7 +328,7 @@ function GuildAdsPlugin_UIPredicate(a, b)
 		end
 	end
 
-	-- twice the same plugin ?
+	-- same plugin twice ?
 	return false;
 end
 

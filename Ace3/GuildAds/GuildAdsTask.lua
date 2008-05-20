@@ -17,6 +17,7 @@ local table_concat = _G.table.concat
 local unpack = _G.unpack
 local pairs = _G.pairs
 local next = _G.next
+local xpcall = xpcall
 
 GuildAdsTask = { }
 
@@ -25,6 +26,50 @@ local frame
 local timers = {}
 local heap = {}
 local localtime = 0
+
+-- Dispatcher ----------------------------------------------
+local function errorhandler(err)
+	return geterrorhandler()(err)
+end
+
+local function CreateDispatcher(argCount)
+	local code = [[
+		local xpcall, eh = ...	-- our arguments are received as unnamed values in "..." since we don't have a proper function declaration
+		local method, ARGS
+		local function call() return method(ARGS) end
+	
+		local function dispatch(func, ...)
+			 method = func
+			 if not method then return end
+			 ARGS = ...
+			 return xpcall(call, eh)
+		end
+	
+		return dispatch
+	]]
+	
+	local ARGS = {}
+	for i = 1, argCount do ARGS[i] = "arg"..i end
+	code = code:gsub("ARGS", table.concat(ARGS, ", "))
+	return assert(loadstring(code, "safecall Dispatcher["..argCount.."]"))(xpcall, errorhandler)
+end
+
+local Dispatchers = setmetatable({}, {
+	__index=function(self, argCount)
+		local dispatcher = CreateDispatcher(argCount)
+		rawset(self, argCount, dispatcher)
+		return dispatcher
+	end
+})
+Dispatchers[0] = function(func)
+	return xpcall(func, errorhandler)
+end
+ 
+local function safecall(func, ...)
+	return Dispatchers[select('#', ...)](func, ...)
+end
+
+-- Scheduler -----------------------------------------------
 
 local function HeapSwap(i1, i2)
 	heap[i1], heap[i2] = heap[i2], heap[i1]
@@ -91,7 +136,7 @@ local function OnUpdate(frame, elapsed)
 			heap.lastIndex = heap.lastIndex - 1
 			HeapBubbleDown(1)
 		else
-			schedule.func(unpack(schedule.args or emptyArray))
+			safecall(schedule.func, unpack(schedule.args or emptyArray))
 			
 			if schedule.repeating then
 				schedule.timeToFire = schedule.timeToFire + schedule.repeating
