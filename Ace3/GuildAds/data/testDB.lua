@@ -58,12 +58,25 @@ CreateFrame = function()
 	return f
 end
 
+GetGameTime = function()
+	local t=os.date("*t",os.time())
+	return t.hour,t.min
+end
+
+GetText = function(a,b,c)
+	local t={ LASTONLINE_MONTHS = "%s months",
+		LASTONLINE_HOURS = "%s hours",
+		LASTONLINE_DAYS = "%s days",
+		GENERIC_MIN = "%s minutes" };
+	return t[a]		
+end
+
 
 --
 -- About GuildAds
 --
 --GUILDADS_VERSION = 200;
-GUILDADS_REVISION = "200";
+GUILDADS_REVISION = "300";
 GUILDADS_REVISION_NUMBER = tonumber((GUILDADS_REVISION or "1"):match("(%d+)"))
 
 GuildAdsTask = {
@@ -110,6 +123,15 @@ GuildAds = {
 	factionName = config.faction;
 	db = GAAceDatabase:new("GuildAdsDatabase");
 }
+
+function GuildAds:Print(t)
+	print("GuildAds:Print "..tostring(t));
+	if type(t)=="table" then
+		for k,v in pairs(t) do
+			print(tostring(k).."="..tostring(v));
+		end
+	end
+end
 
 GuildAds.db:Initialize();
 GuildAdsDB:Initialize();
