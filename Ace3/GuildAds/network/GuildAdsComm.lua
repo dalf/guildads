@@ -49,6 +49,11 @@ GuildAdsComm = GuildAds:NewModule("GuildAdsComm", {
 			[2] = "String"		-- text
 		};
 		
+		P= {
+			-- Active player list
+			[1] = "String"
+		};
+		
 		HS= {	-- Hash Search
 			[1] = "String",		-- Hash Path
 			[2] = "String"		-- Hash sequence (16 parts)
@@ -120,6 +125,10 @@ GuildAdsComm = GuildAds:NewModule("GuildAdsComm", {
 		T= {	-- Move the token to the next player
 			[1] = "Integer"		-- new token position
 		};
+		
+		D= {
+			[1] = "String"		-- marks [1] as being offline, or if nil, marks sender to be offline
+		};
 	},
 	
 	MessageMethod = {
@@ -136,7 +145,9 @@ GuildAdsComm = GuildAds:NewModule("GuildAdsComm", {
 		O	= "ReceiveOldRevision",
 		K	= "ReceiveKeys",
 		CT	= "ReceiveCloseTransaction",
-		T	= "ReceiveMoveToken"
+		T	= "ReceiveMoveToken",
+		D	= "ReceivePlayerLeaving",
+		P	= "ReceivePlayerList"
 	},
 	
 	hasJoined = {},
@@ -243,6 +254,9 @@ end
 function GuildAdsComm:LeaveChannel()
 	LoggingChat(false);
 	if self.channelName then
+		-- Send leave message in case we don't actually leave the channel.
+		self:SendPlayerLeaving()
+		
 		SimpleComm_Leave();
 	
 		self.channelName = nil
@@ -295,6 +309,10 @@ function GuildAdsComm.OnJoin(self)
 	-- reset the minimum and maximum version on the channel (updated when the M message is received from other players)
 	self.minimumRevision = GUILDADS_REVISION_NUMBER;
 	self.maximumRevision = GUILDADS_REVISION_NUMBER;
+	
+	-- Get ready to store responding players
+	self.logging_on=true;
+	self.sendPlayerList=false; -- set to true to enable sending of the P message (not fully operational)
 	
 	-- Send Meta
 	self:SendMeta();
@@ -653,7 +671,9 @@ end
 --------------------------------------------------------------------------------
 function GuildAdsComm:SendMeta(toPlayerName)
 	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendMeta");
-	SimpleComm_SendMessage(toPlayerName, "M>"..GUILDADS_REVISION..">"..GUILDADS_REVISION_STRING..">"..self.startTime..">"..(#self.playerList)..">"..GuildAdsDB.databaseId);
+	-- playerCount=-1 when sending to channel or when self.logging_in==true, (#self.playerList) otherwise
+	local playerCount=toPlayerName and ((not self.logging_in) and (#self.playerList) or -1) or -1
+	SimpleComm_SendMessage(toPlayerName, string.format("M>%s>%s>%i>%i>%s", GUILDADS_REVISION, GUILDADS_REVISION_STRING, self.startTime, playerCount, GuildAdsDB.databaseId));
 	self:SendChatFlag(toPlayerName);
 end
 
@@ -724,6 +744,16 @@ function GuildAdsComm:SendMoveToken(index)
 	SimpleComm_SendMessage(nil, string.format("T>%s", index or ""));
 end
 
+function GuildAdsComm:SendPlayerList(toPlayerName)
+	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendPlayerList(%s)", toPlayerName or "");
+	SimpleComm_SendMessage(toPlayerName, "P>"..table.concat(self.playerList, "/"));
+	self.sendPlayerList=false;
+end
+
+function GuildAdsComm:SendPlayerLeaving(toPlayerName)
+	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendPlayerLeaving(%s)", toPlayerName or "");
+	SimpleComm_SendMessage(nil, "D>"..(toPlayerName or ""));
+end
 --------------------------------------------------------------------------------
 --
 -- Parse inbound messages
@@ -762,6 +792,10 @@ end
 
 function GuildAdsComm:EnableFullProtocol()
 	GuildAdsComm.IGNOREMESSAGE={}; -- maybe empty the existing table? shouldn't be necessary
+	self.logging_on=nil; -- fully logged on now
+	if self.sendPlayerList then
+		self:SendPlayerList();
+	end
 	self:Tick();
 end
 
@@ -781,6 +815,7 @@ function GuildAdsComm:DisableFullProtocol()
 		T=true
 	};
 end
+
 --------------------------------------------------------------------------------
 --
 -- Receive inbound messages
@@ -820,6 +855,9 @@ function GuildAdsComm:ReceiveMeta(channelName, personName, revision, revisionStr
 			GuildAdsTask:DeleteNamedSchedule("MoveToken");
 			-- send my information
 			GuildAdsTask:AddNamedSchedule("SendMeta"..personName, random(self.delay.AnswerMeta), nil, nil, self.SendMeta, self, personName);
+			if self.logging_in and playerCount==-1 then
+				self.sendPlayerList=false;
+			end
 		end
 		-- after initialization : tick again
 		self:SetState("BUILDING_PLAYER_TREE");
@@ -1066,6 +1104,65 @@ function GuildAdsComm:ReceiveMoveToken(channelName, personName, index)
 	-- move the token
 	self:MoveTokenDelayed(index);
 	self:SetState("MOVETOKEN", self.delay.MoveToken+self.delay.Timeout);
+end
+
+function GuildAdsComm:ReceivePlayerList(channelName, personName, playersSerialized)
+	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"ReceivePlayerList(%s)", playersSerialized);
+	-- NOTE: from the time the playerSerialized is sent to we receive it, players may have come online or gone offline!
+	-- This means playersSerialized may occasionally be wrong
+	
+	-- This function assumes that self.playerTree is in perfect sync with self.playerList
+	
+	-- check self.playerList against playersSerialized
+	-- players mentioned in playerList but not in playersSerialized must be logged off: self:SetOnlineStatus(playerName, false)
+	-- 
+	-- create table holding players mentioned in playersSerialized but not in self.playerList
+	local playerWorkTable={}
+	self.playerWorkTable=playerWorkTable; -- for debug purpose
+	
+	local sendMeta=false;
+	local amOnline=false;
+	for player in string.gmatch(playersSerialized, "([^\/]+)/?$?") do
+		player = tostring(player);
+		playerWorkTable[player]=true;
+		--table.insert(playerWorkTable,player);
+		if not self.playerTree[player] then 
+			-- player is active on the channel, but I don't know about him/her. 
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"ReceivePlayerList() Unknown player %s", player);
+			sendMeta=true;
+		end
+		if player == GuildAds.playerName then
+			amOnline=true
+		end
+	end
+	if sendMeta or not amOnline then
+		-- I don't know about all active clients. Send Meta and wait for everyone to respond.
+		-- NOTE: This is a somewhat bandwidth wasteful solution but is backwards compatible.
+		--self:SendMeta();
+		GuildAdsTask:AddNamedSchedule("SendMeta", random(self.delay.SearchDelay), nil, nil, self.SendMeta, self, nil);
+	else
+		GuildAdsTask:DeleteNamedSchedule("SendMeta");		
+	end
+	for _,player in pairs(self.playerList) do
+		if not playerWorkTable[player] then
+			-- player is marked online with me, but didn't respond to last M sent (client crash/lagged).
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"ReceivePlayerList() Correctly marking player as offline: %s", player);
+			self:SetOnlineStatus(playerName, false)
+		end
+	end
+end
+
+function GuildAdsComm:ReceivePlayerLeaving(channelName, personName, playerName)
+	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"ReceivePlayerLeaving(%s)", playerName);
+	if playerName then
+		-- have to handle the situation when playerName == GuildAds.playerName (!!)
+		self:SetOnlineStatus(playerName, false)
+		if playerName == GuildAds.playerName then
+			GuildAdsComm:LeaveChannel()
+		end
+	else
+		self:SetOnlineStatus(personName, false)
+	end
 end
 
 --------------------------------------------------------------------------------
