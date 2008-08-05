@@ -1,9 +1,10 @@
-## Interface: 20400
+﻿## Interface: 20400
 ## Title: GuildAds
-## Author: Zarkan, Fka�, Galmok
+## Author: Zarkan, Fkaï, Galmok
 ## Version: 2.1
 ## Notes: Guild Ads
 ## Notes-frFR: Les annonces de la guilde
+## Notes-ruRU: Обмен внутри Гилдии
 ## OptionalDeps: ReagentData,GuildEventManager2
 ## DefaultState: Enabled
 ## LoadOnDemand: 0
@@ -28,6 +29,7 @@ localization.es.lua
 localization.tw.lua
 localization.cn.lua
 localization.kr.lua
+localization.ru.lua
 GuildAds.lua
 GuildAdsTask.lua
 GuildAdsConfig.xml
