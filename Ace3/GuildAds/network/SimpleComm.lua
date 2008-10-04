@@ -228,18 +228,18 @@ end
 local Encode
 do
 	local drunkHelper_t = {
-		[7]  = "\029\008",
-		[29] = "\029\030",
-		[31] = "\029\032",
-		[20] = "\029\021",
-		[15] = "\029\016",
-		[("S"):byte()] = "\020", -- change S and s to a different set of character bytes.
-		[("s"):byte()] = "\015",
-		[127] = "\029\126", -- \127 (this is here because \000 is more common)
-		[0] = "\127", -- \000
-		[10] = "\029\011", -- \n
-		[124] = "\029\125", -- |
-		[("%"):byte()] = "\029\038", -- %
+		["\007"]  = "\029\008",
+		["\029"] = "\029\030",
+		["\031"] = "\029\032",
+		["\020"] = "\029\021",
+		["\015"] = "\029\016",
+		["S"] = "\020", -- change S and s to a different set of character bytes.
+		["s"] = "\015",
+		["\127"] = "\029\126", -- \127 (this is here because \000 is more common)
+		["\000"] = "\127", -- \000
+		["\010"] = "\029\011", -- \n
+		["\124"] = "\029\125", -- |
+		["%"] = "\029\038", -- %
 	}
 	for c = 128, 255 do
 		local num = c
@@ -269,35 +269,31 @@ do
 			num = num + 1
 		end
 		if num >= 127 then
-			drunkHelper_t[c] = string_char(29, num - 127 + 40) --41, 42, 43, 44, 45
+			drunkHelper_t[string_char(c)] = string_char(29, num - 127 + 40) --41, 42, 43, 44, 45
 		else
-			drunkHelper_t[c] = string_char(31, num)
+			drunkHelper_t[string_char(c)] = string_char(31, num)
 		end
 	end
-	local function drunkHelper(char)
-		return drunkHelper_t[char:byte()]
-	end
+
 	local soberHelper_t = {
-		[7] = "\176\008",
-		[176] = "\176\177",
-		[255] = "\176\254", -- \255 (this is here because \000 is more common)
-		[0] = "\255", -- \000
-		[10] = "\176\011", -- \n
-		[124] = "\176\125", -- |
-		[("%"):byte()] = "\176\038", -- %
+		["\007"] = "\176\008",
+		["\176"] = "\176\177",
+		["\255"] = "\176\254", -- \255 (this is here because \000 is more common)
+		["\000"] = "\255", -- \000
+		["\010"] = "\176\011", -- \n
+		["\124"] = "\176\125", -- |
+		["%"] = "\176\038", -- %
 	}
-	local function soberHelper(char)
-		return soberHelper_t[char:byte()]
-	end
+
 	-- Package a message for transmission
 	function Encode(text, drunk)
 		if drunk then
-			return text:gsub("([\007\010\015\020\029%%\031Ss\124\127-\255])", drunkHelper)
+			return text:gsub("([\007\010\015\020\029%%\031Ss\124\127-\255])", drunkHelper_t)
 		else
 			if not text then
 				DEFAULT_CHAT_FRAME:AddMessage(debugstack())
 			end
-			return text:gsub("([\007\176\255%z\010\124%%])", soberHelper)
+			return text:gsub("([\007\176\255%z\010\124%%])", soberHelper_t)
 		end
 	end
 	
@@ -333,7 +329,7 @@ end
 
 local Decode
 do
-	local t = {
+	local soberHelper_t = {
 		["\008"] = "\007",
 		["\177"] = "\176",
 		["\254"] = "\255",
@@ -341,20 +337,14 @@ do
 		["\125"] = "\124",
 		["\038"] = "\037",
 	}
-	local function soberHelper(text)
-		return t[text]
-	end
 	
-	local t = {
+	local drunkHelper1_t = {
 		["\127"] = "\000",
 		["\015"] = "s",
 		["\020"] = "S",
 	}
-	local function drunkHelper1(text)
-		return t[text]
-	end
 	
-	local t = setmetatable({}, {__index=function(self, c)
+	local drunkHelper2_t = setmetatable({}, {__index=function(self, c)
 		local num = c:byte()
 		if num >= 124 then
 			num = num - 1
@@ -384,11 +374,8 @@ do
 		self[c] = string_char(num)
 		return self[c]
 	end})
-	local function drunkHelper2(text)
-		return t[text]
-	end
 
-	local t = {
+	local drunkHelper3_t = {
 		["\008"] = "\007",
 		["\038"] = "%",
 		["\125"] = "\124",
@@ -411,20 +398,17 @@ do
 		["\032"] = "\031",
 		["\030"] = "\029",
 	}
-	local function drunkHelper3(text)
-		return t[text]
-	end
-	
+
 	-- Clean a received message
 	function Decode(text, drunk)
 		if drunk then
-			text = text:gsub("([\127\015\020])", drunkHelper1)
-			text = text:gsub("\031(.)", drunkHelper2)
-			text = text:gsub("\029([\008\038\125\011\126\016\021\040\041\042\043\044\045\046\047\048\049\050\051\032\030])", drunkHelper3)
+			text = text:gsub("([\127\015\020])", drunkHelper1_t)
+			text = text:gsub("\031(.)", drunkHelper2_t)
+			text = text:gsub("\029([\008\038\125\011\126\016\021\040\041\042\043\044\045\046\047\048\049\050\051\032\030])", drunkHelper3_t)
 		else
 			text = text:gsub("\255", "\000")
 		
-			text = text:gsub("\176([\008\177\254\011\125\038])", soberHelper)
+			text = text:gsub("\176([\008\177\254\011\125\038])", soberHelper_t)
 		end
 		-- remove the hidden character and refix the prohibited characters.
 		return text
