@@ -117,11 +117,11 @@ GuildAdsGEMEvent = {
 		end;
 	end;
 	
-	newChatFrame_OnEvent = function(event)
+	newChatFrame_OnEvent = function(self, event, arg1, ...)
 		if (event == "CHAT_MSG_CHANNEL") and (string.sub(arg1, 1, 4)=="<GEM") then
 			return
 		end
-		GuildAdsGEMEvent.oldChatFrame_OnEvent(event);
+		GuildAdsGEMEvent.oldChatFrame_OnEvent(self, event, arg1, ...);
 	end;
 	
 	saveOptions = function()
