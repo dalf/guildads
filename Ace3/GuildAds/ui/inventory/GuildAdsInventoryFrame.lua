@@ -59,13 +59,13 @@ GuildAdsInventory = {
 		GuildAdsInventory.Update();
 	end;
 	
-	SlotOnLoad = function()
-		local slotName = this:GetName();
+	SlotOnLoad = function(self)
+		local slotName = self:GetName();
 		local id, textureName = GetInventorySlotInfo(strsub(slotName,16));
-		this:SetID(id);
+		self:SetID(id);
 		local texture = getglobal(slotName.."IconTexture");
 		texture:SetTexture(textureName);
-		this.backgroundTextureName = textureName;
+		self.backgroundTextureName = textureName;
 	end;
 
 	SlotOnUpdate = function(playerName, slot)
@@ -79,28 +79,28 @@ GuildAdsInventory = {
 		end;
 	end;
 	
-	SlotOnEnter = function()
-		if this.itemRef then
-			GuildAdsInventory.SetTooltip(this.itemRef);
+	SlotOnEnter = function(self)
+		if self.itemRef then
+			GuildAdsInventory.SetTooltip(self, self.itemRef);
 		end
 	end;
 	
-	SlotOnLeave = function()
+	SlotOnLeave = function(self)
 		GameTooltip:Hide();
 	end;
 	
-	SlotOnClick = function(button)
+	SlotOnClick = function(self, button)
 		if ( button == "LeftButton" ) then
 			if IsShiftKeyDown() and ChatFrameEditBox:IsVisible() then
-				local itemName,itemLink,itemRarity=GetItemInfo(this.itemRef); 
+				local itemName,itemLink,itemRarity=GetItemInfo(self.itemRef); 
 				if (itemName) then
 					local r, g, b, hex = GetItemQualityColor(itemRarity)
 					local hexcol = string.gsub( hex, "|c(.+)", "%1" )
-					local link = "|c"..hexcol.."|H"..this.itemRef.."|h["..itemName.."]|h|r"
+					local link = "|c"..hexcol.."|H"..self.itemRef.."|h["..itemName.."]|h|r"
 					ChatFrameEditBox:Insert(link)
 				end				
 			elseif IsControlKeyDown() then 
-				DressUpItemLink(this.itemRef); 
+				DressUpItemLink(self.itemRef); 
 			end
 		end
 	end;
@@ -119,15 +119,15 @@ GuildAdsInventory = {
 		
 		if ( GameTooltip:IsOwned(button) ) then
 			if ( item ) then
-				GuildAdsInventory.SetTooltip(itemRef);
+				GuildAdsInventory.SetTooltip(button, itemRef);
 			else
 				GameTooltip:Hide();
 			end
 		end
 	end;
 	
-	SetTooltip = function(item)
-		GameTooltip:SetOwner(this, "ANCHOR_RIGHT");
+	SetTooltip = function(button, item)
+		GameTooltip:SetOwner(button, "ANCHOR_RIGHT");
 		if (item) then
 			GameTooltip:SetHyperlink(item);
 			GuildAdsUITools:TooltipAddTT(GameTooltip, nil, item, nil, 1);

@@ -119,7 +119,7 @@ local function HeapBubbleDown(index)
 	end
 end
 
-local function OnUpdate(frame, elapsed)
+local function OnUpdate(self, elapsed)
 	localtime = localtime + elapsed;
 	local schedule = heap[1]
 	while schedule and schedule.timeToFire < localtime do
@@ -152,7 +152,7 @@ local function OnUpdate(frame, elapsed)
 		end
 		schedule = heap[1]
 	end
-	if not schedule then frame:Hide() end
+	if not schedule then self:Hide() end
 end
 
 GuildAdsTask.HeapSwap = HeapSwap

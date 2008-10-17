@@ -19,7 +19,7 @@
 		</HighlightTexture>
 		<Scripts>
 			<OnLoad>
-				this:RegisterForClicks("LeftButtonDown", "RightButtonDown");
+				self:RegisterForClicks("LeftButtonDown", "RightButtonDown");
 			</OnLoad>
 		</Scripts>
 	</Button>

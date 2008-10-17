@@ -40,9 +40,9 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						PanelTemplates_SelectTab(this);
-						PanelTemplates_TabResize(0);
-						getglobal(this:GetName().."HighlightTexture"):SetWidth(this:GetTextWidth() + 31);
+						PanelTemplates_SelectTab(self);
+						PanelTemplates_TabResize(self, 0);
+						getglobal(self:GetName().."HighlightTexture"):SetWidth(self:GetTextWidth() + 31);
 					</OnLoad>
 					<OnClick>
 						GuildAdsSkill.selectTab(GUILDADSSKILL_TAB_PROFESSION);
@@ -316,7 +316,7 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 						</Anchors>
 						<Scripts>
 							<OnVerticalScroll>
-								FauxScrollFrame_OnVerticalScroll(GuildAdsSkill.GUILDADS_ADBUTTONSIZEY, GuildAdsSkill.skillButton.updateAll);
+								FauxScrollFrame_OnVerticalScroll(self, offset, GuildAdsSkill.GUILDADS_ADBUTTONSIZEY, GuildAdsSkill.skillButton.updateAll);
 							</OnVerticalScroll>
 						</Scripts>
 					</ScrollFrame>

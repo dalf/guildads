@@ -45,7 +45,7 @@
 						<Scripts>
 							<OnClick>
 								PlaySound("igChatBottom");
-								this:GetParent():ScrollToBottom();
+								self:GetParent():ScrollToBottom();
 							</OnClick>
 						</Scripts>
 						<NormalTexture file="Interface\ChatFrame\UI-ChatIcon-ScrollEnd-Up"/>
@@ -66,17 +66,17 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								MessageFrameScrollButton_OnLoad();
+								MessageFrameScrollButton_OnLoad(self);
 							</OnLoad>
 							<OnUpdate>
-								MessageFrameScrollButton_OnUpdate(arg1);
+								MessageFrameScrollButton_OnUpdate(self, elapsed);
 							</OnUpdate>
 							<OnClick>
-								if ( this:GetButtonState() == "PUSHED" ) then
-									this.clickDelay = MESSAGE_SCROLLBUTTON_INITIAL_DELAY;
+								if ( self:GetButtonState() == "PUSHED" ) then
+									self.clickDelay = MESSAGE_SCROLLBUTTON_INITIAL_DELAY;
 								else
 									PlaySound("igChatScrollDown");
-									this:GetParent():ScrollDown();
+									self:GetParent():ScrollDown();
 								end
 							</OnClick>
 						</Scripts>
@@ -94,17 +94,17 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								MessageFrameScrollButton_OnLoad();
+								MessageFrameScrollButton_OnLoad(self);
 							</OnLoad>
 							<OnUpdate>
-								MessageFrameScrollButton_OnUpdate(arg1);
+								MessageFrameScrollButton_OnUpdate(self, elapsed);
 							</OnUpdate>
 							<OnClick>
-								if ( this:GetButtonState() == "PUSHED" ) then
-									this.clickDelay = MESSAGE_SCROLLBUTTON_INITIAL_DELAY;
+								if ( self:GetButtonState() == "PUSHED" ) then
+									self.clickDelay = MESSAGE_SCROLLBUTTON_INITIAL_DELAY;
 								else
 									PlaySound("igChatScrollUp");
-									this:GetParent():ScrollUp();
+									self:GetParent():ScrollUp();
 								end
 							</OnClick>
 						</Scripts>
@@ -116,11 +116,11 @@
 				</Frames>
 				<Scripts>
 					<OnHyperlinkClick>
-						ChatFrame_OnHyperlinkShow(arg1, arg2, arg3);
+						ChatFrame_OnHyperlinkShow(self, link, text, button);
 					</OnHyperlinkClick>
 					<OnLoad>
-						this:SetBackdropColor(1,1,1,1);
-						this:EnableMouseWheel(1);
+						self:SetBackdropColor(1,1,1,1);
+						self:EnableMouseWheel(1);
 					</OnLoad>
 				</Scripts>
 				<FontString justifyH="LEFT" font="Fonts\ARIALN.TTF">
@@ -171,13 +171,13 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						this:RegisterForClicks("LeftButtonDown", "RightButtonDown");
+						self:RegisterForClicks("LeftButtonDown", "RightButtonDown");
 					</OnLoad>
 					<OnClick>
 						GuildAds_DebugPlugin.onClickStats();
 					</OnClick>
 					<OnEnter>
-						GameTooltip:SetOwner(this, "ANCHOR_RIGHT");
+						GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
 						GameTooltip:SetText("Right click to enable/disable CPU usage monitoring. It will reload the UI");
 					</OnEnter>
 					<OnLeave>
@@ -233,21 +233,21 @@
 		</Frames>
 		<Scripts>
 			<OnMouseUp>
-				if ( this.isMoving ) then
-					this:StopMovingOrSizing();
-					this.isMoving = false;
+				if ( self.isMoving ) then
+					self:StopMovingOrSizing();
+					self.isMoving = false;
 				end
 			</OnMouseUp>
 			<OnMouseDown>
-				if ( ( ( not this.isLocked ) or ( this.isLocked == 0 ) ) and ( arg1 == "LeftButton" ) ) then
-					this:StartMoving();
-					this.isMoving = true;
+				if ( ( ( not self.isLocked ) or ( self.isLocked == 0 ) ) and ( button == "LeftButton" ) ) then
+					self:StartMoving();
+					self.isMoving = true;
 				end
 			</OnMouseDown>
 			<OnHide>
-				if ( this.isMoving ) then
-					this:StopMovingOrSizing();
-					this.isMoving = false;
+				if ( self.isMoving ) then
+					self:StopMovingOrSizing();
+					self.isMoving = false;
 				end
 				GuildAdsDebug_Log:SetParent("GuildAdsDebugFrame");
 				GuildAdsDebug_Log:ClearAllPoints();
@@ -307,26 +307,26 @@
 		<Scripts>
 			<OnLoad>
 				GameTooltip_OnLoad();
-				this:SetPadding(16);
-				this:RegisterForDrag("LeftButton");
-				this:SetOwner(UIParent,"ANCHOR_PRESERVE")
-				this:SetScale(0.8)
-				this:SetUserPlaced(true);
+				self:SetPadding(16);
+				self:RegisterForDrag("LeftButton");
+				self:SetOwner(UIParent,"ANCHOR_PRESERVE")
+				self:SetScale(0.8)
+				self:SetUserPlaced(true);
 			</OnLoad>
 			<OnDragStart>
-				this:StartMoving();
+				self:StartMoving();
 			</OnDragStart>
 			<OnDragStop>
-				this:StopMovingOrSizing();
-				ValidateFramePosition(this);
+				self:StopMovingOrSizing();
+				ValidateFramePosition(self);
 			</OnDragStop> 			
 			<OnShow>
-				this.t = GetTime()
+				self.t = GetTime()
 			</OnShow>
 			<OnUpdate>
 				local t = GetTime()
-				if t-this.t >=3 then
-					this.t = t
+				if t-self.t >=3 then
+					self.t = t
 					GuildAds_DebugPlugin.displayStats()
 				end
 			</OnUpdate>

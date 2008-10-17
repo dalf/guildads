@@ -8,6 +8,18 @@
 -- Licence: GPL version 2 (General Public License)
 ----------------------------------------------------------------------------------
 
+--[[
+schema = {
+	keys = {
+		[1] = { key="Key", codec="Raw" }
+	},
+	id = "Raw",
+	data = {
+		[1] = { key="Data", codec="Raw" }
+	}
+}
+]]
+
 local nilFunction = function() end;
 
 GuildAdsFakeDataType = GuildAdsDataType:new();

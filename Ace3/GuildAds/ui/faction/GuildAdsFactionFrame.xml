@@ -458,7 +458,7 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 				</Anchors>
 				<Scripts>
 					<OnVerticalScroll>
-						FauxScrollFrame_OnVerticalScroll(GuildAdsSkill.GUILDADS_ADBUTTONSIZEY, GuildAdsFaction.factionButton.updateAll);
+						FauxScrollFrame_OnVerticalScroll(self, offset, GuildAdsSkill.GUILDADS_ADBUTTONSIZEY, GuildAdsFaction.factionButton.updateAll);
 					</OnVerticalScroll>
 				</Scripts>
 				<Layers>

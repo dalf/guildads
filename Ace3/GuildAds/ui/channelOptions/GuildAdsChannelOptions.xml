@@ -114,7 +114,7 @@
 			</Layers>
 			<Scripts>
 				<OnClick>
-					if this:GetChecked() then
+					if self:GetChecked() then
 						PlaySound("igMainMenuOptionCheckBoxOn");
 						GuildAds_ChatManualChannelConfig:SetChecked(0);
 						GuildAds_ChannelEditBox:Hide();
@@ -149,7 +149,7 @@
 			</Layers>
 			<Scripts>
 				<OnClick>
-					if ( this:GetChecked() ) then
+					if ( self:GetChecked() ) then
 						PlaySound("igMainMenuOptionCheckBoxOn");
 						GuildAds_ChatAutoChannelConfig:SetChecked(0);
 						GuildAds_ChannelEditBox:Show();

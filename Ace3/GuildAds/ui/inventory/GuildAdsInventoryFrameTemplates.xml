@@ -5,16 +5,16 @@
 	<Button name="GuildAdsInspectItemSlotButtonTemplate" inherits="ItemButtonTemplate" virtual="true">
         <Scripts>
             <OnLoad>
-				GuildAdsInventory.SlotOnLoad();
+				GuildAdsInventory.SlotOnLoad(self);
             </OnLoad>
             <OnClick>
-				GuildAdsInventory.SlotOnClick(arg1);
+				GuildAdsInventory.SlotOnClick(self, button);
             </OnClick>
             <OnEnter>
-				GuildAdsInventory.SlotOnEnter();
+				GuildAdsInventory.SlotOnEnter(self);
             </OnEnter>
             <OnLeave>
-				GuildAdsInventory.SlotOnLeave();
+				GuildAdsInventory.SlotOnLeave(self);
             </OnLeave>
         </Scripts>
 		<NormalTexture file="Interface\Buttons\UI-Quickslot2">

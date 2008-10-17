@@ -22,9 +22,9 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						PanelTemplates_SelectTab(this);
-						PanelTemplates_TabResize(0);
-						getglobal(this:GetName().."HighlightTexture"):SetWidth(this:GetTextWidth() + 31);
+						PanelTemplates_SelectTab(self);
+						PanelTemplates_TabResize(self, 0);
+						getglobal(self:GetName().."HighlightTexture"):SetWidth(self:GetTextWidth() + 31);
 					</OnLoad>
 					<OnClick>
 						GuildAdsTrade.selectTab(GuildAdsTrade.TAB_REQUEST);
@@ -86,8 +86,8 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								WhoFrameColumn_SetWidth(253);
-								this.sortType = "item";
+								WhoFrameColumn_SetWidth(self, 253);
+								self.sortType = "item";
 							</OnLoad>
 						</Scripts>
 					</Button>
@@ -101,8 +101,8 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								WhoFrameColumn_SetWidth(30);
-								this.sortType = "count";
+								WhoFrameColumn_SetWidth(self, 30);
+								self.sortType = "count";
 							</OnLoad>
 						</Scripts>
 					</Button>
@@ -116,8 +116,8 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								WhoFrameColumn_SetWidth(22);
-								this.sortType = "drop";
+								WhoFrameColumn_SetWidth(self, 22);
+								self.sortType = "drop";
 							</OnLoad>
 						</Scripts>
 					</Button>
@@ -131,8 +131,8 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								WhoFrameColumn_SetWidth(22);
-								this.sortType = "use";
+								WhoFrameColumn_SetWidth(self, 22);
+								self.sortType = "use";
 							</OnLoad>
 						</Scripts>
 					</Button>
@@ -146,8 +146,8 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								WhoFrameColumn_SetWidth(113);
-								this.sortType = "owner";
+								WhoFrameColumn_SetWidth(self, 113);
+								self.sortType = "owner";
 							</OnLoad>
 						</Scripts>
 					</Button>
@@ -161,8 +161,8 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								WhoFrameColumn_SetWidth(80);
-								this.sortType = "since";
+								WhoFrameColumn_SetWidth(self, 80);
+								self.sortType = "since";
 							</OnLoad>
 						</Scripts>
 					</Button>
@@ -176,8 +176,8 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								WhoFrameColumn_SetWidth(80);
-								this.sortType = "minlevel";
+								WhoFrameColumn_SetWidth(self, 80);
+								self.sortType = "minlevel";
 							</OnLoad>
 						</Scripts>
 					</Button>
@@ -376,7 +376,7 @@
 						</Anchors>
 						<Scripts>
 							<OnVerticalScroll>
-								FauxScrollFrame_OnVerticalScroll(GuildAdsTrade.GUILDADS_ADBUTTONSIZEY, GuildAdsTrade.exchangeButtonsUpdateScroll);
+								FauxScrollFrame_OnVerticalScroll(self, offset, GuildAdsTrade.GUILDADS_ADBUTTONSIZEY, GuildAdsTrade.exchangeButtonsUpdateScroll);
 							</OnVerticalScroll>
 						</Scripts>
 					</ScrollFrame>
@@ -402,8 +402,8 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								WhoFrameColumn_SetWidth(50);
-								this.sortType = "";
+								WhoFrameColumn_SetWidth(self, 50);
+								self.sortType = "";
 								GuildAdsMyAdsColumnHeader1Arrow:Hide();
 							</OnLoad>
 							<OnClick>
@@ -420,8 +420,8 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								WhoFrameColumn_SetWidth(40);
-								this.sortType = "";
+								WhoFrameColumn_SetWidth(self, 40);
+								self.sortType = "";
 								GuildAdsMyAdsColumnHeader2Arrow:Hide();
 							
 							</OnLoad>
@@ -439,8 +439,8 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								WhoFrameColumn_SetWidth(213);
-								this.sortType = "item";
+								WhoFrameColumn_SetWidth(self, 213);
+								self.sortType = "item";
 							</OnLoad>
 						</Scripts>
 					</Button>
@@ -454,8 +454,8 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								WhoFrameColumn_SetWidth(30);
-								this.sortType = "count";
+								WhoFrameColumn_SetWidth(self, 30);
+								self.sortType = "count";
 							</OnLoad>
 						</Scripts>
 					</Button>
@@ -469,8 +469,8 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								WhoFrameColumn_SetWidth(120);
-								this.sortType = "";
+								WhoFrameColumn_SetWidth(self, 120);
+								self.sortType = "";
 								GuildAdsMyAdsColumnHeader5Arrow:Hide();
 							
 							</OnLoad>
@@ -488,8 +488,8 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								WhoFrameColumn_SetWidth(80);
-								this.sortType = "since";
+								WhoFrameColumn_SetWidth(self, 80);
+								selfsortType = "since";
 							</OnLoad>
 						</Scripts>
 					</Button>
@@ -652,7 +652,7 @@
 						</Anchors>
 						<Scripts>
 							<OnVerticalScroll>
-								FauxScrollFrame_OnVerticalScroll(GuildAdsTrade.GUILDADS_ADBUTTONSIZEY, GuildAdsTrade.myAds.updateMyAdsFrame);
+								FauxScrollFrame_OnVerticalScroll(self, offset, GuildAdsTrade.GUILDADS_ADBUTTONSIZEY, GuildAdsTrade.myAds.updateMyAdsFrame);
 							</OnVerticalScroll>
 						</Scripts>
 					</ScrollFrame>
@@ -715,13 +715,13 @@
 						
 						<Scripts>
 							<OnShow>
-								this:ClearFocus();
+								self:ClearFocus();
 							</OnShow>
 							<OnEnterPressed>
-								this:ClearFocus();
+								self:ClearFocus();
 							</OnEnterPressed>
 							<OnEscapePressed>
-								this:ClearFocus();
+								self:ClearFocus();
 							</OnEscapePressed>
 							<!--
 							<OnTextChanged>
@@ -798,17 +798,17 @@
 						<HighlightTexture alphaMode="ADD" file="Interface\Buttons\ButtonHilight-Square"/>
 						<Scripts>
 							<OnEnter>
-								GameTooltip:SetOwner(this, "ANCHOR_RIGHT");
+								GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
 								if GuildAdsTrade.currentItem and GuildAdsTrade.currentItem~="" then
 									GameTooltip:SetHyperlink(GuildAdsTrade.currentItem);
-									CursorUpdate();
+									CursorUpdate(self);
 								else
 									GameTooltip:SetText(GUILDADS_TRADE_SHIFTCLICKHELP);
 								end
 							</OnEnter>
 							<OnLeave>
 								GameTooltip:Hide();
-								ResetCursor();
+								ResetCursor(self);
 							</OnLeave>
 						</Scripts>
 					</Button>
@@ -880,16 +880,16 @@
 								</Layers>
 								<Scripts>
 									<OnEnterPressed>
-										this:ClearFocus();
+										self:ClearFocus();
 									</OnEnterPressed>
 									<OnEscapePressed>
-										this:ClearFocus();
+										self:ClearFocus();
 									</OnEscapePressed>
 									<OnEditFocusLost>
-										this:HighlightText(0, 0);
+										self:HighlightText(0, 0);
 									</OnEditFocusLost>
 									<OnEditFocusGained>
-										this:HighlightText();
+										self:HighlightText();
 									</OnEditFocusGained>
 								</Scripts>
 								<FontString inherits="ChatFontNormal"/>
@@ -1185,7 +1185,7 @@
 				</Anchors>
 				<Scripts>
 					<OnVerticalScroll>
-						FauxScrollFrame_OnVerticalScroll(GuildAdsTrade.filterClass.BROWSE_FILTER_HEIGHT, GuildAdsTrade.filterClass.filterUpdate);
+						FauxScrollFrame_OnVerticalScroll(self, offset, GuildAdsTrade.filterClass.BROWSE_FILTER_HEIGHT, GuildAdsTrade.filterClass.filterUpdate);
 					</OnVerticalScroll>
 				</Scripts>
 			</ScrollFrame>
@@ -1235,7 +1235,7 @@
 				</ThumbTexture>
 				<Scripts>
 					<OnValueChanged>
-						GuildAdsTrade.onDateChange();
+						GuildAdsTrade.onDateChange(self);
 					</OnValueChanged>
 				</Scripts>
 			</Slider>
@@ -1253,8 +1253,8 @@
 				</Anchors>
 				<Scripts>
 					<OnEnterPressed>
-						GuildAdsTrade.setSearch(this:GetText());
-						this:ClearFocus();
+						GuildAdsTrade.setSearch(self:GetText());
+						self:ClearFocus();
 					</OnEnterPressed>
 				</Scripts>
 				<!-- <FontString inherits="ChatFontNormal" bytes="64"/> -->
@@ -1291,21 +1291,21 @@
 		</Frames>
 		<Scripts>
 			<OnMouseUp>
-				if ( this:GetParent():GetParent().isMoving ) then
-					this:GetParent():GetParent():StopMovingOrSizing();
-					this:GetParent():GetParent().isMoving = false;
+				if ( self:GetParent():GetParent().isMoving ) then
+					self:GetParent():GetParent():StopMovingOrSizing();
+					self:GetParent():GetParent().isMoving = false;
 				end
 			</OnMouseUp>
 			<OnMouseDown>
-				if ( ( ( not this:GetParent():GetParent().isLocked ) or ( this:GetParent():GetParent().isLocked == 0 ) ) and ( arg1 == "LeftButton" ) ) then
-					this:GetParent():GetParent():StartMoving();
-					this:GetParent():GetParent().isMoving = true;
+				if ( ( ( not self:GetParent():GetParent().isLocked ) or ( self:GetParent():GetParent().isLocked == 0 ) ) and ( arg1 == "LeftButton" ) ) then
+					self:GetParent():GetParent():StartMoving();
+					self:GetParent():GetParent().isMoving = true;
 				end
 			</OnMouseDown>
 			<OnHide>
-				if ( this:GetParent():GetParent().isMoving ) then
-					this:GetParent():GetParent():StopMovingOrSizing();
-					this:GetParent():GetParent().isMoving = false;
+				if ( self:GetParent():GetParent().isMoving ) then
+					self:GetParent():GetParent():StopMovingOrSizing();
+					self:GetParent():GetParent().isMoving = false;
 				end
 			</OnHide>
 		</Scripts>

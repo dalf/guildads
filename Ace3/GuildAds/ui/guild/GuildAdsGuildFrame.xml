@@ -59,8 +59,8 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 								</Anchors>
 								<Scripts>
 									<OnLoad>
-										WhoFrameColumn_SetWidth(113);
-										this.sortType = "name";
+										WhoFrameColumn_SetWidth(self, 113);
+										self.sortType = "name";
 									</OnLoad>
 								</Scripts>
 					</Button>
@@ -75,8 +75,8 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 								</Anchors>
 								<Scripts>
 									<OnLoad>
-										WhoFrameColumn_SetWidth(32);
-										this.sortType = "level";
+										WhoFrameColumn_SetWidth(self, 32);
+										self.sortType = "level";
 									</OnLoad>
 								</Scripts>
 							</Button>
@@ -90,8 +90,8 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 								</Anchors>
 								<Scripts>
 									<OnLoad>
-										WhoFrameColumn_SetWidth(92);
-										this.sortType = "class";
+										WhoFrameColumn_SetWidth(self, 92);
+										self.sortType = "class";
 									</OnLoad>
 								</Scripts>
 							</Button>
@@ -105,8 +105,8 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								WhoFrameColumn_SetWidth(100);
-								this.sortType = "race";
+								WhoFrameColumn_SetWidth(self, 100);
+								self.sortType = "race";
 							</OnLoad>
 						</Scripts>
 					</Button>
@@ -120,8 +120,8 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								WhoFrameColumn_SetWidth(170);
-								this.sortType = "info";
+								WhoFrameColumn_SetWidth(self, 170);
+								self.sortType = "info";
 							</OnLoad>
 						</Scripts>
 					</Button>
@@ -407,7 +407,7 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 						</Anchors>
 						<Scripts>
 							<OnVerticalScroll>
-								FauxScrollFrame_OnVerticalScroll(GuildAdsGuild.GUILDADS_ADBUTTONSIZEY, GuildAdsGuild.peopleButtonsUpdate);
+								FauxScrollFrame_OnVerticalScroll(self, offset, GuildAdsGuild.GUILDADS_ADBUTTONSIZEY, GuildAdsGuild.peopleButtonsUpdate);
 							</OnVerticalScroll>
 						</Scripts>
 					</ScrollFrame>
@@ -444,7 +444,7 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 				</Layers>
 				<Scripts>
 					<OnClick>
-						if ( this:GetChecked() ) then
+						if ( self:GetChecked() ) then
 							PlaySound("igMainMenuOptionCheckBoxOn");
 							GuildAdsGuild.setProfileValue(nil, "GroupByAccount", true);
 						else
@@ -487,7 +487,7 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 				</Layers>
 				<Scripts>
 					<OnClick>
-						if ( this:GetChecked() ) then
+						if ( self:GetChecked() ) then
 							PlaySound("igMainMenuOptionCheckBoxOn");
 							GuildAdsGuild.setProfileValue(nil, "HideOfflines", nil);
 						else
@@ -514,10 +514,10 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 				GuildAdsGuild.onShow();
 			</OnShow>
 			<OnUpdate>
-				GuildAdsGuild.onUpdate();
+				GuildAdsGuild.onUpdate(self, elapsed);
 			</OnUpdate>
 			<OnEvent>
-				GuildAdsGuild.onEvent(event);
+				GuildAdsGuild.onEvent(self, event, ...);
 			</OnEvent>
 		</Scripts> 
 	</Frame>

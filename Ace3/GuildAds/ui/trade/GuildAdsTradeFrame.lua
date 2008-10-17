@@ -268,10 +268,10 @@ GuildAdsTrade = {
 	end;
 	
 	-- ItemFilter	
-	onDateChange = function() 
+	onDateChange = function(self) 
 		if GuildAdsTrade.g_DateFilter[GuildAds_DateFilter:GetValue()] then
-			GuildAds_DateFilterLabel:SetText(GuildAdsDB:FormatTime(GuildAdsTrade.g_DateFilter[this:GetValue()], true));
-			GuildAdsTrade.setProfileValue(nil, "HideAdsOlderThan", GuildAdsTrade.g_DateFilter[this:GetValue()]);
+			GuildAds_DateFilterLabel:SetText(GuildAdsDB:FormatTime(GuildAdsTrade.g_DateFilter[self:GetValue()], true));
+			GuildAdsTrade.setProfileValue(nil, "HideAdsOlderThan", GuildAdsTrade.g_DateFilter[self:GetValue()]);
 		else
  			GuildAds_DateFilterLabel:SetText(GUILDADS_ITEMS.everything);
  			GuildAdsTrade.setProfileValue(nil, "HideAdsOlderThan", nil);
@@ -648,19 +648,19 @@ GuildAdsTrade = {
 	
 	myButton = {
 	
-		onClick = function(button)
-			GuildAdsTrade.select(this.adType, this.playerName, this.item);
+		onClick = function(self, button)
+			GuildAdsTrade.select(self.adType, self.playerName, self.item);
 			
 			if button == "RightButton" then
-				GuildAdsTrade.contextMenu.show();
+				GuildAdsTrade.contextMenu.show(self);
 			end
 			if this.item and button=="LeftButton" and IsControlKeyDown() then 
-				DressUpItemLink(this.item); 
+				DressUpItemLink(self.item); 
 			end
 		end;
 		
-		onEnter = function(obj)
-			GuildAdsTrade.exchangeButton.onEnter(obj);
+		onEnter = function(self)
+			GuildAdsTrade.exchangeButton.onEnter(self);
 		end
 	
 	};
@@ -671,13 +671,13 @@ GuildAdsTrade = {
 		--checkedList = { [GuildAdsTrade.TAB_REQUEST]={}; [GuildAdsTrade.TAB_AVAILABLE]={}; [GuildAdsTrade.TAB_CRAFTABLE]={} };
 		checkedList = { [1]={}; [2]={}; [3]={} };
 		
-		onClick = function(button)
-			if this.item and button=="LeftButton" and IsShiftKeyDown() and ChatFrameEditBox:IsVisible() then 
+		onClick = function(self, button)
+			if self.item and button=="LeftButton" and IsShiftKeyDown() and ChatFrameEditBox:IsVisible() then 
 				local thisitem,itemInfo;
 				if not IsAltKeyDown() then
-					thisItem=this.item;
+					thisItem=self.item;
 				else
-					thisItem=this.recipe;
+					thisItem=self.recipe;
 				end
 				itemInfo=GuildAds_ItemInfo[thisItem] or {};
 				if (thisItem and itemInfo and itemInfo.name) then
@@ -687,23 +687,23 @@ GuildAdsTrade = {
   					ChatFrameEditBox:Insert(link);
 				end
 			else
-				GuildAdsTrade.select(this.adType, this.playerName, this.item);
+				GuildAdsTrade.select(self.adType, self.playerName, self.item);
 			
 				if button == "RightButton" then
-					GuildAdsTrade.contextMenu.show();
+					GuildAdsTrade.contextMenu.show(self);
 				end
-				if this.item and button=="LeftButton" and IsControlKeyDown() then 
-					DressUpItemLink(this.item); 
+				if self.item and button=="LeftButton" and IsControlKeyDown() then 
+					DressUpItemLink(self.item); 
 				end
 			end
 		end;
 		
-		checkButton_OnClick = function()
-			local item=(this:GetParent()).item;
-			local playerName=(this:GetParent()).playerName;
-			local adType=(this:GetParent()).adType;
+		checkButton_OnClick = function(self)
+			local item=(self:GetParent()).item;
+			local playerName=(self:GetParent()).playerName;
+			local adType=(self:GetParent()).adType;
 			if item then
-				if this:GetChecked() then
+				if self:GetChecked() then
 					GuildAdsTrade.exchangeButton.checkedList[GuildAdsTrade.currentTab][item]=playerName;
 					--GuildAdsTrade.debug(item.." inserted into list with value "..tostring(playerName));
 				else
@@ -882,8 +882,8 @@ GuildAdsTrade = {
 			end
 		end;	
 		
-		onEnter = function(obj) 
-			obj = obj or this;
+		onEnter = function(self) 
+			obj = self;
 			
 			GuildAdsTrade.exchangeButton.currentButton=obj;
 			
@@ -894,11 +894,11 @@ GuildAdsTrade = {
 			-- set tooltip
 			local itemInfo;
 			if GuildAdsTrade.exchangeButton.altTooltip then
-				item=this.recipe;
+				item=self.recipe;
 			else
-				item=this.item;
+				item=self.item;
 			end
-			itemInfo=GuildAds_ItemInfo[this.item];
+			itemInfo=GuildAds_ItemInfo[self.item];
 			if item and itemInfo and itemInfo.name then -- GALMOK
 				GameTooltip:SetOwner(obj, "ANCHOR_BOTTOMRIGHT");
 				GameTooltip:SetHyperlink(item);
@@ -1335,46 +1335,46 @@ GuildAdsTrade = {
 		GA_CLASS_FILTERS = "guildadsclass";
 		ENCHANT = GUILDADS_SKILLS[9];
 		
-		onClick = function()
-			if ( this.type == "class" ) then
-				if ( GuildAdsTrade.filterClass.selectedClass == this:GetText() ) then
+		onClick = function(self)
+			if ( self.type == "class" ) then
+				if ( GuildAdsTrade.filterClass.selectedClass == self:GetText() ) then
 					GuildAdsTrade.filterClass.selectedClass = nil;
 					GuildAdsTrade.filterClass.selectedClassIndex = nil;
 				else
-					GuildAdsTrade.filterClass.selectedClass = this:GetText();
-					GuildAdsTrade.filterClass.selectedClassIndex = this.index;
+					GuildAdsTrade.filterClass.selectedClass = self:GetText();
+					GuildAdsTrade.filterClass.selectedClassIndex = self.index;
 				end
 				GuildAdsTrade.filterClass.selectedSubclass = nil;
 				GuildAdsTrade.filterClass.selectedSubclassIndex = nil;
 				GuildAdsTrade.filterClass.selectedInvtype = nil;
 				GuildAdsTrade.filterClass.selectedInvtypeIndex = nil;
-			elseif ( this.type == "guildadsclass" ) then
-				if ( GuildAdsTrade.filterClass.selectedClass == this:GetText() ) then
+			elseif ( self.type == "guildadsclass" ) then
+				if ( GuildAdsTrade.filterClass.selectedClass == self:GetText() ) then
 					GuildAdsTrade.filterClass.selectedClass = nil;
 					GuildAdsTrade.filterClass.selectedClassIndex = nil;
 				else
-					GuildAdsTrade.filterClass.selectedClass = this:GetText();
-					GuildAdsTrade.filterClass.selectedClassIndex = this.index;
+					GuildAdsTrade.filterClass.selectedClass = self:GetText();
+					GuildAdsTrade.filterClass.selectedClassIndex = self.index;
 				end
 				GuildAdsTrade.filterClass.selectedSubclass = nil;
 				GuildAdsTrade.filterClass.selectedSubclassIndex = nil;
 				GuildAdsTrade.filterClass.selectedInvtype = nil;
 				GuildAdsTrade.filterClass.selectedInvtypeIndex = nil;
-			elseif ( this.type == "subclass" ) then
-				if ( GuildAdsTrade.filterClass.selectedSubclass == this:GetText() ) then
+			elseif ( self.type == "subclass" ) then
+				if ( GuildAdsTrade.filterClass.selectedSubclass == self:GetText() ) then
 					GuildAdsTrade.filterClass.selectedSubclass = nil;
 					GuildAdsTrade.filterClass.selectedSubclassIndex = nil;
 				else
-					GuildAdsTrade.filterClass.selectedSubclass = this:GetText();
-					GuildAdsTrade.filterClass.selectedSubclassIndex = this.index;
+					GuildAdsTrade.filterClass.selectedSubclass = self:GetText();
+					GuildAdsTrade.filterClass.selectedSubclassIndex = self.index;
 				end
 				GuildAdsTrade.filterClass.selectedInvtype = nil;
 				GuildAdsTrade.filterClass.selectedInvtypeIndex = nil;
 				
-			elseif ( this.type == "invtype" ) then
-				GuildAdsTrade.filterClass.selectedInvtype = this:GetText();
-				GuildAdsTrade.debug("ttt"..this:GetText());
-				GuildAdsTrade.filterClass.selectedInvtypeIndex = this.index;
+			elseif ( self.type == "invtype" ) then
+				GuildAdsTrade.filterClass.selectedInvtype = self:GetText();
+				GuildAdsTrade.debug("ttt"..self:GetText());
+				GuildAdsTrade.filterClass.selectedInvtypeIndex = self.index;
 			end
 			GuildAdsTrade.filterClass.filterUpdate();
 			GuildAdsTrade.data.resetCache();
@@ -1518,8 +1518,8 @@ GuildAdsTrade = {
 			--GuildAdsTradeContextMenu.name = "Titre";			
 		end;
 	
-		show = function(owner)
-			GuildAdsTrade.contextMenu.currentItem=this.item;
+		show = function(self, owner)
+			GuildAdsTrade.contextMenu.currentItem=self.item;
 			HideDropDownMenu(1);
 			GuildAdsTradeContextMenu.name = "Title";
 			GuildAdsTradeContextMenu.owner = owner;
@@ -1551,7 +1551,7 @@ GuildAdsTrade = {
 			UIDropDownMenu_AddButton(info, 1);			
 		end;
 		
-		initialize = function(level)
+		initialize = function(frame, level)
 			if level==1 then
 				if type(GuildAdsTrade.currentPlayerName)=="string" then
 					GuildAdsPlayerMenu.initialize(GuildAdsTrade.currentPlayerName, 1);

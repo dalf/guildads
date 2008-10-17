@@ -120,16 +120,16 @@ GuildAdsShiftClick = {
 	end;
 	
 	-- Inventory
-	inventoryOnClick = function(button, ignoreShift)
+	inventoryOnClick = function(self, button, ignoreShift)
 		if(not ignoreShift and GuildAdsShiftClick.hookTest(button)) then
-			local texture, itemCount = GetContainerItemInfo(this:GetParent():GetID(), this:GetID());
-			local link = GetContainerItemLink(this:GetParent():GetID(), this:GetID());
+			local texture, itemCount = GetContainerItemInfo(self:GetParent():GetID(), self:GetID());
+			local link = GetContainerItemLink(self:GetParent():GetID(), self:GetID());
 			GuildAdsShiftClick.setItem(button, link, texture, itemCount);
 		end
 	end;
 
 	-- Link into chatframe	
-	chatFrameOnHyperlinkShow = function(link, text, button)
+	chatFrameOnHyperlinkShow = function(self, link, text, button)
 		if (GuildAdsShiftClick.hookTest(button)) and string.sub(link, 1, 5) == "item:" then
 			local info = GuildAds_ItemInfo[link] or {};
 			GuildAdsShiftClick.setItem(button, text, info.texture, 1);
@@ -137,32 +137,32 @@ GuildAdsShiftClick = {
 	end;
 	
 	-- Bank
-	bankOnClick = function(button)
+	bankOnClick = function(self, button)
 		if(GuildAdsShiftClick.hookTest(button)) then
-			local texture, itemCount = GetContainerItemInfo(BANK_CONTAINER, this:GetID());
-			local link = GetContainerItemLink(BANK_CONTAINER, this:GetID());
+			local texture, itemCount = GetContainerItemInfo(BANK_CONTAINER, self:GetID());
+			local link = GetContainerItemLink(BANK_CONTAINER, self:GetID());
 			GuildAdsShiftClick.setItem(button, link, texture, itemCount);
 		end
 	end;
 	
 	-- Paperdoll
-	paperdollOnClick = function(button, ignoreModifiers)
+	paperdollOnClick = function(self, button, ignoreModifiers)
 		if (GuildAdsShiftClick.hookTest(button) and not ignoreModifiers) then
-			local texture = GetInventoryItemTexture("player", this:GetID());
+			local texture = GetInventoryItemTexture("player", self:GetID());
 			local count;
 			if texture then
-				count = GetInventoryItemCount("player", this:GetID());
+				count = GetInventoryItemCount("player", self:GetID());
 			end
-			local link = GetInventoryItemLink("player", this:GetID());
+			local link = GetInventoryItemLink("player", self:GetID());
 			GuildAdsShiftClick.setItem(button, link, texture, count);
 		end
 	end;
 	
 	-- Merchant
-	merchantOnClick = function(button, ignoreModifiers)
+	merchantOnClick = function(self, button, ignoreModifiers)
 		if button=="LeftButton" and not ignoreModifiers and GuildAdsShiftClick.hookTest(button) then
-			local name, texture, price, quantity, numAvailable, isUsable = GetMerchantItemInfo(this:GetID());
-			local link = GetMerchantItemLink(this:GetID());
+			local name, texture, price, quantity, numAvailable, isUsable = GetMerchantItemInfo(self:GetID());
+			local link = GetMerchantItemLink(self:GetID());
 			if (quantity == 1) then
 				quantity = nil;
 			end

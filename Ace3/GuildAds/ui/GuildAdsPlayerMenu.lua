@@ -95,8 +95,8 @@ GuildAdsPlayerMenu = {
 		HideDropDownMenu(currentLevel);
 	end;
 	
-	whisper = function()
-		local owner = this.value;
+	whisper = function(self)
+		local owner = self.value;
 		if owner then
 			if ( not ChatFrameEditBox:IsVisible() ) then
 				ChatFrame_OpenChat("/w "..owner.." ");
@@ -107,8 +107,8 @@ GuildAdsPlayerMenu = {
 		end
 	end;
 	
-	inspect = function()
-		local owner = this.value;
+	inspect = function(self)
+		local owner = self.value;
 		if owner then
 			GuildAdsInspectWindow:Inspect(owner);
 			GuildAdsInventory:Update(true);
@@ -116,15 +116,15 @@ GuildAdsPlayerMenu = {
 		end
 	end;
 	
-	invite = function()
-		local owner = this.value;
+	invite = function(self)
+		local owner = self.value;
 		if owner then
 			InviteUnit(owner);
 		end
 	end;
 	
-	who = function()
-		local owner = this.value;
+	who = function(self)
+		local owner = self.value;
 		if owner then
 			local text = ChatFrameEditBox:GetText();
 			ChatFrameEditBox:SetText("/who "..owner);

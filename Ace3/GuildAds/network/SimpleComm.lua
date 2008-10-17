@@ -657,7 +657,7 @@ local function parseMetaMessage(author, callback, channel)
 	end	
 end
 
-local function onEvent(this, event)
+local function onEvent(self, event, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)
 	if currentChannel.name then
 		currentChannel.id = GetChannelName(currentChannel.name);
 		

@@ -46,7 +46,7 @@
 				</Anchor>
 			</Anchors>
 		</ButtonText>
-        <NormalFont inherits="GameFontHighlightSmall"/>
+	        <NormalFont inherits="GameFontHighlightSmall"/>
 		<NormalTexture name="$parentArrow" file="Interface\Buttons\UI-SortArrow">
 			<Size>
 				<AbsDimension x="9" y="8"/>
@@ -63,8 +63,8 @@
 
 		<Scripts>
 		<OnClick>
-				if ( this.sortType ) then
-					GuildAdsTrade.sortTrade(this.sortType);
+				if ( self.sortType ) then
+					GuildAdsTrade.sortTrade(self.sortType);
 				end
 				PlaySound("igMainMenuOptionCheckBoxOn");
 		</OnClick>
@@ -94,14 +94,14 @@
 		</Layers>
 		<Scripts>
 			<OnClick>
-				GuildAdsTrade.filterClass.onClick();
+				GuildAdsTrade.filterClass.onClick(self);
 			</OnClick>
 		</Scripts>
 		<NormalTexture name="$parentNormalTexture" file="Interface\AuctionFrame\UI-AuctionFrame-FilterBg">
 			<TexCoords left="0" right="0.53125" top="0" bottom="0.625"/>
 		</NormalTexture>
 		<HighlightTexture file="Interface\PaperDollInfoFrame\UI-Character-Tab-Highlight" alphaMode="ADD"/>
-		<ButtonText name="$parentNormalText">
+		<ButtonText name="$parentNormalText" inherits="GameFontNormalSmall" justifyH="LEFT">
 			<Size>
 				<AbsDimension x="115" y="8"/>
 			</Size>
@@ -160,7 +160,7 @@
 			<TexCoords left="0" right="0.53125" top="0" bottom="0.625"/>
 		</NormalTexture>
 		<HighlightTexture file="Interface\PaperDollInfoFrame\UI-Character-Tab-Highlight" alphaMode="ADD"/>
-		<ButtonText name="$parentNormalText" justifyH="LEFT">
+		<ButtonText name="$parentNormalText" inherits="GameFontSmall" justifyH="LEFT">
 			<Anchors>
 				<Anchor point="LEFT">
 					<Offset>
@@ -169,7 +169,7 @@
 				</Anchor>
 			</Anchors>
 		</ButtonText>
-        <NormalFont inherits="GameFontHighlightSmall"/>
+        	<NormalFont inherits="GameFontHighlightSmall"/>
 		<HighlightText name="$parentHighlightText" inherits="GameFontHighlightSmall" justifyH="LEFT">
 			<Anchors>
 				<Anchor point="LEFT">
@@ -199,7 +199,7 @@
 		</HighlightTexture>
 		<Scripts>
 			<OnLoad>
-				this:RegisterForClicks("LeftButtonDown", "RightButtonDown");
+				self:RegisterForClicks("LeftButtonDown", "RightButtonDown");
 			</OnLoad>
 		</Scripts>
 	</Button>
@@ -320,25 +320,25 @@
 				<DisabledCheckedTexture file="Interface\Buttons\UI-CheckBox-Check-Disabled"/>
 				<Scripts>
 					<OnLoad>
-						this:SetChecked(false);
+						self:SetChecked(false);
 					</OnLoad>
 					<OnClick>
-						GuildAdsTrade.exchangeButton.checkButton_OnClick();
+						GuildAdsTrade.exchangeButton.checkButton_OnClick(self);
 					</OnClick>
 				</Scripts>
 			</CheckButton>
 		</Frames>
 		<Scripts>
 			<OnClick>
-				GuildAdsTrade.exchangeButton.onClick(arg1);
+				GuildAdsTrade.exchangeButton.onClick(self, button);
 			</OnClick>
 			<OnEnter>
-				GuildAdsTrade.exchangeButton.onEnter();
-				this:SetScript("OnUpdate",GuildAdsTrade.exchangeButton.onUpdate);
+				GuildAdsTrade.exchangeButton.onEnter(self);
+				self:SetScript("OnUpdate",GuildAdsTrade.exchangeButton.onUpdate);
 			</OnEnter>
 			<OnLeave>
 				GameTooltip:Hide();
-				this:SetScript("OnUpdate",nil);
+				self:SetScript("OnUpdate",nil);
 			</OnLeave>
 		</Scripts>
 	</Button>
@@ -418,7 +418,7 @@
 				<DisabledCheckedTexture file="Interface\Buttons\UI-CheckBox-Check-Disabled"/>
 				<Scripts>
 					<OnLoad>
-						this:SetChecked(false);
+						self:SetChecked(false);
 					</OnLoad>
 					<OnClick>
 						GuildAdsTrade.myAds.myAdCheckButton_OnClick();
@@ -462,10 +462,10 @@
 		</Frames>
 		<Scripts>
 			<OnEnter>
-				GuildAdsTrade.myButton.onEnter();
+				GuildAdsTrade.myButton.onEnter(self);
 			</OnEnter>
 			<OnClick>
-				GuildAdsTrade.myButton.onClick(arg1);
+				GuildAdsTrade.myButton.onClick(self, button);
 			</OnClick>
 			<OnLeave>
 				GameTooltip:Hide();

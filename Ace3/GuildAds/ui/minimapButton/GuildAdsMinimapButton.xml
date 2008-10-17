@@ -65,14 +65,14 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						getglobal(this:GetName().."Text"):SetText(GUILDADS_ICON.." - "..GUILDADS_ADJUST_ANGLE);
-						getglobal(this:GetName().."High"):SetText("360");
-						getglobal(this:GetName().."Low"):SetText("0");
-						this:SetMinMaxValues(0,360);
-						this:SetValueStep(1);
+						getglobal(self:GetName().."Text"):SetText(GUILDADS_ICON.." - "..GUILDADS_ADJUST_ANGLE);
+						getglobal(self:GetName().."High"):SetText("360");
+						getglobal(self:GetName().."Low"):SetText("0");
+						self:SetMinMaxValues(0,360);
+						self:SetValueStep(1);
 					</OnLoad>
 					<OnValueChanged>
-						GuildAdsMinimapButtonCore.setConfigValue(nil, "ArcOffset", this:GetValue());
+						GuildAdsMinimapButtonCore.setConfigValue(nil, "ArcOffset", self:GetValue());
 					</OnValueChanged>
 				</Scripts>
 			</Slider>
@@ -90,14 +90,14 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						getglobal(this:GetName().."Text"):SetText(GUILDADS_ICON.." - "..GUILDADS_ADJUST_RADIUS);
-						getglobal(this:GetName().."High"):SetText("150");
-						getglobal(this:GetName().."Low"):SetText("0");
-						this:SetMinMaxValues(0,150);
-						this:SetValueStep(1);
+						getglobal(self:GetName().."Text"):SetText(GUILDADS_ICON.." - "..GUILDADS_ADJUST_RADIUS);
+						getglobal(self:GetName().."High"):SetText("150");
+						getglobal(self:GetName().."Low"):SetText("0");
+						self:SetMinMaxValues(0,150);
+						self:SetValueStep(1);
 					</OnLoad>
 					<OnValueChanged>
-						GuildAdsMinimapButtonCore.setConfigValue(nil, "RadiusOffset", this:GetValue());
+						GuildAdsMinimapButtonCore.setConfigValue(nil, "RadiusOffset", self:GetValue());
 					</OnValueChanged>
 				</Scripts>
 			</Slider>

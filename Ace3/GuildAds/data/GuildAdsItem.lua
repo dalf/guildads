@@ -106,6 +106,14 @@ do
 			t.texture = "Interface/Icons/Spell_Holy_GreaterHeal";
 			t.type = GUILDADS_SKILLS[9];
 			t.subtype = "";
+		else
+			local found, _, itemLink1 = string.find(_ITT.currentItemRef, "spell:(%d+)");
+			if found then
+				local t = _ItemInfo[_ITT.currentItemRef];
+				t.texture = "Interface/Icons/INV_Inscription_MajorGlyph";
+				t.type = GUILDADS_SKILLS[15];
+				t.subtype = "";
+			end	
 		end
 		
 		-- hide tooltip
@@ -249,6 +257,11 @@ function GuildAds_GetItemInfo(itemRef, needTooltipInformation)
 		if not found then
 			-- for enchant:xxx
 			found, _, itemLink1 = string.find(itemRef, "enchant:(%d+)");
+			if found then
+				AddItem(itemRef);
+			end
+			-- for spell:xxx
+			found, _, itemLink1 = string.find(itemRef, "spell:(%d+)");
 			if found then
 				AddItem(itemRef);
 			end

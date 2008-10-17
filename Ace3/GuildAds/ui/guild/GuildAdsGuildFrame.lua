@@ -66,7 +66,7 @@ GuildAdsGuild = {
 		end		
 	end;
 	
-	onEvent = function()
+	onEvent = function(self, event, arg1)
 		if event=="CHAT_MSG_SYSTEM" then
 			local _, _, playerName = string.find(arg1, FRIEND_OFFLINE_FILTER);
 			if not playerName then
@@ -81,11 +81,11 @@ GuildAdsGuild = {
 		end
 	end;
 	
-	onUpdate = function()
-		if this.update then
-			this.update = this.update - arg1;
-			if this.update<=0 then
-				this.update = nil;
+	onUpdate = function(self, elapsed)
+		if self.update then
+			self.update = self.update - elapsed;
+			if self.update<=0 then
+				self.update = nil;
 				GuildAdsGuild.peopleButtonsUpdate(true);
 				GuildAdsGuild.peopleCountUpdate();
 			end;
@@ -142,6 +142,12 @@ GuildAdsGuild = {
 	--
 	---------------------------------------------------------------------------------
 	onInit = function()
+		-- Init g_AdFilters
+		g_AdFilters = {};
+		for id, name in pairs(GUILDADS_CLASSES) do
+			tinsert(g_AdFilters, { id=id, name=name});
+		end
+		
 		UIDropDownMenu_Initialize(GuildAds_Filter_ClassDropDown, GuildAdsGuild.classFilter.init);
 		UIDropDownMenu_SetText(FILTER, GuildAds_Filter_ClassDropDown);
 		UIDropDownMenu_SetWidth(100, GuildAds_Filter_ClassDropDown);
@@ -158,12 +164,6 @@ GuildAdsGuild = {
 			GuildAdsGuildShowOfflinesCheckButton:SetChecked(1);
 		end
 		
-		-- Init g_AdFilters
-		g_AdFilters = {};
-		for id, name in pairs(GUILDADS_CLASSES) do
-			tinsert(g_AdFilters, { id=id, name=name});
-		end
-
 	end;
 	
 	---------------------------------------------------------------------------------
@@ -347,11 +347,11 @@ GuildAdsGuild = {
 	---------------------------------------------------------------------------------	
 	peopleButton = {
 		
-		onClick = function()
-			if this.owner then
-				if IsControlKeyDown() and arg1=="LeftButton" and GuildAdsGuild.currentPlayerName then
+		onClick = function(self, button)
+			if self.owner then
+				if IsControlKeyDown() and button=="LeftButton" and GuildAdsGuild.currentPlayerName then
 					-- ctrl-click = group with an account
-					local playerName = this.owner;
+					local playerName = self.owner;
 					local linkToPlayerName = GuildAdsGuild.currentPlayerName;
 					if GuildAdsDB.profile.Main:getRevision(playerName)==0 then
 						local account = GuildAdsDB.profile.Main:get(linkToPlayerName, GuildAdsDB.profile.Main.Account) or GuildAdsDB:CreateAccount();
@@ -363,7 +363,7 @@ GuildAdsGuild = {
 					GuildAdsGuild.peopleButtonsUpdate(true);
 					GuildAdsGuild.peopleCountUpdate();
 					
-				elseif this.owner==GuildAdsGuild.currentPlayerName and this.reroll==GuildAdsGuild.currentRerollName and arg1~="RightButton" then
+				elseif self.owner==GuildAdsGuild.currentPlayerName and self.reroll==GuildAdsGuild.currentRerollName and button~="RightButton" then
 					-- same player was clicked = unselect
 					GuildAdsGuild.currentPlayerName = nil;
 					GuildAdsGuild.currentRerollName = nil;
@@ -377,20 +377,19 @@ GuildAdsGuild = {
 				
 				SetCursor(nil);
 				
-				if arg1 == "RightButton" then
+				if button == "RightButton" then
 					GuildAdsGuild.contextMenu.show(GuildAdsGuild.currentRerollName or GuildAdsGuild.currentPlayerName);
 				end
 			end
 		end;
 		
-		onEnter = function(obj)
-			obj = obj or this;
-			local owner = obj.reroll or obj.owner;
+		onEnter = function(self)
+			local owner = self.reroll or self.owner;
 			if (not owner) then
 				return;
 			end
 			
-			GameTooltip:SetOwner(obj, "ANCHOR_BOTTOMRIGHT");
+			GameTooltip:SetOwner(self, "ANCHOR_BOTTOMRIGHT");
 			
 			-- Add player name
 			local ocolor = GuildAdsUITools.onlineColor[GuildAdsGuild.isOnline(owner)];
@@ -545,7 +544,7 @@ GuildAdsGuild = {
 			GuildAdsPlayerMenu.header(GuildAdsGuildContextMenu.owner, 1);
 			GuildAdsPlayerMenu.menus(GuildAdsGuildContextMenu.owner, 1);
 			-- 
-			if 		GuildAdsDB.profile.Main:getRevision(GuildAdsGuildContextMenu.owner)==0 
+			if GuildAdsDB.profile.Main:getRevision(GuildAdsGuildContextMenu.owner)==0 
 				and GuildAdsDB.profile.Main:get(GuildAdsGuildContextMenu.owner, GuildAdsDB.profile.Main.Account) ~= nil then
 				info = { };
 				info.text =  GUILDADS_GUILD_DEGROUP;
@@ -570,18 +569,18 @@ GuildAdsGuild = {
 			GuildAdsPlayerMenu.footer(GuildAdsGuildContextMenu.owner, 1);
 		end;
 		
-		resetAccount = function()
-			if this.value then
-				GuildAdsDB.profile.Main:setRaw(this.value, GuildAdsDB.profile.Main.Account, nil);
+		resetAccount = function(self)
+			if self.value then
+				GuildAdsDB.profile.Main:setRaw(self.value, GuildAdsDB.profile.Main.Account, nil);
 				GuildAdsGuild.peopleButtonsUpdate(true);
 				GuildAdsGuild.peopleCountUpdate();
 			end
 		end;
 		
-		deletePlayer = function()
-			if this.value then
-				GuildAdsGuild.debug("Blacklisting player "..this.value.." from GuildAds database");
-				GuildAdsDB.channel[GuildAds.channelName]:DenyPlayerGuild(this.value);
+		deletePlayer = function(self)
+			if self.value then
+				GuildAdsGuild.debug("Blacklisting player "..self.value.." from GuildAds database");
+				GuildAdsDB.channel[GuildAds.channelName]:DenyPlayerGuild(self.value);
 			end
 		end;
 			
@@ -640,13 +639,13 @@ GuildAdsGuild = {
 			UIDropDownMenu_AddButton(info);		
 		end;
 		
-		onClick = function()
-			if GuildAdsGuild.getProfileValue("Filters", this.value) then
+		onClick = function(self)
+			if GuildAdsGuild.getProfileValue("Filters", self.value) then
 				PlaySound("igMainMenuOptionCheckBoxOff");
-				GuildAdsGuild.setProfileValue("Filters", this.value, nil);
+				GuildAdsGuild.setProfileValue("Filters", self.value, nil);
 			else
 				PlaySound("igMainMenuOptionCheckBoxOn");
-				GuildAdsGuild.setProfileValue("Filters", this.value, true);
+				GuildAdsGuild.setProfileValue("Filters", self.value, true);
 			end
 			GuildAdsGuild.peopleButtonsUpdate(true);
 			GuildAdsGuild.peopleCountUpdate();

@@ -29,8 +29,8 @@
 	<Frame name="GuildAdsConfig_OptionFrameBoxTemplate" inherits="OptionFrameBoxTemplate" virtual="true">		
 		<Scripts>
 			<OnLoad>
-				this:SetBackdropBorderColor(0.4, 0.4, 0.4);
-				this:SetBackdropColor(0.15, 0.15, 0.15);
+				self:SetBackdropBorderColor(0.4, 0.4, 0.4);
+				self:SetBackdropColor(0.15, 0.15, 0.15);
 			</OnLoad>
 		</Scripts>
 	</Frame>

@@ -379,6 +379,7 @@ GuildAdsFaction = {
 					--local button = getglobal("GuildAdsReputationBar"..i);
 					local factionBar = getglobal("GuildAdsReputationBar"..i);
 					local factionHeader = getglobal("GuildAdsReputationHeader"..i);
+					local factionHeaderText = getglobal("GuildAdsReputationHeader"..i.."NormalText");
 					--GuildAdsFaction.debug("i="..i.." j="..j);
 					if (j <= linearSize) then
 						--GuildAdsFaction.debug("linear[j].i="..linear[j].i);
@@ -436,7 +437,7 @@ GuildAdsFaction = {
 							
 							--GuildAdsFaction.debug("Header="..GuildAdsFactionDataType:getNameFromId(linear[j].i));
 							-- empty line
-							factionHeader:SetText(GuildAdsFactionDataType:getNameFromId(linear[j].i));
+							factionHeaderText:SetText(GuildAdsFactionDataType:getNameFromId(linear[j].i));
 							factionBar:Hide();
 							factionHeader:Show();
 							--GuildAdsFaction.factionButton.delete(button);

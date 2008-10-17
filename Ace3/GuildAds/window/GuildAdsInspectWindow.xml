@@ -68,21 +68,21 @@
 		</Frames>
 	<Scripts>
 		<OnMouseUp>
-			if ( this.isMoving ) then
-				this:StopMovingOrSizing();
-				this.isMoving = false;
+			if ( self.isMoving ) then
+				self:StopMovingOrSizing();
+				self.isMoving = false;
 			end
 		</OnMouseUp>
 		<OnMouseDown>
-			if ( ( ( not this.isLocked ) or ( this.isLocked == 0 ) ) and ( arg1 == "LeftButton" ) ) then
-				this:StartMoving();
-				this.isMoving = true;
+			if ( ( ( not self.isLocked ) or ( self.isLocked == 0 ) ) and ( button == "LeftButton" ) ) then
+				self:StartMoving();
+				self.isMoving = true;
 			end
 		</OnMouseDown>
 		<OnHide>
-			if ( this.isMoving ) then
-				this:StopMovingOrSizing();
-				this.isMoving = false;
+			if ( self.isMoving ) then
+				self:StopMovingOrSizing();
+				self.isMoving = false;
 			end
 		</OnHide>
 	</Scripts>

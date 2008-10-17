@@ -7,10 +7,10 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 		</Size>
 		<Scripts>
 			<OnClick>
-				if (this.isCollapsed) then
-					GuildAdsFaction.filters.ExpandFactionHeader(this.id);
+				if (self.isCollapsed) then
+					GuildAdsFaction.filters.ExpandFactionHeader(self.id);
 				else
-					GuildAdsFaction.filters.CollapseFactionHeader(this.id);
+					GuildAdsFaction.filters.CollapseFactionHeader(self.id);
 				end
 			</OnClick>
 		</Scripts>
@@ -38,7 +38,7 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 				</Anchor>
 			</Anchors>
 		</HighlightTexture>
-		<ButtonText name="$parentNormalText">
+		<ButtonText name="$parentNormalText" inherits="GameFontNormal" justifyH="LEFT">
 			<Size>
 				<AbsDimension x="275" y="12"/>
 			</Size>
@@ -188,17 +188,17 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 		</Frames>
 		<Scripts>
 			<OnEnter>
-				if (this.tooltip) then
-					getglobal(this:GetName().."FactionStanding"):SetText(this.tooltip);
+				if (self.tooltip) then
+					getglobal(self:GetName().."FactionStanding"):SetText(self.tooltip);
 				end
-				getglobal(this:GetName().."Highlight1"):Show();
-				getglobal(this:GetName().."Highlight2"):Show();
+				getglobal(self:GetName().."Highlight1"):Show();
+				getglobal(self:GetName().."Highlight2"):Show();
 			</OnEnter>
 			<OnLeave>
-				getglobal(this:GetName().."FactionStanding"):SetText(this.standingText);
+				getglobal(self:GetName().."FactionStanding"):SetText(self.standingText);
 				--if (GetSelectedFaction() ~= this.id) then
-					getglobal(this:GetName().."Highlight1"):Hide();
-					getglobal(this:GetName().."Highlight2"):Hide();
+					getglobal(self:GetName().."Highlight1"):Hide();
+					getglobal(self:GetName().."Highlight2"):Hide();
 				--end
 			</OnLeave>
 			<OnMouseUp>

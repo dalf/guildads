@@ -99,7 +99,7 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 		</Frames>
 		<Scripts>
 			<OnLoad>
-				this:RegisterForClicks("LeftButtonDown", "RightButtonDown");
+				self:RegisterForClicks("LeftButtonDown", "RightButtonDown");
 			</OnLoad>
 			<OnLeave>
 				GameTooltip:Hide();
@@ -144,7 +144,7 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 		</Layers>
 		<Scripts>
 		    <OnClick>
-				GuildAdsSkill.filterBySkillButton.set(this.skillId, nil, true);
+				GuildAdsSkill.filterBySkillButton.set(self.skillId, nil, true);
 			</OnClick>
 			<OnEnter>
 				GuildAdsSkill.filterBySkillButton.onEnter();

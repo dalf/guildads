@@ -38,13 +38,13 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 		</Layers>
 		<Scripts>
 			<OnClick>
-				if ( this.sortType ) then
-					GuildAdsGuild.sortGuildAdsRoster(this.sortType);
+				if ( self.sortType ) then
+					GuildAdsGuild.sortGuildAdsRoster(self.sortType);
 				end
 				PlaySound("igMainMenuOptionCheckBoxOn");
 			</OnClick>
 		</Scripts>
-		<ButtonText>
+		<ButtonText inherits="GameFontHighlightSmall">
 			<Anchors>
 				<Anchor point="LEFT">
 					<Offset>
@@ -53,7 +53,7 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 				</Anchor>
 			</Anchors>
 		</ButtonText>
-        <NormalFont inherits="GameFontHighlightSmall"/>
+        	<NormalFont inherits="GameFontHighlightSmall"/>
 	</Button>
 	
 	<Button name="GuildAdsGuildAdButtonTemplate" virtual="true">
@@ -138,13 +138,13 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 		</Layers>
 		<Scripts>
 			<OnLoad>
-				this:RegisterForClicks("LeftButtonDown", "RightButtonDown");
+				self:RegisterForClicks("LeftButtonDown", "RightButtonDown");
 			</OnLoad>
 			<OnClick>
-				GuildAdsGuild.peopleButton.onClick();
+				GuildAdsGuild.peopleButton.onClick(self, button);
 			</OnClick>
 			<OnEnter>
-				GuildAdsGuild.peopleButton.onEnter();
+				GuildAdsGuild.peopleButton.onEnter(self);
 			</OnEnter>
 			<OnLeave>
 				GameTooltip:Hide();

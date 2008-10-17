@@ -92,7 +92,7 @@
 			<OnEnter>
 				--GameTooltip:SetOwner(this, "ANCHOR_RIGHT");
 				--GameTooltip:SetTalent(TalentFrame.selectedTab, this:GetID());
-				GuildAdsTalentUI.talentButtonOnEnter(this:GetID());
+				GuildAdsTalentUI.talentButtonOnEnter(self:GetID());
 			</OnEnter>
 			<OnLeave>
 				GameTooltip:Hide();
