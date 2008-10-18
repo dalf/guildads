@@ -124,7 +124,7 @@ GuildAdsSkill = {
 	end;
 	
 	onDBUpdate = function(dataType, playerName, id)
-		GuildAdsSkill.skillButton.updateAll(true);
+		GuildAdsSkill.skillButton.updateAll(nil, true);
 	end;
 	
 	onShow = function()
@@ -284,7 +284,7 @@ GuildAdsSkill = {
 					end
 				end
 			end
-			GuildAdsSkill.skillButton.updateAll(true);			
+			GuildAdsSkill.skillButton.updateAll(nil, true);			
 		end;
 		
 		update = function(i, j, status)
@@ -342,7 +342,7 @@ GuildAdsSkill = {
 					GuildAdsSkill.filterBySkillButton.initialize(i, j);
 				end
 			end
-			GuildAdsSkill.skillButton.updateAll(true);		
+			GuildAdsSkill.skillButton.updateAll(nil, true);		
 		end;
 		
 		onEnter = function()
@@ -404,7 +404,7 @@ GuildAdsSkill = {
 			getglobal(skillBar):Show();
 		end;
 		
-		updateAll = function(updateData)
+		updateAll = function(self, updateData)
 		
 			if GuildAdsSkillFrame:IsVisible() then
 				local offset = FauxScrollFrame_GetOffset(GuildAdsSkillAdScrollFrame);

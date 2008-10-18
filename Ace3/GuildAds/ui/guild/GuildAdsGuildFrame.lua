@@ -36,10 +36,10 @@ GuildAdsGuild = {
 	
 	onConfigChanged = function(path, key, value)
 		if key=="GroupByAccount" then
-			GuildAdsGuild.peopleButtonsUpdate(true);
+			GuildAdsGuild.peopleButtonsUpdate(nil, true);
 			GuildAdsGuild.peopleCountUpdate();
 		elseif key=="HideOfflines" then
-			GuildAdsGuild.peopleButtonsUpdate(true);
+			GuildAdsGuild.peopleButtonsUpdate(nil, true);
 			GuildAdsGuild.peopleCountUpdate();
 		end
 	end;
@@ -50,7 +50,7 @@ GuildAdsGuild = {
 	end;
 	
 	onConnection = function(playerName, status) 
-		GuildAdsGuild.peopleButtonsUpdate(true);
+		GuildAdsGuild.peopleButtonsUpdate(nil, true);
 		GuildAdsGuild.peopleCountUpdate();
 		
 		-- show connected status except for my guild
@@ -86,7 +86,7 @@ GuildAdsGuild = {
 			self.update = self.update - elapsed;
 			if self.update<=0 then
 				self.update = nil;
-				GuildAdsGuild.peopleButtonsUpdate(true);
+				GuildAdsGuild.peopleButtonsUpdate(nil, true);
 				GuildAdsGuild.peopleCountUpdate();
 			end;
 		end;
@@ -133,7 +133,7 @@ GuildAdsGuild = {
 		else 
 			GuildAdsGuild.sortData.currentWay[sortValue]="normal";
 		end
-		GuildAdsGuild.peopleButtonsUpdate(true);
+		GuildAdsGuild.peopleButtonsUpdate(nil, true);
 	end;
 	
 	---------------------------------------------------------------------------------
@@ -251,7 +251,7 @@ GuildAdsGuild = {
 	-- Update global ad buttons in the UI
 	-- 
 	---------------------------------------------------------------------------------
-	peopleButtonsUpdate = function(updateData)
+	peopleButtonsUpdate = function(self, updateData)
 		if GuildAdsGuildFrame:IsVisible() then
 			GuildAdsGuild.debug("peopleButtonsUpdate("..tostring(updateData)..")");
 			local offset = FauxScrollFrame_GetOffset(GuildAdsPeopleGlobalAdScrollFrame);
@@ -360,7 +360,7 @@ GuildAdsGuild = {
 						end
 						GuildAdsDB.profile.Main:setRaw(playerName, GuildAdsDB.profile.Main.Account, account);
 					end
-					GuildAdsGuild.peopleButtonsUpdate(true);
+					GuildAdsGuild.peopleButtonsUpdate(nil, true);
 					GuildAdsGuild.peopleCountUpdate();
 					
 				elseif self.owner==GuildAdsGuild.currentPlayerName and self.reroll==GuildAdsGuild.currentRerollName and button~="RightButton" then
@@ -572,7 +572,7 @@ GuildAdsGuild = {
 		resetAccount = function(self)
 			if self.value then
 				GuildAdsDB.profile.Main:setRaw(self.value, GuildAdsDB.profile.Main.Account, nil);
-				GuildAdsGuild.peopleButtonsUpdate(true);
+				GuildAdsGuild.peopleButtonsUpdate(nil, true);
 				GuildAdsGuild.peopleCountUpdate();
 			end
 		end;
@@ -647,7 +647,7 @@ GuildAdsGuild = {
 				PlaySound("igMainMenuOptionCheckBoxOn");
 				GuildAdsGuild.setProfileValue("Filters", self.value, true);
 			end
-			GuildAdsGuild.peopleButtonsUpdate(true);
+			GuildAdsGuild.peopleButtonsUpdate(nil, true);
 			GuildAdsGuild.peopleCountUpdate();
 		end;
 		

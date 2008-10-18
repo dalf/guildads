@@ -63,7 +63,7 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 		</HitRectInsets>
 		<Layers>
 			<Layer level="ARTWORK">
-				<Texture name="$parentReputationBarLeft" file="Interface\PaperDollInfoFrame\UI-Character-ReputationBar">
+				<!--<Texture name="$parentReputationBarLeft" file="Interface\PaperDollInfoFrame\UI-Character-ReputationBar">
 					<Size>
 						<AbsDimension x="256" y="22"/>
 					</Size>
@@ -88,6 +88,58 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 						</Anchor>
 					</Anchors>
 					<TexCoords left="0" right="0.0625" top="0.34375" bottom="0.71875"/>
+				</Texture>-->
+				<Texture name="$parentReputationBarLeft" file="Interface\PaperDollInfoFrame\UI-Character-ReputationBar">
+					<Size>
+						<AbsDimension x="123" y="22"/> <!-- 256 - 123 = 133 -->
+					</Size>
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset>
+								<AbsDimension x="-126" y="4"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+					<TexCoords left="0" right="0.48046875" top="0" bottom="0.34375"/>
+				</Texture>
+				<Texture name="$parentReputationBarCenter" file="Interface\PaperDollInfoFrame\UI-Character-ReputationBar">
+					<Size>
+						<AbsDimension x="61" y="22"/> <!-- 195-255=61  133 - 61 = 72-->
+					</Size>
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeTo="$parentReputationBarLeft" relativePoint="TOPRIGHT">
+							<Offset>
+								<AbsDimension x="0" y="0"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+					<TexCoords left="0.76171875" right="1.0" top="0" bottom="0.34375"/>
+				</Texture>
+				<Texture name="$parentReputationBarCenter2" file="Interface\PaperDollInfoFrame\UI-Character-ReputationBar">
+					<Size>
+						<AbsDimension x="41" y="22"/> <!-- 195-255=61  72 - 45 = 27 -->
+					</Size>
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeTo="$parentReputationBarCenter" relativePoint="TOPRIGHT">
+							<Offset>
+								<AbsDimension x="0" y="0"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+					<TexCoords left="0.83984375" right="1.0" top="0" bottom="0.34375"/>
+				</Texture>				
+				<Texture name="$parentReputationBarRight" file="Interface\PaperDollInfoFrame\UI-Character-ReputationBar">
+					<Size>
+						<AbsDimension x="47" y="24"/> <!-- 38..  16 + 27 = 43 -->
+					</Size>
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeTo="$parentReputationBarCenter2" relativePoint="TOPRIGHT">
+							<Offset>
+								<AbsDimension x="0" y="0"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+					<TexCoords left="0.0" right="0.18359375" top="0.34375" bottom="0.71875"/>
 				</Texture>
 				<FontString name="$parentFactionName" inherits="GameFontHighlightSmall" justifyH="LEFT">
 					<Size x="100" y="10"/>

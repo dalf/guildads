@@ -88,11 +88,11 @@ GuildAdsFaction = {
 	end;
 	
 	onDBUpdate = function(dataType, playerName, id)
-		GuildAdsFaction.factionButton.updateAll(true);
+		GuildAdsFaction.factionButton.updateAll(nil, true);
 	end;
 	
 	onReceivedTransaction = function(dataType, playerName, newKeys, deletedKeys)
-		GuildAdsFaction.factionButton.updateAll(true);
+		GuildAdsFaction.factionButton.updateAll(nil, true);
 	end;
 	
 	onShow = function()
@@ -111,7 +111,7 @@ GuildAdsFaction = {
 		GuildAdsDB.profile.Faction:registerUpdate(GuildAdsFaction.onDBUpdate);
 		GuildAdsDB.profile.Faction:registerTransactionReceived(GuildAdsFaction.onReceivedTransaction);
 		
-		GuildAdsFaction.factionButton.updateAll(true);
+		GuildAdsFaction.factionButton.updateAll(nil, true);
 		GuildAdsFactionFrame:Show();
 	end;
 
@@ -276,26 +276,26 @@ GuildAdsFaction = {
 	filters = {
 		ExpandFactionHeader = function(factionId)
 			GuildAdsFaction.setProfileValue("Filters", factionId, true);
-			GuildAdsFaction.factionButton.updateAll(true);
+			GuildAdsFaction.factionButton.updateAll(nil, true);
 		end;
 			
 		CollapseFactionHeader = function(factionId)
 			GuildAdsFaction.setProfileValue("Filters", factionId, false);
-			GuildAdsFaction.factionButton.updateAll(true);
+			GuildAdsFaction.factionButton.updateAll(nil, true);
 		end;
 		
 		ExpandAllFactionHeaders = function()
 			for i=1, table.getn(GUILDADS_FACTIONS) do
 				GuildAdsFaction.setProfileValue("Filters", i, true);
 			end;
-			GuildAdsFaction.factionButton.updateAll(true);
+			GuildAdsFaction.factionButton.updateAll(nil, true);
 		end;
 		
 		CollapseAllFactionHeaders = function()
 			for i=1, table.getn(GUILDADS_FACTIONS) do
 				GuildAdsFaction.setProfileValue("Filters", i, false);
 			end;
-			GuildAdsFaction.factionButton.updateAll(true);
+			GuildAdsFaction.factionButton.updateAll(nil, true);
 		end;
 		
 		checkButtonSetProfile = function(button,option)
@@ -306,7 +306,7 @@ GuildAdsFaction = {
 				PlaySound("igMainMenuOptionCheckBoxOff");
 				GuildAdsFaction.setProfileValue(nil, option, false);
 			end
-			GuildAdsFaction.factionButton.updateAll(true);
+			GuildAdsFaction.factionButton.updateAll(nil, true);
 		end;
 	};
 	
@@ -358,7 +358,7 @@ GuildAdsFaction = {
 			getglobal(skillBar):Show();
 		end;
 		
-		updateAll = function(updateData)
+		updateAll = function(self, updateData)
 		
 			if GuildAdsFactionFrame:IsVisible() then
 				local offset = FauxScrollFrame_GetOffset(GuildAdsReputationListScrollFrame);
@@ -389,7 +389,7 @@ GuildAdsFaction = {
 							-- update internal data
 							factionBar.player = linear[j].p;
 							factionBar.id = linear[j].i;
-							
+
 							--local factionStanding = GetText("FACTION_STANDING_LABEL"..linear[j].s, gender);
 							local factionStanding = getglobal("FACTION_STANDING_LABEL"..linear[j].s);
 							getglobal("GuildAdsReputationBar"..i.."FactionStanding"):SetText(factionStanding);
@@ -420,7 +420,7 @@ GuildAdsFaction = {
 					
 							getglobal("GuildAdsReputationBar"..i.."Highlight1"):Hide();
 							getglobal("GuildAdsReputationBar"..i.."Highlight2"):Hide();
-							
+
 							-- create a ads
 							--GuildAdsFaction.factionButton.update(factionBar, g_GlobalAdSelectedId==linear[j].i, linear[j]);
 						else
