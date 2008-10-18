@@ -154,8 +154,8 @@ GuildAdsTrade = {
 		
 		if ReagentData then
 			UIDropDownMenu_Initialize( GuildAds_Filter_ZoneDropDown, GuildAdsTrade.ItemFilter.init);
-			UIDropDownMenu_SetText(FILTER, GuildAds_Filter_ZoneDropDown);
-			UIDropDownMenu_SetWidth(100,  GuildAds_Filter_ZoneDropDown);
+			UIDropDownMenu_SetText(GuildAds_Filter_ZoneDropDown, FILTER);
+			UIDropDownMenu_SetWidth(GuildAds_Filter_ZoneDropDown, 100);
 			GuildAds_Filter_ZoneDropDown:Show();
 		else
 			GuildAds_Filter_ZoneDropDown:Hide();
