@@ -43,7 +43,7 @@ local PROFESSION_ARRAY = {
 		  },
 	[4] = {	
 		[1] = {["texture"]="Interface\\Icons\\Trade_Mining",["id"]=2},
-		[2] = {},
+		[2] = {["texture"]="Interface\\Icons\\INV_Inscription_MajorGlyph10",["id"]=15},
 		[3] = {["texture"]="Interface\\Icons\\Trade_Tailoring",["id"]=8}
 		},
 	[5] = {	
