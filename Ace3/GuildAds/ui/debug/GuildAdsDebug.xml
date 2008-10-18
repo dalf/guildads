@@ -174,7 +174,7 @@
 						self:RegisterForClicks("LeftButtonDown", "RightButtonDown");
 					</OnLoad>
 					<OnClick>
-						GuildAds_DebugPlugin.onClickStats();
+						GuildAds_DebugPlugin.onClickStats(self, button);
 					</OnClick>
 					<OnEnter>
 						GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
@@ -306,7 +306,7 @@
 		</Frames>
 		<Scripts>
 			<OnLoad>
-				GameTooltip_OnLoad();
+				GameTooltip_OnLoad(self);
 				self:SetPadding(16);
 				self:RegisterForDrag("LeftButton");
 				self:SetOwner(UIParent,"ANCHOR_PRESERVE")
