@@ -471,7 +471,7 @@
 		</Frames>
 		<Scripts>
 			<OnShow>
-				GuildAdsTalentUI.onShow();
+				GuildAdsTalentUI.onShow(self);
 				--TalentFrame_OnShow();
 			</OnShow>
 			<OnHide>

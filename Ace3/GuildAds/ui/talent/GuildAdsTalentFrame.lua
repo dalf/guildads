@@ -75,7 +75,7 @@ GuildAdsTalentUI = {
 		return nil
 	end;
 	
-	talentButtonOnEnter = function(id)
+	talentButtonOnEnter = function(this, id)
 		local self=GuildAdsTalentUI;
 		local selectedTab = PanelTemplates_GetSelectedTab(GuildAdsTalentFrame);
 		local talentName, iconPath, tier, column, currentRank, maxRank = self.GetTalentInfo(selectedTab, id);
@@ -85,6 +85,7 @@ GuildAdsTalentUI = {
 		else
 			GameTooltip:SetText(HIGHLIGHT_FONT_COLOR_CODE..talentName..FONT_COLOR_CODE_CLOSE);
 		end
+		--[[
 		GameTooltip:AddLine(HIGHLIGHT_FONT_COLOR_CODE.."Rank "..tostring(currentRank).."/"..tostring(maxRank)..FONT_COLOR_CODE_CLOSE);
 		if GuildAdsTalentFrame.pointsSpent then
 			local ptier,pcolumn = self.GetTalentPrereqs(selectedTab, id);
@@ -99,10 +100,11 @@ GuildAdsTalentUI = {
 				end
 			end
 			if GuildAdsTalentFrame.pointsSpent < (tier-1)*5 then
-				local name = GetTalentTabInfo(PanelTemplates_GetSelectedTab(GuildAdsTalentFrame));
+				local name = self.GetTalentTabInfo(PanelTemplates_GetSelectedTab(GuildAdsTalentFrame));
 				GameTooltip:AddLine(RED_FONT_COLOR_CODE.."Requires "..tostring((tier-1)*5).." points in "..name.. " Talents"..FONT_COLOR_CODE_CLOSE);
 			end
 		end
+		--]]
 		GameTooltip:Show();
 	end;
 	
@@ -192,7 +194,7 @@ GuildAdsTalentUI = {
 					GuildAdsTalentFrame.pointsSpent = pointsSpent;
 				end
 				tab:SetText(name);
-				PanelTemplates_TabResize(10, tab);
+				PanelTemplates_TabResize(tab, 10);
 				tab:Show();
 			else
 				tab:Hide();
@@ -581,10 +583,10 @@ GuildAdsTalentUI = {
 	end;
 	
 	--Tab_OnClick 
-	selectTab = function()
-		local self=GuildAdsTalentUI;
-		PanelTemplates_SetTab(GuildAdsTalentFrame, this:GetID());
-		self.Update();
+	selectTab = function(self)
+		--local self=GuildAdsTalentUI;
+		PanelTemplates_SetTab(GuildAdsTalentFrame, self:GetID());
+		GuildAdsTalentUI.Update();
 		for i=1, MAX_TALENT_TABS do
 			SetButtonPulse(getglobal("GuildAdsTalentFrameTab"..i), 0, 0);
 		end
@@ -630,17 +632,16 @@ GuildAdsTalentUI = {
 		end
 	end;
 	
-	DownArrow_OnClick = function()
-		local parent = this:GetParent();
+	DownArrow_OnClick = function(self, button)
+		local parent = self:GetParent();
 		parent:SetValue(parent:GetValue() + (parent:GetHeight() / 2));
 		PlaySound("UChatScrollButton");
 		--UIFrameFlashStop(GuildAdsTalentScrollButtonOverlay);
 	end;
 	
-	TalentButton_OnClick = function()
-		local self=GuildAdsTalentUI;
+	TalentButton_OnClick = function(self, button)
 		if ( IsModifiedClick("CHATLINK") ) then
-			local link = self.GetTalentInfo(PanelTemplates_GetSelectedTab(GuildAdsTalentFrame), this:GetID());
+			local link = GuildAdsTalentUI.GetTalentInfo(PanelTemplates_GetSelectedTab(GuildAdsTalentFrame), self:GetID());
 			if ( link ) then
 				ChatEdit_InsertLink(link);
 			end

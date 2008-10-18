@@ -12,7 +12,7 @@
 				--end
 			</OnEvent>
 			<OnClick>
-				GuildAdsTalentUI.selectTab();
+				GuildAdsTalentUI.selectTab(self);
 				--TalentFrameTab_OnClick();
 			</OnClick>
 			<OnEnter>
@@ -92,13 +92,13 @@
 			<OnEnter>
 				--GameTooltip:SetOwner(this, "ANCHOR_RIGHT");
 				--GameTooltip:SetTalent(TalentFrame.selectedTab, this:GetID());
-				GuildAdsTalentUI.talentButtonOnEnter(self:GetID());
+				GuildAdsTalentUI.talentButtonOnEnter(self, self:GetID());
 			</OnEnter>
 			<OnLeave>
 				GameTooltip:Hide();
 			</OnLeave>
 			<OnClick>
-				GuildAdsTalentUI.TalentButton_OnClick();
+				GuildAdsTalentUI.TalentButton_OnClick(self, button);
 			</OnClick>
 		</Scripts>
 	</Button>
