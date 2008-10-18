@@ -316,7 +316,7 @@ function GuildAdsCodecItemRef.encode(obj)
 	if obj==nil then
 		return "";
 	end
-	local _,_,A,B,C,D,E,F,G,H = string_find(obj, "^item:(%d+):(%d+):(%d+):(%d+):(%d+):(%d+):(%-?%d+):(%d+)$")
+	local _,_,A,B,C,D,E,F,G,H = string_find(obj, "^item:(%d+):(%d+):(%d+):(%d+):(%d+):(%d+):(%-?%d+):(%d+):(%d+)$")
 	local encode = GuildAdsCodecBigInteger.encode;
 	if A then
 		-- item link
@@ -328,10 +328,11 @@ function GuildAdsCodecItemRef.encode(obj)
 		F = F+0
 		G = G+0
 		H = H+0
+		I = I+0
 		
 		local s =        encode(A, true)..":"..encode(B, true)..":"..encode(C, true)
 				  ..":"..encode(D, true)..":"..encode(E, true)..":"..encode(F, true)
-				  ..":"..encode(G, true)..":"..encode(H, true);
+				  ..":"..encode(G, true)..":"..encode(H, true)..":"..encode(I, true);
 		return string.gsub(s, ":::", "%.");
 	end
 	local _,_,A = string_find(obj, "^enchant:(%d+)$")
@@ -355,11 +356,11 @@ function GuildAdsCodecItemRef.decode(str)
 		return "enchant:"..decode(y, true);
 	else
 		y = string.gsub(str, "%.", ":::");
-		local _,_,A,B,C,D,E,F,G,H = string_find(y, "^([^:]*):([^:]*):([^:]*):([^:]*):([^:]*):([^:]*):([^:]*):([^:]*)$")
+		local _,_,A,B,C,D,E,F,G,H,I = string_find(y, "^([^:]*):([^:]*):([^:]*):([^:]*):([^:]*):([^:]*):([^:]*):([^:]*):([^:]*)$")
 		if A then
 			return "item:"..decode(A, true)..":"..decode(B, true)..":"..decode(C, true)..":"
 							..decode(D, true)..":"..decode(E, true)..":"..decode(F, true)..":"
-							..decode(G, true)..":"..decode(H, true)
+							..decode(G, true)..":"..decode(H, true)..":"..decode(I, true);
 		end
 		return y;
 	end
