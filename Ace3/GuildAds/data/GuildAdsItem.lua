@@ -110,7 +110,7 @@ do
 			local found, _, itemLink1 = string.find(_ITT.currentItemRef, "spell:(%d+)");
 			if found then
 				local t = _ItemInfo[_ITT.currentItemRef];
-				t.texture = "Interface/Icons/INV_Inscription_MajorGlyph";
+				t.texture = "Interface/Icons/INV_Inscription_MajorGlyph10";
 				t.type = GUILDADS_SKILLS[15];
 				t.subtype = "";
 			end	
