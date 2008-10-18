@@ -16,6 +16,8 @@
 	For now, the revision updates are avoided : an item is set only one time for the craft frame; but only recipe is stored.
 ]]
 
+local clearedWoW2
+
 GuildAdsTradeSkillDataType = GuildAdsTableDataType:new({
 	metaInformations = {
 		name = "TradeSkill",
@@ -85,6 +87,10 @@ function GuildAdsTradeSkillDataType:onEvent()
 	local skillId = GuildAdsSkillDataType:getIdFromName(GetTradeSkillLine());
 	local t = self:getTableForPlayer(GuildAds.playerName);
 	
+	self:deleteOrphanTradeSkillItems(); -- just in case there are any items without profession label
+	
+	self:clearAllWoW2TradeSkillItems(); -- old WoW2 items are no more
+	
 	for i=1,GetNumTradeSkills() do
 		_, kind = GetTradeSkillInfo(i);
 		if (kind ~= "header") then
@@ -112,21 +118,35 @@ function GuildAdsTradeSkillDataType:onEvent()
 				-- if not (t[item] and t[item].e and t[item].q) then
 				if not (t[item]) then
 					self:set(GuildAds.playerName, item, { s=skillId, e=itemRecipe, q=q });
+				elseif not t[item].s then
+					t[item].s = skillId
 				end
 			end
 		end
 	end
-	
-	self:deleteOrphanTradeSkillItems();
-	
-	self:deleteWoW2TradeSkillItems();
 end
+
+function GuildAdsTradeSkillDataType:deleteWoW2TradeSkillItems()
+	-- delete the items from WOW1
+	local tmp = {};
+	local craft = GuildAdsTradeSkillDataType:getTableForPlayer(GuildAds.playerName);
+	for item, data in pairs(craft) do
+		if string.find(item, "^item:(%d+):(%d+):(%d+):(%d+)$") then
+			tinsert(tmp, item);
+		end
+	end
+	
+	for _, item in pairs(tmp) do
+		self:set(GuildAds.playerName, item, nil);
+	end
+end
+
 
 -- This function will delete all item codes with only 8 numbers in. WoW3 has 9 numbers.
 -- It will NOT cause a DB update or increase revision numbers. (all clients call this and 
 -- there is no need to propagate the deletion).
-function GuildAdsTradeSkillDataType:deleteWoW2TradeSkillItems()
-	if (GuildAds.channelName and not self.deletedWoW2) then
+function GuildAdsTradeSkillDataType:clearAllWoW2TradeSkillItems()
+	if (GuildAds.channelName and not clearedWoW2) then
 		-- delete the items from WOW2 for every player (dont update revision)
 		local players = GuildAdsDB.channel[GuildAds.channelName]:getPlayers();
 		--DEFAULT_CHAT_FRAME:AddMessage("Clearing old items");
@@ -148,7 +168,7 @@ function GuildAdsTradeSkillDataType:deleteWoW2TradeSkillItems()
 				end
 			end
 		end
-		self.deletedWoW2 = true
+		clearedWoW2 = true
 	end
 end
 
