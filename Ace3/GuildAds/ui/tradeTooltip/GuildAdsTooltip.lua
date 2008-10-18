@@ -8,17 +8,15 @@
 -- Licence: GPL version 2 (General Public License)
 ----------------------------------------------------------------------------------
 
--- TODO : rajouter les items craftés
-GuildAdsItems = {};
+-- local AceHook = LibStub("AceHook-3.0")
 
-GuildAdsTradeTooltip = {
+local GuildAdsDB = GuildAdsDB
+GuildAdsItems = {}
+GuildAdsCrafts = {}
 
-	metaInformations = { 
-		name = "TradeTooltip",
-        guildadsCompatible = 200,
-	};
-	
-	colors = {
+local _G = getfenv()
+
+local colors = {
 		TradeNeed = {
 			[true]   = { 1, 0.75, 0 };
 			[false]  = { 1, 1   , 0.5 };
@@ -26,27 +24,404 @@ GuildAdsTradeTooltip = {
 		TradeOffer = {
 			[true]   = { 1, 0   , 0.75 };
 			[false]  = { 1, 0.5 , 1 };
+		};
+		TradeSkill = {
+			[true]   = { 0.75, 0.75, 1 };
+			[false]  = { 0.75, 0.75, 1 };
 		}
 	};
 	
+
+local nameToKey = {}
+GuildAdsNameToKey = nameToKey
+local keyTable = setmetatable({}, {
+	__mode = 'k';
+	__index = function(t, itemLink)
+		if itemLink then
+			-- ChatFrame1:AddMessage("getKeyFromItemRef("..itemLink..")")
+			local start, _, color, ref, name = string.find(itemLink, "|c([%w]+)|H([^|]+)|h%[([^|]+)%]|h|r");
+			local itemRef = start and ref or itemLink
+			-- ChatFrame1:AddMessage(" - itemLink="..itemRef)
+			local start, _, linkType, itemId = string.find(itemRef, "([^:]+):([^:]+)")
+			if start then
+				
+				local key = (linkType=="item") and tonumber(itemId) or -tonumber(itemId)
+				
+				
+				rawset(t, itemLink, key)
+				
+				name = GetItemInfo(itemLink)
+				if name then
+					rawset(nameToKey, name, key)
+				end
+				-- ChatFrame1:AddMessage(" - key("..itemLink..") "..tostring(key))
+				return key
+			else
+				-- ChatFrame1:AddMessage(" - key= nil !")
+			end
+		end
+	end
+})
+GuildAdsKeyTable = keyTable
+
+--------------------------------------------------------------------------
+RECIPEBOOK_RECIPEWORD = "Recipe" 
+RECIPEBOOK_WORD_TRANSMUTE = "Transmute";
+RECIPEBOOK_REGEX_SKILL = string.gsub(string.gsub(ITEM_MIN_SKILL, "%%s", "%(%[%%w%%s%]+%)" ), "%(%%d%)", "%%%(%(%%d+%)%%%)");
+RECIPEBOOK_REGEX_REPUTATION = string.gsub(string.gsub(ITEM_REQ_REPUTATION, "%-", "%%%-"), "%%s", "%(%[%%w %]+%)" );
+RECIPEBOOK_REGEX_SPECIALTY = string.gsub(ITEM_REQ_SKILL, "%%s", "%(%[%%w%%s%]+%)" );
+local CRAFTED_BY = string.gsub(ITEM_CREATED_BY, "cff00ff00", "cffffff00")
+
+local function RB_ParseItemLink(link)
+	if not link then return false end;
+	local _, id, _, _, _, valid, skill = GetItemInfo(link);
+	if not id then return false end;
+	id = string.match(id, "item:(%d+):");
+	skill = GuildAdsSkillDataType:getIdFromName(skill);
+	if valid ~= RECIPEBOOK_RECIPEWORD or skill < 1 then
+		return false; -- not a recipe.
+	else
+	    return true, tonumber(skill), tonumber(id);
+	end
+end
+
+--[[ GetSkillInfo(tooltip) --> Extracts required ranks and specialization needs from tooltip data
+	Returns : rank, specialty, faction required, reputation required, the name of the created item]]--
+local function RB_GetSkillInfo(tooltip, skill)
+	local text;
+	local rank, spec, rep, honor, makes;
+	local uline = 0;
+	if type(tooltip) == "table" then tooltip = tooltip:GetName() end;
+	for i = 2, getglobal(tooltip):NumLines() do
+		text = getglobal(tooltip.."TextLeft"..i):GetText();
+		if text then
+			if string.find(text, ITEM_SPELL_TRIGGER_ONUSE) then
+			    if not skill then
+		        	local _, link = getglobal(tooltip):GetItem();
+	               	valid, skill = RB_ParseItemLink(link)
+					if not valid then skill = 0 end;
+			    end
+			    -- Enchants do not have a created item in most cases.
+				if skill == GuildAdsSkillDataType:getNameFromId(9) then  -- Enchanting
+				    makes = string.match(getglobal(tooltip.."TextLeft1"):GetText(), "%w+%: (.+)")
+				-- Alchemy transmutes are somewhat quirky; match on "Transmute X to Y" rather than created item.
+				elseif skill == GuildAdsSkillDataType:getNameFromId(4) and string.match(getglobal(tooltip):GetItem(), RECIPEBOOK_WORD_TRANSMUTE) then
+				    makes = string.match(getglobal(tooltip.."TextLeft1"):GetText(), "%w+%: (.+)");
+				else
+					makes = getglobal(tooltip.."TextLeft"..i+1):GetText();
+				end
+				if makes then
+					makes = string.gsub(makes, "^%s*(.-)%s*$", "%1");
+				end
+				break; -- No data beyond this point;
+			elseif string.find(text, RECIPEBOOK_REGEX_SKILL) then -- "Requires Skill (Rank)"
+				string.gsub(text, RECIPEBOOK_REGEX_SKILL, function(a,b) rank = b end);
+			elseif string.find(text, RECIPEBOOK_REGEX_REPUTATION) then -- "Requires Faction - Reputation"
+				_,_, rep, honor = string.find(text, RECIPEBOOK_REGEX_REPUTATION);
+			elseif string.find(text, RECIPEBOOK_REGEX_SPECIALTY) then -- "Requires Skill"
+				string.gsub(text, RECIPEBOOK_REGEX_SPECIALTY, function(a,b) spec = a end);
+			end;
+		end
+	end
+	return tonumber(rank), spec, rep, honor, makes;
+end
+	
+--------------------------------------------------------------------------
+
+local function formatData(dataTypeName, data)
+	if data then
+		local t = colors[dataTypeName][GuildAdsUITools:IsAccountOnline(data.owner) and true or false];
+			
+		if data.count>0 then
+			if data.inf then
+				return data.owner .. " (" .. data.count .. "+)", t[1], t[2], t[3];
+			else
+				return data.owner .. " (" .. data.count .. ")", t[1], t[2], t[3];
+			end
+		else
+			return data.owner, t[1], t[2], t[3];
+		end
+	else
+		return " ", 1, 1, 1;
+	end
+end
+	
+local emptyTable = {}
+local function addGuildAdsInfo(tooltip, itemLink)
+	local itemKey = keyTable[itemLink]
+	if itemKey then
+		local t = GuildAdsItems[itemKey]
+		if t then
+			local infosR = t.TradeNeed or emptyTable
+			local infosA = t.TradeOffer or emptyTable
+			local infosC = t.TradeSkill
+			if infosR or infosA then
+				local i=1
+				while (infosR[i] or infosA[i]) and i<5 do
+					local msgR, msgRr, msgRg, msgRb = formatData("TradeNeed", infosR[i])
+					local msgA, msgAr, msgAg, msgAb = formatData("TradeOffer", infosA[i])
+					tooltip:AddDoubleLine(msgR, msgA, msgRr, msgRg, msgRb, msgAr, msgAg, msgAb)
+					i= i+1
+				end
+				if infosC then
+					-- = table.concat(infosC, ", ", 1, 10)
+					local o = ""
+					local glue = " "
+					local c = 1
+					for k,v in pairs(infosC) do
+					 	if c>4 then
+					 		o = o..", ..."
+					 		break
+					 	end
+					 	o = o..glue..tostring(v)
+						glue = ", "
+						c = c + 1
+					end
+					tooltip:AddLine(string.format(CRAFTED_BY, o))
+				end
+				tooltip:Show()
+			end
+		end
+		
+		local valid, skill, itemid = RB_ParseItemLink(itemLink)
+		if valid then
+			local aknow, alearn, ahave, banked, rank, spec, rep, honor, makes
+			rank, spec, rep, honor, makes = RB_GetSkillInfo(tooltip, skill)
+			local craftKey = nameToKey[makes]
+			--[[
+			tooltip:AddDoubleLine("make:", "'"..tostring(makes).."'")
+			tooltip:AddDoubleLine("skill:", skill)
+			tooltip:AddDoubleLine("rank:", rank)
+			tooltip:AddDoubleLine("rep:", rep)
+			tooltip:AddDoubleLine("honor:", honor)
+			tooltip:AddDoubleLine("key:", craftKey)
+			]]
+			local t = GuildAdsItems[craftKey]
+			if t then
+				local infosC = t.TradeSkill
+				-- tooltip:AddDoubleLine("t:", tostring(t))
+				-- tooltip:AddDoubleLine("infosC:", tostring(infosC))
+				if infosC then
+					local o = ""
+					local glue = " "
+					local c = 1
+					for k,v in pairs(infosC) do
+					 	if c>4 then
+					 		o = o..", ..."
+					 		break
+					 	end
+						o = o..glue..tostring(v)
+						glue = ", "
+						c = c + 1
+					end
+					tooltip:AddLine(string.format(CRAFTED_BY, o))
+				end
+			end
+			tooltip:Show()
+		end
+	end
+end
+
+--------------------------------------------------------------------------
+
+local Hooks = {}
+do
+  function Hooks:SetAction(id)
+    local _, item = self:GetItem()
+    if not item then return end
+    addGuildAdsInfo(self, item)
+  end
+
+  function Hooks:SetAuctionItem(type, index)
+    local item = _G.GetAuctionItemLink(type, index)
+    addGuildAdsInfo(self, item)
+  end
+
+  function Hooks:SetAuctionSellItem()
+	local _, item = self:GetItem()
+	if not item then return end
+    addGuildAdsInfo(self, item)
+  end
+
+  function Hooks:SetBagItem(bag, slot)
+    local item  = _G.GetContainerItemLink(bag, slot)
+    addGuildAdsInfo(self, item)
+  end
+
+  function Hooks:SetCraftItem(skill, slot)
+    local item = _G.GetCraftReagentItemLink(skill, slot)
+    addGuildAdsInfo(self, item)
+  end
+
+  function Hooks:SetHyperlink(link, count)
+    addGuildAdsInfo(self, link)
+  end
+
+  function Hooks:SetInboxItem(index, attachmentIndex)
+    local item = _G.GetInboxItemLink(index, attachmentIndex)
+    addGuildAdsInfo(self, item)
+  end
+
+  function Hooks:SetInventoryItem(unit, slot)
+    if type(slot) ~= "number" or slot < 0 then return end
+	local item = _G.GetInventoryItemLink(unit, slot)
+    addGuildAdsInfo(self, item)
+  end
+
+  function Hooks:SetLootItem(slot)
+    local item = _G.GetLootSlotLink(slot)
+    addGuildAdsInfo(self, item)
+  end
+--[[
+  function Hooks:SetLootRollItem(rollID)
+    local _, _, count = _G.GetLootRollItemInfo(rollID)
+    ItemPriceTooltip:AddPrice(self, count)
+  end
+  function Hooks:SetMerchantCostItem(index, item)
+    local _, count = _G.GetMerchantItemCostItem(index, item)
+    addGuildAdsInfo(self, item)
+  end
+]]
+
+  function Hooks:SetMerchantItem(slot)
+    local item = _G.GetMerchantItemLink(slot)
+    addGuildAdsInfo(self, item)
+  end
+--[[
+  function Hooks:SetQuestItem(type, slot)
+    local _, _, count = _G.GetQuestItemInfo(type, slot)
+    ItemPriceTooltip:AddPrice(self, count)
+  end
+
+  function Hooks:SetQuestLogItem(type, index)
+    local _, _, count = _G.GetQuestLogRewardInfo(index)
+    ItemPriceTooltip:AddPrice(self, count)
+  end
+
+  function Hooks:SetSendMailItem(index)
+    local _, _, count = _G.GetSendMailItem(index)
+    ItemPriceTooltip:AddPrice(self, count)
+  end
+
+  function Hooks:SetSocketedItem()
+    ItemPriceTooltip:AddPrice(self, 1)
+  end
+
+  function Hooks:SetExistingSocketGem()
+    ItemPriceTooltip:AddPrice(self, 1)
+  end
+
+  function Hooks:SetSocketGem()
+    ItemPriceTooltip:AddPrice(self, 1)
+  end
+]]
+  function Hooks:SetTradePlayerItem(index)
+    local item = _G.GetTradePlayerItemLink(index)
+    addGuildAdsInfo(self, item)
+  end
+  
+  function Hooks:SetTradeSkillItem(skill, slot)
+    if slot then
+      local item = _G.GetTradeSkillReagentItemLink(skill, slot)
+	  addGuildAdsInfo(self, item)
+    end
+  end
+  
+  function Hooks:SetTradeTargetItem(index)
+    local item = _G.GetTradeTargetItemLink(index)
+    addGuildAdsInfo(self, item)
+  end
+  
+  function Hooks:SetGuildBankItem(tab, slot)
+    local item = _G.GetGuildBankItemLink(tab, slot)
+    addGuildAdsInfo(self, item)
+  end
+
+end
+
+local function installHooks(tooltip, hooks)
+	for name, func in pairs(hooks) do
+		if type(tooltip[name]) == "function" then
+			-- AceHook:SecureHook(tooltip, name, func)
+			hooksecurefunc(tooltip, name, func)
+		end
+	end
+end;
+
+---------------------------------------------------------------------------
+
+local function updateItem(item, playerName, dataTypeName, count, inf)
+	local delete = (count == 0) and (inf == false)
+	item = keyTable[item]
+	if (item ~= nil) then
+		if not GuildAdsItems[item] then
+			GuildAdsItems[item] = {}
+		end
+		if not GuildAdsItems[item][dataTypeName] then
+			GuildAdsItems[item][dataTypeName] = {}
+		end
+		
+		local f = function(k, v)
+			if v.owner==playerName then
+				return k;
+			end
+		end;
+		local index = table.foreach(GuildAdsItems[item][dataTypeName], f);
+		
+		if index then
+			if not delete then
+				local t = GuildAdsItems[item][dataTypeName][index];
+				t.count = count;
+				t.inf = inf;
+			else
+				tremove(GuildAdsItems[item][dataTypeName], index);
+			end
+		else
+			if not delete then
+				tinsert(GuildAdsItems[item][dataTypeName], {
+					count = count;
+					inf = inf;
+					owner = playerName;
+				});
+			end
+		end
+		table.sort(GuildAdsItems[item][dataTypeName], GuildAdsTradeTooltip.predicate);
+	end
+end
+---------------------------------------------------------------------------
+
+
+GuildAdsTradeTooltip = {
+
+	metaInformations = { 
+		name = "TradeTooltip",
+        guildadsCompatible = 200,
+	};
+		
 	onInit = function()
 		-- Hook SetItemRef
 		-- TODO : add support for LootLink, ItemMatrix, KC_Items 
-		hooksecurefunc("SetItemRef", GuildAdsTradeTooltip.SetItemRef);
+		installHooks(GameTooltip, Hooks)
+		installHooks(ItemRefTooltip, Hooks)
 	end;
 	
 	onChannelJoin = function()
 		-- Register for events
 		GuildAdsDB.channel[GuildAds.channelName].TradeNeed:registerUpdate(GuildAdsTradeTooltip.onDBUpdate);
 		GuildAdsDB.channel[GuildAds.channelName].TradeOffer:registerUpdate(GuildAdsTradeTooltip.onDBUpdate);
+		GuildAdsDB.profile.TradeSkill:registerUpdate(GuildAdsTradeTooltip.onCraftUpdate);
 		
 		-- Scan database
 		GuildAdsItems = {};
 		for _, item, playerName, data in GuildAdsDB.channel[GuildAds.channelName].TradeNeed:iterator() do
-			GuildAdsTradeTooltip.onDBUpdate(GuildAdsDB.channel[GuildAds.channelName].TradeNeed, playerName, item);
+			updateItem(item, playerName, "TradeNeed", info.q or 0, (not info.q) and true or false)
 		end
 		for _, item, playerName, data in GuildAdsDB.channel[GuildAds.channelName].TradeOffer:iterator() do
-			GuildAdsTradeTooltip.onDBUpdate(GuildAdsDB.channel[GuildAds.channelName].TradeOffer, playerName, item);
+			updateItem(item, playerName, "TradeOffer", info.q or 0, (not info.q) and true or false)
+		end
+		for _, item, playerName, data in GuildAdsDB.profile.TradeSkill:iterator() do
+			GuildAdsTradeTooltip.onCraftUpdate(GuildAdsDB.profile.TradeSkill, playerName, data.e)
+			GuildAdsTradeTooltip.onCraftUpdate(GuildAdsDB.profile.TradeSkill, playerName, item)
 		end
 	end;
 	
@@ -54,9 +429,44 @@ GuildAdsTradeTooltip = {
 		-- Unregister for events
 		GuildAdsDB.channel[GuildAds.channelName].TradeNeed:unregisterUpdate(GuildAdsTradeTooltip.onDBUpdate);
 		GuildAdsDB.channel[GuildAds.channelName].TradeOffer:unregisterUpdate(GuildAdsTradeTooltip.onDBUpdate);
+		GuildAdsDB.profile.TradeSkill:unregisterUpdate(GuildAdsTradeTooltip.onCraftUpdate);
 	
 		-- Clear database
 		GuildAdsItems = {};
+	end;
+	
+	onCraftUpdate = function(dataType, playerName, item)
+		local dataTypeName = dataType.metaInformations.name
+		local info = dataType:get(playerName, item)
+		local key = keyTable[item]
+		if key then
+			if not GuildAdsItems[key] then
+				GuildAdsItems[key] = {}
+			end
+			if not GuildAdsItems[key][dataTypeName] then
+				GuildAdsItems[key][dataTypeName] = {}
+			end
+			local t = GuildAdsItems[key][dataTypeName]
+			if info then
+				local f = function(k, v)
+				if v==playerName then
+					return k;
+				end
+				end;
+				local index = table.foreach(t, f);
+				if not index then
+					table.insert(t, playerName)
+				end
+			else
+				local f = function(k, v)
+				if v==playerName then
+					return k;
+				end
+				end;
+				local index = table.foreach(t, f);
+				table.remove(t, index);
+			end
+		end
 	end;
 	
 	onDBUpdate = function(dataType, playerName, item)
@@ -73,41 +483,7 @@ GuildAdsTradeTooltip = {
 		else
 			count = 0;
 		end
-		local itemName = (GuildAds_ItemInfo[item] or {}).name; -- TODO : problem when item info not ready
-		if (itemName ~= nil) then
-			if (GuildAdsItems[itemName] == nil) then
-				GuildAdsItems[itemName] = {
-					TradeNeed = {};
-					TradeOffer = {};
-				};
-			end
-			
-			local f = function(k, v)
-				if v.owner==playerName then
-					return k;
-				end
-			end;
-			local index = table.foreach(GuildAdsItems[itemName][dataTypeName], f);
-			
-			if index then
-				if info then
-					local t = GuildAdsItems[itemName][dataTypeName][index];
-					t.count = count;
-					t.inf = inf;
-				else
-					tremove(GuildAdsItems[itemName][dataTypeName], index);
-				end
-			else
-				if info then
-					tinsert(GuildAdsItems[itemName][dataTypeName], {
-						count = count;
-						inf = inf;
-						owner = playerName;
-					});
-				end
-			end
-			table.sort(GuildAdsItems[itemName][dataTypeName], GuildAdsTradeTooltip.predicate);
-		end
+		updateItem(item, playerName, dataTypeName, count, inf)
 	end;
 	
 	predicate = function(a, b)
@@ -149,50 +525,8 @@ GuildAdsTradeTooltip = {
 		-- same
 		return false;
 	end;
-		
-	SetItemRef = function(itemLink, text, button)
-		GuildAdsTradeTooltip.addInformations(ItemRefTooltip);
-	end;
-	
-	formatData = function(dataTypeName, data)
-		if data then
-			local t = GuildAdsTradeTooltip.colors[dataTypeName][GuildAdsDB.profile.Main:get(data.owner, GuildAdsDB.profile.Main.Account)==GuildAdsDB.account];
-			
-			if data.count>0 then
-				if data.inf then
-					return data.owner .. " (" .. data.count .. "+)", t[1], t[2], t[3];
-				else
-					return data.owner .. " (" .. data.count .. ")", t[1], t[2], t[3];
-				end
-			else
-				return data.owner, t[1], t[2], t[3];
-			end
-		else
-			return " ", 1, 1, 1;
-		end
-	end;
-	
-	addInformations = function(tooltip)
-		local lbl = getglobal(tooltip:GetName().."TextLeft1");
-		if lbl then
-			local t = GuildAdsItems[lbl:GetText()];
-			if t then
-				local infosR = t.TradeNeed;
-				local infosA = t.TradeOffer;
-				if infosR or infosA then
-					local i=1;
-					while (infosR[i] or infosA[i]) and i<5 do
-						local msgR, msgRr, msgRg, msgRb = GuildAdsTradeTooltip.formatData("TradeNeed", infosR[i]);
-						local msgA, msgAr, msgAg, msgAb = GuildAdsTradeTooltip.formatData("TradeOffer", infosA[i]);
-						tooltip:AddDoubleLine(msgR, msgA, msgRr, msgRg, msgRb, msgAr, msgAg, msgAb);
-						i= i+1;
-					end
-					tooltip:Show();
-				end
-			end
-		end
-	end;
 	
 }
 
 GuildAdsPlugin.UIregister(GuildAdsTradeTooltip);
+
