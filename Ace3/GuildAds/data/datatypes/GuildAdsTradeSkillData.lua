@@ -44,18 +44,7 @@ function GuildAdsTradeSkillDataType:Initialize()
 	self:RegisterEvent("TRADE_SKILL_SHOW", "onEvent");
 	self:RegisterEvent("TRADE_SKILL_UPDATE", "onEvent");
 	
-	-- delete the items from WOW1
-	local tmp = {};
-	local craft = GuildAdsTradeSkillDataType:getTableForPlayer(GuildAds.playerName);
-	for item, data in pairs(craft) do
-		if string.find(item, "^item:(%d+):(%d+):(%d+):(%d+)$") then
-			tinsert(tmp, item);
-		end
-	end
-	
-	for _, item in pairs(tmp) do
-		self:set(GuildAds.playerName, item, nil);
-	end
+
 
 end
 
@@ -127,9 +116,18 @@ function GuildAdsTradeSkillDataType:onEvent()
 			end
 		end
 	end
-	--[[
-	if (GuildAds.channelName) then
-		-- delete the items from WOW1 for every player (dont update revision)
+	
+	self:deleteOrphanTradeSkillItems();
+	
+	self:deleteWoW2TradeSkillItems();
+end
+
+-- This function will delete all item codes with only 8 numbers in. WoW3 has 9 numbers.
+-- It will NOT cause a DB update or increase revision numbers. (all clients call this and 
+-- there is no need to propagate the deletion).
+function GuildAdsTradeSkillDataType:deleteWoW2TradeSkillItems()
+	if (GuildAds.channelName and not self.deletedWoW2) then
+		-- delete the items from WOW2 for every player (dont update revision)
 		local players = GuildAdsDB.channel[GuildAds.channelName]:getPlayers();
 		--DEFAULT_CHAT_FRAME:AddMessage("Clearing old items");
 		local playerName;
@@ -139,7 +137,7 @@ function GuildAdsTradeSkillDataType:onEvent()
 			if (craft) then
 				local tmp = {}
 				for item, data in pairs(craft) do
-					if string.find(item, "^item:(%d+):(%d+):(%d+):(%d+)$") then
+					if string.find(item, "^item:(%d+):(%d+):(%d+):(%d+):(%d+):(%d+):(%-?%d+):(%d+)$") then
 						tinsert(tmp, item);
 					end
 				end
@@ -150,9 +148,8 @@ function GuildAdsTradeSkillDataType:onEvent()
 				end
 			end
 		end
-		
+		self.deletedWoW2 = true
 	end
-	]]
 end
 
 -- delete items without recipelink for every player
@@ -233,6 +230,19 @@ end
 
 function GuildAdsTradeSkillDataType:deleteIncompleteTradeSkillItems()
 	self:deleteTradeSkillItemsTable(self:getIncompleteTradeSkillItems());
+end
+
+function GuildAdsTradeSkillDataType:deleteOrphanTradeSkillItems()
+	local item, data;
+	local t = {};
+	for item, data in pairs(self:getTableForPlayer(GuildAds.playerName)) do
+		if item~="_u" and not data.s then
+			table.insert(t, item);
+		end
+	end
+	for _, item in pairs(t) do
+		self:set(GuildAds.playerName, item, nil);
+	end
 end
 
 function GuildAdsTradeSkillDataType:deleteTradeSkillItems(skillId)
