@@ -15,8 +15,8 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 		<Frames>
 			<Frame name="GuildAds_Filter_ClassDropDown" inherits="UIDropDownMenuTemplate" enableMouse="true" hidden="false">
 				<Anchors>
-					<Anchor point="TOPRIGHT" relativeTo="GuildAdsMainWindowFrame" >
-						<Offset>
+					<Anchor point="TOPRIGHT" relativeTo="GuildAdsMainWindowFrame">
+					<Offset>
 							<AbsDimension x="-5" y="-42"/>
 						</Offset>
 					</Anchor>

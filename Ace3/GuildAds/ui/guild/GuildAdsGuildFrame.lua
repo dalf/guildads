@@ -149,8 +149,8 @@ GuildAdsGuild = {
 		end
 		
 		UIDropDownMenu_Initialize(GuildAds_Filter_ClassDropDown, GuildAdsGuild.classFilter.init);
-		UIDropDownMenu_SetText(FILTER, GuildAds_Filter_ClassDropDown);
-		UIDropDownMenu_SetWidth(100, GuildAds_Filter_ClassDropDown);
+		UIDropDownMenu_SetText(GuildAds_Filter_ClassDropDown, FILTER);
+		UIDropDownMenu_SetWidth(GuildAds_Filter_ClassDropDown, 100);
 		
 		if (GuildAdsGuild.getProfileValue(nil, "GroupByAccount")) then
 			GuildAdsGroupByAccountCheckButton:SetChecked(1);
