@@ -22,9 +22,9 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						PanelTemplates_SelectTab(this);
-						PanelTemplates_TabResize(0);
-						getglobal(this:GetName().."HighlightTexture"):SetWidth(this:GetTextWidth() + 31);
+						PanelTemplates_SelectTab(self);
+						PanelTemplates_TabResize(self, 0);
+						getglobal(self:GetName().."HighlightTexture"):SetWidth(self:GetTextWidth() + 31);
 					</OnLoad>
 					<OnClick>
 						GuildAdsGEMEvent.selectTab(GuildAdsGEMEvent.GUILDADSEVENT_TAB_EVENTLIST);

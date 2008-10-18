@@ -11,7 +11,7 @@
 			</OnClick>
 			<OnEnter>
 				if (self.tooltip and self.tooltiptitle) then
-					GameTooltip_AddNewbieTip(self, MicroButtonTooltipText(this.tooltiptitle, "TOGGLEGUILDTAB"), 1.0,1.0, 1.0, self.tooltip, 1);
+					GameTooltip_AddNewbieTip(self, MicroButtonTooltipText(self.tooltiptitle, "TOGGLEGUILDTAB"), 1.0,1.0, 1.0, self.tooltip, 1);
 				end
 			</OnEnter>
 			<OnLeave>
