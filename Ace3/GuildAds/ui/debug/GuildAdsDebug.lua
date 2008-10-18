@@ -207,8 +207,8 @@ GuildAds_DebugPlugin = {
 		});
 	end;
 	
-	onClickStats = function()
-		if (arg1 == "LeftButton") then
+	onClickStats = function(self, button)
+		if (button == "LeftButton") then
 			GuildAdsStatsTooltip:SetOwner(UIParent,"ANCHOR_PRESERVE")
 			if not scriptProfile then
 				GuildAdsSwitchMeasureButton:Hide();
