@@ -316,7 +316,7 @@ function GuildAdsCodecItemRef.encode(obj)
 	if obj==nil then
 		return "";
 	end
-	local _,_,A,B,C,D,E,F,G,H = string_find(obj, "^item:(%d+):(%d+):(%d+):(%d+):(%d+):(%d+):(%-?%d+):(%d+):(%d+)$")
+	local _,_,A,B,C,D,E,F,G,H,I = string_find(obj, "^item:(%d+):(%d+):(%d+):(%d+):(%d+):(%d+):(%-?%d+):(%d+):(%d+)$")
 	local encode = GuildAdsCodecBigInteger.encode;
 	if A then
 		-- item link
