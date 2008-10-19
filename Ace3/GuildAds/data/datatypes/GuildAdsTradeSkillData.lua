@@ -41,85 +41,51 @@ local AceEvent = LibStub("AceEvent-3.0")
 AceEvent:Embed(GuildAdsTradeSkillDataType)
 
 function GuildAdsTradeSkillDataType:Initialize()
-	self:RegisterEvent("CRAFT_SHOW", "onEventSpecial");
-	self:RegisterEvent("CRAFT_UPDATE", "onEventSpecial");
 	self:RegisterEvent("TRADE_SKILL_SHOW", "onEvent");
 	self:RegisterEvent("TRADE_SKILL_UPDATE", "onEvent");
-	
-
-
-end
-
-function GuildAdsTradeSkillDataType:onEventSpecial()
-	local item, kind, itemRecipe, minMade, maxMade, q;
-	local skillId = GuildAdsSkillDataType:getIdFromName(GetCraftName());
-	local t = self:getTableForPlayer(GuildAds.playerName);
-	
-	for i=1,GetNumCrafts() do
-		_, kind = GetCraftInfo(i);
-		if (kind ~= "header") then
-			item = GetCraftItemLink(i);
-			minMade, maxMade = GetCraftNumMade(i);
-			-- cooldown = GetCraftCooldown(i);
-			itemRecipe = GetCraftRecipeLink(i);
-			if item then
-				_, item = GuildAds_ExplodeItemRef(item);
-				_, itemRecipe = GuildAds_ExplodeItemRef(itemRecipe);
-				q=nil;
-				if minMade~=1 or maxMade~=1 then
-					q=tostring(minMade);
-					if maxMade~=minMade then
-						q=q.."-"..tostring(maxMade);
-					end
-				end
-				-- if not(t[item] and skillId==t[item].s and itemRecipe==t[item].e and q==t[item].q) then
-				if not(t[item]) then
-					self:set(GuildAds.playerName, item, { s=skillId, e=itemRecipe, q=q });
-				end
-			end
-		end
-	end
-		
 end
 
 function GuildAdsTradeSkillDataType:onEvent()
-	local item, colddown, kind, itemRecipe, minMade, maxMade, q;
 	local skillId = GuildAdsSkillDataType:getIdFromName(GetTradeSkillLine());
-	local t = self:getTableForPlayer(GuildAds.playerName);
+	if skillId > 0 then
+		local item, colddown, kind, itemRecipe, minMade, maxMade, q;
+		local t = self:getTableForPlayer(GuildAds.playerName);
 	
-	self:deleteOrphanTradeSkillItems(); -- just in case there are any items without profession label
+		self:deleteOrphanTradeSkillItems(); -- just in case there are any items without profession label
 	
-	self:clearAllWoW2TradeSkillItems(); -- old WoW2 items are no more
+		--self:clearAllWoW2TradeSkillItems(); -- old WoW2 items are no more
+		self:deleteWoW2TradeSkillItems(); -- only delete my own items
 	
-	for i=1,GetNumTradeSkills() do
-		_, kind = GetTradeSkillInfo(i);
-		if (kind ~= "header") then
-			item = GetTradeSkillItemLink(i);
-			minMade, maxMade = GetTradeSkillNumMade(i);
-			itemRecipe = GetTradeSkillRecipeLink(i);
-			if item then
-				_, item = GuildAds_ExplodeItemRef(item);
-				-- don't share cooldown, causes too much update
-				--[[
-				cooldown = GetTradeSkillCooldown(i) 
-				if cooldown then
-					cooldown = cooldown / 60 + GuildAdsDB:GetCurrentTime();
-				end;
-				]]
-				_, itemRecipe = GuildAds_ExplodeItemRef(itemRecipe);
-				q=nil;
-				if minMade~=1 or maxMade~=1 then
-					q=tostring(minMade);
-					if maxMade~=minMade then
-						q=q.."-"..tostring(maxMade);
+		for i=1,GetNumTradeSkills() do
+			_, kind = GetTradeSkillInfo(i);
+			if (kind ~= "header") then
+				item = GetTradeSkillItemLink(i);
+				minMade, maxMade = GetTradeSkillNumMade(i);
+				itemRecipe = GetTradeSkillRecipeLink(i);
+				if item then
+					_, item = GuildAds_ExplodeItemRef(item);
+					-- don't share cooldown, causes too much update
+					--[[
+					cooldown = GetTradeSkillCooldown(i) 
+					if cooldown then
+						cooldown = cooldown / 60 + GuildAdsDB:GetCurrentTime();
+					end;
+					]]
+					_, itemRecipe = GuildAds_ExplodeItemRef(itemRecipe);
+					q=nil;
+					if minMade~=1 or maxMade~=1 then
+						q=tostring(minMade);
+						if maxMade~=minMade then
+							q=q.."-"..tostring(maxMade);
+						end
 					end
-				end
-				
-				-- if not (t[item] and t[item].e and t[item].q) then
-				if not (t[item]) then
-					self:set(GuildAds.playerName, item, { s=skillId, e=itemRecipe, q=q });
-				elseif not t[item].s then
-					t[item].s = skillId
+					
+					-- if not (t[item] and t[item].e and t[item].q) then
+					if not (t[item]) then
+						self:set(GuildAds.playerName, item, { s=skillId, e=itemRecipe, q=q });
+					elseif not t[item].s then
+						t[item].s = skillId
+					end
 				end
 			end
 		end
@@ -127,11 +93,11 @@ function GuildAdsTradeSkillDataType:onEvent()
 end
 
 function GuildAdsTradeSkillDataType:deleteWoW2TradeSkillItems()
-	-- delete the items from WOW1
+	-- delete the items from WOW2
 	local tmp = {};
 	local craft = GuildAdsTradeSkillDataType:getTableForPlayer(GuildAds.playerName);
 	for item, data in pairs(craft) do
-		if string.find(item, "^item:(%d+):(%d+):(%d+):(%d+)$") then
+		if string.find(item, "^item:(%d+):(%d+):(%d+):(%d+):(%d+):(%d+):(%-?%d+):(%d+)$") then
 			tinsert(tmp, item);
 		end
 	end
