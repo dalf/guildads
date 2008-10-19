@@ -112,16 +112,14 @@ GuildAdsGEMEvent = {
 			end
 		else
 			-- hide GEM messages
-			GuildAdsGEMEvent.oldChatFrame_OnEvent =ChatFrame_OnEvent;
-			ChatFrame_OnEvent = GuildAdsGEMEvent.newChatFrame_OnEvent;
+			ChatFrame_AddMessageEventFilter("CHAT_MSG_CHANNEL", self, GuildAdsGEMEvent.chatFrameFilter)
 		end;
 	end;
 	
-	newChatFrame_OnEvent = function(self, event, arg1, ...)
-		if (event == "CHAT_MSG_CHANNEL") and (string.sub(arg1, 1, 4)=="<GEM") then
-			return
+	chatFrameFilter = function(msg)
+		if (string.sub(msg, 1, 4)=="<GEM") then
+			return true
 		end
-		GuildAdsGEMEvent.oldChatFrame_OnEvent(self, event, arg1, ...);
 	end;
 	
 	saveOptions = function()
