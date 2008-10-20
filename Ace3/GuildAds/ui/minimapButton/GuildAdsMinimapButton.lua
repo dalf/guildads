@@ -26,7 +26,7 @@ GuildAdsMinimapButtonCore = {
 	alerts = {
 	};
 	
-	onLoad = function()
+	onLoad = function(self)
 		-- support for ButtonHole
 		if ButtonHole then
 			GuildAdsMinimapButton:Show();
@@ -40,7 +40,7 @@ GuildAdsMinimapButtonCore = {
 		end
 		
 		GuildAdsMinimapButton:SetAlpha(0.6);
-		this:RegisterForClicks("LeftButtonDown", "RightButtonDown");
+		self:RegisterForClicks("LeftButtonDown", "RightButtonDown");
 	end;
 	
 	onInit = function()
@@ -68,9 +68,8 @@ GuildAdsMinimapButtonCore = {
 		GuildAdsMinimapButtonCore.update();
 	end;
 	
-	onEnter = function()
-		local this = GuildAdsMinimapButton;
-		GameTooltip:SetOwner(this, "ANCHOR_LEFT");
+	onEnter = function(self)
+		GameTooltip:SetOwner(self, "ANCHOR_LEFT");
 		GameTooltip:SetText(GUILDADS_TITLE);
 		local thereIsNoAlert = true;
 		for i, alert in ipairs(GuildAdsMinimapButtonCore.alerts) do
@@ -104,16 +103,16 @@ GuildAdsMinimapButtonCore = {
 			end			
 		end
 		GameTooltip:Show();
-		GuildAdsTask:AddNamedSchedule("GuildAdsMinimapButtonUpdate", 1, true, nil, GuildAdsMinimapButtonCore.onEnter)
+		GuildAdsTask:AddNamedSchedule("GuildAdsMinimapButtonUpdate", 1, true, nil, GuildAdsMinimapButtonCore.onEnter, GuildAdsMinimapButton)
 	end;
 	
-	onLeave = function()
+	onLeave = function(self)
 		GuildAdsTask:DeleteNamedSchedule("GuildAdsMinimapButtonUpdate");
 		GameTooltip:Hide();
 	end;
 	
-	onClick = function()
-		if (arg1 == "LeftButton") then
+	onClick = function(self, button)
+		if (button == "LeftButton") then
 			local alert = GuildAdsMinimapButtonCore.alerts[1];
 			if alert and type(alert.onClick)=="function" then
 				alert.onClick(unpack(alert.onClickArgs or {}));

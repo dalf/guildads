@@ -9,16 +9,16 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 		</Size>
 		<Scripts>
 			<OnLoad>
-				GuildAdsMinimapButtonCore.onLoad();
+				GuildAdsMinimapButtonCore.onLoad(self);
 			</OnLoad>
 			<OnClick>
-				GuildAdsMinimapButtonCore.onClick();
+				GuildAdsMinimapButtonCore.onClick(self, button);
 			</OnClick>
 			<OnEnter>
-				GuildAdsMinimapButtonCore.onEnter();
+				GuildAdsMinimapButtonCore.onEnter(self);
 			</OnEnter>
 			<OnLeave>
-				GuildAdsMinimapButtonCore.onLeave();
+				GuildAdsMinimapButtonCore.onLeave(self);
 			</OnLeave>
 		</Scripts>
 		<NormalTexture file="Interface\AddOns\GuildAds\ui\minimapButton\GuildAdsMinimapButton"/>
