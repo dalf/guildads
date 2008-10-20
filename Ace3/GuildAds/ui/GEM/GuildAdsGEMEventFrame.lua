@@ -112,7 +112,7 @@ GuildAdsGEMEvent = {
 			end
 		else
 			-- hide GEM messages
-			ChatFrame_AddMessageEventFilter("CHAT_MSG_CHANNEL", self, GuildAdsGEMEvent.chatFrameFilter)
+			ChatFrame_AddMessageEventFilter("CHAT_MSG_CHANNEL", GuildAdsGEMEvent.chatFrameFilter)
 		end;
 	end;
 	
