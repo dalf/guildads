@@ -1077,7 +1077,7 @@ function GuildAdsComm:ReceiveCloseTransaction(channelName, personName)
 			local DTS = self.DTS[t.dataTypeName];
 			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"ReceiveCloseTransaction(%s, %s)", tostring(DTS), personName);
 			DTS:ReceiveCloseTransaction(t);
-			GuildAdsHash:UpdateHashTree(self.DTS[t.dataTypeName].dataType, t.playerName, true); -- can't delete player/datatype combos using transactions.
+			GuildAdsHash:UpdateHashTree(self.DTS[t.dataTypeName].dataType, t.playerName, not _IntegrityProblem); -- can't delete player/datatype combos using transactions (except on integrity problems)
 		else
 			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "|cffff1e00Ignore|r CLOSE TRANSACTION about %s (blacklisted)", self.transactions[personName].playerName);
 		end
