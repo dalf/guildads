@@ -47,7 +47,7 @@ end
 
 function GuildAdsTradeSkillDataType:onEvent()
 	local skillId = GuildAdsSkillDataType:getIdFromName(GetTradeSkillLine());
-	if skillId > 0 then
+	if skillId > 0 and not IsTradeSkillLinked() then
 		local item, colddown, kind, itemRecipe, minMade, maxMade, q;
 		local t = self:getTableForPlayer(GuildAds.playerName);
 	
