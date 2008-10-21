@@ -410,6 +410,7 @@ GuildAdsTradeTooltip = {
 		GuildAdsDB.channel[GuildAds.channelName].TradeNeed:registerUpdate(GuildAdsTradeTooltip.onDBUpdate);
 		GuildAdsDB.channel[GuildAds.channelName].TradeOffer:registerUpdate(GuildAdsTradeTooltip.onDBUpdate);
 		GuildAdsDB.profile.TradeSkill:registerUpdate(GuildAdsTradeTooltip.onCraftUpdate);
+		GuildAdsDB.profile.TradeSkill:registerTransactionReceived(GuildAdsTradeTooltip.onTransactionCraftUpdate);
 		
 		-- Scan database
 		GuildAdsItems = {};
@@ -430,9 +431,19 @@ GuildAdsTradeTooltip = {
 		GuildAdsDB.channel[GuildAds.channelName].TradeNeed:unregisterUpdate(GuildAdsTradeTooltip.onDBUpdate);
 		GuildAdsDB.channel[GuildAds.channelName].TradeOffer:unregisterUpdate(GuildAdsTradeTooltip.onDBUpdate);
 		GuildAdsDB.profile.TradeSkill:unregisterUpdate(GuildAdsTradeTooltip.onCraftUpdate);
-	
+		GuildAdsDB.profile.TradeSkill:unregisterTransactionReceived(GuildAdsTradeTooltip.onTransactionCraftUpdate);
+		
 		-- Clear database
 		GuildAdsItems = {};
+	end;
+	
+	onTransactionCraftUpdate = function(dataType, playerName, newKeys, deletedKeys)
+		for _, item in pairs(newKeys) do
+			GuildAdsTradeTooltip.onCraftUpdate(dataType, playerName, item)
+		end
+		for _, item in pairs(newKeys) do
+			GuildAdsTradeTooltip.onCraftUpdate(dataType, playerName, item)
+		end
 	end;
 	
 	onCraftUpdate = function(dataType, playerName, item)
