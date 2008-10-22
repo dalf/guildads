@@ -264,7 +264,7 @@ function GuildAdsDTS:ReceiveCloseTransaction(transaction)
 			-- gather existing items to send using the delete
 			local tmp={}
 			local oldRevision = self.dataType:getRevision(transaction.playerName);
-			for id, _, data, revision in self.datatype:iterator(transaction.playerName) do
+			for id, _, data, revision in self.dataType:iterator(transaction.playerName) do
 				-- new items were not sendt using a transaction-trigger
 				if revision <= oldRevision then
 					tinsert(tmp, id); -- can be sure we get all old items due to integrity problem
