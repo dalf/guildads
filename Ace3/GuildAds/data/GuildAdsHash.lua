@@ -158,6 +158,30 @@ function GuildAdsHash:CreateHashTree()
 	return tree;
 end
 
+function GuildAdsHash:CheckHashTree()
+	self.checkTree=self:CreateHashTree()
+	
+	-- make leaf comparisons
+	local path
+	for l1 = 0, 15 do
+		for l2 = 0, 15 do
+			for l3 = 0, 15 do
+				path = l1..","..l2..","..l3
+				if self.tree[path] and self.checkTree[path] then
+					if self.tree[path].h ~= self.checkTree[path].h then
+						ChatFrame1:AddMessage("path "..l1..","..l2..","..l3.." differs");
+						for k,v in pairs(self.tree[path].d) do
+							ChatFrame1:AddMessage(v.ID);
+						end
+					end
+				end
+			end
+		end
+	end
+	
+	--self.checkTree=nil
+end
+
 function GuildAdsHash:CalculateLeafChecksum(leaf)
 	local h;
 	h=self:fcs16init();
