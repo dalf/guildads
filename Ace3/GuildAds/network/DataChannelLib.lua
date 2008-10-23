@@ -144,16 +144,16 @@ local joinWaitingChannels = function()
 end
 
 -- onUpdate
-local onUpdate = function(this, e)
-	this.t = this.t-e
-	if this.t <= 0 then
-		this:SetScript("OnUpdate", nil)
+local onUpdate = function(self, e)
+	self.t = self.t-e
+	if self.t <= 0 then
+		self:SetScript("OnUpdate", nil)
 		joinWaitingChannels()
 	end
 end
 
 -- onEvent
-local onEvent = function()
+local onEvent = function(self, event, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)
 	if event=="CHAT_MSG_CHANNEL_NOTICE" then
 		local channelName = strlower(arg9);
 		if lib.Channels[channelName] then
