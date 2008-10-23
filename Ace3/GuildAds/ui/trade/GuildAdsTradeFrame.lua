@@ -215,11 +215,11 @@ GuildAdsTrade = {
 		end
 	end;
 	
-	onUpdate = function()
-		if this.update then
-			this.update = this.update - arg1;
-			if this.update<=0 then
-				this.update = nil;
+	onUpdate = function(self, elapsed)
+		if self.update then
+			self.update = self.update - elapsed;
+			if self.update<=0 then
+				self.update = nil;
 				GuildAdsTrade.updateCurrentTab();
 			end;
 		end;
@@ -296,14 +296,14 @@ GuildAdsTrade = {
 		end
 	end;
 	
-	sortTrade = function(sortValue)
+	sortTrade = function(self, sortValue)
 		GuildAdsTrade.sortData.current = sortValue;
 		if (GuildAdsTrade.sortData.currentWay[sortValue]=="normal") then 
 			GuildAdsTrade.sortData.currentWay[sortValue]="up";
 		else 
 			GuildAdsTrade.sortData.currentWay[sortValue]="normal";
 		end
-		GuildAdsTrade.sortAdsArrow(this,GuildAdsTrade.sortData.currentWay[sortValue]);
+		GuildAdsTrade.sortAdsArrow(self, ,GuildAdsTrade.sortData.currentWay[sortValue]);
 		if (GuildAdsTrade.currentTab == GuildAdsTrade.TAB_REQUEST or 
 			GuildAdsTrade.currentTab == GuildAdsTrade.TAB_AVAILABLE or 
 			GuildAdsTrade.currentTab == GuildAdsTrade.TAB_CRAFTABLE ) then
@@ -313,14 +313,14 @@ GuildAdsTrade = {
 		end
 	end;
 	
-	sortMyAdsTrade = function(sortValue)
+	sortMyAdsTrade = function(self, sortValue)
 		GuildAdsTrade.sortData.current = sortValue;
 		if (GuildAdsTrade.sortData.currentWay[sortValue]=="normal") then 
 			GuildAdsTrade.sortData.currentWay[sortValue]="up";
 		else 
 			GuildAdsTrade.sortData.currentWay[sortValue]="normal";
 		end
-		GuildAdsTrade.sortAdsArrow(this,GuildAdsTrade.sortData.currentWay[sortValue]);
+		GuildAdsTrade.sortAdsArrow(self, GuildAdsTrade.sortData.currentWay[sortValue]);
 		GuildAdsTrade.myAds.updateMyAdsFrame(true);
 	end;
 	
@@ -366,17 +366,17 @@ GuildAdsTrade = {
 			end
 		end;
 		
-		onClick = function()
+		onClick = function(self)
 			if ( UIDropDownMenuButton_GetChecked() ) then	
 				PlaySound("igMainMenuOptionCheckBoxOn");
 			else
 				PlaySound("igMainMenuOptionCheckBoxOff");
 			end
 		
-			if GuildAdsTrade.getProfileValue("Filters", this.value) then
-				GuildAdsTrade.setProfileValue("Filters", this.value, nil)
+			if GuildAdsTrade.getProfileValue("Filters", self.value) then
+				GuildAdsTrade.setProfileValue("Filters", self.value, nil)
 			else
-				GuildAdsTrade.setProfileValue("Filters", this.value, true)
+				GuildAdsTrade.setProfileValue("Filters", self.value, true)
 			end
 		
 			GuildAdsTrade.exchangeButtonsUpdate(GuildAdsTrade.currentTab,true);
@@ -654,7 +654,7 @@ GuildAdsTrade = {
 			if button == "RightButton" then
 				GuildAdsTrade.contextMenu.show(self);
 			end
-			if this.item and button=="LeftButton" and IsControlKeyDown() then 
+			if self.item and button=="LeftButton" and IsControlKeyDown() then 
 				DressUpItemLink(self.item); 
 			end
 		end;

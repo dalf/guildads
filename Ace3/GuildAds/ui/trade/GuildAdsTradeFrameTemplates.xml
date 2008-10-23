@@ -64,7 +64,7 @@
 		<Scripts>
 		<OnClick>
 				if ( self.sortType ) then
-					GuildAdsTrade.sortTrade(self.sortType);
+					GuildAdsTrade.sortTrade(self, self.sortType);
 				end
 				PlaySound("igMainMenuOptionCheckBoxOn");
 		</OnClick>
@@ -122,7 +122,7 @@
 		<!--<Scripts>
 			<OnClick>
 				if ( this.sortType ) then
-					GuildAdsTrade.sortMyAdsTrade(this.sortType);
+					GuildAdsTrade.sortMyAdsTrade(self, self.sortType);
 				end
 				PlaySound("igMainMenuOptionCheckBoxOn");
 			</OnClick>
