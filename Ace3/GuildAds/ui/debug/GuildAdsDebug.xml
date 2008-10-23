@@ -190,7 +190,7 @@
 		</Frames>
 		<Scripts>
 			<OnLoad>
-					GuildAds_DebugPlugin.onLoad();
+					GuildAds_DebugPlugin.onLoad(self);
 			</OnLoad>
 			<OnEvent>
 					GuildAds_DebugPlugin.onVariablesLoaded();

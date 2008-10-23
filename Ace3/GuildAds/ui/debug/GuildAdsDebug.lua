@@ -86,9 +86,9 @@ GuildAds_DebugPlugin = {
 		end
 	end;
 	
-	onLoad = function()
+	onLoad = function(self)
 		GuildAds_ChatDebug = GuildAds_DebugPlugin.addDebugMessageReal;
-		this:RegisterEvent("VARIABLES_LOADED");
+		self:RegisterEvent("VARIABLES_LOADED");
 		GuildAdsPlugin.UIregister(GuildAds_DebugPlugin);
 	end;
 	
