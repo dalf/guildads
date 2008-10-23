@@ -6,10 +6,10 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 	<Frame name="GuildAdsCraftFrameMenu" inherits="UIDropDownMenuTemplate">
 		<Scripts>
 			<OnLoad>
-				GuildAdsCraftFrame.onLoad();
+				GuildAdsCraftFrame.onLoad(self);
 			</OnLoad>
 			<OnEvent>
-				GuildAdsCraftFrame.onEvent(event);
+				GuildAdsCraftFrame.onEvent(self, event);
 			</OnEvent>
 		</Scripts>
 	</Frame>
@@ -28,24 +28,6 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 		<Scripts>
 			<OnClick>
 				GuildAdsCraftFrame.buttons.onClick(GuildAdsCraftFrame.buttons.initializeTradeskillMenu);
-			</OnClick>
-		</Scripts>
-	</Button>
-	
-	<Button name="GuildAdsCraftButton" inherits="UIPanelButtonTemplate" text="GUILDADS_TS_LINK" hidden="true">
-		<Size>
-			<AbsDimension x="80" y="22"/>
-		</Size>
-		<Anchors>
-			<Anchor point="BOTTOMRIGHT" relativeTo="CraftCancelButton" relativePoint="TOPRIGHT">
-				<Offset>
-					<AbsDimension x="0" y="0"/>
-				</Offset>
-			</Anchor>
-		</Anchors>
-		<Scripts>
-			<OnClick>
-				GuildAdsCraftFrame.buttons.onClick(GuildAdsCraftFrame.buttons.initializeCraftMenu);
 			</OnClick>
 		</Scripts>
 	</Button>

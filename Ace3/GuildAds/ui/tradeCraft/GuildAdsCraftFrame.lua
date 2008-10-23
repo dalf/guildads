@@ -9,7 +9,6 @@
 ----------------------------------------------------------------------------------
 
 local tradeskillPluginLoaded = false;
-local craftPluginLoaded = false;
 
 GuildAdsCraftFrame = {
 
@@ -19,24 +18,14 @@ GuildAdsCraftFrame = {
 	};
 
 	tradeskillPluginLoaded = false;
-	craftPluginLoaded = false;
 
-	onLoad = function()
-		this:RegisterEvent("CRAFT_SHOW");
-		this:RegisterEvent("TRADE_SKILL_SHOW");		
+	onLoad = function(self)
+		self:RegisterEvent("TRADE_SKILL_SHOW");		
 		GuildAdsPlugin.UIregister(GuildAdsCraftFrame);
 	end;
 	
-	onEvent = function(event)
-		if event=="CRAFT_SHOW" then
-			if not craftPluginLoaded then
-				GuildAdsCraftButton:ClearAllPoints();
-				GuildAdsCraftButton:SetParent("CraftFrame");
-				GuildAdsCraftButton:SetPoint("BOTTOMRIGHT", CraftCancelButton, "TOPRIGHT");
-				GuildAdsCraftButton:Show();
-				craftPluginLoaded = true;
-			end
-		elseif event=="TRADE_SKILL_SHOW" then
+	onEvent = function(self, event)
+		if event=="TRADE_SKILL_SHOW" then
 			if not tradeskillPluginLoaded then
 				GuildAdsTradeskillButton:ClearAllPoints();
 				GuildAdsTradeskillButton:SetParent("TradeSkillFrame");
@@ -51,19 +40,12 @@ GuildAdsCraftFrame = {
 		if tradeskillPluginLoaded then
 			GuildAdsTradeskillButton:Show();
 		end
-		if craftPluginLoaded then
-			GuildAdsCraftButton:Show();
-		end
-		
     end;
 
     onChannelLeave = function()
 		if tradeskillPluginLoaded then
 			GuildAdsTradeskillButton:Hide();
 		end
-		if craftPluginLoaded then
-			GuildAdsCraftButton:Hide();
-		end		
     end;
 	
 	askItem = function(item)
@@ -78,21 +60,21 @@ GuildAdsCraftFrame = {
 		end
 	end;
 	
-	onClickHave = function()
-		local item = this.value;
+	onClickHave = function(self)
+		local item = self.value;
 		local data = GuildAdsDB.channel[GuildAds.channelName].TradeOffer:get(GuildAds.playerName, item.ref);
 		if not data then
 			GuildAdsDB.channel[GuildAds.channelName].TradeOffer:set(GuildAds.playerName, item.ref, { _t=GuildAdsDB:GetCurrentTime() });
 		end
 	end;
 	
-	onClickAskItem = function()
-		local item = this.value;
+	onClickAskItem = function(self)
+		local item = self.value;
 		GuildAdsCraftFrame.askItem(item);
 	end;
 	
-	onClickAskEverything = function()
-		for k,item in pairs(this.value) do
+	onClickAskEverything = function(self)
+		for k,item in pairs(self.value) do
 			GuildAdsCraftFrame.askItem(item);
 		end
 	end;
@@ -175,71 +157,6 @@ GuildAdsCraftFrame = {
 			end
 			
 			PlaySound("igMainMenuOpen");
-		end;
-		
-		-- by ElPico
-		initializeCraftMenu = function(level)
-			local id = GetCraftSelectionIndex();
-			local craftName, craftSubSpellName, craftType, numAvailable, isExpanded = GetCraftInfo(id);
-			local craftDesc = GetCraftDescription(id);
-			local count = 1;
-		
-			------
-			local composants = { };
-			local menu = { };
-	
-			local numReagents = GetCraftNumReagents(id);
-			for i=1, numReagents, 1 do
-				local reagentName, reagentTexture, reagentCount, playerReagentCount = GetCraftReagentInfo(id, i);
-				local link = GetCraftReagentItemLink(id, i);
-				local itemColor, itemRef, itemName = GuildAds_ExplodeItemRef(link);
-				
-				local info = {
-					value = { 
-						ref = itemRef;
-						count = reagentCount;
-					};
-					text = GUILDADS_BUTTON_ADDREQUEST.." "..reagentCount.." "..reagentName;
-					notCheckable = 1;
-					func = GuildAdsCraftFrame.onClickAskItem;
-				};
-				
-				tinsert(composants, info.value);
-				tinsert(menu, info);
-			end
-			
-			
-			local link = GetCraftItemLink(id);
-			local itemColor, itemRef, itemName = GuildAds_ExplodeItemRef(link);
-			info = {
-				text = GUILDADS_BUTTON_ADDAVAILABLE.." "..craftName.." "..craftSubSpellName;
-				notCheckable = 1;
-				func = GuildAdsCraftFrame.onClickHave;
-				value = { 
-					ref = itemRef
-				};
-			};
-			UIDropDownMenu_AddButton(info, 1);
-			
-			---- Demande tous les composants
-			info = {
-				notCheckable = 1;
-				text = string.format(GUILDADS_TS_ASKITEMS, count, craftName);
-				tooltipTitle = craftName;
-				tooltipText = GUILDADS_TS_ASKITEMS_TT;
-				func = GuildAdsCraftFrame.onClickAskEverything;
-				value = composants;
-			};
-			UIDropDownMenu_AddButton(info, 1);
-			
-			---- Demande un composant en particulier
-			for k,info in pairs(menu) do
-				UIDropDownMenu_AddButton(info, 1);
-			end
-			
-			PlaySound("igMainMenuOpen");
-		end;
-		
+		end;		
 	};
-		
 };
