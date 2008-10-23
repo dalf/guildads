@@ -508,7 +508,7 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 		
 		<Scripts> 
 			<OnLoad>
-				GuildAdsGuild.onLoad();
+				GuildAdsGuild.onLoad(self);
 			</OnLoad>
 			<OnShow>
 				GuildAdsGuild.onShow();

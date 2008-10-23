@@ -44,9 +44,9 @@ GuildAdsGuild = {
 		end
 	end;
 	
-	onLoad = function()
-		this:RegisterEvent("CHAT_MSG_SYSTEM");
-		this:RegisterEvent("GUILD_ROSTER_UPDATE");
+	onLoad = function(self)
+		self:RegisterEvent("CHAT_MSG_SYSTEM");
+		self:RegisterEvent("GUILD_ROSTER_UPDATE");
 	end;
 	
 	onConnection = function(playerName, status) 
