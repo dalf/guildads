@@ -162,17 +162,18 @@ function GuildAdsHash:CheckHashTree()
 	self.checkTree=self:CreateHashTree()
 	
 	-- make leaf comparisons
-	local path
+	local path, a, b, c
 	for l1 = 0, 15 do
 		for l2 = 0, 15 do
 			for l3 = 0, 15 do
 				path = l1..","..l2..","..l3
-				if self.tree[path] and self.checkTree[path] then
-					if self.tree[path].h ~= self.checkTree[path].h then
-						ChatFrame1:AddMessage("path "..l1..","..l2..","..l3.." differs");
-						for k,v in pairs(self.tree[path].d) do
-							ChatFrame1:AddMessage(v.ID);
-						end
+				a=self.tree[path]
+				b=self.checkTree[path]
+				if (a and not b) or (not a and b) or (a and b and a.h ~= b.h) then
+					c=a.d or b.d
+					ChatFrame1:AddMessage("path "..l1..","..l2..","..l3.." differs");
+					for k,v in pairs(c.d) do
+						ChatFrame1:AddMessage(v.ID..(a and " missing" or ""));
 					end
 				end
 			end
