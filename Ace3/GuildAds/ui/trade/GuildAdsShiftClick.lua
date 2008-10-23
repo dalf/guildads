@@ -596,4 +596,3 @@ GuildAdsPlugin.UIregister(GuildAdsShiftClick);
 GuildAdsShiftClick.hook("inspectLoadUI", "InspectFrame_LoadUI", GuildAdsShiftClick.inspect.loadUI);
 GuildAdsShiftClick.hook("auctionHouseLoadUI", "AuctionFrame_LoadUI", GuildAdsShiftClick.auctionHouse.loadUI);
 GuildAdsShiftClick.hook("tradeSkillLoadUI", "TradeSkillFrame_LoadUI", GuildAdsShiftClick.tradeSkill.loadUI);
-GuildAdsShiftClick.hook("craftLoadUI", "CraftFrame_LoadUI", GuildAdsShiftClick.craft.loadUI);
