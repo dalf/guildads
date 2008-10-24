@@ -132,10 +132,11 @@ GUILDADS_SKILLS = {
 	[8]  = "Couture",
 	[9]  = "Enchantement",
 	[10] = "Pêche",
-	[11] = "Premiers soins",
+	[11] = "Secourisme",
 	[12] = "Cuisine",
 	[13] = "Crochetage",
 	[14] = "Joaillerie",
+	[15] = "Calligraphie",
 
 	[20] = "Armes de pugilat",
 	[21] = "Dagues",
