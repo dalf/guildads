@@ -303,7 +303,7 @@ GuildAdsTrade = {
 		else 
 			GuildAdsTrade.sortData.currentWay[sortValue]="normal";
 		end
-		GuildAdsTrade.sortAdsArrow(self, ,GuildAdsTrade.sortData.currentWay[sortValue]);
+		GuildAdsTrade.sortAdsArrow(self, GuildAdsTrade.sortData.currentWay[sortValue]);
 		if (GuildAdsTrade.currentTab == GuildAdsTrade.TAB_REQUEST or 
 			GuildAdsTrade.currentTab == GuildAdsTrade.TAB_AVAILABLE or 
 			GuildAdsTrade.currentTab == GuildAdsTrade.TAB_CRAFTABLE ) then
