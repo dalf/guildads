@@ -124,8 +124,8 @@ function GuildAdsHash:CreateHashTree()
 			end
 		end
 	end
-	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "Number of IDs: %i",numIDs)
-	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "Number of unique hashes: %i",numHashes) -- #tmp doesn't work for some reason
+	GuildAds_ChatDebug(GA_DEBUG_HASH, "Number of IDs: %i",numIDs)
+	GuildAds_ChatDebug(GA_DEBUG_HASH, "Number of unique hashes: %i",numHashes) -- #tmp doesn't work for some reason
 	
 	maxShared=0;
 	maxV=nil
@@ -141,9 +141,9 @@ function GuildAdsHash:CreateHashTree()
 	end
 	-- following sort is not necessary
 	--sort(CheckSums, function(a,b) if a[1].hashID<b[1].hashID then return true; else return false; end; end);
-	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "Max number of IDs on 1 hashID is %i",maxShared);
+	GuildAds_ChatDebug(GA_DEBUG_HASH, "Max number of IDs on 1 hashID is %i",maxShared);
 	for k,v in pairs(maxV) do
-		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "%s", v.ID); --v.p v.dt
+		GuildAds_ChatDebug(GA_DEBUG_HASH, "%s", v.ID); --v.p v.dt
 	end
 	
 	-- Calculate leaf checksums
@@ -170,7 +170,7 @@ function GuildAdsHash:CheckHashTree()
 				a=self.tree[path]
 				b=self.checkTree[path]
 				if (a and not b) or (not a and b) or (a and b and a.h ~= b.h) then
-					c=a.d or b.d
+					c=a or b
 					ChatFrame1:AddMessage("path "..l1..","..l2..","..l3.." differs");
 					for k,v in pairs(c.d) do
 						ChatFrame1:AddMessage(v.ID..(a and " missing" or ""));
@@ -242,16 +242,13 @@ function GuildAdsHash:CalculateHashFromLevels(l1, l2, l3, l4)
 end
 
 function GuildAdsHash:UpdateTree(tree, playerName, dataTypeName)
-	local ID;
-	local t;
-	local path; 
-	local hashMask;
+	local ID, hashID, path, treepath;
 	
 	ID=GuildAdsHash:getID(playerName,dataTypeName);
 	hashID=GuildAdsHash:CalculateHash(ID);
 	
 	path=GuildAdsHash:SplitHash(hashID);
-	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "path=%s",table.concat(path,","));
+	GuildAds_ChatDebug(GA_DEBUG_HASH, "path=%s",table.concat(path,","));
 	
 	-- is ID in tree?
 	treepath=tree[path]; -- just an optimisation
@@ -259,25 +256,28 @@ function GuildAdsHash:UpdateTree(tree, playerName, dataTypeName)
 		for k,v in pairs(treepath.d) do -- small loop, with 12 bit hash (path length = 3), 500 unique ids usually gives no more than 2 loops.
 			if v.ID == ID then
 				-- hashID exists and contains ID: Just update leaf checksums and recalculate path checksums
-				GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "found %s",ID);
-				GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "checksum=%s (before)",treepath.h);
+				GuildAds_ChatDebug(GA_DEBUG_HASH, "ID found %s",ID);
+				GuildAds_ChatDebug(GA_DEBUG_HASH, "checksum=%s (before)",treepath.h);
 				treepath.h=GuildAdsHash:CalculateLeafChecksum(treepath.d);
-				GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "checksum=%s (after)",treepath.h);
+				GuildAds_ChatDebug(GA_DEBUG_HASH, "checksum=%s (after)",treepath.h);
 				GuildAdsHash:CalculatePathChecksums(tree,path);
 				return; 
 			end
 		end
 		-- hashID exists but ID wasn't there. Add ID to leaf (hashID) and sort them. Then recalculate leaf and path checksum.
+		GuildAds_ChatDebug(GA_DEBUG_HASH, "hashID found %s",table.concat(path,","));
 		if self.DT[dataTypeName]:getRevision(playerName) > 0 then
 			tinsert(treepath.d,{ hashID=hashID, ID=ID, p=playerName, dt=self.DT[dataTypeName] });
 			sort(treepath.d, function(a,b) if a.ID<b.ID then return true; else return false; end; end);
 			treepath.h=GuildAdsHash:CalculateLeafChecksum(treepath.d);
+			GuildAds_ChatDebug(GA_DEBUG_HASH, "checksum=%s (after)",treepath.h);
 			GuildAdsHash:CalculatePathChecksums(tree,path);
 		end
 	else
 		-- hashID doesn't exist: Create leaf (hashID) and add ID to it. Then calculate leaf and path checksum.
+		GuildAds_ChatDebug(GA_DEBUG_HASH, "hashID not found. Creating %s",table.concat(path,","))
 		if self.DT[dataTypeName]:getRevision(playerName) > 0 then
-			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "Path %s is not found.",table.concat(path,","));
+			GuildAds_ChatDebug(GA_DEBUG_HASH, "Path %s is not found.",table.concat(path,","));
 			tree[path]={ d={ { hashID=hashID, ID=ID, p=playerName, dt=self.DT[dataTypeName] } } };
 			tree[path].h=GuildAdsHash:CalculateLeafChecksum(tree[path].d);
 			GuildAdsHash:CalculatePathChecksums(tree,path);
@@ -299,6 +299,7 @@ function GuildAdsHash:RemoveID(tree,playerName,dataTypeName)
 		if treepath and treepath.d then
 			for k,v in pairs(treepath.d) do -- small loop, with 12 bit hash (path length = 3), 500 unique ids usually gives no more than 2 loops.
 				if v.ID == ID then
+					GuildAds_ChatDebug(GA_DEBUG_HASH, "ID found. Deleting %s", ID);
 					treepath.d[k]=nil; -- removing an ID does not change the order. No sort necessary.
 					if #treepath.d>0 then
 						treepath.h=GuildAdsHash:CalculateLeafChecksum(treepath.d); -- update leaf checksum
@@ -315,17 +316,26 @@ end
 
 -- called when DB is updated by player or by transaction
 function GuildAdsHash:UpdateHashTree(dataType, playerName, id)
+	local hashBefore=GuildAdsHash.tree[""].h
+	GuildAds_ChatDebug(GA_DEBUG_HASH, "GuildAdsHash (BEFORE): roothash="..tostring(hashBefore).."   id="..tostring(id));
+	
 	if id then
 		GuildAdsHash:UpdateTree(GuildAdsHash.tree, playerName, dataType.metaInformations.name);
 	else
 		GuildAdsHash:RemoveID(GuildAdsHash.tree, playerName, dataType.metaInformations.name);
+	end
+	
+	local hashAfter=GuildAdsHash.tree[""].h
+	GuildAds_ChatDebug(GA_DEBUG_HASH, "GuildAdsHash (AFTER): roothash="..tostring(hashAfter));
+	if hashBefore == hashAfter then
+		GuildAds_ChatDebug(GA_DEBUG_HASH, "GuildAdsHash: Hash didn't change! Did the revision change?");
 	end
 end
 
 -- recalculate path checksum 
 function GuildAdsHash:CalculatePathChecksums(tree, path)
 	local i,p,t;
-	p={}
+	p={ [0]=tree }
 	t=tree;
 	for k,v in pairs(path) do
 		tinsert(p,t[v]);
@@ -335,7 +345,7 @@ function GuildAdsHash:CalculatePathChecksums(tree, path)
 	if i>self.maxRecurse-1 then
 		i=self.maxRecurse-1;
 	end
-	while i>0 do
+	while i>=0 do
 		--GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "Updating path "..i)
 		GuildAdsHash:CalculateBranchChecksum(p[i]); -- does not recurse
 		i=i-1;
@@ -541,7 +551,7 @@ end
 
 function GuildAdsHash:ReceiveSearch(path, hashSequence)
 	if not self.search[path] then
-		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"GuildAdsHash:ReceiveSearch %s", path);
+		GuildAds_ChatDebug(GA_DEBUG_HASH,"GuildAdsHash:ReceiveSearch %s", path);
 		self.search[path] = {
 			bestPlayerName = GuildAdsComm.playerTree[GuildAds.playerName].i, -- playername as index
 			path = self:stringToPath(path);
@@ -550,9 +560,9 @@ function GuildAdsHash:ReceiveSearch(path, hashSequence)
 			amount = #((self.tree[path] or {}).d or {});  -- number of IDs for this path (or 0).
 			numplayers = 1; -- the number of players the bestPlayerName is drawn from (used to calculate probabilities)
 		};
-		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"GuildAdsHash:ReceiveSearch (%s)", self:pathToString(self.search[path].path));
+		GuildAds_ChatDebug(GA_DEBUG_HASH,"GuildAdsHash:ReceiveSearch (%s)", self:pathToString(self.search[path].path));
 	else
-		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"  - Hash search already in progress");
+		GuildAds_ChatDebug(GA_DEBUG_HASH,"  - Hash search already in progress");
 	end
 	
 	if not (GuildAdsComm.playerTree[GuildAds.playerName].c1 or GuildAdsComm.playerTree[GuildAds.playerName].c2) then
@@ -610,20 +620,20 @@ end
 function GuildAdsHash:ReceiveHashSearchResult(path, hashChanged, who, amount, DTS)
 	if self.search[path] then
 		local pathElements, newSearchPath;
-		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "ReceiveHashSearchResult:GuildAdsHash");
+		GuildAds_ChatDebug(GA_DEBUG_HASH, "ReceiveHashSearchResult:GuildAdsHash");
 		--if self.search[path].hashChanged == 0 then
 		if hashChanged == 0 then
 			-- every online client has the same hash for this path (i.e. no change)
 		else
 			pathElements=self:IntegerToPathElement(hashChanged); 
-			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "ReceiveHashSearchResult: %s + %s", path, table.concat(pathElements,","));
+			GuildAds_ChatDebug(GA_DEBUG_HASH, "ReceiveHashSearchResult: %s + %s", path, table.concat(pathElements,","));
 			-- WARNING: REUSE OF PATH TABLE IS WRONG. MAKE A COPY!
 			-- problem: 2 hash search results with the same path can be sent due to lag
 			newSearchPath=self:stringToPath(path); -- get table form of path
 			--tinsert(newSearchPath, pathElements[math.random(1,#pathElements)]); -- pick a random branch (client probably picks different branches, all choices are good)
 			--GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "ReceiveHashSearchResult: NewSearchPath = %s",self:pathToString(newSearchPath));
 			if #newSearchPath == self.maxRecurse-1 then
-				GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "ReceiveHashSearchResult:Queuing Revision Search ");
+				GuildAds_ChatDebug(GA_DEBUG_HASH, "ReceiveHashSearchResult:Queuing Revision Search ");
 				-- full path, search for all IDs at this path
 				-- queue revision searches (every client does this)
 				for _,branch in pairs(pathElements) do
@@ -638,7 +648,7 @@ function GuildAdsHash:ReceiveHashSearchResult(path, hashChanged, who, amount, DT
 					end
 				end
 			else
-				GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "ReceiveHashSearchResult:Queuing Hash Search Path");
+				GuildAds_ChatDebug(GA_DEBUG_HASH, "ReceiveHashSearchResult:Queuing Hash Search Path");
 				for _,branch in pairs(pathElements) do
 					newSearchPath=self:stringToPath(path);
 					tinsert(newSearchPath,branch);

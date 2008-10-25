@@ -22,6 +22,7 @@ GA_DEBUG_PROTOCOL = 4;
 GA_DEBUG_STORAGE = 5;
 GA_DEBUG_GUI = 6;
 GA_DEBUG_PLUGIN = 8;
+GA_DEBUG_HASH = 9;
 
 function GuildAds_ChatDebug()
 end

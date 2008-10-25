@@ -14,7 +14,7 @@
 			</Anchor>
 		</Anchors>	
 		<Frames>
-			<ScrollingMessageFrame name="GuildAdsDebug_Log" displayDuration="1200.0" maxLines="128">
+			<ScrollingMessageFrame name="GuildAdsDebug_Log" displayDuration="1200.0" maxLines="1280">
 				<Size>
 					<AbsDimension x="460" y="460"/>
 				</Size>
