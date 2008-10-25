@@ -270,11 +270,17 @@ function GuildAdsDTS:ReceiveCloseTransaction(transaction)
 					tinsert(tmp, id); -- can be sure we get all old items due to integrity problem
 				end
 			end
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "revision (before) = "..tostring(self.dataType:getRevision(transaction.playerName)))
 			self.dataType:setRevision(transaction.playerName, 0);
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "revision (after) = "..tostring(self.dataType:getRevision(transaction.playerName)))
+			GuildAdsHash:UpdateHashTree(GuildAdsHash.DT[transaction.dataTypeName], transaction.playerName, not transaction._IntegrityProblem);
 			self:QueueSearch(transaction.playerName);
 			self.dataType:triggerTransactionReceived(transaction.playerName, {}, tmp);
 		else
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "revision (before) = "..tostring(self.dataType:getRevision(transaction.playerName)))
 			self.dataType:setRevision(transaction.playerName, transaction.toRevision);
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "revision (after) = "..tostring(self.dataType:getRevision(transaction.playerName)))
+			GuildAdsHash:UpdateHashTree(GuildAdsHash.DT[transaction.dataTypeName], transaction.playerName, not transaction._IntegrityProblem);
 			if self.dataType.metaInformations.name=="Admin" then
 				GuildAdsDB.channel[GuildAds.channelName]:deletePlayers();
 			end
