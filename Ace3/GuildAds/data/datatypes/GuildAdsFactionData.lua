@@ -46,29 +46,35 @@ function GuildAdsFactionDataType:Initialize()
 	self:RegisterEvent("UPDATE_FACTION", "onEvent");
 end
 
-function GuildAdsFactionDataType:onEvent()
-	local playerName = UnitName("player");
-	local playerFactionIds = {};
-	-- add new factions
-	for i = 1, GetNumFactions(), 1 do	
-		local factionName, description, standingId, bottomValue, topValue, earnedValue, atWarWith, canToggleAtWar, isHeader, isCollapsed, isWatched = GetFactionInfo(i);
-		if (isHeader == nil) then
-			local id = self:getIdFromName(factionName);
-			if (id > 0) then
-				self:set(playerName, id, { v=earnedValue; b=bottomValue; t=topValue; s=standingId });
-				playerFactionIds[id] = true;
+function GuildAdsFactionDataType:onEvent(event, arg1)
+	if event == "UPDATE_FACTION" then
+		local playerName = UnitName("player");
+		local playerFactionIds = {};
+		-- add new factions
+		local allHeadersOpen = true
+		for i = 1, GetNumFactions(), 1 do	
+			local factionName, description, standingId, bottomValue, topValue, earnedValue, atWarWith, canToggleAtWar, isHeader, isCollapsed, hasRep, isWatched, isChild = GetFactionInfo(i);
+			if (isHeader == nil) then
+				local id = self:getIdFromName(factionName);
+				if (id > 0) then
+					self:set(playerName, id, { v=earnedValue; b=bottomValue; t=topValue; s=standingId });
+					playerFactionIds[id] = true;
+				end
+			else
+				allHeadersOpen = allHeadersOpen and not isCollapsed
+			end
+		end
+		-- delete factions
+		-- The only way to detect if a faction is to be deleted is to check if all headers are open (not collapsed) as 
+		-- that will ensure we have a full faction list. Only then may we delete factions from the list. 
+		if allHeadersOpen then
+			for id in pairs(self:getTableForPlayer(playerName)) do
+				if not playerFactionIds[id] and id~="_u" then
+					self:set(playerName, id, nil);
+				end
 			end
 		end
 	end
-	-- delete factions (this deletes factions that you chose to hide which is not what we want)
-	-- The only way to detect if a faction is to be deleted is to check if all headers are open (not collapsed) as 
-	-- that will ensure we have a full faction list. Only then may we delete factions from the list. This is not
-	-- implemented yet.
-	--for id in pairs(self:getTableForPlayer(playerName)) do
-	--	if not playerFactionIds[id] and id~="_u" then
-	--		self:set(playerName, id, nil);
-	--	end
-	--end
 end
 
 function GuildAdsFactionDataType:getIdFromName(FactionName)
