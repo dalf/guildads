@@ -68,7 +68,7 @@ function GuildAdsDBChannel:addPlayer(playerName)
 			-- old profile data may exist in the database, make sure the hash tree is updated
 			for name, profileDT in pairs(GuildAdsDB.profile) do
 				if profileDT:getRevision(playerName) > 0 then -- speed-up
-					GuildAdsHash:UpdateHashTree(profileDR, playerName, true);
+					GuildAdsHash:UpdateHashTree(profileDT, playerName, true);
 				end
 			end
 			-- it should not be possible to have old channel data present so there is no need to check
