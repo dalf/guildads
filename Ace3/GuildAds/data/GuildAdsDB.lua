@@ -65,6 +65,14 @@ function GuildAdsDBChannel:addPlayer(playerName)
 	if self:isPlayerAllowed(playerName) then
 		if not self.db.Players[playerName] then
 			self.db.Players[playerName] = true;
+			-- old profile data may exist in the database, make sure the hash tree is updated
+			for name, profileDT in pairs(GuildAdsDB.profile) do
+				if profileDT:getRevision(playerName) > 0 then -- speed-up
+					GuildAdsHash:UpdateHashTree(profileDR, playerName, true);
+				end
+			end
+			-- it should not be possible to have old channel data present so there is no need to check
+			
 			self:triggerEvent(self.PLAYER, playerName);
 		end
 		return true;
