@@ -38,16 +38,21 @@ function GuildAdsFactionDataType:Initialize()
 		CHARACTER_POINTS_CHANGED when player level up or forget/learn a skill
 		CHAT_MSG_SKILL event fires when the player progress
 	]]
-	GuildAdsTask:AddNamedSchedule("GuildAdsFactionDataTypeInit", 8, nil, nil, self.onEvent, self)
+	--GuildAdsTask:AddNamedSchedule("GuildAdsFactionDataTypeInit", 8, nil, nil, self.onEvent, self)
 	-- UPDATE_FACTION, CHAT_MSG_COMBAT_FACTION_CHANGE, COMBAT_TEXT_UPDATE, UNIT_FACTION, UPDATE_FACTION
-	--self:RegisterEvent("CHARACTER_POINTS_CHANGED", "onEvent");
-	--self:RegisterEvent("CHAT_MSG_SKILL", "onEvent");
-	self:RegisterEvent("PLAYER_LEVEL_UP", "onEvent");
+
+	-- when UPDATE_FACTION fires, faction information may actually not be available. Try to delay...
+	self:RegisterEvent("PLAYER_ENTERING_WORLD", "enterWorld");
+end
+
+function GuildAdsFactionDataType:enterWorld()
+	self:UnregisterEvent("PLAYER_ENTERING_WORLD");
 	self:RegisterEvent("UPDATE_FACTION", "onEvent");
 end
 
 function GuildAdsFactionDataType:onEvent(event, arg1)
 	if event == "UPDATE_FACTION" then
+		local added, deleted = 0, 0;
 		local playerName = UnitName("player");
 		local playerFactionIds = {};
 		-- add new factions
@@ -58,6 +63,9 @@ function GuildAdsFactionDataType:onEvent(event, arg1)
 				local id = self:getIdFromName(factionName);
 				if (id > 0) then
 					self:set(playerName, id, { v=earnedValue; b=bottomValue; t=topValue; s=standingId });
+					if not self:get(playerName, id) then
+						added = added + 1
+					end
 					playerFactionIds[id] = true;
 				end
 			else
@@ -68,12 +76,20 @@ function GuildAdsFactionDataType:onEvent(event, arg1)
 		-- The only way to detect if a faction is to be deleted is to check if all headers are open (not collapsed) as 
 		-- that will ensure we have a full faction list. Only then may we delete factions from the list. 
 		if allHeadersOpen then
+			local tmp = {}
 			for id in pairs(self:getTableForPlayer(playerName)) do
 				if not playerFactionIds[id] and id~="_u" then
-					self:set(playerName, id, nil);
+					if self:get(playerName, id) then
+						deleted = deleted + 1
+					end
+					tinsert(tmp, id);
 				end
 			end
+			for _, faction in pairs(tmp) do
+				self:set(playerName, faction, nil);
+			end
 		end
+		GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "GuildAdsFactionDataType: Updating faction information (%s added, %s deleted)", added, deleted);
 	end
 end
 

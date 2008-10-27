@@ -41,29 +41,39 @@ local AceEvent = LibStub("AceEvent-3.0")
 AceEvent:Embed(GuildAdsTradeSkillDataType)
 
 function GuildAdsTradeSkillDataType:Initialize()
-	self:RegisterEvent("TRADE_SKILL_SHOW", "onEvent");
+	self:RegisterEvent("PLAYER_ENTERING_WORLD", "enterWorld");
+end
+
+function GuildAdsTradeSkillDataType:enterWorld()
+	self:UnregisterEvent("PLAYER_ENTERING_WORLD");
+	--self:RegisterEvent("TRADE_SKILL_SHOW", "onEvent");
 	self:RegisterEvent("TRADE_SKILL_UPDATE", "onEvent");
 end
 
-function GuildAdsTradeSkillDataType:onEvent()
+function GuildAdsTradeSkillDataType:onEvent(event, arg1)
 	local skillId = GuildAdsSkillDataType:getIdFromName(GetTradeSkillLine());
 	if skillId > 0 and not IsTradeSkillLinked() then
-		local item, colddown, kind, itemRecipe, minMade, maxMade, q;
+		local item, colddown, kind, open, itemRecipe, minMade, maxMade, q;
+		local tmp = {}
+		local allHeadersOpen = true
+		local added, deleted = 0, 0;
 		local t = self:getTableForPlayer(GuildAds.playerName);
 	
 		self:deleteOrphanTradeSkillItems(); -- just in case there are any items without profession label
 	
-		--self:clearAllWoW2TradeSkillItems(); -- old WoW2 items are no more
+		--	--self:clearAllWoW2TradeSkillItems(); -- old WoW2 items are no more
 		self:deleteWoW2TradeSkillItems(); -- only delete my own items
 	
 		for i=1,GetNumTradeSkills() do
-			_, kind = GetTradeSkillInfo(i);
+			_, kind, _, open = GetTradeSkillInfo(i);
 			if (kind ~= "header") then
 				item = GetTradeSkillItemLink(i);
+				
 				minMade, maxMade = GetTradeSkillNumMade(i);
 				itemRecipe = GetTradeSkillRecipeLink(i);
 				if item then
 					_, item = GuildAds_ExplodeItemRef(item);
+					tmp[item]=true;
 					-- don't share cooldown, causes too much update
 					--[[
 					cooldown = GetTradeSkillCooldown(i) 
@@ -83,12 +93,30 @@ function GuildAdsTradeSkillDataType:onEvent()
 					-- if not (t[item] and t[item].e and t[item].q) then
 					if not (t[item]) then
 						self:set(GuildAds.playerName, item, { s=skillId, e=itemRecipe, q=q });
+						added = added + 1
 					elseif not t[item].s then
 						t[item].s = skillId
 					end
 				end
+			else
+				allHeadersOpen = allHeadersOpen and open
 			end
 		end
+		-- delete items not found in the above code
+		if allHeadersOpen then
+			local tmp2 = {};
+			local craft = self:getTableForPlayer(GuildAds.playerName);
+			for item, data in pairs(craft) do
+				if (not tmp[item]) and (item ~= "_u") and (data.s == skillId) then
+					tinsert(tmp2, item);
+				end
+			end
+			for _, item in pairs(tmp2) do
+				self:set(GuildAds.playerName, item, nil);
+				deleted = deleted + 1
+			end
+		end
+		GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "GuildAdsTradeSkillDataType: Updating tradeskill information (%s added, %s deleted)", added, deleted);
 	end
 end
 
