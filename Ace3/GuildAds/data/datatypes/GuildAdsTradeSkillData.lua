@@ -55,15 +55,36 @@ function GuildAdsTradeSkillDataType:onEvent(event, arg1)
 	if skillId > 0 and not IsTradeSkillLinked() then
 		local item, colddown, kind, open, itemRecipe, minMade, maxMade, q;
 		local tmp = {}
-		local allHeadersOpen = true
 		local added, deleted = 0, 0;
 		local t = self:getTableForPlayer(GuildAds.playerName);
-	
+
 		self:deleteOrphanTradeSkillItems(); -- just in case there are any items without profession label
 	
 		--	--self:clearAllWoW2TradeSkillItems(); -- old WoW2 items are no more
 		self:deleteWoW2TradeSkillItems(); -- only delete my own items
-	
+
+		-- Check the TradeSkill UI to see if any filters are enabled.
+		local fullListShown = true
+		if TradeSkillFrameAvailableFilterCheckButton then
+			fullListShown = fullListShown and not TradeSkillFrameAvailableFilterCheckButton:GetChecked()
+			--GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "GuildAdsTradeSkillDataType: button = "..tostring(TradeSkillFrameAvailableFilterCheckButton:GetChecked() and "checked" or "not checked"))
+		end
+		if TradeSkillFrameEditBox then
+			fullListShown = fullListShown and (TradeSkillFrameEditBox:GetText() == "" or TradeSkillFrameEditBox:GetText() == SEARCH)
+			--GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "GuildAdsTradeSkillDataType: text = "..tostring(TradeSkillFrameEditBox:GetText()))
+		end
+		if TradeSkillInvSlotDropDown then
+			local dd = UIDropDownMenu_GetSelectedID(TradeSkillInvSlotDropDown)
+			fullListShown = fullListShown and (dd == 1 or not dd)
+			--GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "GuildAdsTradeSkillDataType: InvDropDown = "..(UIDropDownMenu_GetSelectedID(TradeSkillInvSlotDropDown) or ""))
+		end
+		if TradeSkillSubClassDropDown then
+			local dd = UIDropDownMenu_GetSelectedID(TradeSkillSubClassDropDown)
+			fullListShown = fullListShown and (dd == 1 or not dd)
+			--GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "GuildAdsTradeSkillDataType: ClassDropDown = "..(UIDropDownMenu_GetSelectedID(TradeSkillSubClassDropDown) or ""))
+		end
+		
+		-- Check for new tradeskills
 		for i=1,GetNumTradeSkills() do
 			_, kind, _, open = GetTradeSkillInfo(i);
 			if (kind ~= "header") then
@@ -99,11 +120,14 @@ function GuildAdsTradeSkillDataType:onEvent(event, arg1)
 					end
 				end
 			else
-				allHeadersOpen = allHeadersOpen and open
+				fullListShown = fullListShown and open
 			end
 		end
+		
+		GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "GuildAdsTradeSkillDataType: Full List Shown: "..(fullListShown and "true" or "false"))
+		
 		-- delete items not found in the above code
-		if allHeadersOpen then
+		if fullListShown then
 			local tmp2 = {};
 			local craft = self:getTableForPlayer(GuildAds.playerName);
 			for item, data in pairs(craft) do
