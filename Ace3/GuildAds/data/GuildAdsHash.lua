@@ -316,19 +316,21 @@ end
 
 -- called when DB is updated by player or by transaction
 function GuildAdsHash:UpdateHashTree(dataType, playerName, id)
-	local hashBefore=GuildAdsHash.tree[""].h
-	GuildAds_ChatDebug(GA_DEBUG_HASH, "GuildAdsHash (BEFORE): roothash="..tostring(hashBefore).."   id="..tostring(id));
-	
-	if id then
-		GuildAdsHash:UpdateTree(GuildAdsHash.tree, playerName, dataType.metaInformations.name);
-	else
-		GuildAdsHash:RemoveID(GuildAdsHash.tree, playerName, dataType.metaInformations.name);
-	end
-	
-	local hashAfter=GuildAdsHash.tree[""].h
-	GuildAds_ChatDebug(GA_DEBUG_HASH, "GuildAdsHash (AFTER): roothash="..tostring(hashAfter));
-	if hashBefore == hashAfter then
-		GuildAds_ChatDebug(GA_DEBUG_HASH, "GuildAdsHash: Hash didn't change! Did the revision change?");
+	if GuildAdsHash.tree then
+		local hashBefore=GuildAdsHash.tree[""].h
+		GuildAds_ChatDebug(GA_DEBUG_HASH, "GuildAdsHash (BEFORE): roothash="..tostring(hashBefore).."   id="..tostring(id));
+		
+		if id then
+			GuildAdsHash:UpdateTree(GuildAdsHash.tree, playerName, dataType.metaInformations.name);
+		else
+			GuildAdsHash:RemoveID(GuildAdsHash.tree, playerName, dataType.metaInformations.name);
+		end
+		
+		local hashAfter=GuildAdsHash.tree[""].h
+		GuildAds_ChatDebug(GA_DEBUG_HASH, "GuildAdsHash (AFTER): roothash="..tostring(hashAfter));
+		if hashBefore == hashAfter then
+			GuildAds_ChatDebug(GA_DEBUG_HASH, "GuildAdsHash: Hash didn't change! Did the revision change?");
+		end
 	end
 end
 
