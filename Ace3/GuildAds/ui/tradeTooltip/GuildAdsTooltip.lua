@@ -166,7 +166,7 @@ local function addGuildAdsInfo(tooltip, itemLink)
 				if infosC then
 					-- = table.concat(infosC, ", ", 1, 10)
 					local o = ""
-					local glue = " "
+					local glue = ""
 					local c = 1
 					for k,v in pairs(infosC) do
 					 	if c>4 then
@@ -177,7 +177,9 @@ local function addGuildAdsInfo(tooltip, itemLink)
 						glue = ", "
 						c = c + 1
 					end
-					tooltip:AddLine(string.format(CRAFTED_BY, o))
+					if c>1 then
+						tooltip:AddLine(string.format(CRAFTED_BY, o))
+					end
 				end
 				tooltip:Show()
 			end
@@ -203,7 +205,7 @@ local function addGuildAdsInfo(tooltip, itemLink)
 				-- tooltip:AddDoubleLine("infosC:", tostring(infosC))
 				if infosC then
 					local o = ""
-					local glue = " "
+					local glue = ""
 					local c = 1
 					for k,v in pairs(infosC) do
 					 	if c>4 then
@@ -214,7 +216,9 @@ local function addGuildAdsInfo(tooltip, itemLink)
 						glue = ", "
 						c = c + 1
 					end
-					tooltip:AddLine(string.format(CRAFTED_BY, o))
+					if c>1 then
+						tooltip:AddLine(string.format(CRAFTED_BY, o))
+					end
 				end
 			end
 			tooltip:Show()
