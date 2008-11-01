@@ -218,9 +218,10 @@ function lib:LibActivate(stub, oldLib, oldList)
 	if GetChannelList()==1 then
 		joinWaitingChannels();
 	else
-		self.Frame.t = 7
-		self.Frame:SetScript("OnUpdate", onUpdate);
+		--self.Frame.t = 7
+		--self.Frame:SetScript("OnUpdate", onUpdate);
 	end
+	
     -- nil return makes stub do object copy
 end
 
