@@ -1,3 +1,27 @@
+----------------------------------------------------------------------------------
+--
+-- GuildAdsHash.lua
+--
+-- Author: Galmok of European Stormrage (Horde)
+-- URL : http://guildads.sourceforge.net
+-- Email : guildads@gmail.com, galmok@gmail.com
+-- Licence: GPL version 2 (General Public License)
+----------------------------------------------------------------------------------
+
+local bit_rshift = bit.rshift
+local bit_band = bit.band
+local bit_lshift = bit.lshift
+local bit_bor = bit.bor
+local bit_bxor = bit.bxor
+local string_sub = string.sub
+local table_insert = table.insert
+local table_concat = table.concat
+local string_format = string.format
+local string_byte = string.byte
+
+-- dont make new empty tables all the time (used by ReceiveSearch)
+local emptytable = {}
+
 GuildAdsHash={};
 
 function GuildAdsHash:Initialize()
@@ -7,7 +31,7 @@ function GuildAdsHash:Initialize()
 	self.DT=GuildAdsHash:GetDatatypes();
 	self:DeleteAllSearches();
 
-	--[[/*
+	--[[/* The following copyright notice concerns only the FCS hash algorithm
 	---------------------------------------------------------------------------
 	Copyright (c) 2003, Dominik Reichl <dominik.reichl@t-online.de>, Germany.
 	All rights reserved.
@@ -33,13 +57,13 @@ function GuildAdsHash:fcs16update(uFcs16, pBuffer)
 	local i
 	local l=string.len(pBuffer)
 	for i = 1,l do
-		uFcs16 = bit.bxor(bit.rshift(uFcs16,8), self.fcs16tab[bit.band(bit.bxor(uFcs16, string.byte(pBuffer,i)), 255)+1])
+		uFcs16 = bit_bxor(bit_rshift(uFcs16,8), self.fcs16tab[bit_band(bit_bxor(uFcs16, string_byte(pBuffer,i)), 255)+1])
 	end
 	return uFcs16
 end
 
 function GuildAdsHash:fcs16final(uFcs16)
-	return bit.bxor(uFcs16,65535)
+	return bit_bxor(uFcs16,65535)
 end
 -- END OF FCS16
 
@@ -48,7 +72,7 @@ function GuildAdsHash:CalculateHash(ID)
 	hashID=self:fcs16init();
 	hashID=self:fcs16update(hashID,ID);
 	hashID=self:fcs16final(hashID);
-	return bit.band(hashID,GuildAdsHash.hashMask);
+	return bit_band(hashID,GuildAdsHash.hashMask);
 end
 
 function GuildAdsHash:GetDatatypes()
@@ -209,36 +233,36 @@ end
 
 function GuildAdsHash:SplitHash1(hash)
 	local l1;
-	l1=bit.band(hash,15); -- lowest 4 bits
+	l1=bit_band(hash,15); -- lowest 4 bits
 	return {l1};
 end
 
 function GuildAdsHash:SplitHash2(hash)
 	local l1, l2;
-	l1=bit.band(hash,15); -- lowest 4 bits
-	l2=bit.rshift(bit.band(hash,240),4); -- next 4 bits
+	l1=bit_band(hash,15); -- lowest 4 bits
+	l2=bit_rshift(bit_band(hash,240),4); -- next 4 bits
 	return {l1, l2};
 end
 
 function GuildAdsHash:SplitHash3(hash)
 	local l1, l2, l3;
-	l1=bit.band(hash,15); -- lowest 4 bits
-	l2=bit.rshift(bit.band(hash,240),4); -- next 4 bits
-	l3=bit.rshift(bit.band(hash,4095),8); -- next 4 bits
+	l1=bit_band(hash,15); -- lowest 4 bits
+	l2=bit_rshift(bit_band(hash,240),4); -- next 4 bits
+	l3=bit_rshift(bit_band(hash,4095),8); -- next 4 bits
 	return {l1, l2, l3};
 end
 
 function GuildAdsHash:SplitHash4(hash)
 	local l1, l2, l3, l4;
-	l1=bit.band(hash,15); -- lowest 4 bits
-	l2=bit.rshift(bit.band(hash,240),4); -- next 4 bits
-	l3=bit.rshift(bit.band(hash,4095),8); -- next 4 bits
-	l4=bit.rshift(hash,12); -- highest 4 bits
+	l1=bit_band(hash,15); -- lowest 4 bits
+	l2=bit_rshift(bit_band(hash,240),4); -- next 4 bits
+	l3=bit_rshift(bit_band(hash,4095),8); -- next 4 bits
+	l4=bit_rshift(hash,12); -- highest 4 bits
 	return {l1, l2, l3, l4};
 end
 
 function GuildAdsHash:CalculateHashFromLevels(l1, l2, l3, l4)
-	return bit.bor(l1, bit.bor( bit.bor( bit.lshift(l2,4), bit.lshift(l3,8) ), bit.lshift(l4,12) ));
+	return bit_bor(l1, bit_bor( bit_bor( bit_lshift(l2,4), bit_lshift(l3,8) ), bit_lshift(l4,12) ));
 end
 
 function GuildAdsHash:UpdateTree(tree, playerName, dataTypeName)
@@ -248,7 +272,7 @@ function GuildAdsHash:UpdateTree(tree, playerName, dataTypeName)
 	hashID=GuildAdsHash:CalculateHash(ID);
 	
 	path=GuildAdsHash:SplitHash(hashID);
-	GuildAds_ChatDebug(GA_DEBUG_HASH, "path=%s",table.concat(path,","));
+	GuildAds_ChatDebug(GA_DEBUG_HASH, "path=%s",table_concat(path,","));
 	
 	-- is ID in tree?
 	treepath=tree[path]; -- just an optimisation
@@ -265,7 +289,7 @@ function GuildAdsHash:UpdateTree(tree, playerName, dataTypeName)
 			end
 		end
 		-- hashID exists but ID wasn't there. Add ID to leaf (hashID) and sort them. Then recalculate leaf and path checksum.
-		GuildAds_ChatDebug(GA_DEBUG_HASH, "hashID found %s",table.concat(path,","));
+		GuildAds_ChatDebug(GA_DEBUG_HASH, "hashID found %s",table_concat(path,","));
 		if self.DT[dataTypeName]:getRevision(playerName) > 0 then
 			tinsert(treepath.d,{ hashID=hashID, ID=ID, p=playerName, dt=self.DT[dataTypeName] });
 			sort(treepath.d, function(a,b) if a.ID<b.ID then return true; else return false; end; end);
@@ -275,9 +299,9 @@ function GuildAdsHash:UpdateTree(tree, playerName, dataTypeName)
 		end
 	else
 		-- hashID doesn't exist: Create leaf (hashID) and add ID to it. Then calculate leaf and path checksum.
-		GuildAds_ChatDebug(GA_DEBUG_HASH, "hashID not found. Creating %s",table.concat(path,","))
+		GuildAds_ChatDebug(GA_DEBUG_HASH, "hashID not found. Creating %s",table_concat(path,","))
 		if self.DT[dataTypeName]:getRevision(playerName) > 0 then
-			GuildAds_ChatDebug(GA_DEBUG_HASH, "Path %s is not found.",table.concat(path,","));
+			GuildAds_ChatDebug(GA_DEBUG_HASH, "Path %s is not found.",table_concat(path,","));
 			tree[path]={ d={ { hashID=hashID, ID=ID, p=playerName, dt=self.DT[dataTypeName] } } };
 			tree[path].h=GuildAdsHash:CalculateLeafChecksum(tree[path].d);
 			GuildAdsHash:CalculatePathChecksums(tree,path);
@@ -393,7 +417,7 @@ function GuildAdsHash:GetHexHash(t)
 	s="";
 	for i=0,15,1 do
 		if t[i] and t[i].h then
-			s=string.format("%04x",t[i].h)..s;
+			s=string_format("%04x",t[i].h)..s;
 		else
 			s="XXXX"..s;
 		end
@@ -405,7 +429,7 @@ function GuildAdsHash:CompareHexHash(h1,h2)
 	local i,r;
 	r="";
 	for i=1,64,4 do
-		if string.sub(h1,i,i+3)==string.sub(h2,i,i+3) then
+		if string_sub(h1,i,i+3)==string_sub(h2,i,i+3) then
 			r=r.."0";
 		else
 			r=r.."1";
@@ -417,9 +441,9 @@ end
 function GuildAdsHash:NumToBase64(n)
 	local t = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ+*";
 	if n<262144 then
-		local c0=bit.band(n,63)+1;			-- bit 0-5
-		local c1=bit.band(bit.rshift(n,6),63)+1;	-- bit 6-11
-		local c2=bit.band(bit.rshift(n,12),63)+1;	-- bit 12-17
+		local c0=bit_band(n,63)+1;			-- bit 0-5
+		local c1=bit_band(bit_rshift(n,6),63)+1;	-- bit 6-11
+		local c2=bit_band(bit_rshift(n,12),63)+1;	-- bit 12-17
 		return t:sub(c0,c0)..t:sub(c1,c1)..t:sub(c2,c2);
 	end
 end
@@ -428,35 +452,35 @@ function GuildAdsHash:GetBase64Hash(t)
 	s={};
 	for i=15,0,-1 do
 		if t and t[i] and t[i].h then
-			table.insert(s,GuildAdsHash:NumToBase64(t[i].h));
+			table_insert(s,GuildAdsHash:NumToBase64(t[i].h));
 		else
-			table.insert(s,"///"); -- no checksum for this leaf. Indicate using invalid base64 chars.
+			table_insert(s,"///"); -- no checksum for this leaf. Indicate using invalid base64 chars.
 		end
 	end
-	return table.concat(s);
+	return table_concat(s);
 end
 
 function GuildAdsHash:CompareBase64Hash(h1,h2)
 	local i,r;
 	r={};
 	for i=1,48,3 do
-		if string.sub(h1,i,i+2)==string.sub(h2,i,i+2) then
-			table.insert(r,"0");
+		if string_sub(h1,i,i+2)==string_sub(h2,i,i+2) then
+			table_insert(r,"0");
 		else
-			table.insert(r,"1");
+			table_insert(r,"1");
 		end
 	end
-	return table.concat(r);
+	return table_concat(r);
 end
 
 function GuildAdsHash:CompareBase64HashToInteger(h1,h2)
 	local i,r;
 	r=0;
 	for i=1,48,3 do
-		if string.sub(h1,i,i+2)==string.sub(h2,i,i+2) then
-			r=bit.lshift(r,1);
+		if string_sub(h1,i,i+2)==string_sub(h2,i,i+2) then
+			r=bit_lshift(r,1);
 		else
-			r=bit.bor(bit.lshift(r,1),1);
+			r=bit_bor(bit_lshift(r,1),1);
 		end
 	end
 	return r;
@@ -467,10 +491,10 @@ function GuildAdsHash:IntegerToPathElement(r)
 	local i;
 	path={}
 	for i=0,15,1 do
-		if bit.band(r,1)==1 then
-			tinsert(path,i)
+		if bit_band(r,1)==1 then
+			table_insert(path,i)
 		end
-		r=bit.rshift(r,1);
+		r=bit_rshift(r,1);
 	end
 	return path;
 end
@@ -522,7 +546,7 @@ function GuildAdsHash:setMetaTable(t)
 end
 
 function GuildAdsHash:pathToString(path)
-	return table.concat(path,",");
+	return table_concat(path,",");
 end
 
 function GuildAdsHash:stringToPath(str)
@@ -559,10 +583,9 @@ function GuildAdsHash:ReceiveSearch(path, hashSequence)
 			path = self:stringToPath(path);
 			hashSequence = hashSequence,
 			hashChanged = self:CompareBase64HashToInteger(self:GetBase64Hash(self.tree[path]), hashSequence);
-			amount = #((self.tree[path] or {}).d or {});  -- number of IDs for this path (or 0).
+			amount = #((self.tree[path] or emptytable).d or emptytable);  -- number of IDs for this path (or 0).
 			numplayers = 1; -- the number of players the bestPlayerName is drawn from (used to calculate probabilities)
 		};
-		GuildAds_ChatDebug(GA_DEBUG_HASH,"GuildAdsHash:ReceiveSearch (%s)", self:pathToString(self.search[path].path));
 	else
 		GuildAds_ChatDebug(GA_DEBUG_HASH,"  - Hash search already in progress");
 	end
@@ -583,7 +606,7 @@ function GuildAdsHash:ReceiveHashSearchToParent(childPlayerName, path, hashChang
 	local result = self.search[path];
 	
 	-- merge information
-	result.hashChanged = bit.bor(result.hashChanged, hashChanged);
+	result.hashChanged = bit_bor(result.hashChanged, hashChanged);
 	if amount > result.amount then -- the player with the most ID's for this path is assumed to be the best player. 
 		result.bestPlayerName = who;
 		result.amount = amount;
@@ -622,18 +645,16 @@ end
 function GuildAdsHash:ReceiveHashSearchResult(path, hashChanged, who, amount, DTS)
 	if self.search[path] then
 		local pathElements, newSearchPath;
-		GuildAds_ChatDebug(GA_DEBUG_HASH, "ReceiveHashSearchResult:GuildAdsHash");
-		--if self.search[path].hashChanged == 0 then
+		GuildAds_ChatDebug(GA_DEBUG_HASH, "GuildAdsHash:ReceiveHashSearchResult");
 		if hashChanged == 0 then
 			-- every online client has the same hash for this path (i.e. no change)
 		else
 			pathElements=self:IntegerToPathElement(hashChanged); 
-			GuildAds_ChatDebug(GA_DEBUG_HASH, "ReceiveHashSearchResult: %s + %s", path, table.concat(pathElements,","));
+			GuildAds_ChatDebug(GA_DEBUG_HASH, "ReceiveHashSearchResult: %s + %s", path, table_concat(pathElements,","));
 			-- WARNING: REUSE OF PATH TABLE IS WRONG. MAKE A COPY!
 			-- problem: 2 hash search results with the same path can be sent due to lag
 			newSearchPath=self:stringToPath(path); -- get table form of path
 			--tinsert(newSearchPath, pathElements[math.random(1,#pathElements)]); -- pick a random branch (client probably picks different branches, all choices are good)
-			--GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "ReceiveHashSearchResult: NewSearchPath = %s",self:pathToString(newSearchPath));
 			if #newSearchPath == self.maxRecurse-1 then
 				GuildAds_ChatDebug(GA_DEBUG_HASH, "ReceiveHashSearchResult:Queuing Revision Search ");
 				-- full path, search for all IDs at this path
@@ -643,14 +664,13 @@ function GuildAdsHash:ReceiveHashSearchResult(path, hashChanged, who, amount, DT
 					tinsert(newSearchPath,branch);
 					if self.tree[newSearchPath] then
 						for _,v in pairs(self.tree[newSearchPath].d) do
-							--print(v.ID); --v.p v.dt
 							--GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "ReceiveHashSearchResult:Queuing Revision Search %s (%s,%s)",v.ID,v.dt.metaInformations.name,v.p);
 							GuildAdsComm:QueueSearch(DTS[v.dt.metaInformations.name], v.p);
 						end
 					end
 				end
 			else
-				GuildAds_ChatDebug(GA_DEBUG_HASH, "ReceiveHashSearchResult:Queuing Hash Search Path");
+				GuildAds_ChatDebug(GA_DEBUG_HASH, "ReceiveHashSearchResult:Queuing Hash Search Path(s)");
 				for _,branch in pairs(pathElements) do
 					newSearchPath=self:stringToPath(path);
 					tinsert(newSearchPath,branch);
