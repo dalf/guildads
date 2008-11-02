@@ -655,6 +655,6 @@ function GuildAdsDB:FormatTime(ref, relative)
 	elseif (hour > 0) then
 		return prefix..string.format(GetText("LASTONLINE_HOURS", nil, hour), hour);
 	else
-		return prefix..string.format(GetText("GENERIC_MIN", nil, minute), minute);
+		return prefix..string.format(GetText("INT_GENERAL_DURATION_MIN"), minute);
 	end
 end
