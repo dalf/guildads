@@ -136,7 +136,9 @@ local joinWaitingChannels = function()
 	if lib.WaitingChannels then
 		for _, channelName in pairs(lib.WaitingChannels) do
 			if lib.Channels[channelName] and not lib.Channels[channelName].ID then
-				JoinPermanentChannel(channelName, lib.Channels[channelName].Password, lib.Channels[channelName].ChatFrame and lib.Channels[channelName].ChatFrame:GetID());
+				if not JoinPermanentChannel(channelName, lib.Channels[channelName].Password, lib.Channels[channelName].ChatFrame and lib.Channels[channelName].ChatFrame:GetID()) then
+					return false;
+				end
 			end
 		end
 		lib.WaitingChannels = nil;
@@ -188,6 +190,9 @@ local onEvent = function(self, event, arg1, arg2, arg3, arg4, arg5, arg6, arg7, 
 		if arg1==ERR_TOO_MANY_CHAT_CHANNELS then
 			lib.gotTooManyChannelsMessage = true;
 		end
+	elseif event=="PLAYER_ENTERING_WORLD" then
+		joinWaitingChannels();
+		self:UnregisterEvent("PLAYER_ENTERING_WORLD");
 	end
 end
 
@@ -214,6 +219,7 @@ function lib:LibActivate(stub, oldLib, oldList)
 	self.Frame:UnregisterAllEvents();
 	self.Frame:RegisterEvent("CHAT_MSG_CHANNEL_NOTICE");
 	self.Frame:RegisterEvent("CHAT_MSG_SYSTEM");
+	self.Frame:RegisterEvent("PLAYER_ENTERING_WORLD");
 	self.Frame:Show();
 	
 	if GetChannelList()==1 then
@@ -288,7 +294,7 @@ function lib:OpenChannel(addonName, channelName, password, chatFrame)
 			tinsert(self.WaitingChannels, normalChannelName);
 		else
 			self.gotTooManyChannelsMessage = nil;
-			if not JoinChannelByName(normalChannelName, password, chatFrame and chatFrame:GetID()) then
+			if not JoinPermanentChannel(normalChannelName, password, chatFrame and chatFrame:GetID()) then
 				-- not joined : wrong name
 				self.Channels[channelName] = nil;
 				-- callback about wrong name
