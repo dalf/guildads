@@ -136,7 +136,7 @@ local joinWaitingChannels = function()
 	if lib.WaitingChannels then
 		for _, channelName in pairs(lib.WaitingChannels) do
 			if lib.Channels[channelName] and not lib.Channels[channelName].ID then
-				JoinChannelByName(channelName, lib.Channels[channelName].Password, lib.Channels[channelName].ChatFrame and lib.Channels[channelName].ChatFrame:GetID());
+				JoinPermanentChannel(channelName, lib.Channels[channelName].Password, lib.Channels[channelName].ChatFrame and lib.Channels[channelName].ChatFrame:GetID());
 			end
 		end
 		lib.WaitingChannels = nil;
@@ -180,7 +180,8 @@ local onEvent = function(self, event, arg1, arg2, arg3, arg4, arg5, arg6, arg7, 
 				-- Id has changed according to the Sky addon.
 				self.Channels[channelName].ID = GetChannelName(channelName);
 			end
-		elseif arg1=="YOU_JOINED" and arg8==1 then
+		end
+		if arg1=="YOU_JOINED" and arg8==1 then
 			joinWaitingChannels();
 		end
 	elseif event=="CHAT_MSG_SYSTEM" then
