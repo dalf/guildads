@@ -17,7 +17,8 @@ local GAClasses = {
 	["HUNTER"] = 6,
 	["WARLOCK"] = 7,
 	["MAGE"] = 8,
-	["PRIEST"] = 9
+	["PRIEST"] = 9,
+	["DEATHKNIGHT"] = 10
 }
 
 local GARaces = {

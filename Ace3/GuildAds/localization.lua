@@ -143,7 +143,8 @@ GUILDADS_CLASSES = {
 	[6] = "Hunter",
 	[7] = "Warlock",
 	[8] = "Mage",
-	[9] = "Priest"
+	[9] = "Priest",
+	[10] = "Death Knight"
 };
 
 
