@@ -67,7 +67,7 @@ GetText = function(a,b,c)
 	local t={ LASTONLINE_MONTHS = "%s months",
 		LASTONLINE_HOURS = "%s hours",
 		LASTONLINE_DAYS = "%s days",
-		GENERIC_MIN = "%s minutes" };
+		INT_GENERAL_DURATION_MIN = "%s minutes" };
 	return t[a]		
 end
 
@@ -85,6 +85,7 @@ GuildAdsTask = {
 }
 
 GuildAds_ChatDebug = function(t, m)
+	print(m)
 end
 
 dofile(config.guildAdsDatabaseFile);
@@ -115,6 +116,7 @@ dofile(config.wowPath.."Interface\\AddOns\\GuildAds\\data\\datatypes\\GuildAdsTr
 dofile(config.wowPath.."Interface\\AddOns\\GuildAds\\data\\datatypes\\GuildAdsInventoryData.lua");
 dofile(config.wowPath.."Interface\\AddOns\\GuildAds\\data\\datatypes\\GuildAdsSkillData.lua");
 dofile(config.wowPath.."Interface\\AddOns\\GuildAds\\data\\datatypes\\GuildAdsTalentData.lua");
+dofile(config.wowPath.."Interface\\AddOns\\GuildAds\\data\\datatypes\\GuildAdsForumData.lua");
 
 GuildAds = {
 	playerName = config.playerName;
