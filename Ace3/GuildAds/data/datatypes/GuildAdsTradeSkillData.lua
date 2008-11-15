@@ -46,11 +46,24 @@ end
 
 function GuildAdsTradeSkillDataType:enterWorld()
 	self:UnregisterEvent("PLAYER_ENTERING_WORLD");
-	--self:RegisterEvent("TRADE_SKILL_SHOW", "onEvent");
-	self:RegisterEvent("TRADE_SKILL_UPDATE", "onEvent");
+	self:RegisterEvent("TRADE_SKILL_SHOW", "onEvent");
+	--self:RegisterEvent("TRADE_SKILL_UPDATE", "onEvent");
+	self:RegisterEvent("TRADE_SKILL_CLOSE", "onEvent");
 end
 
 function GuildAdsTradeSkillDataType:onEvent(event, arg1)
+	GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "GuildAdsTradeSkillDataType: event="..tostring(event));
+	if event=="TRADE_SKILL_SHOW" then
+		GuildAdsTradeSkillDataType.tradeSkillWindowOpen=true;
+		GuildAdsTradeSkillDataType:UpdateTradeSkills();
+	elseif event=="TRADE_SKILL_CLOSE" then
+		GuildAdsTradeSkillDataType.tradeSkillWindowOpen=false;
+	elseif GuildAdsTradeSkillDataType.tradeSkillWindowOpen then
+		GuildAdsTradeSkillDataType:UpdateTradeSkills();
+	end
+end
+
+function GuildAdsTradeSkillDataType:UpdateTradeSkills()
 	local skillId = GuildAdsSkillDataType:getIdFromName(GetTradeSkillLine());
 	if skillId > 0 and not IsTradeSkillLinked() then
 		local item, colddown, kind, open, itemRecipe, minMade, maxMade, q;
