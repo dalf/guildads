@@ -19,6 +19,7 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 			<AbsDimension x="80" y="22"/>
 		</Size>
 		<Anchors>
+			<!-- Known bug: TradeSkillCancelButton is not available at login -->
 			<Anchor point="BOTTOMRIGHT" relativeTo="TradeSkillCancelButton" relativePoint="TOPRIGHT">
 				<Offset>
 					<AbsDimension x="0" y="0"/>
