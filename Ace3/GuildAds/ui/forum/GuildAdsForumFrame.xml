@@ -533,7 +533,7 @@
 				<ScrollChild>
 					<EditBox name="GuildAdsForumBodyText" autofocus="false" multiLine="true" letters="6000">
 						<Size>
-							<AbsDimension x="541" y="234"/>
+							<AbsDimension x="490" y="234"/>
 						</Size>
 						<Scripts>
 							<OnEscapePressed>
