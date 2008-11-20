@@ -643,7 +643,7 @@ local function parseOneMessage(author, text, channel, drunk)
 	
 	-- unserialize (and decode) message from the packet.
 	if packet then
-		tinsert(currentChannel.inboundQueue, new(currentChannel.onMessage, author, Decode(packet, true), channel))
+		tinsert(currentChannel.inboundQueue, new(currentChannel.onMessage, author, Decode(packet, drunk), channel))
 		if not GuildAdsTask:NamedScheduleCheck("SimpleCommUnqueueMessage") then
 			GuildAdsTask:AddNamedSchedule("SimpleCommUnqueueMessage", SIMPLECOMM_INBOUND_TICK_DELAY, true, nil, unqueueMessage)
 		end
