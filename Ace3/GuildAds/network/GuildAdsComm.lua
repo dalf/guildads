@@ -759,35 +759,52 @@ end
 -- Parse inbound messages
 -- 
 --------------------------------------------------------------------------------
-function GuildAdsComm:CallReceive(channelName, personName, command, ...)
+function GuildAdsComm:CallReceive(channelName, personName, command)
 	-- ignore message
- 	if GuildAdsComm.IGNOREMESSAGE[command] then
-		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "Ignore message, command=%s", tostring(command));
+	local cmd = command[1]
+ 	if GuildAdsComm.IGNOREMESSAGE[cmd] then
+		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "Ignore message, command=%s", tostring(cmd));
 		return;
 	end
 	
 	-- call Receive* method
-	local d = GuildAdsComm.MessageCodecs[command];
-	local m = GuildAdsComm.MessageMethod[command];
+	local d = GuildAdsComm.MessageCodecs[cmd];
+	local m = GuildAdsComm.MessageMethod[cmd];
 	if m then
 		GuildAdsComm[m](
 			self,
 			channelName,
 			personName,
-			d[1] and GuildAdsCodecs[d[1]].decode(select(1, ...)),
-			d[2] and GuildAdsCodecs[d[2]].decode(select(2, ...)),
-			d[3] and GuildAdsCodecs[d[3]].decode(select(3, ...)),
-			d[4] and GuildAdsCodecs[d[4]].decode(select(4, ...)),
-			d[5] and GuildAdsCodecs[d[5]].decode(select(5, ...)),
-			d[6] and GuildAdsCodecs[d[6]].decode(select(6, ...)),
-			d[7] and GuildAdsCodecs[d[7]].decode(select(7, ...))
+			d[1] and GuildAdsCodecs[d[1]].decode(command[2]),
+			d[2] and GuildAdsCodecs[d[2]].decode(command[3]),
+			d[3] and GuildAdsCodecs[d[3]].decode(command[4]),
+			d[4] and GuildAdsCodecs[d[4]].decode(command[5]),
+			d[5] and GuildAdsCodecs[d[5]].decode(command[6]),
+			d[6] and GuildAdsCodecs[d[6]].decode(command[7]),
+			d[7] and GuildAdsCodecs[d[7]].decode(command[8])
 		);
 	end
 end
 
+local string_find = string.find
+local string_sub = string.sub
+local table_insert = table.insert
+function ssplit( inSplitPattern, str)
+	outResults = { }
+	local theStart = 1
+	local theSplitStart, theSplitEnd = string_find( str, inSplitPattern, theStart )
+	while theSplitStart do
+		table_insert( outResults, string_sub( str, theStart, theSplitStart-1 ) )
+		theStart = theSplitEnd + 1
+		theSplitStart, theSplitEnd = string_find( str, inSplitPattern, theStart )
+	end
+	table_insert( outResults, string_sub( str, theStart ) )
+	return outResults
+end
+
 function GuildAdsComm.OnMessage(personName, text, channelName)
-	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, text);
-	GuildAdsComm:CallReceive(channelName, personName, strsplit(">", text));
+	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "%s", text);
+	GuildAdsComm:CallReceive(channelName, personName, ssplit(">", text));
 end
 
 function GuildAdsComm:EnableFullProtocol()
