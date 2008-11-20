@@ -1,7 +1,7 @@
 ﻿## Interface: 30000
 ## Title: GuildAds
 ## Author: Zarkan, Fkaï, Galmok
-## Version: 2.1
+## Version: 2.4
 ## Notes: Guild Ads
 ## Notes-frFR: Les annonces de la guilde
 ## Notes-ruRU: Обмен внутри Гилдии
@@ -21,6 +21,7 @@ lib\AceEvent-3.0\AceEvent-3.0.xml
 lib\AceConsole-3.0\AceConsole-3.0.xml
 lib\AceGUI-3.0\AceGUI-3.0.xml
 lib\AceConfig-3.0\AceConfig-3.0.xml
+lib\LibCompress\lib.xml
 revision.lua
 localization.lua
 localization.de.lua
@@ -49,6 +50,7 @@ data\datatypes\GuildAdsTradeOfferData.lua
 data\datatypes\GuildAdsInventoryData.lua
 data\datatypes\GuildAdsTradeSkillData.lua
 data\datatypes\GuildAdsTalentData.lua
+data\datatypes\GuildAdsForumData.lua
 network\DataChannelLib.lua
 network\SimpleComm.lua
 network\GuildAdsCodecs.lua
@@ -75,4 +77,5 @@ ui\faction\GuildAdsFactionFrame.xml
 ui\inventory\GuildAdsInventoryFrame.xml
 ui\GEM\GuildAdsGEMEventFrame.xml
 ui\minimapButton\GuildAdsMinimapButton.xml
-ui\Talent\GuildAds_TalentUI.xml
+ui\talent\GuildAds_TalentUI.xml
+ui\forum\GuildAdsForumFrame.xml
