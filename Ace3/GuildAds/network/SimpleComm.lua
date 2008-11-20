@@ -240,6 +240,7 @@ do
 		["\010"] = "\029\011", -- \n
 		["\124"] = "\029\125", -- |
 		["%"] = "\029\038", -- %
+		["\013"] = "\029\012", -- 
 	}
 	for c = 128, 255 do
 		local num = c
@@ -249,6 +250,9 @@ do
 		end
 		if num >= 9 then
 			num = num + 2
+		end
+		if num >= 13 then
+			num = num + 1
 		end
 		if num >= 15 then
 			num = num + 1
@@ -288,7 +292,7 @@ do
 	-- Package a message for transmission
 	function Encode(text, drunk)
 		if drunk then
-			return text:gsub("([\007\010\015\020\029%%\031Ss\124\127-\255])", drunkHelper_t)
+			return text:gsub("([%z\007\010\013\015\020\029%%\031Ss\124\127-\255])", drunkHelper_t)
 		else
 			if not text then
 				DEFAULT_CHAT_FRAME:AddMessage(debugstack())
@@ -364,6 +368,9 @@ do
 		if num >= 15 then
 			num = num - 1
 		end
+		if num >= 13 then
+			num = num - 1
+		end
 		if num >= 9 then
 			num = num - 2
 		end
@@ -380,21 +387,23 @@ do
 		["\038"] = "%",
 		["\125"] = "\124",
 		["\011"] = "\010",
+		["\012"] = "\013",
 		["\126"] = "\127",
 		["\016"] = "\015",
 		["\021"] = "\020",
-		["\040"] = "\244",
-		["\041"] = "\245",
-		["\042"] = "\246",
-		["\043"] = "\247",
-		["\044"] = "\248",
-		["\045"] = "\249",
-		["\046"] = "\250",
-		["\047"] = "\251",
-		["\048"] = "\252",
-		["\049"] = "\253",
-		["\050"] = "\254",
-		["\051"] = "\255",
+		["\040"] = "\243",
+		["\041"] = "\244",
+		["\042"] = "\245",
+		["\043"] = "\246",
+		["\044"] = "\247",
+		["\045"] = "\248",
+		["\046"] = "\249",
+		["\047"] = "\250",
+		["\048"] = "\251",
+		["\049"] = "\252",
+		["\050"] = "\253",
+		["\051"] = "\254",
+		["\052"] = "\255",
 		["\032"] = "\031",
 		["\030"] = "\029",
 	}
@@ -404,7 +413,7 @@ do
 		if drunk then
 			text = text:gsub("([\127\015\020])", drunkHelper1_t)
 			text = text:gsub("\031(.)", drunkHelper2_t)
-			text = text:gsub("\029([\008\038\125\011\126\016\021\040\041\042\043\044\045\046\047\048\049\050\051\032\030])", drunkHelper3_t)
+			text = text:gsub("\029([\008\038\125\011\012\126\016\021\040\041\042\043\044\045\046\047\048\049\050\051\052\032\030])", drunkHelper3_t)
 		else
 			text = text:gsub("\255", "\000")
 		
@@ -596,9 +605,6 @@ local function unqueueMessage()
 end
 
 local function parseOneMessage(author, text, channel, drunk)
-	-- decode the message
-	text = Decode(text, drunk)
-
 	-- is it a fragmented message ?
 	local packets = nil;
 	local packet, packetNumber, last = unsplitSerialize(text);
@@ -635,9 +641,9 @@ local function parseOneMessage(author, text, channel, drunk)
 		end
 	end
 	
-	-- unserialize message from the packet.
+	-- unserialize (and decode) message from the packet.
 	if packet then
-		tinsert(currentChannel.inboundQueue, new(currentChannel.onMessage, author, packet, channel))
+		tinsert(currentChannel.inboundQueue, new(currentChannel.onMessage, author, Decode(packet, true), channel))
 		if not GuildAdsTask:NamedScheduleCheck("SimpleCommUnqueueMessage") then
 			GuildAdsTask:AddNamedSchedule("SimpleCommUnqueueMessage", SIMPLECOMM_INBOUND_TICK_DELAY, true, nil, unqueueMessage)
 		end
