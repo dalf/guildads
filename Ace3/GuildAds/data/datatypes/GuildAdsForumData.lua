@@ -98,30 +98,6 @@ There will also be no styling.
 function GuildAdsForumDataType:Initialize()
 end
 
--- DELETE THIS
-function GuildAdsForumDataType:FakeInitialize()
-	self.db = {}
-	self:InitializeChannel();
-	
-	self.db.forum = {
-		["Galmok1"] = { Galmok={ t=1, s="First post", d="Some random crap" }},
-		["Galmok1:Knok1"] = { Knok={ t=2, s="First reply", d="Some more random crap" }},
-		["Galmok1:Knok1:Timble1"] = { Timble={ t=3, s="First reply to the reply", d="Much more random crap" }},
-		["Galmok1:Timble2"] = { Timble={ t=2, s="Second reply", d="Random crap" }},
-		["Timble2"] = { Timble={ t=4, s="Timble's first post", d="Weeeeh", f=4 }},
-		["Timble2:Galmok1"] = { Galmok={ t=5, s=nil, d="Welcome!!" }},
-		["Knok3"] = { Knok={ t=7, s="Hello world!", d="I am here!", f=1 }},
-		["Pongo4"] = { Pongo={ t=8, s="LFG Onyxia", d="reply here if you want to come", f=2 }},
-		["Pongo4:Galmok1"] = { Galmok={ t=9, s=nil, d="I am in" }},
-		["Pongo4:Timble2"] = { Timble={t=10, s="Me too", d="Me too" }},
-		["Pongo4:Knok3"] = { Knok={ t=11, s=nil, d="Me also" }}
-	};
-end
-
--- DELETE THIS
-function GuildAdsForumDataType:triggerUpdate()
-end
-
 function GuildAdsForumDataType:InitializeChannel()
 	if self.db.forum == nil then
 		self.db.forum = {};
@@ -269,5 +245,4 @@ function GuildAdsForumDataType:iteratorIds()
 	return self.nextForumId, self, nil;
 end
 
-GuildAdsForumDataType:FakeInitialize();
---GuildAdsForumDataType:register();
+GuildAdsForumDataType:register();
