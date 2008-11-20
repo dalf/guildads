@@ -1,3 +1,12 @@
+----------------------------------------------------------------------------------
+--
+-- GuildAdsForumFrame.lua
+--
+-- Author: Galmok of Stormrage-EU (horde)
+-- URL : http://guildads.sourceforge.net
+-- Email : galmok@gmail.com, guildads@gmail.com
+-- Licence: GPL version 2 (General Public License)
+----------------------------------------------------------------------------------
 
 local F_STICKY = 1
 local F_LOCKED = 2
@@ -38,6 +47,8 @@ GuildAdsForum = {
 	--newPostID = nil;
 	
 	onInit = function()
+		GuildAdsForum.libCompress=LibStub:GetLibrary("LibCompress");
+		
 		GuildAdsForum.UpdatePermissions();
 		GuildAdsForum.updateButtons();
 	end;
@@ -50,45 +61,55 @@ GuildAdsForum = {
 	end;
 	
 	onDBUpdate = function(dataType, playerName, id)
+		GuildAdsForum.data.resetCache();
+		-- if window is open, update it
+		GuildAdsForum.postButtonsUpdate();
+		GuildAdsForum.updateButtons();
 	end;
 	
 	onChannelJoin = function()
-		--GuildAdsDB.profile.Main:registerUpdate(GuildAdsGuild.onDBUpdate);
-		--GuildAdsDB.channel[GuildAds.channelName]:registerEvent(GuildAdsGuild.onPlayerListUpdate);
+		GuildAdsDB.channel[GuildAds.channelName].Forum:registerUpdate(GuildAdsForum.onDBUpdate);
 		--GuildAdsGuild.delayedUpdate();
 	end;
 	
 	onChannelLeave = function()
+		GuildAdsDB.channel[GuildAds.channelName].Forum:unregisterUpdate(GuildAdsForum.onDBUpdate);
 		--GuildAdsDB.profile.Main:unregisterUpdate(GuildAdsGuild.onDBUpdate);
 		--GuildAdsDB.channel[GuildAds.channelName]:unregisterEvent(GuildAdsGuild.onPlayerListUpdate);
 		--GuildAdsGuild.delayedUpdate();
 	end;
 	
 	updateButtons = function(data)
-		if not GuildAdsForum.currentSelectedPostId or not data then
-			-- no post selected
-			GuildAdsForumBodyText:SetText("");
-			GuildAdsForumSubjectEditBox:SetText("");
-			GuildAdsForumStickyCheckButton:SetChecked(0);
-			GuildAdsForumLockedCheckButton:SetChecked(0);
-			GuildAdsForumOfficerCheckButton:SetChecked(0);
-			GuildAdsForumNewPostButton:Enable();
-			GuildAdsForumReplyButton:Disable();
-			GuildAdsForumPostButton:Disable();
-		else
-			-- some post selected
-			GuildAdsForumBodyText:SetText(data.d or "");
-			GuildAdsForumSubjectEditBox:SetText(data.s or "");
-			GuildAdsForumStickyCheckButton:SetChecked(bit.band(data.f or 0, F_STICKY)==F_STICKY and 1 or 0);
-			GuildAdsForumLockedCheckButton:SetChecked(bit.band(data.f or 0, F_LOCKED)==F_LOCKED and 1 or 0);
-			GuildAdsForumOfficerCheckButton:SetChecked(bit.band(data.f or 0, F_OFFICERONLY)==F_OFFICERONLY and 1 or 0);
-			GuildAdsForumNewPostButton:Enable();
-			if bit.band(data.f or 0, F_LOCKED)==F_LOCKED then
+		if GuildAdsForumFrame:IsVisible() then
+			if not GuildAdsForum.currentSelectedPostId or not data then
+				-- no post selected
+				GuildAdsForumBodyText:SetText("");
+				GuildAdsForumSubjectEditBox:SetText("");
+				GuildAdsForumStickyCheckButton:SetChecked(0);
+				GuildAdsForumLockedCheckButton:SetChecked(0);
+				GuildAdsForumOfficerCheckButton:SetChecked(0);
+				GuildAdsForumNewPostButton:Enable();
 				GuildAdsForumReplyButton:Disable();
+				GuildAdsForumPostButton:Disable();
 			else
-				GuildAdsForumReplyButton:Enable();
+				-- some post selected
+				local checksumOK, text = GuildAdsForum.decompressWithChecksumCheck(data.d or "")
+				if checksumOK then
+					-- some form of highlighting here
+				end
+				GuildAdsForumBodyText:SetText(text);
+				GuildAdsForumSubjectEditBox:SetText(data.s or "");
+				GuildAdsForumStickyCheckButton:SetChecked(bit.band(data.f or 0, F_STICKY)==F_STICKY and 1 or 0);
+				GuildAdsForumLockedCheckButton:SetChecked(bit.band(data.f or 0, F_LOCKED)==F_LOCKED and 1 or 0);
+				GuildAdsForumOfficerCheckButton:SetChecked(bit.band(data.f or 0, F_OFFICERONLY)==F_OFFICERONLY and 1 or 0);
+				GuildAdsForumNewPostButton:Enable();
+				if bit.band(data.f or 0, F_LOCKED)==F_LOCKED then
+					GuildAdsForumReplyButton:Disable();
+				else
+					GuildAdsForumReplyButton:Enable();
+				end
+				GuildAdsForumPostButton:Disable();
 			end
-			GuildAdsForumPostButton:Disable();
 		end
 	end;
 	
@@ -223,6 +244,10 @@ GuildAdsForum = {
 		cache = nil;
 		cacheTree = nil;
 		
+		resetCache = function()
+			GuildAdsForum.data.cache = nil;
+		end;
+		
 		get = function(updateData)
 			if GuildAdsForum.data.cache==nil or updateData==true then
 				-- calculate reply and post ID now (less code to maintain)
@@ -230,7 +255,6 @@ GuildAdsForum = {
 				local newPostID = 0;
 				
 				local players = GuildAdsDB.channel[GuildAds.channelName]:getPlayers();
-				players = { Galmok=true, Knok=true, Pongo=true, Timble=true }; -- DEBUG
 				
 				-- make table with parent and grandparent post id's of the selected post id.
 				local parentTable = {}
@@ -247,9 +271,7 @@ GuildAdsForum = {
 				
 				-- create linear list of visible posts
 				local workingTable = {}
-				--local datatype = GuildAdsDB.channel[GuildAds.channelName].Forum;
-				local datatype = GuildAdsForumDataType; -- DEBUG
-				--for postid, data in pairs(GuildAdsForum.tempforum) do
+				local datatype = GuildAdsDB.channel[GuildAds.channelName].Forum;
 				for postid in datatype:iteratorIds() do
 					local start, _, expectedAuthor = string.find(postid, "([^:]*)[0-9]*$");
 					local data, author;
@@ -494,6 +516,29 @@ GuildAdsForum = {
 		end
 	end;
 	
+	-- returns two checksum bytes
+	calcChecksum = function(str)
+		local checksum = GuildAdsHash:fcs16init();
+		checksum = GuildAdsHash:fcs16update(checksum, str or "");
+		checksum = GuildAdsHash:fcs16final(checksum);
+		return string.char(bit.band(checksum,255))..string.char(bit.band(bit.rshift(checksum,8),255));
+	end;
+	
+	-- 
+	decompressWithChecksumCheck = function(data)
+		if type(data)=="string" and #data >= 2 then
+			local checksumBytes = data:sub(-2)
+			--local givenChecksum = string.byte(checksumBytes, 1) + string.byte(checksumBytes, 2)*256
+			local text = data:sub(1, #data-2)
+			text = GuildAdsForum.libCompress:Decompress(text or "");
+			if GuildAdsForum.calcChecksum(text) == checksumBytes then
+			--if checksum == givenChecksum then
+				return true, text
+			end
+		end
+		return nil, "Checksum mismatch"
+	end;
+	
 	postButtonClicked = function()
 		--local start, _ = string.find(GuildAdsForum.newPostID, "^[^:]+[0-9]+$");
 		--if start then
@@ -501,14 +546,18 @@ GuildAdsForum = {
 			local data = {}
 			data.s = GuildAdsForumSubjectEditBox:GetText();
 			data.d = GuildAdsForumBodyText:GetText();
+			local checksum = GuildAdsForum.calcChecksum(data.d);
+			data.d = GuildAdsForum.libCompress:Compress(data.d);
+			data.d = data.d..checksum;
 			data.t = GuildAdsDB:GetCurrentTime();
 			data.f = bit.bor(bit.bor(GuildAdsForumStickyCheckButton:GetChecked() and 1 or 0, 
 						GuildAdsForumLockedCheckButton:GetChecked() and 2 or 0),
 						GuildAdsForumOfficerCheckButton:GetChecked() and 4 or 0);
 			
-			local datatype = GuildAdsForumDataType; -- DEBUG
+			local datatype = GuildAdsDB.channel[GuildAds.channelName].Forum;
+			--local datatype = GuildAdsForumDataType; -- DEBUG
 			datatype:set(GuildAds.playerName, GuildAdsForum.postID, data);
-			
+			GuildAdsForum.postID = nil
 			if GuildAdsForum.postID == GuildAdsForum.newPostID then
 				GuildAdsForum.currentSelectedPostId = nil;
 			end
