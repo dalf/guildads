@@ -66,11 +66,22 @@ GUILDADS_HEADER_SKILL 		= SKILLS;
 GUILDADS_HEADER_ANNONCE		= GUILD;
 GUILDADS_HEADER_FACTION		= "Reputation";
 GUILDADS_HEADER_EVENT		= "Events";
+GUILDADS_HEADER_FORUM		= "Forum";
 
 GUILDADS_GUILD_GROUPWITHACCOUNT	= "Group %s with the account of %s";
 GUILDADS_GUILD_DEGROUP		= "Degroup from the account";
 GUILDADS_GUILD_BLACKLIST	= "Blacklist"; 
-                    
+
+GUILDADS_FORUM_SUBJECT		= MAIL_SUBJECT_LABEL; --"Subject:"
+GUILDADS_FORUM_AUTHOR		= "Author";
+GUILDADS_FORUM_DATE		= "Date";
+GUILDADS_FORUM_NEWPOST		= "New";
+GUILDADS_FORUM_REPLY		= REPLY_MESSAGE; --"Reply"
+GUILDADS_FORUM_STICKY		= "Sticky";
+GUILDADS_FORUM_LOCKED		= "Locked";
+GUILDADS_FORUM_OFFICERPOST	= "Officer post";
+GUILDADS_FORUM_POST		= "Post";
+
 -- Item
 GUILDADS_ITEMS = {
 	everything = "Everything",
@@ -194,6 +205,9 @@ GUILDADSTOOLTIPS_SKILL =  "Allow you to see skills and professions of your curre
 
 GUILDADSTOOLTIPS_GUILD_TITLE = GUILD;
 GUILDADSTOOLTIPS_GUILD = "Allow you to see roster of current guildads mate";
+
+GUILDADSTOOLTIPS_FORUM_TITLE = GUILDADS_HEADER_FORUM;
+GUILDADSTOOLTIPS_FORUM = "Allow you to see in-game guildads forum";
 
 --Factions (only factions mentioned here can be synchronized)
 -- Taken from http://www.wowwiki.com/Reputation#Reputation_sheet
