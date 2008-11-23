@@ -131,7 +131,9 @@ GuildAdsTalentUI = {
 				local pointsSpent=0; -- to be calculated
 				for talentIndex=1,data.nt do
 					local d=GuildAdsDB.profile.Talent:get(GuildAdsInspectWindow.playerName, tostring(tabIndex)..":"..tostring(talentIndex));
-					pointsSpent=pointsSpent+(d.cr or 0);
+					if d then
+						pointsSpent=pointsSpent+(d.cr or 0);
+					end
 				end
 				return data.n or "", data.t or "", pointsSpent, data.b or "";
 			end
