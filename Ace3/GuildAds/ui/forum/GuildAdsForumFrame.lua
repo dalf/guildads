@@ -277,7 +277,7 @@ GuildAdsForum = {
 					local data, author;
 					if expectedAuthor and players[expectedAuthor] then
 						author = expectedAuthor;
-						postdata = datatype:get(author, postid);
+						data = datatype:get(author, postid);
 					else
 						for actualAuthor, postid, postdata in datatype:iterator(nil, postid) do
 							if players[actualAuthor] then
