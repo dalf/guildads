@@ -62,23 +62,57 @@ GuildAdsForum = {
 	
 	onDBUpdate = function(dataType, playerName, id)
 		GuildAdsForum.data.resetCache();
+		GuildAdsForum.delayedUpdate();
 		-- if window is open, update it
-		GuildAdsForum.postButtonsUpdate();
-		GuildAdsForum.updateButtons();
+		--GuildAdsForum.postButtonsUpdate();
+		--GuildAdsForum.updateButtons();
+	end;
+	
+	onReceivedTransaction = function(dataType, playerName, newKeys, deletedKeys)
+		GuildAdsForum.data.resetCache();
+		GuildAdsForum.delayedUpdate();
 	end;
 	
 	onChannelJoin = function()
 		GuildAdsDB.channel[GuildAds.channelName].Forum:registerUpdate(GuildAdsForum.onDBUpdate);
-		--GuildAdsGuild.delayedUpdate();
+		GuildAdsDB.channel[GuildAds.channelName].Forum:registerTransactionReceived(GuildAdsForum.onReceivedTransaction);
+		GuildAdsForum.delayedUpdate();
 	end;
 	
 	onChannelLeave = function()
 		GuildAdsDB.channel[GuildAds.channelName].Forum:unregisterUpdate(GuildAdsForum.onDBUpdate);
+		GuildAdsDB.channel[GuildAds.channelName].Forum:unregisterTransactionReceived(GuildAdsForum.onReceivedTransaction);
 		--GuildAdsDB.profile.Main:unregisterUpdate(GuildAdsGuild.onDBUpdate);
 		--GuildAdsDB.channel[GuildAds.channelName]:unregisterEvent(GuildAdsGuild.onPlayerListUpdate);
-		--GuildAdsGuild.delayedUpdate();
+		GuildAdsForum.delayedUpdate();
 	end;
 	
+	onUpdate = function(self, elapsed)
+		if self.update then
+			self.update = self.update - elapsed;
+			if self.update<=0 then
+				self.update = nil;
+				GuildAdsForum.updateWindow();
+			end;
+		end;
+	end;
+
+	delayedUpdate = function()
+		GuildAdsForumFrame.update = 1;
+	end;
+	
+	updateWindow = function()
+		GuildAdsTrade.debug("updateWindow");
+		if GuildAdsForumFrame and GuildAdsForumFrame.IsVisible and GuildAdsForumFrame:IsVisible() then
+			-- update forum posting lines
+			GuildAdsForum.postButtonsUpdate();
+			-- update selected forum post ONLY if a new post isn't being written
+			-- NOT written yet (no update happens)
+			-- GuildAdsForum.updateButtons()
+		end
+	end;
+	
+	-- update display post (lower 2/3 of forum UI)
 	updateButtons = function(data)
 		if GuildAdsForumFrame:IsVisible() then
 			if not GuildAdsForum.currentSelectedPostId or not data then
@@ -146,8 +180,9 @@ GuildAdsForum = {
 		GuildAdsForum.postButtonsUpdate(nil, true);
 	end;
 	
+	-- update forum posting lines (upper 1/3 of forum UI)
 	postButtonsUpdate = function(self, updateData)
-		if GuildAdsForumFrame:IsVisible() then
+		--if GuildAdsForumFrame:IsVisible() then
 			GuildAdsForum.debug("postButtonsUpdate("..tostring(updateData)..")");
 			local offset = FauxScrollFrame_GetOffset(GuildAdsForumPostLineScrollFrame);
 		
@@ -181,7 +216,7 @@ GuildAdsForum = {
 				i = i+1;
 			end;
 			FauxScrollFrame_Update(GuildAdsForumPostLineScrollFrame, linearSize, GuildAdsForum.GUILDADS_NUM_POST_BUTTONS, GuildAdsForum.GUILDADS_POSTBUTTONSIZEY);
-		end;
+		--end;
 	end;
 				
 	postLineButton = {
@@ -250,6 +285,8 @@ GuildAdsForum = {
 		
 		get = function(updateData)
 			if GuildAdsForum.data.cache==nil or updateData==true then
+				-- delete old postID (should it exist)
+				GuildAdsForum.postID=nil
 				-- calculate reply and post ID now (less code to maintain)
 				local replyID = 0;
 				local newPostID = 0;
@@ -274,11 +311,12 @@ GuildAdsForum = {
 				local datatype = GuildAdsDB.channel[GuildAds.channelName].Forum;
 				for postid in datatype:iteratorIds() do
 					local start, _, expectedAuthor = string.find(postid, "([^:]*)[0-9]*$");
-					local data, author;
+					local data, author = nil, nil;
 					if expectedAuthor and players[expectedAuthor] then
 						author = expectedAuthor;
 						data = datatype:get(author, postid);
-					else
+					end
+					if not data then
 						for actualAuthor, postid, postdata in datatype:iterator(nil, postid) do
 							if players[actualAuthor] then
 								data = postdata;
@@ -289,12 +327,12 @@ GuildAdsForum = {
 					end
 					if data then
 						-- find largest number in the id's of root posts
-						local start, _, number = string.find(postid, "^[^:]+([0-9]+)$");
+						local start, _, number = string.find(postid, "^[^:]-([0-9]+)$");
 						if number and tonumber(number) > newPostID then
 							newPostID = tonumber(number);
 						end
 						if GuildAdsForum.currentSelectedPostId then
-							start, _, number = string.find(postid, "^"..GuildAdsForum.currentSelectedPostId..":[^:]+([0-9]+)$");
+							start, _, number = string.find(postid, "^"..GuildAdsForum.currentSelectedPostId..":[^:]-([0-9]+)$");
 							if number and tonumber(number) > replyID then
 								replyID = tonumber(number);
 							end							
@@ -349,7 +387,7 @@ GuildAdsForum = {
 		currentWay = {
 			subject = "up",
 			author = "normal",
-			date = "up",
+			date = "normal",
 		};
 
 		predicateFunctions = {
@@ -528,11 +566,10 @@ GuildAdsForum = {
 	decompressWithChecksumCheck = function(data)
 		if type(data)=="string" and #data >= 2 then
 			local checksumBytes = data:sub(-2)
-			--local givenChecksum = string.byte(checksumBytes, 1) + string.byte(checksumBytes, 2)*256
 			local text = data:sub(1, #data-2)
+			text = GuildAdsForum.libCompress:Decode7bit(text or "");
 			text = GuildAdsForum.libCompress:Decompress(text or "");
 			if GuildAdsForum.calcChecksum(text) == checksumBytes then
-			--if checksum == givenChecksum then
 				return true, text
 			end
 		end
@@ -547,7 +584,8 @@ GuildAdsForum = {
 			data.s = GuildAdsForumSubjectEditBox:GetText();
 			data.d = GuildAdsForumBodyText:GetText();
 			local checksum = GuildAdsForum.calcChecksum(data.d);
-			data.d = GuildAdsForum.libCompress:Compress(data.d);
+			data.d = GuildAdsForum.libCompress:Compress(data.d); -- this will make the data use at most 1 byte more and hopefully somewhat less
+			data.d = GuildAdsForum.libCompress:Encode7bit(data.d); -- this will expand data approx 14% in memory, BUT use approx 35% less bandwidth than raw compressed data
 			data.d = data.d..checksum;
 			data.t = GuildAdsDB:GetCurrentTime();
 			data.f = bit.bor(bit.bor(GuildAdsForumStickyCheckButton:GetChecked() and 1 or 0, 
@@ -557,10 +595,10 @@ GuildAdsForum = {
 			local datatype = GuildAdsDB.channel[GuildAds.channelName].Forum;
 			--local datatype = GuildAdsForumDataType; -- DEBUG
 			datatype:set(GuildAds.playerName, GuildAdsForum.postID, data);
-			GuildAdsForum.postID = nil
 			if GuildAdsForum.postID == GuildAdsForum.newPostID then
 				GuildAdsForum.currentSelectedPostId = nil;
 			end
+			GuildAdsForum.postID = nil
 			GuildAdsForumSubjectEditBox:ClearFocus();
 			GuildAdsForumBodyText:ClearFocus();
 			GuildAdsForum.updateButtons();

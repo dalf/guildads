@@ -683,7 +683,7 @@
 				GuildAdsForum.onShow();
 			</OnShow>
 			<OnUpdate>
-				--GuildAdsGuild.onUpdate(self, elapsed);
+				GuildAdsForum.onUpdate(self, elapsed);
 			</OnUpdate>
 			<OnEvent>
 				--GuildAdsGuild.onEvent(self, event, ...);
