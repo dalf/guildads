@@ -226,201 +226,28 @@ end
 -- 
 ---------------------------------------------------------------------------------
 local Encode
-do
-	local drunkHelper_t = {
-		["\007"]  = "\029\008",
-		["\029"] = "\029\030",
-		["\031"] = "\029\032",
-		["\020"] = "\029\021",
-		["\015"] = "\029\016",
-		["S"] = "\020", -- change S and s to a different set of character bytes.
-		["s"] = "\015",
-		["\127"] = "\029\126", -- \127 (this is here because \000 is more common)
-		["\000"] = "\127", -- \000
-		["\010"] = "\029\011", -- \n
-		["\124"] = "\029\125", -- |
-		["%"] = "\029\038", -- %
-		["\013"] = "\029\012", -- 
-	}
-	for c = 128, 255 do
-		local num = c
-		num = num - 127
-		if num >= 7 then
-			num = num + 1
-		end
-		if num >= 9 then
-			num = num + 2
-		end
-		if num >= 13 then
-			num = num + 1
-		end
-		if num >= 15 then
-			num = num + 1
-		end
-		if num >= 20 then
-			num = num + 1
-		end
-		if num >= 29 then
-			num = num + 2
-		end
-		if num >= 83 then
-			num = num + 1
-		end
-		if num >= 115 then
-			num = num + 1
-		end
-		if num >= 124 then
-			num = num + 1
-		end
-		if num >= 127 then
-			drunkHelper_t[string_char(c)] = string_char(29, num - 127 + 40) --41, 42, 43, 44, 45
-		else
-			drunkHelper_t[string_char(c)] = string_char(31, num)
-		end
-	end
-
-	local soberHelper_t = {
-		["\007"] = "\176\008",
-		["\176"] = "\176\177",
-		["\255"] = "\176\254", -- \255 (this is here because \000 is more common)
-		["\000"] = "\255", -- \000
-		["\010"] = "\176\011", -- \n
-		["\124"] = "\176\125", -- |
-		["%"] = "\176\038", -- %
-	}
-
-	-- Package a message for transmission
-	function Encode(text, drunk)
-		if drunk then
-			return text:gsub("([%z\007\010\013\015\020\029%%\031Ss\124\127-\255])", drunkHelper_t)
-		else
-			if not text then
-				DEFAULT_CHAT_FRAME:AddMessage(debugstack())
-			end
-			return text:gsub("([\007\176\255%z\010\124%%])", soberHelper_t)
-		end
-	end
-	
-	local function EncodeBytes_helper(drunk, ...)
-		local n = select('#', ...)
-		if n == 0 then
-			return
-		end
-		local t
-		if drunk then
-			t = drunkHelper_t
-		else
-			t = soberHelper_t
-		end
-		local num = (...)
-		local value = t[num]
-		if not value then
-			return num, EncodeBytes_helper(drunk, select(2, ...))
-		else
-			local len = #value
-			if len == 1 then
-				return value:byte(1), EncodeBytes_helper(drunk, select(2, ...))
-			else -- 2
-				local a, b = value:byte(1, 2)
-				return a, b, EncodeBytes_helper(drunk, select(2, ...))
-			end
-		end
-	end
-	function EncodeBytes(drunk, ...)
-		return string_char(EncodeBytes_helper(drunk, ...))
-	end
-end
-
 local Decode
 do
-	local soberHelper_t = {
-		["\008"] = "\007",
-		["\177"] = "\176",
-		["\254"] = "\255",
-		["\011"] = "\010",
-		["\125"] = "\124",
-		["\038"] = "\037",
-	}
+	local lib = LibStub:GetLibrary("LibCompress")
+	local chatCodec = lib:GetChatEncodeTable("sS\007", "", "\015\020")
+	local addonCodec = lib:GetAddonEncodeTable("\007", "", "")
 	
-	local drunkHelper1_t = {
-		["\127"] = "\000",
-		["\015"] = "s",
-		["\020"] = "S",
-	}
-	
-	local drunkHelper2_t = setmetatable({}, {__index=function(self, c)
-		local num = c:byte()
-		if num >= 124 then
-			num = num - 1
-		end
-		if num >= 115 then
-			num = num - 1
-		end
-		if num >= 83 then
-			num = num - 1
-		end
-		if num >= 29 then
-			num = num - 2
-		end
-		if num >= 20 then
-			num = num - 1
-		end
-		if num >= 15 then
-			num = num - 1
-		end
-		if num >= 13 then
-			num = num - 1
-		end
-		if num >= 9 then
-			num = num - 2
-		end
-		if num >= 7 then
-			num = num - 1
-		end
-		num = num + 127 
-		self[c] = string_char(num)
-		return self[c]
-	end})
-
-	local drunkHelper3_t = {
-		["\008"] = "\007",
-		["\038"] = "%",
-		["\125"] = "\124",
-		["\011"] = "\010",
-		["\012"] = "\013",
-		["\126"] = "\127",
-		["\016"] = "\015",
-		["\021"] = "\020",
-		["\040"] = "\243",
-		["\041"] = "\244",
-		["\042"] = "\245",
-		["\043"] = "\246",
-		["\044"] = "\247",
-		["\045"] = "\248",
-		["\046"] = "\249",
-		["\047"] = "\250",
-		["\048"] = "\251",
-		["\049"] = "\252",
-		["\050"] = "\253",
-		["\051"] = "\254",
-		["\052"] = "\255",
-		["\032"] = "\031",
-		["\030"] = "\029",
-	}
-
-	-- Clean a received message
-	function Decode(text, drunk)
-		if drunk then
-			text = text:gsub("([\127\015\020])", drunkHelper1_t)
-			text = text:gsub("\031(.)", drunkHelper2_t)
-			text = text:gsub("\029([\008\038\125\011\012\126\016\021\040\041\042\043\044\045\046\047\048\049\050\051\052\032\030])", drunkHelper3_t)
+	-- Package a message for transmission
+	function Encode(text, chatChannel)
+		if chatChannel then
+			return chatCodec:Encode(text)
 		else
-			text = text:gsub("\255", "\000")
-		
-			text = text:gsub("\176([\008\177\254\011\125\038])", soberHelper_t)
+			return addonCodec:Encode(text)
 		end
-		-- remove the hidden character and refix the prohibited characters.
-		return text
+	end
+	
+	-- Clean a received message
+	function Decode(text, chatChannel)
+		if chatChannel then
+			return chatCodec:Decode(text)
+		else
+			return addonCodec:Decode(text)
+		end
 	end
 end
 
