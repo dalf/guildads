@@ -8,7 +8,7 @@
 -- Licence: GPL version 2 (General Public License)
 ----------------------------------------------------------------------------------
 
-GUILDADS_VERSION_PROTOCOL = "3";
+GUILDADS_VERSION_PROTOCOL = "4";
 GUILDADS_MSG_PREFIX_NOVERSION = "GA";
 GUILDADS_MSG_PREFIX_REGEX = "GA.*\t";
 
