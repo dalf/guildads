@@ -247,46 +247,30 @@ end
 -------------------------------------------
 GuildAdsCodecString = GuildAdsCodec:new({}, "String", 1);
 
-GuildAdsCodecString.SpecialChars = ">/\002";
-GuildAdsCodecString.SpecialCharsRegex = "(["..GuildAdsCodecString.SpecialChars.."])";
-
-GuildAdsCodecString.SpecialCharMap =
-{
-	gt = ">",		-- separator for serialized command
-	s = "/",		-- separator for serialized table
-	ei = "\002",	-- \002 for nil value
+local encodeCharTable = {
+	["\021"] = "\021\001",	-- have to encode our quote-byte
+	["\002"]  = "\021\003",	-- \002 for nil value
+	[">"] = "\021\004",	-- separator for serialized command
+	["/"] = "\021\005"	-- separator for serialized table
 };
-
-local encodeChar = function(pField)
-	for vName, vChar in pairs(GuildAdsCodecString.SpecialCharMap) do
-		if vChar == pField then
-			return "&"..vName..";";
-		end
-	end
-	return "";
-end
 
 function GuildAdsCodecString.encode(pString)
 	if pString then
-		return string.gsub(
-						pString,
-						GuildAdsCodecString.SpecialCharsRegex,
-						encodeChar);
+		return pString:gsub("([\002\021>/])", encodeCharTable);
 	end
 	return "\002";
 end
 
-local decodeChar = function (pField)
-	local vChar = GuildAdsCodecString.SpecialCharMap[pField];					
-	return vChar or "&"..pField..";"
-end
+local decodeCharTable = {
+	["\001"] = "\021",
+	["\003"] = "\002",
+	["\004"] = ">",
+	["\005"] = "/"
+};
 
 function GuildAdsCodecString.decode(pString)
 	if pString ~= "\002" then
-		return string.gsub(
-						pString,
-						"&(%w+);", 
-						decodeChar);
+		return pString:gsub("\021([\001\003\004\005])", decodeCharTable);
 	end
 end
 
