@@ -43,7 +43,8 @@ GuildAdsFaction = {
 			main = {
 				frame = "GuildAdsFactionFrame",
 				tab = "GuildAdsFactionTab",
-				tooltip = "Faction tab",
+				tooltip = GUILDADSTOOLTIPS_FACTION,
+				tooltiptitle = GUILDADSTOOLTIPS_FACTION_TITLE,
 				priority = 2
 			}
 		}

@@ -81,6 +81,7 @@ GUILDADS_FORUM_STICKY		= "Sticky";
 GUILDADS_FORUM_LOCKED		= "Locked";
 GUILDADS_FORUM_OFFICERPOST	= "Officer post";
 GUILDADS_FORUM_POST		= "Post";
+GUILDADS_FORUM_EMPTYSUBJECT	= "<no subject>";
 
 -- Item
 GUILDADS_ITEMS = {
@@ -200,6 +201,9 @@ GUILDADS_SKILLS	= {
 GUILDADSTOOLTIPS_ADS_TITLE = TRADE;
 GUILDADSTOOLTIPS_ADS =  "Allow you to see the current adds of your guildads mate";
 
+GUILDADSTOOLTIPS_FACTION_TITLE = GUILDADS_HEADER_FACTION;
+GUILDADSTOOLTIPS_FACTION = "Allows you to see the reputation of your guildads mate";
+
 GUILDADSTOOLTIPS_SKILL_TITLE = GUILDADS_HEADER_SKILL;
 GUILDADSTOOLTIPS_SKILL =  "Allow you to see skills and professions of your current guildads mate";
 
@@ -207,7 +211,7 @@ GUILDADSTOOLTIPS_GUILD_TITLE = GUILD;
 GUILDADSTOOLTIPS_GUILD = "Allow you to see roster of current guildads mate";
 
 GUILDADSTOOLTIPS_FORUM_TITLE = GUILDADS_HEADER_FORUM;
-GUILDADSTOOLTIPS_FORUM = "Allow you to see in-game guildads forum";
+GUILDADSTOOLTIPS_FORUM = "Allow you to see the in-game guildads forum";
 
 --Factions (only factions mentioned here can be synchronized)
 -- Taken from http://www.wowwiki.com/Reputation#Reputation_sheet
