@@ -25,6 +25,7 @@ GuildAds_ItemInfo = setmetatable({}, {
 
 local _ItemInfo = CreateFrame("GameTooltip", "GuildAdsITT", nil, "GameTooltipTemplate");
 local _ITT = GuildAdsITT
+local enchantCount = 0
 local SetItem, Timeout, AddItem, ItemReady, ParseTooltip
 do
 	function SetItem(itemRef)
@@ -35,6 +36,7 @@ do
 		
 		_ITT:SetHyperlink(itemRef);
 		GuildAdsTask:AddNamedSchedule("GuildAdsItem_Timeout", 2, nil, nil, Timeout);
+		GuildAdsTask:DeleteNamedSchedule("GuildAdsItem_SetItem");
 	end
 
 	function Timeout()
@@ -106,6 +108,7 @@ do
 			t.texture = "Interface/Icons/Spell_Holy_GreaterHeal";
 			t.type = GUILDADS_SKILLS[9];
 			t.subtype = "";
+			enchantCount = enchantCount + 1;
 		else
 			local found, _, itemLink1 = string.find(_ITT.currentItemRef, "spell:(%d+)");
 			if found then
@@ -125,9 +128,18 @@ do
 		-- next item if there is one
 		local itemRef = next(_ITT.itemRefs);
 		if itemRef then
-			SetItem(itemRef);
+			if enchantCount > 30 then
+				-- Enchants (unlike items) are fetched without delay from the server so we have to 
+				-- throttle them manually.
+				GuildAds_ChatDebug(GA_DEBUG_STORAGE, "ItemReady: delaying for 5 seconds");
+				GuildAdsTask:AddNamedSchedule("GuildAdsItem_SetItem", 5, nil, nil, SetItem, itemRef);
+				enchantCount = 0
+			else
+				SetItem(itemRef);
+			end
 		else
 			GuildAdsPlugin_OnEvent(GAS_EVENT_ITEMINFOREADY);
+			enchantCount = 0;
 		end
 	end
 
