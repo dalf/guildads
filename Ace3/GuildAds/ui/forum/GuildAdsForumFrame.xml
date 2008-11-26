@@ -673,7 +673,7 @@
 				</Scripts>
 			</Button>
 
-			<Button name="GuildAdsForumTab" inherits="GuildAdsWindowTabTemplate" text="GUILDADS_HEADER_FORUM" />
+			
 		</Frames>
 		<Scripts> 
 			<OnLoad>
@@ -690,4 +690,6 @@
 			</OnEvent>
 		</Scripts>
 	</Frame>
+	
+	<Button name="GuildAdsForumTab" inherits="GuildAdsWindowTabTemplate" text="GUILDADS_HEADER_FORUM" />
 </Ui>

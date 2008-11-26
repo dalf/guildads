@@ -143,6 +143,7 @@ function GuildAdsForumDataType:setRaw(author, id, info, revision)
 		end
 		self.db.forum[id][author] = info;
 		info._u = revision;
+		info.n = true;
 	else
 		if self.db.forum[id] then
 			self.db.forum[id][author] = nil;
@@ -160,6 +161,7 @@ function GuildAdsForumDataType:set(author, id, info)
 			local revision = self:getRevision(author)+1;
 			self:setRevision(author, revision);
 			info._u = revision;
+			info.n = true; -- mark as new
 			forum[author] = info;
 			self:triggerUpdate(author, id);
 			return info;
@@ -173,6 +175,18 @@ function GuildAdsForumDataType:set(author, id, info)
 			self:setRevision(author, self:getRevision(author)+1);
 			self:triggerUpdate(author, id);
 		end
+	end
+end
+
+function GuildAdsForumDataType:isRead(author, id)
+	if self.db.forum[id] and self.db.forum[id][author] then
+		return not self.db.forum[id][author].n;
+	end
+end
+
+function GuildAdsForumDataType:markAsRead(author, id)
+	if self.db.forum[id] and self.db.forum[id][author] then
+		self.db.forum[id][author].n = nil
 	end
 end
 

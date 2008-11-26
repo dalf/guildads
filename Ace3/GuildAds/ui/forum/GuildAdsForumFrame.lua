@@ -132,6 +132,7 @@ GuildAdsForum = {
 					-- some form of highlighting here
 				end
 				GuildAdsForumBodyText:SetText(text);
+				GuildAdsForumBodyText:SetCursorPosition(0);
 				GuildAdsForumSubjectEditBox:SetText(data.s or "");
 				GuildAdsForumStickyCheckButton:SetChecked(bit.band(data.f or 0, F_STICKY)==F_STICKY and 1 or 0);
 				GuildAdsForumLockedCheckButton:SetChecked(bit.band(data.f or 0, F_LOCKED)==F_LOCKED and 1 or 0);
@@ -229,6 +230,9 @@ GuildAdsForum = {
 				else
 					-- another player was clicked = select
 					GuildAdsForum.currentSelectedPostId = self.postId;
+					-- mark selected post as read
+					local datatype = GuildAdsDB.channel[GuildAds.channelName].Forum;
+					datatype:markAsRead(self.data.a, self.data.id)
 				end
 				GuildAdsForum.updateButtons(self.data);
 				GuildAdsForum.postButtonsUpdate(self, true);
@@ -242,10 +246,12 @@ GuildAdsForum = {
 		update = function(button, selected, post)
 			local buttonName= button:GetName();
 			
-			local subjectField = buttonName.."Subject";
-			local authorField = buttonName.."Author";
-			local dateField = buttonName.."Date";
-			local textureField = buttonName.."Texture";
+			local subjectField = getglobal(buttonName.."Subject");
+			local authorField = getglobal(buttonName.."Author");
+			local dateField = getglobal(buttonName.."Date");
+			local textureField = getglobal(buttonName.."Texture");
+
+			local datatype = GuildAdsDB.channel[GuildAds.channelName].Forum;
 
 			if selected then
 				button:LockHighlight();
@@ -254,23 +260,29 @@ GuildAdsForum = {
 			end
 			
 			local ocolor = colors.officer[bit.band(post.f or 0, F_OFFICERONLY)]
-			getglobal(textureField):SetTexture(ocolor[1], ocolor[2], ocolor[3], ocolor[4]);
+			textureField:SetTexture(ocolor[1], ocolor[2], ocolor[3], ocolor[4]);
 
 			local lcolor = colors.locked[bit.band(post.f or 0, F_LOCKED)]
-			local subjectText = post.s or "<NO SUBJECT>";
+			local subjectText = post.s or GUILDADS_FORUM_EMPTYSUBJECT;
 			if bit.band(post.f or 0, F_STICKY)==F_STICKY then
 				subjectText = "\124TInterface\\TargetingFrame\\UI-RaidTargetingIcon_1:0\124t" .. subjectText;
 			end
 			subjectText = string.rep("   ",(post.l or 1)-1)..subjectText;
-			getglobal(subjectField):SetText(subjectText);
-			getglobal(subjectField):SetTextColor(lcolor[1], lcolor[2], lcolor[3], lcolor[4]);
-			getglobal(subjectField):Show();
+			subjectField:SetText(subjectText);
+			subjectField:SetTextColor(lcolor[1], lcolor[2], lcolor[3], lcolor[4]);
+			--if not datatype:isRead(post.a, post.id) then
+			if post.n then
+				subjectField:SetFontObject("Tooltip_Med")
+			else
+				subjectField:SetFontObject("GameFontNormalSmall")
+			end
+			subjectField:Show();
 			
-			getglobal(authorField):SetText(post.a);
-			getglobal(authorField):Show();
+			authorField:SetText(post.a);
+			authorField:Show();
 			
-			getglobal(dateField):SetText(GuildAdsDB:FormatTime(post.t or 0));
-			getglobal(dateField):Show();
+			dateField:SetText(GuildAdsDB:FormatTime(post.t or 0));
+			dateField:Show();
 			
 		end;
 	};
@@ -308,6 +320,7 @@ GuildAdsForum = {
 				
 				-- create linear list of visible posts
 				local workingTable = {}
+				local unreadPosts = {}
 				local datatype = GuildAdsDB.channel[GuildAds.channelName].Forum;
 				for postid in datatype:iteratorIds() do
 					local start, _, expectedAuthor = string.find(postid, "([^:]*)[0-9]*$");
@@ -331,6 +344,7 @@ GuildAdsForum = {
 						if number and tonumber(number) > newPostID then
 							newPostID = tonumber(number);
 						end
+						-- find largest number in the id's of replies to the current selected post
 						if GuildAdsForum.currentSelectedPostId then
 							start, _, number = string.find(postid, "^"..GuildAdsForum.currentSelectedPostId..":[^:]-([0-9]+)$");
 							if number and tonumber(number) > replyID then
@@ -340,6 +354,7 @@ GuildAdsForum = {
 					   if (bit.band(data.f or 0, F_OFFICERONLY)==0 or 
 					    (bit.band(data.f or 0, F_OFFICERONLY)==F_OFFICERONLY and GuildAdsForum.viewOfficer)) then 
 						local level = select("#", string.split(":",postid))
+						local visiblePost = false
 						if GuildAdsForum.currentSelectedPostId then
 							-- show any 1. level replies to the selected post
 							start = string.find(postid, "^"..GuildAdsForum.currentSelectedPostId..":[^:]*$");
@@ -354,16 +369,34 @@ GuildAdsForum = {
 								end
 							end
 							if start then
-								tinsert(workingTable, { id=postid, l=level, t=data.t, a=author, s=data.s, d=data.d, f=data.f});
+								visiblePost = true;
 							end
 						else
 							-- show root posts
 							start = string.find(postid, ":");
 							if not start then
-								tinsert(workingTable, { id=postid, l=level, t=data.t, a=author, s=data.s, d=data.d, f=data.f});
+								visiblePost = true;
+							end
+						end
+						if visiblePost then
+							tinsert(workingTable, { id=postid, l=level, t=data.t, a=author, s=data.s, d=data.d, f=data.f, n=data.n});
+						end
+						if data.n then
+							unreadPosts[postid] = true;
+							local t=""
+							for k in string.gmatch(postid, "([^:]+):") do
+								t=t..k
+								unreadPosts[t] = true
+								t=t..":"
 							end
 						end
 					   end
+					end
+				end
+				for _, post in pairs(workingTable) do
+					if unreadPosts[post.id] then
+						GuildAdsForum.debug("post.id = "..post.id)
+						post.n = true
 					end
 				end
 				GuildAdsForum.newPostID = GuildAds.playerName..tostring((newPostID + 1));
@@ -382,17 +415,17 @@ GuildAdsForum = {
 	
 	sortData = {
 			
-		current = "date";
+		current = "subject";
 	
 		currentWay = {
-			subject = "up",
+			subject = "normal",
 			author = "normal",
 			date = "normal",
 		};
 
 		predicateFunctions = {
 		
-			subject = function(a, b)
+			subject2 = function(a, b)
 				if a.s and b.s then
 					if (a.s < b.s) then
 						return false;
@@ -406,6 +439,16 @@ GuildAdsForum = {
 					return true
 				end
 				return nil;
+			end;
+
+			subject = function(a, b)
+				if a.n and not b.n then
+					return true;
+				elseif not a.n and b.n then
+					return false;
+				else
+					return GuildAdsForum.sortData.predicateFunctions.date(a, b);
+				end
 			end;
 			
 			author = function(a, b)
