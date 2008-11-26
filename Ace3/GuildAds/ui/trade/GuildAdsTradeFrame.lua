@@ -1095,28 +1095,31 @@ GuildAdsTrade = {
 				end
 				GuildAdsTrade.data.cache[tab] = {};
 				if (tab == GuildAdsTrade.TAB_CRAFTABLE) then
+					local emptytable = {};
 					local tmptable = {};
+					local item8
 					for _, item, playerName, data in datatype:iterator() do
-						if (tmptable[item]) then
+						item8 = item:gsub("^(item:%-?%d+:%-?%d+:%-?%d+:%-?%d+:%-?%d+:%-?%d+:%-?%d+:%-?%d+):%-?%d+$", "%1");
+						if (tmptable[item8]) then
 							if GuildAdsTrade.altkey then
 								if not data.e then
-									tinsert(tmptable[item].p, playerName);
+									tinsert(tmptable[item8].p, playerName);
 								end
 							else
-								tinsert(tmptable[item].p, playerName);
-								tmptable[item].e=tmptable[item].e or data.e;
-								tmptable[item].q=tmptable[item].q or data.q;
+								tinsert(tmptable[item8].p, playerName);
+								tmptable[item8].e=tmptable[item8].e or data.e;
+								tmptable[item8].q=tmptable[item8].q or data.q;
 							end
 						else
 							if (not GuildAdsTrade.altkey and GuildAdsTrade.data.adIsVisible(adtype, playerName, item, data)) or (GuildAdsTrade.altkey and not data.e) then
-								tmptable[item]={ i=item, p={playerName}, d=data, t=adtype, e=data.e, q=data.q };
+								tmptable[item8]={ i=item, p={playerName}, d=data, t=adtype, e=data.e, q=data.q };
 							end
 						end
 					end
 					local info;
 					for key,value in pairs(tmptable) do
-						info = GuildAds_ItemInfo[key] or {};
-						tinsert(GuildAdsTrade.data.cache[tab], { i=key, p=value.p, d=value.d, t=value.t, e=value.e, q=value.q, l=info.minlevel });
+						info = GuildAds_ItemInfo[value.i] or emptytable;
+						tinsert(GuildAdsTrade.data.cache[tab], { i=value.i, p=value.p, d=value.d, t=value.t, e=value.e, q=value.q, l=info.minlevel });
 					end
 					for _, data in pairs(GuildAdsTrade.data.cache[tab]) do
 						table.sort(data.p, GuildAdsTrade.sortData.predicateFunctions.crafter);
