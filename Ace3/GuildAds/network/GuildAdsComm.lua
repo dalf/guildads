@@ -242,7 +242,7 @@ function GuildAdsComm:Initialize()
 end
 
 function GuildAdsComm:JoinChannel(channel, password, command, alias)
-	LoggingChat(true);
+	--LoggingChat(true);
 	self.channelName = channel
 	self.channelPassword = password
 	
@@ -252,7 +252,7 @@ function GuildAdsComm:JoinChannel(channel, password, command, alias)
 end
 
 function GuildAdsComm:LeaveChannel()
-	LoggingChat(false);
+	--LoggingChat(false);
 	if self.channelName then
 		-- Send leave message in case we don't actually leave the channel.
 		self:SendPlayerLeaving()
