@@ -75,7 +75,7 @@ function GuildAdsFactionDataType:onEvent(event, arg1)
 		-- delete factions
 		-- The only way to detect if a faction is to be deleted is to check if all headers are open (not collapsed) as 
 		-- that will ensure we have a full faction list. Only then may we delete factions from the list. 
-		if allHeadersOpen and ReputationFrame:IsVisible() then
+		if allHeadersOpen then
 			local tmp = {}
 			for id in pairs(self:getTableForPlayer(playerName)) do
 				if not playerFactionIds[id] and id~="_u" then
