@@ -392,6 +392,7 @@ GuildAdsSkill = {
 				elseif (info.m >= 75) then
 					getglobal(skillBar):SetStatusBarColor(TradeSkillTypeColor["trivial"].r,TradeSkillTypeColor["trivial"].g,TradeSkillTypeColor["trivial"].b);
 				end
+				getglobal(skillBar):SetMinMaxValues(0, g_currentTab == GUILDADSSKILL_TAB_PROFESSION and 450 or 400)
 				getglobal(skillBar):SetValue(info.v);
 				getglobal(skillRank):SetText(info.v.."/"..info.m);
 				

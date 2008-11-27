@@ -34,7 +34,7 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 			</Layer>
 		</Layers>
 		<Frames>
-			<StatusBar name="$parentSkillBar" hidden="true" drawLayer="BACKGROUND" minValue="0" maxValue="375" defaultValue="0">
+			<StatusBar name="$parentSkillBar" hidden="true" drawLayer="BACKGROUND" minValue="0" maxValue="450" defaultValue="0">
 				<Size>
 					<AbsDimension x="180" y="15"/>
 				</Size>
