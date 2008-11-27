@@ -9,19 +9,22 @@
 ----------------------------------------------------------------------------------
 
 local GUILDADS_NUM_GLOBAL_FACTION_BUTTONS = 19;
-local GUILDADS_PLAYER_MAX_LEVEL = 70;
+local GUILDADS_PLAYER_MAX_LEVEL = 80;
 
 local GUILDADS_FACTION_GROUPS = {
 					[1] = 1, [2] = 1, [3] = 1, [4] = 1, [5] = 1, [6] = 2,
 					[7] = 2,  [8] = 2, [9] = 1, [10] = 1, [11] = 1, [12] = 1,
 					[13] = 1, [14] = 2, [15] = 2, [16] = 2, [17] = 3, [18] = 3,
 					[19] = 3, [20] = 3, [21] = 3, [22] = 3, [23] = 3, [24] = 3,
-					[25] = 3, [26] = 3, [27] = 4, [28] = 4, [29] = 4, [30] = 4,
+					[25] = 3, [26] = 9, [27] = 4, [28] = 4, [29] = 4, [30] = 4,
 					[31] = 4, [32] = 5, [33] = 5, [34] = 5, [35] = 5, [36] = 6,
-					[37] = 6, [38] = 6, [39] = 6, [40] = 6, [41] = 6, [42] = 6,
+					[37] = 6, [38] = 9, [39] = 9, [40] = 6, [41] = 6, [42] = 9,
 					[43] = 6, [44] = 6, [45] = 6, [46] = 6, [47] = 6, [48] = 6,
-					[49] = 6, [50] = 6, [51] = 6, [52] = 6, [53] = 6, [54] = 6,
-					[55] = 4
+					[49] = 6, [50] = 9, [51] = 6, [52] = 9, [53] = 6, [54] = 6,
+					[55] = 4, [56] = 6,
+					[57] = 7, [58] = 7, [59] = 7, [60] = 7, [61] = 7, [62] = 7,
+					[63] = 7, [64] = 7, [65] = 7, [66] = 7, [67] = 7, [68] = 7,
+					[69] = 8, [70] = 8, [71] = 8
 				};
 local GUILDADS_FACTION_GROUP_OPTION = {
 					[1] = "ShowFaction";
@@ -30,6 +33,9 @@ local GUILDADS_FACTION_GROUP_OPTION = {
 					[4] = "ShowShattrathCity";
 					[5] = "ShowSteamwheedleCartel";
 					[6] = "ShowOther";
+					[7] = "ShowNorthrend";
+					[8] = "ShowDalaran",
+					[9] = "ShowRaid"
 					};
 
 --- Index of the ad currently selected
@@ -74,8 +80,8 @@ GuildAdsFaction = {
 			GuildAdsFaction.setProfileValue(nil, "HideCollapsed", true);
 		end
 		
-		if type(GuildAdsFaction.getRawProfileValue(nil, "OnlyLevel70"))=="nil" then
-			GuildAdsFaction.setProfileValue(nil, "OnlyLevel70", true);
+		if type(GuildAdsFaction.getRawProfileValue(nil, "OnlyLevel80"))=="nil" then
+			GuildAdsFaction.setProfileValue(nil, "OnlyLevel80", true);
 		end
 		-- "Horde", "Horde Forces", "Outland", "Shattrath City", "Steamwheedle Cartel", "Other"
 		-- "Faction", "Faction Forces", "Outland", "Shattrath City", "Steamwheedle Cartel", "Other"
@@ -100,7 +106,7 @@ GuildAdsFaction = {
 		GuildAdsFaction.debug("onShow()");
 		
 		GuildAdsFaction.updateCheckButton(GuildAds_FactionHideCollapsedCheckButton, GuildAdsFaction.getProfileValue(nil, "HideCollapsed"));
-		GuildAdsFaction.updateCheckButton(GuildAds_FactionOnlyLevel70CheckButton, GuildAdsFaction.getProfileValue(nil, "OnlyLevel70"));
+		GuildAdsFaction.updateCheckButton(GuildAds_FactionOnlyLevel80CheckButton, GuildAdsFaction.getProfileValue(nil, "OnlyLevel80"));
 		
 		GuildAdsFaction.updateCheckButton(GuildAds_FactionShowFactionCheckButton, GuildAdsFaction.getProfileValue(nil, "ShowFaction"));
 		GuildAdsFaction.updateCheckButton(GuildAds_FactionShowFactionForcesCheckButton, GuildAdsFaction.getProfileValue(nil, "ShowFactionForces"));
@@ -108,6 +114,9 @@ GuildAdsFaction = {
 		GuildAdsFaction.updateCheckButton(GuildAds_FactionShowShattrathCityCheckButton, GuildAdsFaction.getProfileValue(nil, "ShowShattrathCity"));
 		GuildAdsFaction.updateCheckButton(GuildAds_FactionShowSteamwheedleCartelCheckButton, GuildAdsFaction.getProfileValue(nil, "ShowSteamwheedleCartel"));
 		GuildAdsFaction.updateCheckButton(GuildAds_FactionShowOtherCheckButton, GuildAdsFaction.getProfileValue(nil, "ShowOther"));
+		GuildAdsFaction.updateCheckButton(GuildAds_FactionShowNorthrendCheckButton, GuildAdsFaction.getProfileValue(nil, "ShowNorthrend"));
+		GuildAdsFaction.updateCheckButton(GuildAds_FactionShowDalaranCheckButton, GuildAdsFaction.getProfileValue(nil, "ShowDalaran"));
+		GuildAdsFaction.updateCheckButton(GuildAds_FactionShowRaidCheckButton, GuildAdsFaction.getProfileValue(nil, "ShowRaid"));
 		
 		GuildAdsDB.profile.Faction:registerUpdate(GuildAdsFaction.onDBUpdate);
 		GuildAdsDB.profile.Faction:registerTransactionReceived(GuildAdsFaction.onReceivedTransaction);
@@ -159,7 +168,7 @@ GuildAdsFaction = {
 						if GuildAdsFaction.getProfileValue("Filters", id) then
 							for playerName, _, data in GuildAdsFactionDataType:iterator(nil, id) do
 								if not GuildAdsGuild.getProfileValue(nil, "HideOfflines") or GuildAdsGuild.isOnline(playerName) then
-									if not (GuildAdsFaction.getProfileValue(nil, "OnlyLevel70") and ((GuildAdsDB.profile.Main:get(playerName, GuildAdsDB.profile.Main.Level) or 0)<GUILDADS_PLAYER_MAX_LEVEL)) then
+									if not (GuildAdsFaction.getProfileValue(nil, "OnlyLevel80") and ((GuildAdsDB.profile.Main:get(playerName, GuildAdsDB.profile.Main.Level) or 0)<GUILDADS_PLAYER_MAX_LEVEL)) then
 										hideCollapsed=true;
 									end
 								end
@@ -179,7 +188,7 @@ GuildAdsFaction = {
 					-- for each player
 					for playerName, _, data in GuildAdsFactionDataType:iterator(nil, id) do
 						if not GuildAdsGuild.getProfileValue(nil, "HideOfflines") or GuildAdsGuild.isOnline(playerName) then
-							if not (GuildAdsFaction.getProfileValue(nil, "OnlyLevel70") and ((GuildAdsDB.profile.Main:get(playerName, GuildAdsDB.profile.Main.Level) or 0)<GUILDADS_PLAYER_MAX_LEVEL)) then
+							if not (GuildAdsFaction.getProfileValue(nil, "OnlyLevel80") and ((GuildAdsDB.profile.Main:get(playerName, GuildAdsDB.profile.Main.Level) or 0)<GUILDADS_PLAYER_MAX_LEVEL)) then
 								if insertHeader and (not hideCollapsed or factionOpen) then
 									tinsert(GuildAdsFaction.data.cache, {i=id, h=factionOpen } );
 									insertHeader = nil;

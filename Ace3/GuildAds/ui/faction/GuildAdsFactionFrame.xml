@@ -543,7 +543,7 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 			</Button>
 			<Frame name="GuildAdsFactionOptionsFrame" inherits="GuildAdsConfig_OptionFrameBoxTemplate" parent="GuildAdsFactionFrame">
 				<Size>
-					<AbsDimension x="200" y="214"/>
+					<AbsDimension x="200" y="270"/>
 				</Size>
 				<Anchors>
 					<!-- <Anchor point="TOP"> -->
@@ -596,7 +596,7 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 						</Scripts>
 					</CheckButton>
 					
-					<CheckButton name="GuildAds_FactionOnlyLevel70CheckButton" inherits="GuildAdsConfig_CheckButton">
+					<CheckButton name="GuildAds_FactionOnlyLevel80CheckButton" inherits="GuildAdsConfig_CheckButton">
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="GuildAds_FactionHideCollapsedCheckButton" relativePoint="BOTTOMLEFT">
 								<Offset>
@@ -606,7 +606,7 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 						</Anchors>
 						<Layers>
 							<Layer level="ARTWORK">
-								<FontString name="$parentLabel" inherits="GameFontNormalSmall" text="GUILDADS_FACTION_ONLY_LEVEL_70" >
+								<FontString name="$parentLabel" inherits="GameFontNormalSmall" text="GUILDADS_FACTION_ONLY_LEVEL_80" >
 									<Anchors>
 										<Anchor point="LEFT" relativePoint="RIGHT">
 											<Offset>
@@ -619,14 +619,14 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 						</Layers>
 						<Scripts>
 							<OnClick>
-								GuildAdsFaction.filters.checkButtonSetProfile(this,"OnlyLevel70");
+								GuildAdsFaction.filters.checkButtonSetProfile(this,"OnlyLevel80");
 							</OnClick>
 						</Scripts>
 					</CheckButton>
 					
 					<CheckButton name="GuildAds_FactionShowFactionCheckButton" inherits="GuildAdsConfig_CheckButton">
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="GuildAds_FactionOnlyLevel70CheckButton" relativePoint="BOTTOMLEFT">
+							<Anchor point="TOPLEFT" relativeTo="GuildAds_FactionOnlyLevel80CheckButton" relativePoint="BOTTOMLEFT">
 								<Offset>
 									<AbsDimension x="0" y="-20" />
 								</Offset>
@@ -680,9 +680,37 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 						</Scripts>
 					</CheckButton>
 
-					<CheckButton name="GuildAds_FactionShowOutlandCheckButton" inherits="GuildAdsConfig_CheckButton">
+					<CheckButton name="GuildAds_FactionShowSteamwheedleCartelCheckButton" inherits="GuildAdsConfig_CheckButton">
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="GuildAds_FactionShowFactionForcesCheckButton" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Layers>
+							<Layer level="ARTWORK">
+								<FontString name="$parentLabel" inherits="GameFontNormalSmall" text="GUILDADS_FACTION_SHOWSTEAMWHEEDLECARTEL">
+									<Anchors>
+										<Anchor point="LEFT" relativePoint="RIGHT">
+											<Offset>
+												<AbsDimension x="5" y="1"/>
+											</Offset>
+										</Anchor>
+									</Anchors>
+								</FontString>
+							</Layer>
+						</Layers>
+						<Scripts>
+							<OnClick>
+								GuildAdsFaction.filters.checkButtonSetProfile(this,"ShowSteamwheedleCartel");
+							</OnClick>
+						</Scripts>
+					</CheckButton>
+
+					<CheckButton name="GuildAds_FactionShowOutlandCheckButton" inherits="GuildAdsConfig_CheckButton">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="GuildAds_FactionShowSteamwheedleCartelCheckButton" relativePoint="BOTTOMLEFT">
 								<Offset>
 									<AbsDimension x="0" y="0" />
 								</Offset>
@@ -736,7 +764,7 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 						</Scripts>
 					</CheckButton>
 
-					<CheckButton name="GuildAds_FactionShowSteamwheedleCartelCheckButton" inherits="GuildAdsConfig_CheckButton">
+					<CheckButton name="GuildAds_FactionShowNorthrendCheckButton" inherits="GuildAdsConfig_CheckButton">
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="GuildAds_FactionShowShattrathCityCheckButton" relativePoint="BOTTOMLEFT">
 								<Offset>
@@ -746,7 +774,7 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 						</Anchors>
 						<Layers>
 							<Layer level="ARTWORK">
-								<FontString name="$parentLabel" inherits="GameFontNormalSmall" text="GUILDADS_FACTION_SHOWSTEAMWHEEDLECARTEL">
+								<FontString name="$parentLabel" inherits="GameFontNormalSmall" text="GUILDADS_FACTION_SHOWNORTHREND">
 									<Anchors>
 										<Anchor point="LEFT" relativePoint="RIGHT">
 											<Offset>
@@ -759,14 +787,70 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 						</Layers>
 						<Scripts>
 							<OnClick>
-								GuildAdsFaction.filters.checkButtonSetProfile(this,"ShowSteamwheedleCartel");
+								GuildAdsFaction.filters.checkButtonSetProfile(this,"ShowNorthrend");
+							</OnClick>
+						</Scripts>
+					</CheckButton>
+
+					<CheckButton name="GuildAds_FactionShowDalaranCheckButton" inherits="GuildAdsConfig_CheckButton">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="GuildAds_FactionShowNorthrendCheckButton" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Layers>
+							<Layer level="ARTWORK">
+								<FontString name="$parentLabel" inherits="GameFontNormalSmall" text="GUILDADS_FACTION_SHOWDALARAN">
+									<Anchors>
+										<Anchor point="LEFT" relativePoint="RIGHT">
+											<Offset>
+												<AbsDimension x="5" y="1"/>
+											</Offset>
+										</Anchor>
+									</Anchors>
+								</FontString>
+							</Layer>
+						</Layers>
+						<Scripts>
+							<OnClick>
+								GuildAdsFaction.filters.checkButtonSetProfile(this,"ShowDalaran");
+							</OnClick>
+						</Scripts>
+					</CheckButton>
+
+					<CheckButton name="GuildAds_FactionShowRaidCheckButton" inherits="GuildAdsConfig_CheckButton">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="GuildAds_FactionShowDalaranCheckButton" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Layers>
+							<Layer level="ARTWORK">
+								<FontString name="$parentLabel" inherits="GameFontNormalSmall" text="GUILDADS_FACTION_SHOWRAID">
+									<Anchors>
+										<Anchor point="LEFT" relativePoint="RIGHT">
+											<Offset>
+												<AbsDimension x="5" y="1"/>
+											</Offset>
+										</Anchor>
+									</Anchors>
+								</FontString>
+							</Layer>
+						</Layers>
+						<Scripts>
+							<OnClick>
+								GuildAdsFaction.filters.checkButtonSetProfile(this,"ShowRaid");
 							</OnClick>
 						</Scripts>
 					</CheckButton>
 
 					<CheckButton name="GuildAds_FactionShowOtherCheckButton" inherits="GuildAdsConfig_CheckButton">
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="GuildAds_FactionShowSteamwheedleCartelCheckButton" relativePoint="BOTTOMLEFT">
+							<Anchor point="TOPLEFT" relativeTo="GuildAds_FactionShowRaidCheckButton" relativePoint="BOTTOMLEFT">
 								<Offset>
 									<AbsDimension x="0" y="0" />
 								</Offset>
@@ -791,6 +875,7 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 							</OnClick>
 						</Scripts>
 					</CheckButton>
+
 					<!--
 					<CheckButton name="GuildAds_ChatShowNewHaveCheckButton" inherits="GuildAdsConfig_CheckButton">
 						<Anchors>
