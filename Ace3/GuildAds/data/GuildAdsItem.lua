@@ -30,16 +30,16 @@ local SetItem, Timeout, AddItem, ItemReady, ParseTooltip
 do
 	function SetItem(itemRef)
 		GuildAds_ChatDebug(GA_DEBUG_STORAGE, "  - SetItem:"..itemRef);
+		GuildAdsTask:DeleteNamedSchedule("GuildAdsItem_SetItem");
+		GuildAdsTask:AddNamedSchedule("GuildAdsItem_Timeout", 2, nil, nil, Timeout);
 		_ITT.currentItemRef = itemRef;
 		_ITT:ClearLines();
-		_ITT:SetOwner(WorldFrame, "ANCHOR_NONE"); 
-		
+		_ITT:SetOwner(WorldFrame, "ANCHOR_NONE");
 		_ITT:SetHyperlink(itemRef);
-		GuildAdsTask:AddNamedSchedule("GuildAdsItem_Timeout", 2, nil, nil, Timeout);
-		GuildAdsTask:DeleteNamedSchedule("GuildAdsItem_SetItem");
 	end
 
 	function Timeout()
+		GuildAds_ChatDebug(GA_DEBUG_STORAGE, "  - Timeout:");
 		if _ITT.currentItemRef then
 			GuildAds_ChatDebug(GA_DEBUG_STORAGE, "  - Timeout:".._ITT.currentItemRef);
 		
@@ -93,8 +93,11 @@ do
 		
 		if (_G["GuildAdsITTTextLeft1"]:GetText() == RETRIEVING_ITEM_INFO) then
 			GuildAdsTask:AddNamedSchedule("GuildAdsItem_ItemReady", 0.3, nil, nil, ItemReady)
+			enchantCount = 0
 			return
 		end
+		
+		GuildAdsTask:DeleteNamedSchedule("GuildAdsItem_Timeout");
 		
 		-- GetItemInfo again
 		GuildAds_GetItemInfo(_ITT.currentItemRef);
@@ -118,7 +121,7 @@ do
 				t.subtype = "";
 			end	
 		end
-		
+
 		-- hide tooltip
 		_ITT.itemRefs[_ITT.currentItemRef] = nil
 		_ITT.count = _ITT.count-1
@@ -128,7 +131,7 @@ do
 		-- next item if there is one
 		local itemRef = next(_ITT.itemRefs);
 		if itemRef then
-			if enchantCount > 30 then
+			if enchantCount > 20 then
 				-- Enchants (unlike items) are fetched without delay from the server so we have to 
 				-- throttle them manually.
 				GuildAds_ChatDebug(GA_DEBUG_STORAGE, "ItemReady: delaying for 5 seconds");
