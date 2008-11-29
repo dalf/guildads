@@ -318,7 +318,6 @@
 			</OnDragStart>
 			<OnDragStop>
 				self:StopMovingOrSizing();
-				ValidateFramePosition(self);
 			</OnDragStop> 			
 			<OnShow>
 				self.t = GetTime()
