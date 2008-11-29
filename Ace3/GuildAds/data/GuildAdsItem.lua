@@ -26,6 +26,7 @@ GuildAds_ItemInfo = setmetatable({}, {
 local _ItemInfo = CreateFrame("GameTooltip", "GuildAdsITT", nil, "GameTooltipTemplate");
 local _ITT = GuildAdsITT
 local enchantCount = 0
+local userCall = false
 local SetItem, Timeout, AddItem, ItemReady, ParseTooltip
 do
 	function SetItem(itemRef)
@@ -100,7 +101,7 @@ do
 		GuildAdsTask:DeleteNamedSchedule("GuildAdsItem_Timeout");
 		
 		-- GetItemInfo again
-		GuildAds_GetItemInfo(_ITT.currentItemRef);
+		GuildAds_innerGetItemInfo(_ITT.currentItemRef);
 		-- parse tooltips
 		ParseTooltip(_ITT.currentItemRef);
 
@@ -141,8 +142,10 @@ do
 				SetItem(itemRef);
 			end
 		else
-			GuildAdsPlugin_OnEvent(GAS_EVENT_ITEMINFOREADY);
 			enchantCount = 0;
+			if not userCall then
+				GuildAdsPlugin_OnEvent(GAS_EVENT_ITEMINFOREADY);
+			end
 		end
 	end
 
@@ -265,8 +268,17 @@ end
 -- if the item is not in the itemcache.wdb file, you have to wait for GAS_EVENT_ITEMINFOREADY
 -- 
 -- test : /dump GuildAds_GetItemInfo("item:9387:0:1200:0")
+--
+-- GAS_EVENT_ITEMINFOREADY event should only be sent if items/enchants are fetched asynchronously
 ---------------------------------------------------------------------------------
 function GuildAds_GetItemInfo(itemRef, needTooltipInformation)
+	userCall = true
+	local ret = GuildAds_innerGetItemInfo(itemRef, needTooltipInformation)
+	userCall = false
+	return ret
+end
+
+function GuildAds_innerGetItemInfo(itemRef, needTooltipInformation)
 	if itemRef and not(rawget(_ItemInfo, itemRef) and (not needTooltipInformation or rawget(_ItemInfo, itemRef)._tt))  then
 		local found, _, itemLink1, itemLink2, itemLink3, itemLink4 = string.find(itemRef, "item:(%d+):(%d+):(%d+):(%d+)");
 		if not found then
