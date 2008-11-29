@@ -149,7 +149,7 @@ function GuildAdsCodecGeneric.decode(str)
 		typeString = string.sub(str, 0, 1);
 		valueString = string.sub(str, 2);
 		if (typeString == "s") then
-			return GuildAdsCodecString.decode(str);
+			return GuildAdsCodecString.decode(valueString);
 		elseif (typeString == "n") then
 			return tonumber(valueString);
 		elseif (typeString == "1") then
