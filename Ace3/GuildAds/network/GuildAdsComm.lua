@@ -265,7 +265,14 @@ function GuildAdsComm:LeaveChannel()
 end
 
 function GuildAdsComm:GetChannelStatus()
-	return SimpleComm_GetChannelStatus();
+	-- add information about the sync state
+	-- min/max number of searches based on hash queue length
+	local t_min = GuildAdsComm.hashSearchQueue[1]:Length()  * 1 + GuildAdsComm.hashSearchQueue[2]:Length()
+	local t_max = GuildAdsComm.hashSearchQueue[1]:Length()  * 17 + GuildAdsComm.hashSearchQueue[2]:Length()
+	-- number of new (in this session) updates
+	local s = GuildAdsComm.searchQueue:Length()
+	local status, chatStatus = SimpleComm_GetChannelStatus()
+	return status, chatStatus, s, t_min, t_max
 end
 
 function GuildAdsComm.FilterText(text)

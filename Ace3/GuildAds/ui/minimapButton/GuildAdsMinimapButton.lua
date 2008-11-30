@@ -88,7 +88,7 @@ GuildAdsMinimapButtonCore = {
 			thereIsNoAlert = false;
 		end
 		if thereIsNoAlert then
-			local status, message = GuildAdsComm:GetChannelStatus();
+			local status, message, my_search_queue, hash_min_search, hash_max_search = GuildAdsComm:GetChannelStatus();
 			if status~="Connected" then
 				if GuildAds.channelName then
 					GameTooltip:AddLine(GuildAds.channelName..": "..(status or ""), 1, 0, 0);
@@ -100,6 +100,8 @@ GuildAdsMinimapButtonCore = {
 				end
 			else
 				GameTooltip:AddLine(GuildAds.channelName..": "..(status or ""), 0, 1, 0);
+				-- Remaining searches: 1 (16-200)
+				GameTooltip:AddLine(string.format("%s %s (%s - %s)", GUILDADS_STATUS_TIP, tostring(my_search_queue or 0), tostring(hash_min_search or 0), tostring(hash_max_search or 0)), 0, 1, 0);
 			end			
 		end
 		GameTooltip:Show();
