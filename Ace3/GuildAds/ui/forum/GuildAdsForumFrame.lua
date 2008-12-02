@@ -124,6 +124,7 @@ GuildAdsForum = {
 				GuildAdsForumOfficerCheckButton:SetChecked(0);
 				GuildAdsForumNewPostButton:Enable();
 				GuildAdsForumReplyButton:Disable();
+				GuildAdsForumPostButton:SetText(GUILDADS_FORUM_POST);
 				GuildAdsForumPostButton:Disable();
 			else
 				-- some post selected
@@ -143,7 +144,14 @@ GuildAdsForum = {
 				else
 					GuildAdsForumReplyButton:Enable();
 				end
-				GuildAdsForumPostButton:Disable();
+				local start, _, expectedAuthor = string.find(GuildAdsForum.currentSelectedPostId, "([^:]+)[0-9]+$");
+				if expectedAuthor == GuildAds.playerName then
+					GuildAdsForumPostButton:SetText(GUILDADS_FORUM_EDITPOST);
+					GuildAdsForumPostButton:Enable();
+				else
+					GuildAdsForumPostButton:SetText(GUILDADS_FORUM_POST);
+					GuildAdsForumPostButton:Disable();
+				end
 			end
 		end
 	end;
@@ -575,6 +583,7 @@ GuildAdsForum = {
 			GuildAdsForumOfficerCheckButton:SetChecked(0);
 			GuildAdsForumReplyButton:Disable();
 			GuildAdsForumNewPostButton:Disable();
+			GuildAdsForumPostButton:SetText(GUILDADS_FORUM_POST);
 			GuildAdsForumPostButton:Enable();
 			GuildAdsForum.postID = GuildAdsForum.newPostID;
 		end
@@ -592,6 +601,7 @@ GuildAdsForum = {
 			GuildAdsForumOfficerCheckButton:SetChecked(0);
 			GuildAdsForumReplyButton:Disable();
 			GuildAdsForumNewPostButton:Disable();
+			GuildAdsForumPostButton:SetText(GUILDADS_FORUM_POST);
 			GuildAdsForumPostButton:Enable();
 			GuildAdsForum.postID = GuildAdsForum.replyID;
 		end
@@ -620,8 +630,6 @@ GuildAdsForum = {
 	end;
 	
 	postButtonClicked = function()
-		--local start, _ = string.find(GuildAdsForum.newPostID, "^[^:]+[0-9]+$");
-		--if start then
 		if GuildAdsForum.postID then
 			local data = {}
 			data.s = GuildAdsForumSubjectEditBox:GetText();
@@ -636,7 +644,6 @@ GuildAdsForum = {
 						GuildAdsForumOfficerCheckButton:GetChecked() and 4 or 0);
 			
 			local datatype = GuildAdsDB.channel[GuildAds.channelName].Forum;
-			--local datatype = GuildAdsForumDataType; -- DEBUG
 			datatype:set(GuildAds.playerName, GuildAdsForum.postID, data);
 			if GuildAdsForum.postID == GuildAdsForum.newPostID then
 				GuildAdsForum.currentSelectedPostId = nil;
@@ -647,6 +654,15 @@ GuildAdsForum = {
 			GuildAdsForum.updateButtons();
 			GuildAdsForum.postButtonsUpdate(self, true);
 		end
+		if GuildAdsForumPostButton:GetText() == GUILDADS_FORUM_EDITPOST then
+			GuildAdsForumPostButton:SetText(GUILDADS_FORUM_POST)
+			GuildAdsForum.postID = GuildAdsForum.currentSelectedPostId
+			GuildAdsForumSubjectEditBox:SetFocus();
+			GuildAdsForumReplyButton:Disable();
+			GuildAdsForumNewPostButton:Disable();
+			GuildAdsForumPostButton:Enable();
+		end
+
 	end;
 }
 
