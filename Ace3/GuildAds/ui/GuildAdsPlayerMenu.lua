@@ -21,7 +21,7 @@ GuildAdsPlayerMenu = {
 	end;
 	
 	empty = function(owner, level)
-		info = { };
+		info = UIDropDownMenu_CreateInfo();
 		info.text =  "";
 		info.notClickable = 1;
 		info.notCheckable = 1;
@@ -30,14 +30,12 @@ GuildAdsPlayerMenu = {
 	
 	header = function(owner, level)
 		currentLevel = level;
-		local color = GuildAdsUITools:GetPlayerColor(owner)
+		local _, colorHex = GuildAdsUITools:GetPlayerColor(owner)
 		
-		info = { };
+		info = UIDropDownMenu_CreateInfo();
 		info.text =  owner;
 		info.notCheckable = 1;
-		info.textR = color.r;
-		info.textG = color.g;
-		info.textB = color.b;
+		info.colorCode = colorHex;
 		UIDropDownMenu_AddButton(info, level);
 	end;
 	
@@ -48,7 +46,7 @@ GuildAdsPlayerMenu = {
 		end
 		
 		if online then
-			info = { };
+			info = UIDropDownMenu_CreateInfo();
 			info.text =  WHISPER_MESSAGE;
 			info.notCheckable = 1;
 			info.value = owner;
@@ -57,7 +55,7 @@ GuildAdsPlayerMenu = {
 		end
 
 		if GuildAdsInspectWindow then
-			info = { };
+			info = UIDropDownMenu_CreateInfo();
 			info.text =  INSPECT;
 			info.notCheckable = 1;
 			info.value = owner;
@@ -66,14 +64,14 @@ GuildAdsPlayerMenu = {
 		end
 
 		if online then
-			info = { };
+			info = UIDropDownMenu_CreateInfo();
 			info.text =  CHAT_INVITE_SEND;
 			info.notCheckable = 1;
 			info.value = owner;
 			info.func = GuildAdsPlayerMenu.invite;
 			UIDropDownMenu_AddButton(info, level);
 	
-			info = { };
+			info = UIDropDownMenu_CreateInfo();
 			info.text =  WHO;
 			info.notCheckable = 1;
 			info.value = owner;
@@ -84,7 +82,7 @@ GuildAdsPlayerMenu = {
 	
 	footer = function(owner, level)
 		currentLevel = level;
-		info = { };
+		info = UIDropDownMenu_CreateInfo();
 		info.text = CANCEL;
 		info.notCheckable = 1;
 		info.func = GuildAdsPlayerMenu.cancel;
