@@ -370,8 +370,8 @@ GuildAdsGuild = {
 					GuildAdsGuild.peopleButtonsUpdate();
 				else
 					-- another player was clicked = select
-					GuildAdsGuild.currentPlayerName = this.owner;
-					GuildAdsGuild.currentRerollName = this.reroll;
+					GuildAdsGuild.currentPlayerName = self.owner;
+					GuildAdsGuild.currentRerollName = self.reroll;
 					GuildAdsGuild.peopleButtonsUpdate();
 				end
 				
@@ -546,7 +546,7 @@ GuildAdsGuild = {
 			-- 
 			if GuildAdsDB.profile.Main:getRevision(GuildAdsGuildContextMenu.owner)==0 
 				and GuildAdsDB.profile.Main:get(GuildAdsGuildContextMenu.owner, GuildAdsDB.profile.Main.Account) ~= nil then
-				info = { };
+				info = UIDropDownMenu_CreateInfo();
 				info.text =  GUILDADS_GUILD_DEGROUP;
 				info.notCheckable = 1;
 				info.value = GuildAdsGuildContextMenu.owner;
@@ -554,11 +554,8 @@ GuildAdsGuild = {
 				UIDropDownMenu_AddButton(info, 1);
 			end
 			-- 
-			-- GALMOK
-			--local t1,t2,t3 = GuildControlGetRankFlags();
-			--if (t3) then 
 			if CanGuildRemove() then
-				info = { };
+				info = UIDropDownMenu_CreateInfo();
 				info.text = GUILDADS_GUILD_BLACKLIST;
 				info.notCheckable = 1;
 				info.value = GuildAdsGuildContextMenu.owner;
