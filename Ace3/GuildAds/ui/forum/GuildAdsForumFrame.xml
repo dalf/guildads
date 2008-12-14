@@ -692,4 +692,12 @@
 	</Frame>
 	
 	<Button name="GuildAdsForumTab" inherits="GuildAdsWindowTabTemplate" text="GUILDADS_HEADER_FORUM" />
+	
+	<Frame name="GuildAdsForumContextMenu" inherits="UIDropDownMenuTemplate">
+		<Scripts>
+			<OnLoad>
+				GuildAdsForum.contextMenu.onLoad();
+			</OnLoad>
+		</Scripts>
+	</Frame>
 </Ui>

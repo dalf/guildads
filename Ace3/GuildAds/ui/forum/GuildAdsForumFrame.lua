@@ -246,7 +246,7 @@ GuildAdsForum = {
 				GuildAdsForum.postButtonsUpdate(self, true);
 				
 				if button == "RightButton" then
-					--GuildAdsGuild.contextMenu.show(GuildAdsGuild.currentRerollName or GuildAdsGuild.currentPlayerName);
+					GuildAdsForum.contextMenu.show(self.data);
 				end
 			end
 		end;
@@ -286,7 +286,8 @@ GuildAdsForum = {
 			end
 			subjectField:Show();
 			
-			authorField:SetText(post.a);
+			local _, colorHex = GuildAdsUITools:GetPlayerColor(post.a)
+			authorField:SetText(colorHex..post.a.."|r");
 			authorField:Show();
 			
 			dateField:SetText(GuildAdsDB:FormatTime(post.t or 0));
@@ -294,6 +295,55 @@ GuildAdsForum = {
 			
 		end;
 	};
+	
+	---------------------------------------------------------------------------------
+	--
+	-- context menu
+	--
+	---------------------------------------------------------------------------------	
+	contextMenu = {
+	
+		onLoad = function()
+			GuildAdsForumContextMenu.initialize = GuildAdsForum.contextMenu.initialize;
+			GuildAdsForumContextMenu.displayMode = "MENU";
+		end;
+	
+		show = function(data)
+			HideDropDownMenu(1);
+			GuildAdsForumContextMenu.name = "Title";
+			GuildAdsForumContextMenu.data = data;
+			ToggleDropDownMenu(1, nil, GuildAdsForumContextMenu, "cursor");
+		end;
+		
+		initialize = function()
+			-- default menu
+			GuildAdsPlayerMenu.header(GuildAdsForumContextMenu.data.a, 1);
+			GuildAdsPlayerMenu.menus(GuildAdsForumContextMenu.data.a, 1);
+			-- 
+			if CanGuildRemove() then
+				info = UIDropDownMenu_CreateInfo();
+				info.text = GUILDADS_FORUM_DELETEPOST;
+				info.notCheckable = 1;
+				info.value = GuildAdsForumContextMenu.data;
+				info.func = GuildAdsForum.contextMenu.deletePost;
+				UIDropDownMenu_AddButton(info, 1);
+			end
+			
+			GuildAdsPlayerMenu.footer(GuildAdsForumContextMenu.data.a, 1);
+		end;
+		
+		deletePost = function(self)
+			if self.value then
+				GuildAdsGuild.debug("Deleting post by "..self.value.a.." (id="..self.value.id..") from GuildAds database");
+				local datatype = GuildAdsDB.channel[GuildAds.channelName].Forum;
+				if self.value.a and self.value.id then
+					datatype:set(self.value.a, self.value.id, nil);
+				end
+			end
+		end;
+			
+	};
+
 	
 	data = {
 		cache = nil;
@@ -304,6 +354,15 @@ GuildAdsForum = {
 		end;
 		
 		get = function(updateData)
+			local ret = GuildAdsForum.data.get2(updateData)
+			if #ret == 0 then
+				GuildAdsForum.currentSelectedPostId = nil
+				ret = GuildAdsForum.data.get2(true);
+			end
+			return ret
+		end;
+		
+		get2 = function(updateData)
 			if GuildAdsForum.data.cache==nil or updateData==true then
 				-- delete old postID (should it exist)
 				GuildAdsForum.postID=nil
