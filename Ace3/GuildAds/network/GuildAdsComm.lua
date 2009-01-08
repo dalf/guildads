@@ -989,39 +989,43 @@ end
 
 function GuildAdsComm:ReceiveOpenTransaction(channelName, personName, dataTypeName, playerName, fromRevision, toRevision, version)
 	self.stats.Transaction = self.stats.Transaction + 1
-	local databaseId = self.playerMeta[personName].databaseId
-	local statsPerDB = self.stats.TransactionPerDatabase
-	statsPerDB.changed = true
-	if statsPerDB.count[databaseId] then
-		statsPerDB.count[databaseId] = statsPerDB.count[databaseId] + 1
-	else
-		statsPerDB.count[databaseId] = 1
-		table.insert(statsPerDB.db, { databaseId, personName })
-	end
-	
-	local DTS = self.DTS[dataTypeName];
-	if personName~=GuildAds.playerName then
-		if self.transactions[personName] then
-			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "|cffff1e00Duplicate|r OPEN TRANSACTION from %s (already open)", personName);
+	if personName then
+		local databaseId = self.playerMeta[personName].databaseId
+		local statsPerDB = self.stats.TransactionPerDatabase
+		statsPerDB.changed = true
+		if statsPerDB.count[databaseId] then
+			statsPerDB.count[databaseId] = statsPerDB.count[databaseId] + 1
+		else
+			statsPerDB.count[databaseId] = 1
+			table.insert(statsPerDB.db, { databaseId, personName })
 		end
-		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"ReceiveOpenTransaction(%s, %s, %s)", tostring(DTS), playerName, fromRevision);
-		-- add transaction
-		self.transactions[personName] = {
-			playerName = playerName,
-			ignore = not GuildAdsDB.channel[GuildAds.channelName]:isPlayerAllowed(playerName),
-			dataTypeName = dataTypeName,
-			fromRevision = fromRevision,
-			toRevision = toRevision,
-			lmt=time()
-		}
-		self.transactions[personName].__index = self.transactions[personName];
-		-- parse message
-		DTS:ReceiveOpenTransaction(self.transactions[personName], playerName, fromRevision, toRevision, version or 1);
-		if self.transactions[personName].ignore then
-			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"|cffff1e00Ignore|r ReceiveOpenTransaction(%s, %s, %s) (blacklisted)", tostring(DTS), playerName, fromRevision);
+		
+		local DTS = self.DTS[dataTypeName];
+		if personName~=GuildAds.playerName then
+			if self.transactions[personName] then
+				GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "|cffff1e00Duplicate|r OPEN TRANSACTION from %s (already open)", personName);
+			end
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"ReceiveOpenTransaction(%s, %s, %s)", tostring(DTS), playerName, fromRevision);
+			-- add transaction
+			self.transactions[personName] = {
+				playerName = playerName,
+				ignore = not GuildAdsDB.channel[GuildAds.channelName]:isPlayerAllowed(playerName),
+				dataTypeName = dataTypeName,
+				fromRevision = fromRevision,
+				toRevision = toRevision,
+				lmt=time()
+			}
+			self.transactions[personName].__index = self.transactions[personName];
+			-- parse message
+			DTS:ReceiveOpenTransaction(self.transactions[personName], playerName, fromRevision, toRevision, version or 1);
+			if self.transactions[personName].ignore then
+				GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"|cffff1e00Ignore|r ReceiveOpenTransaction(%s, %s, %s) (blacklisted)", tostring(DTS), playerName, fromRevision);
+			end
+		else
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"|cffff1e00Ignore|r ReceiveOpenTransaction(%s, %s, %s) (my update)", tostring(DTS), playerName, fromRevision);
 		end
 	else
-		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"|cffff1e00Ignore|r ReceiveOpenTransaction(%s, %s, %s) (my update)", tostring(DTS), playerName, fromRevision);
+		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"|cffff1e00Ignore|r ReceiveOpenTransaction(%s, %s) (unknown playerMeta for %s)", playerName, fromRevision, personeName);
 	end
 	-- reset timeout
 	self:SetState("UPDATING", self.delay.TransactionDelay+self.delay.Timeout);
