@@ -76,11 +76,26 @@ GUILDADS_HEADER_SKILL 		= SKILLS;
 GUILDADS_HEADER_ANNONCE		= GUILD;
 GUILDADS_HEADER_FACTION		= "Репутация";
 GUILDADS_HEADER_EVENT		= "События";
+GUILDADS_HEADER_FORUM		= "Форум";
 
 GUILDADS_GUILD_GROUPWITHACCOUNT	= "Группировать %s с аккаунтом %s";
 GUILDADS_GUILD_DEGROUP		= "Отделить от аккаунта";
 GUILDADS_GUILD_BLACKLIST	= "Чёрный список"; 
                     
+GUILDADS_FORUM_SUBJECT		= MAIL_SUBJECT_LABEL; --"Тема:"
+GUILDADS_FORUM_AUTHOR		= "Автор";
+GUILDADS_FORUM_DATE		= "Дата";
+GUILDADS_FORUM_NEWPOST		= "Новое";
+GUILDADS_FORUM_EDITPOST		= "Редактировать";
+GUILDADS_FORUM_REPLY		= REPLY_MESSAGE; --"Ответить"
+GUILDADS_FORUM_STICKY		= "Закрепить";
+GUILDADS_FORUM_LOCKED		= "Закрытая";
+GUILDADS_FORUM_OFFICERPOST	= "Тема для офицеров";
+GUILDADS_FORUM_POST		= "Запостить";
+GUILDADS_FORUM_EMPTYSUBJECT	= "<нет темы>";
+GUILDADS_FORUM_DELETEPOST	= "Удалить сообщение";
+
+
 -- Item
 GUILDADS_ITEMS = {
 	everything = "Всё",
@@ -153,7 +168,8 @@ GUILDADS_CLASSES = {
 	[6] = "Охотник",
 	[7] = "Чернокнижник",
 	[8] = "Маг",
-	[9] = "Жрец"
+	[9] = "Жрец",
+	[10] = "Рыцарь смерти"
 };
 
 
@@ -161,11 +177,11 @@ GUILDADS_CLASSES = {
 GUILDADS_SKILLS	= {
 	[1]  = "Травничество",
 	[2]  = "Горное дело",
-	[3]  = "Свежевание",
+	[3]  = "Снятие шкур",
 	[4]  = "Алхимия",
 	[5]  = "Кузнечное дело",
-	[6]  = "Механика",
-	[7]  = "Кожевное дело",
+	[6]  = "Инженерное дело",
+	[7]  = "Кожевничество",
 	[8]  = "Портняжное дело",
 	[9]  = "Наложение чар",
 	[10] = "Рыбная ловля",
@@ -173,6 +189,7 @@ GUILDADS_SKILLS	= {
 	[12] = "Кулинария",
 	[13] = "Вскрытие замков",
 	[14] = "Ювелирное дело",
+	[15] = "Начертание", -- NEW patch 3.02
 	
 	[20] = "Рукопашный бой",
 	[21] = "Кинжалы",
@@ -261,7 +278,29 @@ GUILDADS_FACTIONS = {
 	[52] = "Песчаная Чешуя";
 	[53] = "Транквиллион";
 	[54] = "Аметистовое Око";
-}; -- last one used is 55
+	[56] = "Рыцари Черного Клинка", -- WotLK -- Other
+	[57] = "Серебряный Авангард", -- Northrend
+	[58] = "Explorer's League",
+	[59] = "Племя Бешеного Сердца",
+	[60] = "Зиморожденные",
+	[61] = "Карающая длань",
+	[62] = "Калу'ак",
+	[63] = "Оракулы",
+	[64] = "Сыновья Ходира",
+	[65] = "Таунка",
+	[66] = "Экспедиция Отважных",
+	[67] = "Армия Песни Войны",
+	[68] = "Драконий союз",
+	[69] = "Кирин-Тор", -- Dalaran
+	[70] = "Серебряный Союз",
+	[71] = "The Sunreavers"
+};
+
+GUILDADS_FACTION_OPTIONS	= "Настройка фракций";
+GUILDADS_FACTION_HIDE_COLLAPSED = "Скрывать пересекающиеся фракции";
+GUILDADS_FACTION_ONLY_LEVEL_80	= "Показывать только игроков 80 уровня";
+GUILDADS_FACTION_FACTION	= "Показать Фракции"; -- Should be updated runtime to either Horde or Alliance
+
 
 GUILDADS_FACTION_SHOWFACTION = "Показывать Фракцию";
 GUILDADS_FACTION_SHOWFACTIONFORCES = "Показывать Силы Фракции";
@@ -269,6 +308,10 @@ GUILDADS_FACTION_SHOWOUTLAND = "Показывать Запределье";
 GUILDADS_FACTION_SHOWSHATTRATHCITY = "Показывать Шаттрат";
 GUILDADS_FACTION_SHOWSTEAMWHEEDLECARTEL = "Показывать Картель Хитрая Шестерёнка";
 GUILDADS_FACTION_SHOWOTHER = "Показывать Остальные";
+GUILDADS_FACTION_SHOWNORTHREND = "Показывать Нордскол";
+GUILDADS_FACTION_SHOWDALARAN = "Показывать Даларан";
+GUILDADS_FACTION_SHOWRAID = "Показывать Рейд"
+
 
 GUILDADS_OPTIONS = {
 	["toggle"]			= BINDING_NAME_SHOW;
