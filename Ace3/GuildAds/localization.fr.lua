@@ -3,40 +3,49 @@
 GUILDADS_TITLE					= "GuildAds";
 
 -- Minimap button
-GUILDADS_BUTTON_TIP				= "Les Annonces de la guilde";
+GUILDADS_BUTTON_TIP				= "Afficher/Cacher GuildAds";
+GUILDADS_UPGRADE_TIP		= "Nouvelle version de GuildAds: ";
+GUILDADS_UPGRADE_TIP		= "Une nouvelle version de GuildAds est disponible: ";
+GUILDADS_STATUS_TIP		= "Recherches en cours:";
 
-GUILDADSTOOLTIPS_ADS 			=  "Vous permet de voir les annonces";
+-- Options frame
+GUILDADS_OPTIONS_TITLE		= "Options du canal GuildAds";
+GUILDADS_CHAT_OPTIONS		= "Options du Chat";
+GUILDADS_CHAT_USETHIS		= "Utiliser ce canal :";
+GUILDADS_CHAT_CHANNEL		= "Nom";
+GUILDADS_CHAT_PASSWORD		= "Mot de passe";
+GUILDADS_CHAT_COMMAND		= "Commande '/'";
+GUILDADS_CHAT_ALIAS 		= "Alias du canal";
+GUILDADS_CHAT_SHOW_NEWEVENT	= "Afficher les nouveaux Evenements"
+GUILDADS_CHAT_SHOW_NEWASK	= "Afficher les nouvelles Demandes";
+GUILDADS_CHAT_SHOW_NEWHAVE	= "Afficher les nouvelles Offres";
+GUILDADS_ADS_OPTIONS		= "Options des Annonces";
+GUILDADS_PUBLISH		= "Publier mes Annonces";
+GUILDADS_VIEWMYADS		= "Afficher mes Annonces";
+GUILDADS_ICON_OPTIONS		= "Option du bouton Minimap";
+GUILDADS_ICON			= "Bouton Minimap";
+GUILDADS_ADJUST_ANGLE		= "Regler l'angle";
+GUILDADS_ADJUST_RADIUS		= "Regler le radius";
 
--- Config
-GUILDADS_CHAT_OPTIONS			= "Options du canal GuildAds";
-GUILDADS_CHAT_USETHIS			= "Utiliser ce canal :";
-GUILDADS_CHAT_CHANNEL			= "Nom";
-GUILDADS_CHAT_PASSWORD			= "Mot de passe";
-GUILDADS_CHAT_COMMAND			= 'Commande "/"';
-GUILDADS_CHAT_ALIAS				= "Alias";
-GUILDADS_CHAT_SHOW_NEWEVENT		= "Afficher les nouveaux evenements"
-GUILDADS_CHAT_SHOW_NEWASK		= "Afficher les nouvelles demandes";
-GUILDADS_CHAT_SHOW_NEWHAVE		= "Afficher les nouvelles propositions";
-GUILDADS_ADS_OPTIONS			= "Options des annonces";
-GUILDADS_PUBLISH				= "Publier mes annonces";
-GUILDADS_VIEWMYADS				= "Voir mes annonces";
-GUILDADS_ICON_OPTIONS			= "Options de l\'ic\195\180ne de la Minimap";
-GUILDADS_ICON					= "Ic\195\180ne de la Minimap";
-GUILDADS_ADJUST_ANGLE			= "Adjuster l'angle";
-GUILDADS_ADJUST_RADIUS			= "Adjuster le rayon";
+GUILDADS_AUTOCHANNELCONFIG	= "Configuration automatique des canaux";
+GUILDADS_MANUALCHANNELCONFIG	= "Configuration manuelle des canaux";
 
-GUILDADS_AUTOCHANNELCONFIG		= "Configuration de canal automatique";
-GUILDADS_MANUALCHANNELCONFIG	= "Configuration du canal manuelle";
+GUILDADS_ERROR_NOTINITIALIZED 	= "GuildAds n'est pas lance."
 
-GUILDADS_ERROR_TOOMANYCHANNELS		= "Vous avez d\195\169j\195\160 rejoint le nombre maximum de canaux (10)"; 
-GUILDADS_ERROR_JOINCHANNELFAILED 	= "N'a pas joint le canal pour une raison inconnue";
-GUILDADS_ERROR_WRONGPASSWORD 		= "Le mot de passe est incorrect";
+GUILDADS_ERROR_TOOMANYCHANNELS	= "Vous avez atteint le nombre maximum de canaux"; 
+GUILDADS_ERROR_JOINCHANNELFAILED = "Erreur inconnue de connexion au canal";
+GUILDADS_ERROR_WRONGPASSWORD 	= "Erreur de mot de passe";
+
+GUILDADS_NEWDATATYPEVERSION	= "Type de données \"%s\" : %s a une nouvelle version %s. Mettez à jour votre version pour updater les données.";
+
+
 
 -- Main frame
 GUILDADS_MYADS				= "Mes Annonces";
 GUILDADS_BUTTON_INVITE		= "Invite Groupe";
 GUILDADS_BUTTON_ADDREQUEST	= "Demander";
 GUILDADS_BUTTON_ADDAVAILABLE	= "Proposer";
+GUILDADS_BUTTON_REMOVE		= REMOVE;
 GUILDADS_QUANTITY			= "Quantité";
 GUILDADS_SINCE				= "Depuis %s";
 GUILDADS_SIMPLE_SINCE		= "Depuis";
@@ -47,7 +56,8 @@ GUILDADS_TRADE_NUMBER		= "Nb";
 GUILDADS_TRADE_OBJECT		= "Objet";
 GUILDADS_TRADE_ACTIVE		= "Active";
 GUILDADS_TRADE_TYPE			= "Type";
-GUILDADS_TRADE_SHIFTCLICKHELP= "Pour placer un objet içi, utiliser shift-click lorsque cette fenêtre est ouverte";
+GUILDADS_TRADE_SHIFTCLICKHELP= "Pour placer un objet içi, click gauche sur un objet lorsque cette fenêtre est ouverte";
+GUILDADS_TRADE_MINLEVEL		= "Level Min";
 
 -- Column headers
 GUILDADS_HEADER_REQUEST		= "Demande";
@@ -57,42 +67,59 @@ GUILDADS_HEADER_AVAILABLE	= "Propose";
 -- GUILDADS_HEADER_ANNONCE : done by WOW
 GUILDADS_HEADER_FACTION		= "Réputation";
 GUILDADS_HEADER_EVENT		= "Evénements";
+GUILDADS_HEADER_FORUM		= "Forum";
 
 GUILDADS_GUILD_GROUPWITHACCOUNT	= "Associer %s avec le compte de %s";
 GUILDADS_GUILD_DEGROUP			= "Dissocier du compte";
-GUILDADS_GUILD_BLACKLIST		= "Interdire";
+GUILDADS_GUILD_BLACKLIST		= "Bannir";
 
--- Equipment
-GUILDADS_EQUIPMENT		= "Equipement";
+GUILDADS_FORUM_SUBJECT		= MAIL_SUBJECT_LABEL; --"Sujet:"
+GUILDADS_FORUM_AUTHOR		= "Auteur";
+GUILDADS_FORUM_DATE		= "Date";
+GUILDADS_FORUM_NEWPOST		= "Nouveau";
+GUILDADS_FORUM_EDITPOST		= "Editer";
+GUILDADS_FORUM_REPLY		= REPLY_MESSAGE; --"Repondre"
+GUILDADS_FORUM_STICKY		= "Post It";
+GUILDADS_FORUM_LOCKED		= "Verrouille";
+GUILDADS_FORUM_OFFICERPOST	= "Post d'Officier";
+GUILDADS_FORUM_POST		= "Post";
+GUILDADS_FORUM_EMPTYSUBJECT	= "<sans titre>";
+GUILDADS_FORUM_DELETEPOST	= "Supprimer le post";
 
--- Tooltip requests
-GUILDADS_ASKTOOLTIP		= "%s demande(s)";
+
+
 				
 -- Item
 -- arme, armure, conteneur, artisanat, projectile, carquois, recette, composant, divers
 GUILDADS_ITEMS = {
 	everything = "Tout",
 	everythingelse = "Tout le reste",
-	monster	= "Obtenu sur des monstres",
-	classReagent = "Utilisé par une classe",
-	tradeReagent = "Utilisé pour les professions",
+	monster	= "Loot de mobs",
+	classReagent = "Items pour les Classes",
+	tradeReagent = "Items pour les Professions",
 	vendor = "Vendeur",
-	trade = "Produit par les professions",
+	trade = "Produit par les Professions",
 	gather = "Recolte",
 };
 				
 GUILDADS_ITEMS_SIMPLE = {
 	everything = "Tout"
 };
+
+-- Equipment
+GUILDADS_EQUIPMENT		= "Equipement";
+
+
+-- Tooltip requests
+GUILDADS_ASKTOOLTIP		= "%s demande(s)";
 				
 -- Tradeskills
 GUILDADS_TS_ASKITEMS		= "Demander les composants pour %i %s";
-GUILDADS_TS_ASKITEMS_TT		= "Modifiez le nombre d'objets à créer pour préciser les quantités.";
+GUILDADS_TS_ASKITEMS_TT		= "Modifiez le nombre d'objets à créer pour indiquer les quantités.";
 
 -- Bindings
--- BINDING_HEADER_GUILDADS
 BINDING_NAME_SHOW		= "Afficher GuildAds";
-BINDING_NAME_SHOW_CONFIG	= "Afficher les préférences";
+BINDING_NAME_SHOW_CONFIG	= "Afficher les préférences de GuildAds";
 
 -- Race
 GUILDADS_RACES = {
@@ -117,7 +144,8 @@ GUILDADS_CLASSES = {
 	[6] = "Chasseur",
 	[7] = "Démoniste",
 	[8] = "Mage",
-	[9] = "Prêtre"
+	[9] = "Prêtre",
+	[10] = "Chevalier de la Mort"
 };
 
 -- Skill
@@ -155,10 +183,23 @@ GUILDADS_SKILLS = {
 	[34] = "Baguettes"
 };
 
-GUILDADS_FACTION_OPTIONS		= "Paramètres Faction";
-GUILDADS_FACTION_HIDE_COLLAPSED = "Cacher les factions réduites";
-GUILDADS_FACTION_ONLY_LEVEL_70	= "Cacher les niveaux < 70";
-GUILDADS_FACTION_FACTION		= "Afficher Factions"; -- Should be updated runtime to either Horde or Alliance
+
+
+GUILDADSTOOLTIPS_ADS 			=  "Afficher les annonces en cours des membres";
+
+GUILDADSTOOLTIPS_FACTION = "Afficher la Réputation des membres";
+
+GUILDADSTOOLTIPS_SKILL =  "Afficher les Compétences et les Métiers des membres";
+
+GUILDADSTOOLTIPS_GUILD = "Afficher la liste des membres";
+
+GUILDADSTOOLTIPS_FORUM = "Afficher le forum in-game";
+
+
+
+--Factions (only factions mentioned here can be synchronized)
+-- Taken from http://www.wowwiki.com/Reputation#Reputation_sheet
+-- Pour la traduction en francais : http://www.wowhead.com/?factions
 
 GUILDADS_FACTIONS = {
 	[1]  = "Darnassus";  -- Alliance
@@ -216,14 +257,57 @@ GUILDADS_FACTIONS = {
 	[52] = "La Balance des sables";
 	[53] = "Tranquillien";
 	[54] = "L'\197\146il pourpre";
-}; -- last one used is 55
+	[56] = "Les Chevaliers de l'Epée de Ebano", -- WotLK -- Other
+	[57] = "La Croisade d'Argent", -- Northrend
+	[58] = "La Ligue des Explorateurs",
+	[59] = "La Tribu Frénécoeur",
+	[60] = "Les Givre-nés",
+	[61] = "La Main de la Vengeance",
+	[62] = "Les Kalu'aks",
+	[63] = "Les Oracles",
+	[64] = "Les Fils de Hodir",
+	[65] = "Les Taunkas",
+	[66] = "Expédition de la Vaillance",
+	[67] = "Offensive Chant-de-guerre",
+	[68] = "L'Accord de Wyrm",
+	[69] = "Le Kirin Tor", -- Dalaran
+	[70] = "Le Concordat argenté",
+	[71] = "Les Saccage-soleil"
+}; -- The last one used is 71
 
-GUILDADS_FACTION_SHOWFACTION = "Faction";
-GUILDADS_FACTION_SHOWFACTIONFORCES = "Force de la faction";
-GUILDADS_FACTION_SHOWOUTLAND = "Outreterre";
-GUILDADS_FACTION_SHOWSHATTRATHCITY = "Shattrath";
-GUILDADS_FACTION_SHOWSTEAMWHEEDLECARTEL = "Cartel Gentepression";
-GUILDADS_FACTION_SHOWOTHER = "Autres";
+GUILDADS_FACTION_OPTIONS		= "Paramètres des Factions";
+GUILDADS_FACTION_HIDE_COLLAPSED = "Cacher les factions desactivées";
+GUILDADS_FACTION_ONLY_LEVEL_70	= "Cacher les niveaux < 70";
+GUILDADS_FACTION_ONLY_LEVEL_80	= "Cacher les niveaux < 80";
+GUILDADS_FACTION_FACTION		= "Afficher Factions"; -- Should be updated runtime to either Horde or Alliance
 
+GUILDADS_FACTION_SHOWFACTION = "Afficher Factions";
+GUILDADS_FACTION_SHOWFACTIONFORCES = "Afficher Forces de la faction";
+GUILDADS_FACTION_SHOWOUTLAND = "Afficher Outreterre";
+GUILDADS_FACTION_SHOWSHATTRATHCITY = "Afficher Shattrath";
+GUILDADS_FACTION_SHOWSTEAMWHEEDLECARTEL = "Afficher Cartel Gentepression";
+GUILDADS_FACTION_SHOWOTHER = "Afficher Autres";
+GUILDADS_FACTION_SHOWNORTHREND = "Afficher Northrend";
+GUILDADS_FACTION_SHOWDALARAN = "Afficher Dalaran";
+GUILDADS_FACTION_SHOWRAID = "Afficher Raid"
 
+GUILDADS_OPTIONS = {
+	["toggle"]			= BINDING_NAME_SHOW;
+	["options"]			= BINDING_NAME_SHOW_CONFIG;
+	["debug"] 			= "Activer/Desactiver les message de debug";
+	["info"] 			= "Afficher les informations générales de debug";
+	["reset"]			= "Reinitialiser toute la database!";
+	["reset all"]		= "Reinitialiser toute la database excepté les informations du compte";
+	["reset channel"]	= "Reinitialiser toutes les informations sur les canaux";
+	["reset others"]	= "Reinitialiser toutes les informations sur les autres joueurs";
+	["reset player"]	= "Reinitialiser les informations d'un joueur particulier";
+	["clean"]			= "Nettoyer la database";
+	["clean other"]		= "Supprimer les informations Métiers issus des autres comptes qui n'ont pas de lien vers une recette";
+	["admin"]			= "Gérer le controle d'accès des joueurs et des guildes";
+	["admin show"]		= "Afficher la liste des controles d'accès en cours";
+	["admin deny"]		= "Interdire l'accès à un joueur ou à une guilde (les informations du joueur/guilde seront effacés)";
+	["admin allow"]		= "Autoriser l'accès à un joueur ou à une guilde";
+	["admin remove"]	= "Supprimer un joueur ou une guilde de la liste des controles d'accès";
+	["admin allowed"]	= "Vérifier le controle d'accès d'un joueur";
+}
 end
