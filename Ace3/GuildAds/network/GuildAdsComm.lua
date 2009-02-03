@@ -989,7 +989,7 @@ end
 
 function GuildAdsComm:ReceiveOpenTransaction(channelName, personName, dataTypeName, playerName, fromRevision, toRevision, version)
 	self.stats.Transaction = self.stats.Transaction + 1
-	if personName then
+	if self.playerMeta[personName] then
 		local databaseId = self.playerMeta[personName].databaseId
 		local statsPerDB = self.stats.TransactionPerDatabase
 		statsPerDB.changed = true
