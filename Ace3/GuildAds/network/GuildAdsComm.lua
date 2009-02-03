@@ -728,12 +728,12 @@ end
 
 function GuildAdsComm:SendRevision(dataType, playerName, revision, id, data)
 	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendNewRevision(%s, %s, %s)", dataType.metaInformations.name, playerName, tostring(id));
-	SimpleComm_SendMessage(nil, string.format("N>%s>%s>%s", revision, GuildAdsCodecs[dataType.schema.id].encode(id), GuildAdsCodecs[dataType.metaInformations.name.."Data"].encode(data) ) );
+	SimpleComm_SendMessage(nil, "N>"..tostring(revision)..">"..GuildAdsCodecs[dataType.schema.id].encode(id)..">"..GuildAdsCodecs[dataType.metaInformations.name.."Data"].encode(data) );
 end
 
 function GuildAdsComm:SendKeys(dataType, playerName, keys)
 	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"SendKeys(%s, %s)", dataType.metaInformations.name, playerName);
-	SimpleComm_SendMessage(nil, string.format("K>%s", GuildAdsCodecs[dataType.metaInformations.name.."Keys"].encode(keys)) );
+	SimpleComm_SendMessage(nil, "K>"..GuildAdsCodecs[dataType.metaInformations.name.."Keys"].encode(keys) );
 end
 
 function GuildAdsComm:SendOldRevision(dataType, playerName, revisions)
