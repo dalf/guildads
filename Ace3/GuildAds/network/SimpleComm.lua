@@ -620,8 +620,6 @@ function SimpleComm_New_ChatFrame_MessageEventHandler(self, event, ...)
 	-- call the default ChatFrame_OnEvent
 	SimpleComm_Old_ChatFrame_MessageEventHandler(self, event, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11);
 end
-SimpleComm_Old_ChatFrame_MessageEventHandler = ChatFrame_MessageEventHandler;
-ChatFrame_MessageEventHandler = SimpleComm_New_ChatFrame_MessageEventHandler;
 
 ---------------------------------------------------------------------------------
 --
@@ -781,6 +779,11 @@ function SimpleComm_Join(Channel, Password)
 	
 	if firstJoin then
 		firstJoin = nil;
+		
+		-- hook ChatFrame events to filter the messages
+		SimpleComm_Old_ChatFrame_MessageEventHandler = ChatFrame_MessageEventHandler;
+		ChatFrame_MessageEventHandler = SimpleComm_New_ChatFrame_MessageEventHandler;
+
 		-- Set timer
 		frame:Show();
 	end
