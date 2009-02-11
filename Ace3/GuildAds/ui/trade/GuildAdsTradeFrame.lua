@@ -909,6 +909,9 @@ GuildAdsTrade = {
 				if data._t then
 					GameTooltip:AddLine(string.format(GUILDADS_SINCE, GuildAdsDB:FormatTime(data._t)), GuildAdsUITools.noteColor.r, GuildAdsUITools.noteColor.g, GuildAdsUITools.noteColor.b);
 				end
+				if GuildAdsTrade.currentTab == GuildAdsTrade.TAB_CRAFTABLE and item == self.item then
+					GameTooltip:AddLine(GUILDADS_TRADE_ALT_TOOLTIP, GuildAdsUITools.helpColor.r, GuildAdsUITools.helpColor.g, GuildAdsUITools.helpColor.b);
+				end
 				GameTooltip:Show();
 				local info = GuildAds_ItemInfo[item];
 				if info then

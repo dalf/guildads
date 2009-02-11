@@ -31,6 +31,7 @@ GuildAdsUITools.accountOnlineColorHex = {
 }
 
 GuildAdsUITools.noteColor = { ["r"] = 0.3,	["g"] = 0.6,	["b"] = 1.0 };
+GuildAdsUITools.helpColor = { r=0.3,	g=1.0,	b=0.6 };
 GuildAdsUITools.white	  = { ["r"] = 1.0,	["g"] = 1.0, 	["b"] = 1.0 };
 
 GuildAdsUITools.invalid   = { ["r"] = 1.0,	["g"] = 0.5, 	["b"] = 0.5 };
