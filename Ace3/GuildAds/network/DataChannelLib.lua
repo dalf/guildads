@@ -191,7 +191,9 @@ local onEvent = function(self, event, arg1, arg2, arg3, arg4, arg5, arg6, arg7, 
 			lib.gotTooManyChannelsMessage = true;
 		end
 	elseif event=="PLAYER_ENTERING_WORLD" then
-		joinWaitingChannels();
+		-- fail safe to ensure channels are joined
+		lib.Frame.t = 20
+		lib.Frame:SetScript("OnUpdate", onUpdate);
 		self:UnregisterEvent("PLAYER_ENTERING_WORLD");
 	end
 end
