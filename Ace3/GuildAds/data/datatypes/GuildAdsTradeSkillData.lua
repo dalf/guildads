@@ -47,8 +47,16 @@ end
 function GuildAdsTradeSkillDataType:enterWorld()
 	self:UnregisterEvent("PLAYER_ENTERING_WORLD");
 	self:RegisterEvent("TRADE_SKILL_SHOW", "onEvent");
-	--self:RegisterEvent("TRADE_SKILL_UPDATE", "onEvent");
+	self:RegisterEvent("TRADE_SKILL_UPDATE", "onEvent");
 	self:RegisterEvent("TRADE_SKILL_CLOSE", "onEvent");
+end
+
+-- Nearly impossible to get reliable tradeskill information. 
+local Orig_CloseTradeSkill = CloseTradeSkill
+function CloseTradeSkill()
+	GuildAdsTradeSkillDataType.tradeSkillWindowOpen=false;
+	-- call the original CloseTradeSkill
+	Orig_CloseTradeSkill();
 end
 
 function GuildAdsTradeSkillDataType:onEvent(event, arg1)
@@ -95,6 +103,19 @@ function GuildAdsTradeSkillDataType:UpdateTradeSkills()
 			local dd = UIDropDownMenu_GetSelectedID(TradeSkillSubClassDropDown)
 			fullListShown = fullListShown and (dd == 1 or not dd)
 			--GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "GuildAdsTradeSkillDataType: ClassDropDown = "..(UIDropDownMenu_GetSelectedID(TradeSkillSubClassDropDown) or ""))
+		end
+		
+		-- Check to see if there are any headers. If not, item info is most likely not available yet.
+		local headers=false
+		for i=1,GetNumTradeSkills() do
+			_, kind, _, open = GetTradeSkillInfo(i);
+			if (kind == "header") then
+				headers = true
+			end
+		end
+		if not headers then
+			GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "GuildAdsTradeSkillDataType: no headers found")
+			return
 		end
 		
 		-- Check for new tradeskills
