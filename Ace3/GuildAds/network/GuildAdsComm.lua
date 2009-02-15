@@ -1025,7 +1025,7 @@ function GuildAdsComm:ReceiveOpenTransaction(channelName, personName, dataTypeNa
 			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"|cffff1e00Ignore|r ReceiveOpenTransaction(%s, %s, %s) (my update)", tostring(DTS), playerName, fromRevision);
 		end
 	else
-		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"|cffff1e00Ignore|r ReceiveOpenTransaction(%s, %s) (unknown playerMeta for %s)", playerName, fromRevision, personeName);
+		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"|cffff1e00Ignore|r ReceiveOpenTransaction(%s, %s) (unknown playerMeta for %s)", playerName, fromRevision, personName);
 	end
 	-- reset timeout
 	self:SetState("UPDATING", self.delay.TransactionDelay+self.delay.Timeout);
