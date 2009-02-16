@@ -502,7 +502,6 @@ GuildAdsTrade = {
 			else 
 				GuildAds_Filter_ZoneDropDown:Hide();
 			end
-			GuildAdsTrade.altkey=IsAltKeyDown(); -- used to display invalid items, i.e. items that lack recipelinks (hidden feature)
 			GuildAdsTrade.exchangeButtonsUpdate(tab,true);
 
 		elseif (tab == GuildAdsTrade.TAB_MY_ADS) then
@@ -721,7 +720,7 @@ GuildAdsTrade = {
 			for item, players in pairs(GuildAdsTrade.exchangeButton.checkedList[GuildAdsTrade.currentTab]) do
 				GuildAdsTrade.debug("deleting item "..item.." from players");
 				if type(players)=="table" then
-					for _, playerName in pairs(players) do
+					for _, playerName in ipairs(players) do
 						GuildAdsTrade.exchangeButton.deleteItemFromDB(playerName,item);
 					end
 				elseif type(players)=="string" then
@@ -789,7 +788,7 @@ GuildAdsTrade = {
 			else
 				ga_table_erase(GuildAdsTrade.exchangeButton.t);
 				local online, accountOnline, atLeastOneOnline, atLeastOneOnlineAccount;
-				for _, name in pairs(playerName) do
+				for _, name in ipairs(playerName) do
 					online = GuildAdsComm:IsOnLine(name);
 					accountOnline = GuildAdsUITools:IsAccountOnline(name)
 					atLeastOneOnline = atLeastOneOnline or online
@@ -1012,6 +1011,19 @@ GuildAdsTrade = {
 			end
 		end;
 		
+		playerIsVisible = function(adtype, author)
+			-- show offline player
+			if GuildAdsTrade.getProfileValue(nil, "HideOfflinePlayer") and not GuildAdsComm:IsOnLine(author) then
+				return false;
+			end
+
+			-- show my ads
+			if GuildAdsTrade.getProfileValue(nil, "HideMyAds") and (GuildAds.playerName == author) then
+				return false;
+			end
+			return true;			
+		end;
+		
 		adIsVisible = function(adtype, author, item, data)
 			-- show offline player
 			if GuildAdsTrade.getProfileValue(nil, "HideOfflinePlayer") and not GuildAdsComm:IsOnLine(author) then
@@ -1101,29 +1113,47 @@ GuildAdsTrade = {
 					local emptytable = {};
 					local tmptable = {};
 					local item8
-					for _, item, playerName, data in datatype:iterator() do
-						item8 = item:gsub("^(item:%-?%d+:%-?%d+:%-?%d+:%-?%d+:%-?%d+:%-?%d+:%-?%d+:%-?%d+):%-?%d+$", "%1");
-						if (tmptable[item8]) then
-							if GuildAdsTrade.altkey then
-								if not data.e then
-									tinsert(tmptable[item8].p, playerName);
+					local itemVisibleCache = {};
+					local t;
+					local players = GuildAdsDB.channel[GuildAds.channelName]:getPlayers();
+					for playerName in pairs(players) do
+						if GuildAdsTrade.data.playerIsVisible(adtype, playerName) then
+						--for _, item, playerName, data in datatype:iterator(playerName, nil) do
+							for item, _, data in datatype:iterator(playerName, nil) do
+								item8 = item:gsub("^(item:%-?%d+:%-?%d+:%-?%d+:%-?%d+:%-?%d+:%-?%d+:%-?%d+:%-?%d+):%-?%d+$", "%1");
+								t = tmptable[item8]
+								if t then
+									tinsert(t, playerName);
+									if not t.e then
+										t.e=t.e or data.e;
+									end
+									if not t.q then
+										t.q=t.q or data.q;
+									end
+								else
+									if not itemVisibleCache[item8] then								
+										if GuildAdsTrade.data.adIsVisible(adtype, playerName, item, data) then
+											itemVisibleCache[item8] = 1
+										else
+											itemVisibleCache[item8] = 0
+										end
+									end
+									if itemVisibleCache[item8] == 1 then
+										tmptable[item8]={ i=item, [1]=playerName, d=data, t=adtype, e=data.e, q=data.q };
+									end
 								end
-							else
-								tinsert(tmptable[item8].p, playerName);
-								tmptable[item8].e=tmptable[item8].e or data.e;
-								tmptable[item8].q=tmptable[item8].q or data.q;
-							end
-						else
-							if (not GuildAdsTrade.altkey and GuildAdsTrade.data.adIsVisible(adtype, playerName, item, data)) or (GuildAdsTrade.altkey and not data.e) then
-								tmptable[item8]={ i=item, p={playerName}, d=data, t=adtype, e=data.e, q=data.q };
 							end
 						end
 					end
+					itemVisibleCache = nil
 					local info;
 					for key,value in pairs(tmptable) do
 						info = GuildAds_ItemInfo[value.i] or emptytable;
-						tinsert(GuildAdsTrade.data.cache[tab], { i=value.i, p=value.p, d=value.d, t=value.t, e=value.e, q=value.q, l=info.minlevel });
+						value.l = info.minlevel;
+						value.p = value
+						tinsert(GuildAdsTrade.data.cache[tab], value)
 					end
+					tmptable = nil
 					for _, data in pairs(GuildAdsTrade.data.cache[tab]) do
 						table.sort(data.p, GuildAdsTrade.sortData.predicateFunctions.crafter);
 					end
@@ -1562,7 +1592,7 @@ GuildAdsTrade = {
 				if type(GuildAdsTrade.currentPlayerName)=="string" then
 					GuildAdsPlayerMenu.initialize(GuildAdsTrade.currentPlayerName, 1);
 				elseif type(GuildAdsTrade.currentPlayerName)=="table" then
-					for _, name in pairs(GuildAdsTrade.currentPlayerName) do
+					for _, name in ipairs(GuildAdsTrade.currentPlayerName) do
 						GuildAdsTrade.contextMenu.addPlayer(name);
 					end
 				end
