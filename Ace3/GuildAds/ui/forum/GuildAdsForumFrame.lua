@@ -242,12 +242,12 @@ GuildAdsForum = {
 					local datatype = GuildAdsDB.channel[GuildAds.channelName].Forum;
 					datatype:markAsRead(self.data.a, self.data.id)
 				end
-				GuildAdsForum.updateButtons(self.data);
-				GuildAdsForum.postButtonsUpdate(self, true);
-				
 				if button == "RightButton" then
 					GuildAdsForum.contextMenu.show(self.data);
 				end
+
+				GuildAdsForum.updateButtons(self.data);
+				GuildAdsForum.postButtonsUpdate(self, true);				
 			end
 		end;
 
