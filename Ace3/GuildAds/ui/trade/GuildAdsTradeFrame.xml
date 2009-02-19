@@ -1256,6 +1256,14 @@
 						GuildAdsTrade.setSearch(self:GetText());
 						self:ClearFocus();
 					</OnEnterPressed>
+					<OnEnter>
+						GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT");
+						GameTooltip:SetText(GUILDADS_TRADE_SEARCHHELP);
+					</OnEnter>
+					<OnLeave>
+						GameTooltip:Hide();
+						ResetCursor(self);
+					</OnLeave>
 				</Scripts>
 				<!-- <FontString inherits="ChatFontNormal" bytes="64"/> -->
 			</EditBox>

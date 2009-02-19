@@ -55,6 +55,7 @@ GUILDADS_TRADE_TYPE		= "Type";
 GUILDADS_TRADE_SHIFTCLICKHELP 	= "To put an item here, shift-click it while this window is opened";
 GUILDADS_TRADE_MINLEVEL		= "MinLevel";
 GUILDADS_TRADE_ALT_TOOLTIP	= "Hold ALT for craft tooltip";
+GUILDADS_TRADE_SEARCHHELP	= "Use regular expression\nSpecial characters: ().%+-*?[]^$\nEscape with % (e.g. [ -> %[ )";
 
 -- Column headers
 GUILDADS_HEADER_REQUEST		= "Ask";
