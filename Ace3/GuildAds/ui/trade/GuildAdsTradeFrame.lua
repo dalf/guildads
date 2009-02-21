@@ -730,6 +730,10 @@ GuildAdsTrade = {
 			GuildAdsTrade.exchangeButton.checkedList[GuildAdsTrade.currentTab]={}; -- clear checkmark list
 			GuildAdsTrade.data.resetCache();
 			GuildAdsTrade.updateCurrentTab();
+			-- clear current selection
+			GuildAdsTrade.currentItem = nil;
+			GuildAdsTrade.currentAdType = nil;
+			GuildAdsTrade.updateCurrentItem(); -- clear the My Ads selection
 		end;
 		
 		deleteItemFromDB = function(author,item)
