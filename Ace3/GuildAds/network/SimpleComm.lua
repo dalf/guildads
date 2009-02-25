@@ -621,6 +621,13 @@ function SimpleComm_New_ChatFrame_MessageEventHandler(self, event, ...)
 	SimpleComm_Old_ChatFrame_MessageEventHandler(self, event, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11);
 end
 
+local function filter_message(msg)
+	-- Hide if this is an internal message
+	if currentChannel.isChatMessageVisible and currentChannel.isChatMessageVisible(msg) then
+		return true
+	end
+	return false, msg
+end
 ---------------------------------------------------------------------------------
 --
 -- DataChannelLib callback
@@ -781,8 +788,12 @@ function SimpleComm_Join(Channel, Password)
 		firstJoin = nil;
 		
 		-- hook ChatFrame events to filter the messages
+		-- delayed hook to ensure (more or less) that GuildAds gets to filter the messages before other addons
 		SimpleComm_Old_ChatFrame_MessageEventHandler = ChatFrame_MessageEventHandler;
 		ChatFrame_MessageEventHandler = SimpleComm_New_ChatFrame_MessageEventHandler;
+
+		-- remove previous message filter (built into SimpleComm_New_ChatFrame_MessageEventHandler)
+		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_CHANNEL", filter_message)
 
 		-- Set timer
 		frame:Show();
@@ -841,6 +852,7 @@ local function onLoad()
 	frame:RegisterEvent("CHAT_MSG_CHANNEL_JOIN")
 	frame:RegisterEvent("CHAT_MSG_CHANNEL_LEAVE")
 	frame:RegisterEvent("CHAT_MSG_SYSTEM")
+	ChatFrame_AddMessageEventFilter("CHAT_MSG_CHANNEL", filter_message)
 end
 
 onLoad()
