@@ -40,7 +40,7 @@ setmetatable(DataTypeToQuestType, DataTypeToQuestTypeMetaTable)
 
 GuildAdsQuestDataType = GuildAdsTableDataType:new({
 	metaInformations = {
-		name = "QuestData",
+		name = "Quest",
 		version = 1,
         	guildadsCompatible = 200,
 		parent = GuildAdsDataType.PROFILE,
@@ -86,19 +86,22 @@ function GuildAdsQuestDataType:onEvent()
 				anyCollapsed = true
 			end
 		else
-			local questLink = GetQuestLink(i)
-			if questLink then
-				-- split questLink into colour, questID, questLevel and questName
-				local questColor, ref, questName = GuildAds_ExplodeItemRef(questLink)
-				local start, _, questID, questLevel = string.find(ref, "quest:([^:]+):([^:]+)")
-				if questID then
-					flags = isComplete and isComplete+1 or 1
-					flags = isDaily and flags+4 or flags
-					GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "GuildAdsQuestDataType: setting "..tostring(questID).." ("..questName..")");
-					self:set(playerName, questID, {l=questLevel, c=questColor, n=questName, g=groupName, r=QuestTypeToDataType[questTag], s=flags})
-					questIDs[questID] = true;
+			-- Don't share daily quests (will be an option eventually)
+			--if not isDaily then
+				local questLink = GetQuestLink(i)
+				if questLink then
+					-- split questLink into colour, questID, questLevel and questName
+					local questColor, ref, questName = GuildAds_ExplodeItemRef(questLink)
+					local start, _, questID, questLevel = string.find(ref, "quest:([^:]+):([^:]+)")
+					if questID then
+						flags = isComplete and isComplete+1 or 1
+						flags = isDaily and flags+4 or flags
+						GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "GuildAdsQuestDataType: setting "..tostring(questID).." ("..questName..")");
+						self:set(playerName, questID, {l=questLevel, c=questColor, n=questName, g=groupName, r=QuestTypeToDataType[questTag], s=flags})
+						questIDs[questID] = true;
+					end
 				end
-			end
+			--end
 		end
 	end
 	if not anyCollapsed then

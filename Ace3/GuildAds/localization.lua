@@ -66,6 +66,11 @@ GUILDADS_HEADER_ANNONCE		= GUILD;
 GUILDADS_HEADER_FACTION		= "Reputation";
 GUILDADS_HEADER_EVENT		= "Events";
 GUILDADS_HEADER_FORUM		= "Forum";
+GUILDADS_HEADER_QUEST		= QUESTS_LABEL; -- "Quests";
+
+GUILDADS_QUEST_GROUP		= "Quest group";
+GUILDADS_QUEST_NAME		= "Quest name";
+GUILDADS_QUEST_TYPE		= "Quest type";
 
 GUILDADS_GUILD_GROUPWITHACCOUNT	= "Group %s with the account of %s";
 GUILDADS_GUILD_DEGROUP		= "Degroup from the account";
@@ -207,6 +212,9 @@ GUILDADSTOOLTIPS_FACTION = "Allows you to see the reputation of your guildads ma
 
 GUILDADSTOOLTIPS_SKILL_TITLE = GUILDADS_HEADER_SKILL;
 GUILDADSTOOLTIPS_SKILL =  "Allow you to see skills and professions of your current guildads mate";
+
+GUILDADSTOOLTIPS_QUEST_TITLE = GUILDADS_HEADER_QUEST;
+GUILDADSTOOLTIPS_QUEST = "Allow you to see the current quests of your guildads mate";
 
 GUILDADSTOOLTIPS_GUILD_TITLE = GUILD;
 GUILDADSTOOLTIPS_GUILD = "Allow you to see roster of current guildads mate";
