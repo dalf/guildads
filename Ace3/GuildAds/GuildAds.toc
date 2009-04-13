@@ -21,6 +21,10 @@ lib\AceEvent-3.0\AceEvent-3.0.xml
 lib\AceConsole-3.0\AceConsole-3.0.xml
 lib\AceGUI-3.0\AceGUI-3.0.xml
 lib\AceConfig-3.0\AceConfig-3.0.xml
+#lib\LibPeriodicTable-3.1\
+lib\LibTradeLinks-1.0\LibTradeLinks-1.0.lua
+lib\LibTradeLinks-1.0\LiveData.lua
+lib\LibTradeLinks-1.0\BetaData.lua
 lib\LibCompress\lib.xml
 revision.lua
 localization.lua
@@ -51,6 +55,7 @@ data\datatypes\GuildAdsInventoryData.lua
 data\datatypes\GuildAdsTradeSkillData.lua
 data\datatypes\GuildAdsTalentData.lua
 data\datatypes\GuildAdsForumData.lua
+data\datatypes\GuildAdsQuestData.lua
 network\DataChannelLib.lua
 network\SimpleComm.lua
 network\GuildAdsCodecs.lua

@@ -173,7 +173,7 @@ local function addGuildAdsInfo(tooltip, itemLink)
 					 		o = o..", ..."
 					 		break
 					 	end
-					 	o = o..glue..tostring(v)
+					 	o = o..glue..tostring(k)
 						glue = ", "
 						c = c + 1
 					end
@@ -212,7 +212,7 @@ local function addGuildAdsInfo(tooltip, itemLink)
 					 		o = o..", ..."
 					 		break
 					 	end
-						o = o..glue..tostring(v)
+						o = o..glue..tostring(k)
 						glue = ", "
 						c = c + 1
 					end
@@ -445,41 +445,78 @@ GuildAdsTradeTooltip = {
 		for _, item in pairs(newKeys) do
 			GuildAdsTradeTooltip.onCraftUpdate(dataType, playerName, item)
 		end
-		for _, item in pairs(newKeys) do
+		for _, item in pairs(deletedKeys) do
 			GuildAdsTradeTooltip.onCraftUpdate(dataType, playerName, item)
 		end
 	end;
 	
 	onCraftUpdate = function(dataType, playerName, item)
 		local dataTypeName = dataType.metaInformations.name
-		local info = dataType:get(playerName, item)
-		local key = keyTable[item]
-		if key then
-			if not GuildAdsItems[key] then
-				GuildAdsItems[key] = {}
-			end
-			if not GuildAdsItems[key][dataTypeName] then
-				GuildAdsItems[key][dataTypeName] = {}
-			end
-			local t = GuildAdsItems[key][dataTypeName]
-			if info then
-				local f = function(k, v)
-				if v==playerName then
-					return k;
+		local info = dataType:get(playerName, item) -- is this an add (non-nil) or remove (nil)
+		
+		-- the following 2 loops are much too expensive and must be broken into smaller ones
+		
+		-- handle trade: links
+		local LTLFunc = LibStub("LibTradeLinks-1.0")
+		local LPTFunc = LibStub("LibPeriodicTable-3.1")
+		local itemTable
+		if item then
+			local _, _, linkType = string.find(item, "^([^:]+):.*$")
+			if linkType == "trade" then
+				-- trade: link... build table of items with enchant links
+				itemTable = {}
+				local linkTable = LTLFunc:Decode(item, true, false); 
+				local level = tostring(UnitLevel("player"))
+				for link in pairs(linkTable) do
+					local itemLink = LPTFunc:ItemInSet(-link,"Tradeskill.RecipeLinks")
+					if itemLink then
+						item="item:"..itemLink..":0:0:0:0:0:0:0:"..level
+					else
+						item="enchant:"..tostring(link)
+					end
+					itemTable[item]=true
 				end
-				end;
-				local index = table.foreach(t, f);
-				if not index then
-					table.insert(t, playerName)
+				item = next(itemTable)
+			end
+		end
+		
+		while item do
+			local key = keyTable[item]
+			if key then
+				if not GuildAdsItems[key] then
+					GuildAdsItems[key] = {}
 				end
+				if not GuildAdsItems[key][dataTypeName] then
+					GuildAdsItems[key][dataTypeName] = {}
+				end
+				local t = GuildAdsItems[key][dataTypeName]
+				t[playerName] = info and true or nil
+				--[[
+				if info then
+					local f = function(k, v)
+					if v==playerName then
+						return k;
+					end
+					end;
+					local index = table.foreach(t, f);
+					if not index then
+						table.insert(t, playerName)
+					end
+				else
+					local f = function(k, v)
+					if v==playerName then
+						return k;
+					end
+					end;
+					local index = table.foreach(t, f);
+					table.remove(t, index);
+				end
+				]]
+			end
+			if type(itemTable) == "table" then
+				item = next(itemTable, item)
 			else
-				local f = function(k, v)
-				if v==playerName then
-					return k;
-				end
-				end;
-				local index = table.foreach(t, f);
-				table.remove(t, index);
+				item = nil
 			end
 		end
 	end;

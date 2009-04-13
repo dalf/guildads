@@ -1118,32 +1118,58 @@ GuildAdsTrade = {
 					local tmptable = {};
 					local item8
 					local itemVisibleCache = {};
-					local t;
+					local t, linkTable;
 					local players = GuildAdsDB.channel[GuildAds.channelName]:getPlayers();
 					for playerName in pairs(players) do
 						if GuildAdsTrade.data.playerIsVisible(adtype, playerName) then
-						--for _, item, playerName, data in datatype:iterator(playerName, nil) do
+							local LTLFunc = LibStub("LibTradeLinks-1.0")
+							local LPTFunc = LibStub("LibPeriodicTable-3.1")
 							for item, _, data in datatype:iterator(playerName, nil) do
-								item8 = item:gsub("^(item:%-?%d+:%-?%d+:%-?%d+:%-?%d+:%-?%d+:%-?%d+:%-?%d+:%-?%d+):%-?%d+$", "%1");
-								t = tmptable[item8]
-								if t then
-									tinsert(t, playerName);
-									if not t.e then
-										t.e=t.e or data.e;
-									end
-									if not t.q then
-										t.q=t.q or data.q;
-									end
-								else
-									if not itemVisibleCache[item8] then								
-										if GuildAdsTrade.data.adIsVisible(adtype, playerName, item, data) then
-											itemVisibleCache[item8] = 1
+								local _, _, linkType = string.find(item, "^([^:]+):.*$")
+								local itemTable
+								if linkType == "trade" then
+									-- trade: link... build table of items with enchant links
+									itemTable = {}
+									linkTable = LTLFunc:Decode(item, true, false); 
+									for link in pairs(linkTable) do
+										local itemLink = LPTFunc:ItemInSet(-link,"Tradeskill.RecipeLinks")
+										if itemLink then
+											item="item:"..itemLink..":0:0:0:0:0:0:0:"..UnitLevel("player")
 										else
-											itemVisibleCache[item8] = 0
+											item="enchant:"..tostring(link)
+											GuildAdsTrade.debug("LibPeriodicTable doesn't have the item that enchant:"..tostring(link).." makes. Please report.")
+										end
+										itemTable[item]={ e="enchant:"..tostring(link) }
+									end
+									item, data = next(itemTable)
+								end
+								while item do
+									item8 = item:gsub("^(item:%-?%d+:%-?%d+:%-?%d+:%-?%d+:%-?%d+:%-?%d+:%-?%d+:%-?%d+):%-?%d+$", "%1");
+									t = tmptable[item8]
+									if t then
+										tinsert(t, playerName);
+										if not t.e then
+											t.e=t.e or data.e;
+										end
+										if not t.q then
+											t.q=t.q or data.q;
+										end
+									else
+										if not itemVisibleCache[item8] then								
+											if GuildAdsTrade.data.adIsVisible(adtype, playerName, item, data) then
+												itemVisibleCache[item8] = 1
+											else
+												itemVisibleCache[item8] = 0
+											end
+										end
+										if itemVisibleCache[item8] == 1 then
+											tmptable[item8]={ i=item, [1]=playerName, d=data, t=adtype, e=data.e, q=data.q };
 										end
 									end
-									if itemVisibleCache[item8] == 1 then
-										tmptable[item8]={ i=item, [1]=playerName, d=data, t=adtype, e=data.e, q=data.q };
+									if type(itemTable) == "table" then
+										item, data = next(itemTable, item)
+									else
+										item = nil
 									end
 								end
 							end

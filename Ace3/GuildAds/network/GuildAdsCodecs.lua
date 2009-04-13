@@ -355,11 +355,19 @@ end
 GuildAdsCodecColor = GuildAdsCodec:new({}, "Color", 1);
 
 GuildAdsCodecColor.SerializeColorData = {
-	["ffa335ee"]="E";
-	["ff0070dd"]="R";
-	["ff1eff00"]="U";
-	["ffffffff"]="C";
-	["ff9d9d9d"]="P";
+	["ffa335ee"]="E"; -- epic item
+	["ff0070dd"]="R"; -- rare item
+	["ff1eff00"]="U"; -- normal/green item
+	["ffffffff"]="C"; -- white item
+	["ff9d9d9d"]="P"; -- gray item
+	["ffe6cc80"]="H"; -- heirloom item
+	["ff808080"]="A"; -- gray quest
+	["ff40c040"]="G"; -- green quest
+	["ffffff00"]="Y"; -- yellow quest
+	["ffff8040"]="O"; -- orange quest
+	["ffff2020"]="D"; -- red quest
+	["ffffd000"]="N"; -- enchant link/trade link
+	["ff71d5ff"]="S"; -- spell link
 };
 
 GuildAdsCodecColor.UnserializeColorData = {
@@ -368,6 +376,14 @@ GuildAdsCodecColor.UnserializeColorData = {
 	["U"]="ff1eff00";
 	["C"]="ffffffff";
 	["P"]="ff9d9d9d";
+	["H"]="ffe6cc80";
+	["A"]="ff808080";
+	["G"]="ff40c040";
+	["Y"]="ffffff00";
+	["O"]="ffff8040";
+	["D"]="ffff2020";
+	["N"]="ffffd000";
+	["S"]="ff71d5ff";
 };
 
 GuildAdsCodecColor.ColorMetaTable = {

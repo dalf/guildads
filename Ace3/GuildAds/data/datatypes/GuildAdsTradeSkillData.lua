@@ -28,11 +28,12 @@ GuildAdsTradeSkillDataType = GuildAdsTableDataType:new({
 		depend = { "Main" }
 	};
 	schema = {
-		id = "ItemRef",
+		id = "ItemRef", -- item:XX, enchant:XX or trade:XX
 		data = {
-			[1] = { key="cd",	codec="BigInteger" },
-			[2] = { key="e",	codec="ItemRef" },
-			[3] = { key="q",	codec="String" },
+			[1] = { key="cd",	codec="BigInteger" },	-- nil
+			[2] = { key="e",	codec="ItemRef" }, 	-- enchant:XX (with id being item:XX or enchant:XX) or nil
+			[3] = { key="q",	codec="String" }, 	-- enchant: or trade: number of items made from resources or 
+									--  trade: nil
 		}
 	}
 });
@@ -84,6 +85,21 @@ function GuildAdsTradeSkillDataType:UpdateTradeSkills()
 		--	--self:clearAllWoW2TradeSkillItems(); -- old WoW2 items are no more
 		self:deleteWoW2TradeSkillItems(); -- only delete my own items
 
+		local tradeSkillLink = GetTradeSkillListLink()
+		local color, link
+		if tradeSkillLink then
+			GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "GuildAdsTradeSkillDataType: TradeSkillLink available")
+			color, link = GuildAds_ExplodeItemRef(tradeSkillLink)
+			if link then
+				tmp[link]=true
+				if not t[link] then
+					GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "GuildAdsTradeSkillDataType: Adding TradeSkill Link "..link)
+					self:set(GuildAds.playerName, link, { s=skillId })
+					added = added + 1
+				end
+			end
+		end
+
 		-- Check the TradeSkill UI to see if any filters are enabled.
 		local fullListShown = true
 		if TradeSkillFrameAvailableFilterCheckButton then
@@ -119,6 +135,8 @@ function GuildAdsTradeSkillDataType:UpdateTradeSkills()
 		end
 		
 		-- Check for new tradeskills
+		if not tradeSkillLink then
+			-- if there is no tradeskill link (Poisons, Mining and Runeforging) then gather items the hard way
 		for i=1,GetNumTradeSkills() do
 			_, kind, _, open = GetTradeSkillInfo(i);
 			if (kind ~= "header") then
@@ -157,14 +175,24 @@ function GuildAdsTradeSkillDataType:UpdateTradeSkills()
 				fullListShown = fullListShown and open
 			end
 		end
+		else
+			-- not necessarily true, but will cause the individual item:XXs to be removed from the database
+			fullListShown = true
+		end
 		
 		GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "GuildAdsTradeSkillDataType: Full List Shown: "..(fullListShown and "true" or "false"))
 		
 		-- delete items not found in the above code
 		if fullListShown then
+			for k,v in pairs(tmp) do
+				GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "GuildAdsTradeSkillDataType: "..tostring(k))
+			end
 			local tmp2 = {};
 			local craft = self:getTableForPlayer(GuildAds.playerName);
 			for item, data in pairs(craft) do
+				if (item ~= "_u") and (data.s == skillId) then
+					GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "GuildAdsTradeSkillDataType: checking "..tostring(item))
+				end
 				if (not tmp[item]) and (item ~= "_u") and (data.s == skillId) then
 					tinsert(tmp2, item);
 				end
