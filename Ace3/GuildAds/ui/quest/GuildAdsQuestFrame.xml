@@ -42,7 +42,7 @@
 		<Scripts>
 			<OnClick>
 				if ( self.sortType ) then
-					GuildAdsQuest.sortPosts(self.sortType);
+					GuildAdsQuest.sortQuests(self.sortType);
 				end
 				PlaySound("igMainMenuOptionCheckBoxOn");
 			</OnClick>
@@ -58,7 +58,7 @@
 		</ButtonText>
         	<NormalFont inherits="GameFontHighlightSmall"/>
 	</Button>
-	<Button name="GuildAdsQuestPostLineButtonTemplate" virtual="true">
+	<Button name="GuildAdsQuestButtonTemplate" virtual="true">
 		<Size>
 			<AbsDimension x="490" y="16"/>
 		</Size>
@@ -76,6 +76,25 @@
 			</Anchors>
 		</HighlightTexture>
 		<Layers>
+			<Layer level="BACKGROUND">
+				<FontString name="$parentTag" inherits="GameFontNormalSmall" justifyH="RIGHT">
+					<Size>
+						<AbsDimension x="0" y="14"/>
+					</Size>
+					<Anchors>
+						<Anchor point="RIGHT">
+							<Offset>
+								<AbsDimension x="-174" y="-2"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+				<FontString name="GuildAdsQuestTagDummyText" inherits="GameFontNormalSmall" hidden="true">
+					<Size>
+						<AbsDimension x="0" y="14"/>
+					</Size>
+				</FontString>
+			</Layer>
 			<Layer level="BORDER">
 				<Texture name="$parentTexture">
 					<Size>
@@ -92,7 +111,7 @@
 				</Texture>
 				<FontString name="$parentGroup" inherits="GameFontNormalSmall" justifyH="LEFT">
 					<Size>
-						<AbsDimension x="298" y="14"/>
+						<AbsDimension x="98" y="14"/>
 					</Size>
 					<Anchors>
 						<Anchor point="TOPLEFT">
@@ -104,7 +123,7 @@
 				</FontString>
 				<FontString name="$parentName" inherits="GameFontHighlightSmall" justifyH="LEFT">
 					<Size>
-						<AbsDimension x="92" y="14"/>
+						<AbsDimension x="200" y="14"/>
 					</Size>
 					<Anchors>
 						<Anchor point="LEFT" relativeTo="$parentGroup" relativePoint="RIGHT">
@@ -114,12 +133,38 @@
 						</Anchor>
 					</Anchors>
 				</FontString>
-				<FontString name="$parentType" inherits="GameFontHighlightSmall" justifyH="LEFT">
+				<!--
+				<FontString name="$parentDifficulty" inherits="GameFontHighlightSmall" justifyH="LEFT">
 					<Size>
 						<AbsDimension x="80" y="14"/>
 					</Size>
 					<Anchors>
 						<Anchor point="LEFT" relativeTo="$parentName" relativePoint="RIGHT">
+							<Offset>
+								<AbsDimension x="0" y="0"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+				-->
+				<FontString name="$parentPlayer" inherits="GameFontHighlightSmall" justifyH="LEFT">
+					<Size>
+						<AbsDimension x="172" y="14"/>
+					</Size>
+					<Anchors>
+						<Anchor point="LEFT" relativeTo="$parentGroup" relativePoint="RIGHT">
+							<Offset>
+								<AbsDimension x="200" y="0"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+				<FontString name="$parentLevel" inherits="GameFontHighlightSmall" justifyH="LEFT">
+					<Size>
+						<AbsDimension x="28" y="14"/>
+					</Size>
+					<Anchors>
+						<Anchor point="LEFT" relativeTo="$parentPlayer" relativePoint="RIGHT">
 							<Offset>
 								<AbsDimension x="0" y="0"/>
 							</Offset>
@@ -133,10 +178,10 @@
 				self:RegisterForClicks("LeftButtonDown", "RightButtonDown");
 			</OnLoad>
 			<OnClick>
-				GuildAdsQuest.postLineButton.onClick(self, button);
+				GuildAdsQuest.questLineButton.onClick(self, button);
 			</OnClick>
 			<OnEnter>
-				--GuildAdsGuild.peopleButton.onEnter(self);
+				GuildAdsQuest.questLineButton.onEnter(self, button);
 			</OnEnter>
 			<OnLeave>
 				GameTooltip:Hide();
@@ -163,7 +208,7 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						WhoFrameColumn_SetWidth(self, 318);
+						WhoFrameColumn_SetWidth(self, 118);
 						self.sortType = "group";
 					</OnLoad>
 				</Scripts>
@@ -178,7 +223,7 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						WhoFrameColumn_SetWidth(self, 92);
+						WhoFrameColumn_SetWidth(self, 120);
 						self.sortType = "name";
 					</OnLoad>
 				</Scripts>
@@ -194,12 +239,42 @@
 				<Scripts>
 					<OnLoad>
 						WhoFrameColumn_SetWidth(self, 80);
-						self.sortType = "type";
+						self.sortType = "difficulty";
+					</OnLoad>
+				</Scripts>
+			</Button>
+			<Button name="GuildAdsQuestColumnHeader4" inherits="GuildAdsQuestColumnHeaderTemplate" text="GUILDADS_QUEST_PLAYERS">
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="GuildAdsQuestColumnHeader3" relativePoint="RIGHT">
+						<Offset>
+							<AbsDimension x="-2" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						WhoFrameColumn_SetWidth(self, 172);
+						self.sortType = "player";
+					</OnLoad>
+				</Scripts>
+			</Button>
+			<Button name="GuildAdsQuestColumnHeader5" inherits="GuildAdsQuestColumnHeaderTemplate" text="LEVEL">
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="GuildAdsQuestColumnHeader4" relativePoint="RIGHT">
+						<Offset>
+							<AbsDimension x="-2" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						WhoFrameColumn_SetWidth(self, 28);
+						self.sortType = "level";
 					</OnLoad>
 				</Scripts>
 			</Button>
 			
-			<Button name="GuildAdsQuestPostLineButton1" inherits="GuildAdsQuestPostLineButtonTemplate" id="1">
+			<Button name="GuildAdsQuestButton1" inherits="GuildAdsQuestButtonTemplate" id="1">
 				<Anchors>
 					<Anchor point="TOPLEFT" relativeTo="GuildAdsQuestColumnHeader1" relativePoint="BOTTOMLEFT">
 						<Offset>
@@ -209,9 +284,9 @@
 				</Anchors>
 			</Button>
 			
-			<Button name="GuildAdsQuestPostLineButton2" inherits="GuildAdsQuestPostLineButtonTemplate" id="2">
+			<Button name="GuildAdsQuestButton2" inherits="GuildAdsQuestButtonTemplate" id="2">
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="GuildAdsQuestPostLineButton1" relativePoint="BOTTOMLEFT">
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsQuestButton1" relativePoint="BOTTOMLEFT">
 						<Offset>
 							<AbsDimension x="0" y=""/>
 						</Offset>
@@ -219,9 +294,9 @@
 				</Anchors>
 			</Button>
 					
-			<Button name="GuildAdsQuestPostLineButton3" inherits="GuildAdsQuestPostLineButtonTemplate" id="3">
+			<Button name="GuildAdsQuestButton3" inherits="GuildAdsQuestButtonTemplate" id="3">
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="GuildAdsQuestPostLineButton2" relativePoint="BOTTOMLEFT">
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsQuestButton2" relativePoint="BOTTOMLEFT">
 						<Offset>
 							<AbsDimension x="0" y="0"/>
 						</Offset>
@@ -229,9 +304,9 @@
 				</Anchors>
 			</Button>
 					
-			<Button name="GuildAdsQuestPostLineButton4" inherits="GuildAdsQuestPostLineButtonTemplate" id="4">
+			<Button name="GuildAdsQuestButton4" inherits="GuildAdsQuestButtonTemplate" id="4">
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="GuildAdsQuestPostLineButton3" relativePoint="BOTTOMLEFT">
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsQuestButton3" relativePoint="BOTTOMLEFT">
 						<Offset>
 							<AbsDimension x="0" y="0"/>
 						</Offset>
@@ -239,9 +314,9 @@
 				</Anchors>
 			</Button>
 					
-			<Button name="GuildAdsQuestPostLineButton5" inherits="GuildAdsQuestPostLineButtonTemplate" id="5">
+			<Button name="GuildAdsQuestButton5" inherits="GuildAdsQuestButtonTemplate" id="5">
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="GuildAdsQuestPostLineButton4" relativePoint="BOTTOMLEFT">
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsQuestButton4" relativePoint="BOTTOMLEFT">
 						<Offset>
 							<AbsDimension x="0" y="0"/>
 						</Offset>
@@ -249,9 +324,9 @@
 				</Anchors>
 			</Button>
 					
-			<Button name="GuildAdsQuestPostLineButton6" inherits="GuildAdsQuestPostLineButtonTemplate" id="6">
+			<Button name="GuildAdsQuestButton6" inherits="GuildAdsQuestButtonTemplate" id="6">
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="GuildAdsQuestPostLineButton5" relativePoint="BOTTOMLEFT">
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsQuestButton5" relativePoint="BOTTOMLEFT">
 						<Offset>
 							<AbsDimension x="0" y="0"/>
 						</Offset>
@@ -259,9 +334,9 @@
 				</Anchors>
 			</Button>
 					
-			<Button name="GuildAdsQuestPostLineButton7" inherits="GuildAdsQuestPostLineButtonTemplate" id="7">
+			<Button name="GuildAdsQuestButton7" inherits="GuildAdsQuestButtonTemplate" id="7">
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="GuildAdsQuestPostLineButton6" relativePoint="BOTTOMLEFT">
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsQuestButton6" relativePoint="BOTTOMLEFT">
 						<Offset>
 							<AbsDimension x="0" y="0"/>
 						</Offset>
@@ -269,9 +344,29 @@
 				</Anchors>
 			</Button>
 					
-			<Button name="GuildAdsQuestPostLineButton8" inherits="GuildAdsQuestPostLineButtonTemplate" id="8">
+			<Button name="GuildAdsQuestButton8" inherits="GuildAdsQuestButtonTemplate" id="8">
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="GuildAdsQuestPostLineButton7" relativePoint="BOTTOMLEFT">
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsQuestButton7" relativePoint="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="0" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Button>
+					
+			<Button name="GuildAdsQuestButton9" inherits="GuildAdsQuestButtonTemplate" id="9">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsQuestButton8" relativePoint="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="0" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Button>
+					
+			<Button name="GuildAdsQuestButton10" inherits="GuildAdsQuestButtonTemplate" id="10">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsQuestButton9" relativePoint="BOTTOMLEFT">
 						<Offset>
 							<AbsDimension x="0" y="0"/>
 						</Offset>
@@ -279,12 +374,182 @@
 				</Anchors>
 			</Button>
 			
-			<ScrollFrame name="GuildAdsQuestPostLineScrollFrame" inherits="FauxScrollFrameTemplate">
+			<Button name="GuildAdsQuestButton11" inherits="GuildAdsQuestButtonTemplate" id="11">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsQuestButton10" relativePoint="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="0" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Button>
+			
+			<Button name="GuildAdsQuestButton12" inherits="GuildAdsQuestButtonTemplate" id="12">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsQuestButton11" relativePoint="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="0" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Button>
+			
+			<Button name="GuildAdsQuestButton13" inherits="GuildAdsQuestButtonTemplate" id="13">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsQuestButton12" relativePoint="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="0" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Button>
+			
+			<Button name="GuildAdsQuestButton14" inherits="GuildAdsQuestButtonTemplate" id="14">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsQuestButton13" relativePoint="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="0" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Button>
+			
+			<Button name="GuildAdsQuestButton15" inherits="GuildAdsQuestButtonTemplate" id="15">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsQuestButton14" relativePoint="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="0" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Button>
+			
+			<Button name="GuildAdsQuestButton16" inherits="GuildAdsQuestButtonTemplate" id="16">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsQuestButton15" relativePoint="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="0" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Button>
+			
+			<Button name="GuildAdsQuestButton17" inherits="GuildAdsQuestButtonTemplate" id="17">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsQuestButton16" relativePoint="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="0" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Button>
+			
+			<Button name="GuildAdsQuestButton18" inherits="GuildAdsQuestButtonTemplate" id="18">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsQuestButton17" relativePoint="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="0" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Button>
+			
+			<Button name="GuildAdsQuestButton19" inherits="GuildAdsQuestButtonTemplate" id="19">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsQuestButton18" relativePoint="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="0" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Button>
+			
+			<Button name="GuildAdsQuestButton20" inherits="GuildAdsQuestButtonTemplate" id="20">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsQuestButton19" relativePoint="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="0" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Button>
+			
+			<Button name="GuildAdsQuestButton21" inherits="GuildAdsQuestButtonTemplate" id="21">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsQuestButton20" relativePoint="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="0" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Button>
+			
+			<Button name="GuildAdsQuestButton22" inherits="GuildAdsQuestButtonTemplate" id="22">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsQuestButton21" relativePoint="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="0" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Button>
+			
+			<Button name="GuildAdsQuestButton23" inherits="GuildAdsQuestButtonTemplate" id="23">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsQuestButton22" relativePoint="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="0" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Button>
+			
+			<Button name="GuildAdsQuestButton24" inherits="GuildAdsQuestButtonTemplate" id="24">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsQuestButton23" relativePoint="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="0" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Button>
+			
+			<Button name="GuildAdsQuestButton25" inherits="GuildAdsQuestButtonTemplate" id="25">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsQuestButton24" relativePoint="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="0" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Button>
+			
+			<Button name="GuildAdsQuestButton26" inherits="GuildAdsQuestButtonTemplate" id="26">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsQuestButton25" relativePoint="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="0" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Button>
+			
+			<Button name="GuildAdsQuestButton27" inherits="GuildAdsQuestButtonTemplate" id="27">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsQuestButton26" relativePoint="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="0" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Button>
+			
+			<ScrollFrame name="GuildAdsQuestScrollFrame" inherits="FauxScrollFrameTemplate">
 				<Size>
-					<AbsDimension x="505" y="129"/> <!-- 16 (height)*8(number of post-lines) + 1= 129 -->
+					<AbsDimension x="505" y="433"/> <!-- 16 (height)*27(number of quest-lines) + 1= 417 -->
 				</Size>
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="GuildAdsQuestPostLineButton1" relativePoint="TOPLEFT">
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsQuestButton1" relativePoint="TOPLEFT">
 						<Offset>
 							<AbsDimension x="0" y="-1"/>
 						</Offset>
@@ -292,387 +557,10 @@
 				</Anchors>
 				<Scripts>
 					<OnVerticalScroll>
-						FauxScrollFrame_OnVerticalScroll(self, offset, GuildAdsQuest.GUILDADS_POSTBUTTONSIZEY, GuildAdsQuest.postButtonsUpdate);
+						FauxScrollFrame_OnVerticalScroll(self, offset, GuildAdsQuest.GUILDADS_QUESTBUTTONSIZEY, GuildAdsQuest.questButtonsUpdate);
 					</OnVerticalScroll>
 				</Scripts>
 			</ScrollFrame>
-
-			<EditBox name="GuildAdsQuestSubjectEditBox" letters="64" historyLines="0" autoFocus="false">
-				<Size>
-					<AbsDimension x="220" y="20"/>
-				</Size>
-				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="GuildAdsQuestPostLineButton8" relativePoint="BOTTOMLEFT">								<Offset>
-							<AbsDimension x="80" y="-3"/>
-						</Offset>
-					</Anchor>
-				</Anchors>
-				<Layers>
-					<Layer level="BACKGROUND">
-						<FontString inherits="GameFontNormal" text="MAIL_SUBJECT_LABEL" justifyH="RIGHT">
-							<Anchors>
-								<Anchor point="RIGHT" relativePoint="LEFT">
-									<Offset>
-										<AbsDimension x="-12" y="0"/>
-									</Offset>
-								</Anchor>
-							</Anchors>
-						</FontString>
-						<Texture name="$parentLeft" file="Interface\Common\Common-Input-Border">
-							<Size>
-								<AbsDimension x="8" y="20"/>
-							</Size>
-							<Anchors>
-								<Anchor point="TOPLEFT">
-									<Offset>
-										<AbsDimension x="-8" y="0"/>
-									</Offset>
-								</Anchor>
-							</Anchors>
-							<TexCoords left="0" right="0.0625" top="0" bottom="0.625"/>
-						</Texture>
-						<Texture name="$parentMiddle" file="Interface\Common\Common-Input-Border">
-							<Size>
-								<AbsDimension x="221" y="20"/>
-							</Size>
-							<Anchors>
-								<Anchor point="LEFT" relativeTo="$parentLeft" relativePoint="RIGHT"/>
-							</Anchors>
-							<TexCoords left="0.0625" right="0.9375" top="0" bottom="0.625"/>
-						</Texture>
-						<Texture name="$parentRight" file="Interface\Common\Common-Input-Border">
-							<Size>
-								<AbsDimension x="8" y="20"/>
-							</Size>
-							<Anchors>
-								<Anchor point="LEFT" relativeTo="$parentMiddle" relativePoint="RIGHT"/>
-							</Anchors>
-							<TexCoords left="0.9375" right="1.0" top="0" bottom="0.625"/>
-						</Texture>
-					</Layer>
-				</Layers>
-				<Scripts>
-					<OnTabPressed>
-						GuildAdsQuestBodyText:SetFocus();
-						--EditBox_HandleTabbing(self, SEND_MAIL_TAB_LIST);
-					</OnTabPressed>
-					<OnEnterPressed>
-						GuildAdsQuestBodyText:SetFocus();
-					</OnEnterPressed>
-					<OnEscapePressed>
-						self:ClearFocus();
-					</OnEscapePressed>
-					<OnTextChanged>
-						--SendMailFrame_CanSend();
-					</OnTextChanged>
-				</Scripts>
-				<FontString inherits="ChatFontNormal"/>
-			</EditBox>
-
-			<CheckButton name="GuildAdsQuestStickyCheckButton" hidden="false">
-				<Anchors>
-					<Anchor point="LEFT" relativeTo="GuildAdsQuestSubjectEditBox" relativePoint="RIGHT">
-						<Offset>
-							<AbsDimension x="30" y="0"/>
-						</Offset>
-					</Anchor>
-				</Anchors>
-				<Size>
-					<AbsDimension x="20" y="20"/>
-				</Size>
-				<NormalTexture file="Interface\Buttons\UI-CheckBox-Up"/>
-				<PushedTexture file="Interface\Buttons\UI-CheckBox-Down"/>
-				<HighlightTexture file="Interface\Buttons\UI-CheckBox-Highlight" alphaMode="ADD"/>
-				<CheckedTexture file="Interface\Buttons\UI-CheckBox-Check"/>
-				<DisabledCheckedTexture file="Interface\Buttons\UI-CheckBox-Check-Disabled"/>
-				<Layers>
-					<Layer level="ARTWORK">
-						<FontString name="$parentText" inherits="GameFontNormalSmall" text="GUILDADS_FORUM_STICKY">
-							<Anchors>
-								<Anchor point="LEFT" relativePoint="RIGHT">
-									<Offset>
-										<AbsDimension x="5" y="1"/>
-									</Offset>
-								</Anchor>
-							</Anchors>
-						</FontString>
-						
-					</Layer>
-				</Layers>
-				<Scripts>
-					<OnClick>
-						if ( self:GetChecked() ) then
-							PlaySound("igMainMenuOptionCheckBoxOn");
-							--GuildAdsQuest.setProfileValue(nil, "GroupByAccount", true);
-						else
-							PlaySound("igMainMenuOptionCheckBoxOff");
-							--GuildAdsQuest.setProfileValue(nil, "GroupByAccount", false);
-						end
-					</OnClick>
-				</Scripts>
-			</CheckButton>
-
-			<CheckButton name="GuildAdsQuestLockedCheckButton" hidden="false">
-				<Anchors>
-					<Anchor point="LEFT" relativeTo="GuildAdsQuestStickyCheckButton" relativePoint="RIGHT">
-						<Offset>
-							<AbsDimension x="50" y="0"/>
-						</Offset>
-					</Anchor>
-				</Anchors>
-				<Size>
-					<AbsDimension x="20" y="20"/>
-				</Size>
-				<NormalTexture file="Interface\Buttons\UI-CheckBox-Up"/>
-				<PushedTexture file="Interface\Buttons\UI-CheckBox-Down"/>
-				<HighlightTexture file="Interface\Buttons\UI-CheckBox-Highlight" alphaMode="ADD"/>
-				<CheckedTexture file="Interface\Buttons\UI-CheckBox-Check"/>
-				<DisabledCheckedTexture file="Interface\Buttons\UI-CheckBox-Check-Disabled"/>
-				<Layers>
-					<Layer level="ARTWORK">
-						<FontString name="$parentText" inherits="GameFontNormalSmall" text="GUILDADS_FORUM_LOCKED">
-							<Anchors>
-								<Anchor point="LEFT" relativePoint="RIGHT">
-									<Offset>
-										<AbsDimension x="5" y="1"/>
-									</Offset>
-								</Anchor>
-							</Anchors>
-						</FontString>
-						
-					</Layer>
-				</Layers>
-				<Scripts>
-					<OnClick>
-						if ( self:GetChecked() ) then
-							PlaySound("igMainMenuOptionCheckBoxOn");
-							--GuildAdsQuest.setProfileValue(nil, "GroupByAccount", true);
-						else
-							PlaySound("igMainMenuOptionCheckBoxOff");
-							--GuildAdsQuest.setProfileValue(nil, "GroupByAccount", false);
-						end
-					</OnClick>
-				</Scripts>
-			</CheckButton>
-
-
-			<ScrollFrame name="GuildAdsQuestBodyScrollFrame" inherits="UIPanelScrollFrameTemplate">
-				<Size>
-					<AbsDimension x="490" y="255"/>
-				</Size>
-				<Anchors>
-					<Anchor point="TOP" relativeTo="GuildAdsQuestSubjectEditBox" relativePoint="BOTTOM">
-						<Offset>
-							<!--<AbsDimension x="18" y="-18"/>-->
-							<AbsDimension x="0" y="-3"/>
-						</Offset>
-					</Anchor>
-					<Anchor point="LEFT" relativeTo="GuildAdsQuestPostLineButton8" relativePoint="LEFT">
-						<Offset>
-							<!--<AbsDimension x="18" y="-18"/>-->
-							<AbsDimension x="18" y="0"/>
-						</Offset>
-					</Anchor>
-					
-				</Anchors>
-				<Layers>
-					<Layer>
-						<Texture>
-							<Color r="1" g="1" b="1" a="0.05" /> 
-						</Texture>
-					</Layer>
-				</Layers>
-			<!--	<Layers>
-					<Layer level="ARTWORK">
-						<Texture name="GetDataScrollBarTop" file="Interface\PaperDollInfoFrame\UI-Character-ScrollBar">
-							<Size>
-								<AbsDimension x="31" y="156"/>
-							</Size>
-							<Anchors>
-								<Anchor point="TOPLEFT" relativePoint="TOPRIGHT">
-									<Offset>
-										<AbsDimension x="0" y="5"/>
-									</Offset>
-								</Anchor>
-							</Anchors>
-							<TexCoords left="0" right="0.484375" top="0" bottom="1.0"/>
-						</Texture>
-						<Texture name="GetDataScrollBarBottom" file="Interface\PaperDollInfoFrame\UI-Character-ScrollBar">
-							<Size>
-								<AbsDimension x="31" y="106"/>
-							</Size>
-							<Anchors>
-								<Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT">
-									<Offset>
-										<AbsDimension x="0" y="-2"/>
-									</Offset>
-								</Anchor>
-							</Anchors>
-							<TexCoords left="0.515625" right="1.0" top="0" bottom="0.4140625"/>
-						</Texture>
-						<Texture name="GetDataScrollBarMiddle" file="Interface\PaperDollInfoFrame\UI-Character-ScrollBar">
-							<Size>
-								<AbsDimension x="31" y="60"/>
-							</Size>
-							<Anchors>
-								<Anchor point="TOP" relativeTo="GetDataScrollBarTop" relativePoint="BOTTOM">
-									<Offset>
-										<AbsDimension x="0" y="0"/>
-									</Offset>
-								</Anchor>
-								<Anchor point="BOTTOM" relativeTo="GetDataScrollBarBottom" relativePoint="TOP">
-									<Offset>
-										<AbsDimension x="0" y="0"/>
-									</Offset>
-								</Anchor>
-							</Anchors>
-							<TexCoords left="0" right="0.484375" top=".75" bottom="1.0"/>
-						</Texture>
-					</Layer>
-				</Layers> -->
-				<ScrollChild>
-					<EditBox name="GuildAdsQuestBodyText" autofocus="false" multiLine="true" letters="6000">
-						<Size>
-							<AbsDimension x="490" y="234"/>
-						</Size>
-						<Scripts>
-							<OnEscapePressed>
-								self:ClearFocus();
-							</OnEscapePressed>
-							<OnTextChanged>
-								ScrollingEdit_OnTextChanged(self, GuildAdsQuestBodyScrollFrame);
-							</OnTextChanged>
-							<OnCursorChanged>
-								ScrollingEdit_OnCursorChanged(self, x, y, w, h);
-							</OnCursorChanged>
-							<OnUpdate>
-								ScrollingEdit_OnUpdate(self, elapsed, GuildAdsQuestBodyScrollFrame);
-							</OnUpdate>
-							<OnShow>
-								--self:SetText(SEARCH);
-							</OnShow>
-							<OnEnterPressed>
-								--self:ClearFocus();
-							</OnEnterPressed>
-							<OnEditFocusLost>
-								--self:HighlightText(0, 0);
-							</OnEditFocusLost>
-							<OnEditFocusGained>
-								--self:HighlightText();
-							</OnEditFocusGained>
-						</Scripts>
-						<FontString inherits="ChatFontNormal"/>
-					</EditBox>
-				</ScrollChild>
-			</ScrollFrame>
-
-			<Button name="GuildAdsQuestNewPostButton" inherits="UIPanelButtonTemplate" text="GUILDADS_FORUM_NEWPOST">
-				<Size>
-					<AbsDimension x="100" y="21"/>
-				</Size>
-				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="GuildAdsQuestBodyScrollFrame" relativePoint="BOTTOMLEFT">
-						<Offset>
-							<AbsDimension x="0" y="-5"/>
-						</Offset>
-					</Anchor>
-				</Anchors>
-				<Scripts>
-					<OnClick>
-						GuildAdsQuest.newPostButtonClicked();
-					</OnClick>
-				</Scripts>
-			</Button>
-			<Button name="GuildAdsQuestReplyButton" inherits="UIPanelButtonTemplate" text="GUILDADS_FORUM_REPLY">
-				<Size>
-					<AbsDimension x="100" y="21"/>
-				</Size>
-				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="GuildAdsQuestNewPostButton" relativePoint="TOPRIGHT">
-						<Offset>
-							<AbsDimension x="30" y="0"/>
-						</Offset>
-					</Anchor>
-				</Anchors>
-				<Scripts>
-					<OnLoad>
-						self:Disable();
-					</OnLoad>
-					<OnClick>
-						GuildAdsQuest.replyButtonClicked();
-					</OnClick>
-				</Scripts>
-			</Button>
-			
-			<CheckButton name="GuildAdsQuestOfficerCheckButton" hidden="false">
-				<Anchors>
-					<Anchor point="LEFT" relativeTo="GuildAdsQuestReplyButton" relativePoint="RIGHT">
-						<Offset>
-							<AbsDimension x="30" y="0"/>
-						</Offset>
-					</Anchor>
-				</Anchors>
-				<Size>
-					<AbsDimension x="20" y="20"/>
-				</Size>
-				<NormalTexture file="Interface\Buttons\UI-CheckBox-Up"/>
-				<PushedTexture file="Interface\Buttons\UI-CheckBox-Down"/>
-				<HighlightTexture file="Interface\Buttons\UI-CheckBox-Highlight" alphaMode="ADD"/>
-				<CheckedTexture file="Interface\Buttons\UI-CheckBox-Check"/>
-				<DisabledCheckedTexture file="Interface\Buttons\UI-CheckBox-Check-Disabled"/>
-				<Layers>
-					<Layer level="ARTWORK">
-						<FontString name="$parentText" inherits="GameFontNormalSmall" text="GUILDADS_FORUM_OFFICERPOST">
-							<Anchors>
-								<Anchor point="LEFT" relativePoint="RIGHT">
-									<Offset>
-										<AbsDimension x="5" y="1"/>
-									</Offset>
-								</Anchor>
-							</Anchors>
-						</FontString>
-						
-					</Layer>
-				</Layers>
-				<Scripts>
-					<OnClick>
-						if ( self:GetChecked() ) then
-							PlaySound("igMainMenuOptionCheckBoxOn");
-							--GuildAdsQuest.setProfileValue(nil, "GroupByAccount", true);
-						else
-							PlaySound("igMainMenuOptionCheckBoxOff");
-							--GuildAdsQuest.setProfileValue(nil, "GroupByAccount", false);
-						end
-					</OnClick>
-				</Scripts>
-			</CheckButton>
-
-			<Button name="GuildAdsQuestPostButton" inherits="UIPanelButtonTemplate" text="GUILDADS_FORUM_POST">
-				<Size>
-					<AbsDimension x="100" y="21"/>
-				</Size>
-				<Anchors>
-					<Anchor point="TOP" relativeTo="GuildAdsQuestNewPostButton" relativePoint="TOP">
-						<Offset>
-							<AbsDimension x="0" y="0"/>
-						</Offset>
-					</Anchor>
-					<Anchor point="RIGHT" relativeTo="GuildAdsMainWindowFrame" relativePoint="RIGHT">
-						<Offset>
-							<AbsDimension x="-20" y="0"/>
-						</Offset>
-					</Anchor>
-				</Anchors>
-				<Scripts>
-					<OnLoad>
-						self:Disable();
-					</OnLoad>
-					<OnClick>
-						GuildAdsQuest.postButtonClicked();
-					</OnClick>
-				</Scripts>
-			</Button>
-
 			
 		</Frames>
 		<Scripts> 
@@ -691,7 +579,7 @@
 		</Scripts>
 	</Frame>
 	
-	<Button name="GuildAdsQuestTab" inherits="GuildAdsWindowTabTemplate" text="GUILDADS_HEADER_FORUM" />
+	<Button name="GuildAdsQuestTab" inherits="GuildAdsWindowTabTemplate" text="GUILDADS_HEADER_QUEST" />
 	
 	<Frame name="GuildAdsQuestContextMenu" inherits="UIDropDownMenuTemplate">
 		<Scripts>

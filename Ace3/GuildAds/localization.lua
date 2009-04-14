@@ -70,7 +70,8 @@ GUILDADS_HEADER_QUEST		= QUESTS_LABEL; -- "Quests";
 
 GUILDADS_QUEST_GROUP		= "Quest group";
 GUILDADS_QUEST_NAME		= "Quest name";
-GUILDADS_QUEST_TYPE		= "Quest type";
+GUILDADS_QUEST_TYPE		= "Difficulty";
+GUILDADS_QUEST_PLAYERS		= "Players";
 
 GUILDADS_GUILD_GROUPWITHACCOUNT	= "Group %s with the account of %s";
 GUILDADS_GUILD_DEGROUP		= "Degroup from the account";
