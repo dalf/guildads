@@ -33,7 +33,7 @@ GuildAdsForum = {
 				tab = "GuildAdsForumTab",
 				tooltiptitle = GUILDADSTOOLTIPS_FORUM_TITLE,
                 		tooltip = GUILDADSTOOLTIPS_FORUM,--"Guild tab",
-				priority = 5
+				priority = 60
 			}
 		}
 	};

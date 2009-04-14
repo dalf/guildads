@@ -26,7 +26,7 @@ GuildAdsGuild = {
 				tab = "GuildAdsGuildTab",
 				tooltiptitle = GUILDADSTOOLTIPS_GUILD_TITLE,--"Guilde",
                 tooltip = GUILDADSTOOLTIPS_GUILD,--"Guild tab",
-				priority = 4
+				priority = 50
 			}
 		}
 	};
