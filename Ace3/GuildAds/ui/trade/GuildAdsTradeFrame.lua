@@ -1593,9 +1593,9 @@ GuildAdsTrade = {
 		end;
 		
 		addPlayer = function(playerName)
-			local color = GuildAdsUITools:GetPlayerColor(playerName);
+			local _, color = GuildAdsUITools:GetPlayerColor(playerName);
 			local info = { };
-			info.text =  playerName;
+			info.text =  color..playerName.."|r";
 			info.value = playerName;
 			info.notCheckable = 1;
 			--info.notClickable = 1; --will make the button white...
@@ -1603,17 +1603,6 @@ GuildAdsTrade = {
 			-- info.func = ToggleDropDownMenu;
 			-- info.arg1 = 2;
 			-- info.arg2 = playerName
-			info.textR = color.r;
-			info.textG = color.g;
-			info.textB = color.b;
-			if GuildAdsTrade.contextMenu.currentItem then
-				local item = GuildAdsTradeSkillDataType:get(playerName,GuildAdsTrade.contextMenu.currentItem);
-				if item and not item.e then
-					info.textR = GuildAdsUITools.invalid.r;
-					info.textG = GuildAdsUITools.invalid.g;
-					info.textB = GuildAdsUITools.invalid.b;
-				end
-			end
 			UIDropDownMenu_AddButton(info, 1);			
 		end;
 		
