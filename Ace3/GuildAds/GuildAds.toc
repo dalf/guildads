@@ -5,7 +5,7 @@
 ## Notes: Guild Ads
 ## Notes-frFR: Les annonces de la guilde
 ## Notes-ruRU: Обмен внутри Гилдии
-## OptionalDeps: ReagentData,GuildEventManager2
+## OptionalDeps: ReagentData,GuildEventManager2,LibPeriodicTable-3.1
 ## DefaultState: Enabled
 ## LoadOnDemand: 0
 ## SavedVariables: GuildAdsDatabase
@@ -13,6 +13,7 @@
 ## X-Website: http://guildads.sf.net
 ## X-License: GPL v2
 ## X-Category: Guild
+## X-Embeds: LibStub, CallbackHandler-1.0, AceAddon-3.0, AceConfig-3.0, AceConsole-3.0, AceEvent-3.0, AceGUI-3.0, LibCompress, LibPeriodicTable-3.1
 lib\Ace1\GAAceDB.lua
 lib\LibStub\LibStub.lua
 lib\AceAddon-3.0\AceAddon-3.0.xml
@@ -21,7 +22,8 @@ lib\AceEvent-3.0\AceEvent-3.0.xml
 lib\AceConsole-3.0\AceConsole-3.0.xml
 lib\AceGUI-3.0\AceGUI-3.0.xml
 lib\AceConfig-3.0\AceConfig-3.0.xml
-#lib\LibPeriodicTable-3.1\
+lib\LibPeriodicTable-3.1\LibPeriodicTable-3.1.lua
+lib\LibPeriodicTable-3.1\LibPeriodicTable-3.1-Tradeskill\LibPeriodicTable-3.1-Tradeskill.lua
 lib\LibTradeLinks-1.0\LibTradeLinks-1.0.lua
 lib\LibTradeLinks-1.0\LiveData.lua
 lib\LibTradeLinks-1.0\BetaData.lua
@@ -84,3 +86,4 @@ ui\GEM\GuildAdsGEMEventFrame.xml
 ui\minimapButton\GuildAdsMinimapButton.xml
 ui\talent\GuildAds_TalentUI.xml
 ui\forum\GuildAdsForumFrame.xml
+ui\quest\GuildAdsQuestFrame.xml
