@@ -10,12 +10,13 @@
 
 -- /run for q,p,d in GuildAdsDB.profile.QuestData:iterator("Galmok", nil) do print(d) end
 
-QuestTypeToDataType={
+local QuestTypeToDataType={
 	[ELITE] = "E",
 	[LFG_TYPE_DUNGEON] = "D",
 	[PVP] = "P",
 	[RAID] = "R",
-	[GROUP] = "G"
+	[GROUP] = "G",
+	[DUNGEON_DIFFICULTY2] = "H",
 }
 local QuestTypeToDataTypeMetaTable = {
 	__index = function(t,i)
@@ -24,12 +25,13 @@ local QuestTypeToDataTypeMetaTable = {
 }
 setmetatable(QuestTypeToDataType, QuestTypeToDataTypeMetaTable)
 
-DataTypeToQuestType={
+local DataTypeToQuestType={
 	E = ELITE,
 	D = LFG_TYPE_DUNGEON,
 	P = PVP,
 	R = RAID,
-	G = GROUP
+	G = GROUP,
+	H = DUNGEON_DIFFICULTY2,
 }
 local DataTypeToQuestTypeMetaTable = {
 	__index = function(t,i)
@@ -68,6 +70,10 @@ function GuildAdsQuestDataType:Initialize()
 	self:RegisterEvent("PLAYER_LEVEL_UP", "onEvent");
 	--self:RegisterEvent("UNIT_QUEST_LOG_CHANGED", "onEvent");
 	self:RegisterEvent("QUEST_LOG_UPDATE", "onEvent");
+end
+
+function GuildAdsQuestDataType:GetVerboseQuestTag(questTag)
+	return DataTypeToQuestType[questTag]
 end
 
 function GuildAdsQuestDataType:onEvent()
