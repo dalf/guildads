@@ -192,7 +192,7 @@ GuildAdsTalentUI = {
 				name, iconTexture, pointsSpent = self.GetTalentTabInfo(i);
 				if ( i == PanelTemplates_GetSelectedTab(GuildAdsTalentFrame) ) then
 					-- If tab is the selected tab set the points spent info
-					GuildAdsTalentFrameSpentPoints:SetText(format(MASTERY_POINTS_SPENT, name).." "..HIGHLIGHT_FONT_COLOR_CODE..pointsSpent..FONT_COLOR_CODE_CLOSE);
+					GuildAdsTalentFrameSpentPoints:SetFormattedText(MASTERY_POINTS_SPENT, name, HIGHLIGHT_FONT_COLOR_CODE..pointsSpent..FONT_COLOR_CODE_CLOSE)
 					GuildAdsTalentFrame.pointsSpent = pointsSpent;
 				end
 				tab:SetText(name);
@@ -608,7 +608,8 @@ GuildAdsTalentUI = {
 		if cp1<0 then
 			cp1=0;
 		end
-		GuildAdsTalentFrameTalentPointsText:SetText(cp1);
+		GuildAdsTalentFrameTalentPointsText:SetFormattedText(UNSPENT_TALENT_POINTS, HIGHLIGHT_FONT_COLOR_CODE..cp1..FONT_COLOR_CODE_CLOSE);
+		--GuildAdsTalentFrameTalentPointsText:SetText(cp1);
 		GuildAdsTalentFrame.talentPoints = cp1;
 	end;
 
