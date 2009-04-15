@@ -1,5 +1,5 @@
 local MAJOR = "LibTradeLinks-1.0";
-local MINOR = "9614";
+local MINOR = "9767";
 
 local LibTradeLinks, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 
@@ -254,7 +254,7 @@ function LibTradeLinks:Decode(link, purgeNonRecipe, purgeBoP)
 		profession = tonumber(profession);
 		for skillId, data in next, Data do
 			if data.ProfessionIdList[profession] then
-				return self:Purge(Decode64(skills, data.Data), purgeNonRecipe, purgeBoP);
+				return self:Purge(Decode64(skills, data.Data), purgeNonRecipe, purgeBoP), skillId;
 			end
 		end
 	end
