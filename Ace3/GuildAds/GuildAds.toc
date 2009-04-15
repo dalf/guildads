@@ -1,7 +1,7 @@
-﻿## Interface: 30000
+﻿## Interface: 30100
 ## Title: GuildAds
 ## Author: Zarkan, Fkaï, Galmok
-## Version: 2.4
+## Version: 2.5
 ## Notes: Guild Ads
 ## Notes-frFR: Les annonces de la guilde
 ## Notes-ruRU: Обмен внутри Гилдии
