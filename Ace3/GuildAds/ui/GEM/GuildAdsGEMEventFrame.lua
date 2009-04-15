@@ -116,10 +116,11 @@ GuildAdsGEMEvent = {
 		end;
 	end;
 	
-	chatFrameFilter = function(msg)
+	chatFrameFilter = function(self, event, msg, ...)
 		if (string.sub(msg, 1, 4)=="<GEM") then
 			return true
 		end
+		return false, msg, ...
 	end;
 	
 	saveOptions = function()
