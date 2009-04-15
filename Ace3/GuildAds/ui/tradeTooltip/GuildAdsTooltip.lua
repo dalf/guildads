@@ -467,7 +467,7 @@ GuildAdsTradeTooltip = {
 				itemTable = {}
 				local linkTable = LTLFunc:Decode(item, true, false); 
 				local level = tostring(UnitLevel("player"))
-				if linkTable do
+				if linkTable then
 					for link in pairs(linkTable) do
 						local itemLink = LPTFunc:ItemInSet(-link,"Tradeskill.RecipeLinks")
 						if itemLink then
