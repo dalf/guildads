@@ -27,6 +27,7 @@ local _ItemInfo = CreateFrame("GameTooltip", "GuildAdsITT", nil, "GameTooltipTem
 local _ITT = GuildAdsITT
 local enchantCount = 0
 local userCall = false
+local linkBan = {}
 local SetItem, Timeout, AddItem, ItemReady, ParseTooltip
 do
 	function SetItem(itemRef)
@@ -43,12 +44,15 @@ do
 		GuildAds_ChatDebug(GA_DEBUG_STORAGE, "  - Timeout:");
 		if _ITT.currentItemRef then
 			GuildAds_ChatDebug(GA_DEBUG_STORAGE, "  - Timeout:".._ITT.currentItemRef);
-		
+
 			GuildAdsTask:DeleteNamedSchedule("GuildAdsItem_ItemReady")
-		
+			
 			if _ITT.itemRefs[_ITT.currentItemRef] < 3 then
 				_ITT.itemRefs[_ITT.currentItemRef] = (_ITT.itemRefs[_ITT.currentItemRef] or 0) + 1;
 			else
+				-- prevent trying to retrieve this link again (until relog, that is).
+				linkBan[_ITT.currentItemRef] = true		
+
 				-- hide tooltip
 				_ITT.itemRefs[_ITT.currentItemRef] = nil
 				_ITT.count = _ITT.count-1
@@ -65,7 +69,7 @@ do
 	end
 
 	function AddItem(itemRef)
-		if itemRef then
+		if itemRef and not linkBan[itemRef] then
 			if not _ITT.itemRefs then
 				_ITT.itemRefs = {};
 				_ITT.count = 0;
@@ -88,6 +92,7 @@ do
 			-- unknown error occured. Drop remaining items from queue and signal iteminfo ready
 			-- This is just a crude workaround
 			_ITT.itemRefs = {}
+			_ITT.count = 0;
 			GuildAdsPlugin_OnEvent(GAS_EVENT_ITEMINFOREADY);
 			return
 		end			
@@ -132,11 +137,11 @@ do
 		-- next item if there is one
 		local itemRef = next(_ITT.itemRefs);
 		if itemRef then
-			if enchantCount > 20 then
+			if enchantCount >= 5 then
 				-- Enchants (unlike items) are fetched without delay from the server so we have to 
 				-- throttle them manually.
-				GuildAds_ChatDebug(GA_DEBUG_STORAGE, "ItemReady: delaying for 5 seconds");
-				GuildAdsTask:AddNamedSchedule("GuildAdsItem_SetItem", 5, nil, nil, SetItem, itemRef);
+				GuildAds_ChatDebug(GA_DEBUG_STORAGE, "ItemReady: delaying for 2 seconds");
+				GuildAdsTask:AddNamedSchedule("GuildAdsItem_SetItem", 2, nil, nil, SetItem, itemRef);
 				enchantCount = 0
 			else
 				SetItem(itemRef);
@@ -205,6 +210,17 @@ do
 	_ITT:SetScript("OnShow", ItemReady);
 end
 
+function GuildAds_ShowLinkBanList()
+	for link,_ in pairs(linkBan) do
+		GuildAds_ChatDebug(GA_DEBUG_STORAGE, "linkBan: "..tostring(link))
+	end
+end
+
+function GuildAds_RemoveFromLinkBanList(link)
+	if link then
+		linkBan[link] = nil
+	end
+end
 ---------------------------------------------------------------------------------
 --
 -- GuildAds_ImplodeItemRef
