@@ -560,73 +560,65 @@ end
 -- Chat frame filters
 -- 
 ---------------------------------------------------------------------------------
-function SimpleComm_New_ChatFrame_MessageEventHandler(self, event, ...)
-	local arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11 = ...;
-	if event=="CHAT_MSG_CHANNEL" then
-		-- Hide if this is an internal message
-		if currentChannel.isChatMessageVisible and currentChannel.isChatMessageVisible(arg1) then
-			return;
-		end
+local function filter_message(self, event, ...)
+	local arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11 = ...
+	
+	-- Hide if this is an internal message
+	if currentChannel.isChatMessageVisible and currentChannel.isChatMessageVisible(arg1) then
+		return true
 	end
+	
+	if (currentChannel.name) and (arg8 == currentChannel.id) then	
+		currentChannel.id = GetChannelName(currentChannel.name);
+		
+		-- unpack PIPE_ENTITIE
+		arg1 = string.gsub(arg1, PIPE_ENTITIE, "|")
+			
+		-- Hack to change the channel name :
+		-- ChatFrame_OnEvent shows "["..gsub(arg4, "%s%-%s.*", "").."] "..body
+		-- channelLength = strlen(arg4) is used to find if the channel is shown in this ChatFrame (as above)
+		-- -> arg4 is set to name we want to show concatenate with " -" and many spaces which will delete by the gsub call
+		if (currentChannel.slashCmdUpper) then
+			arg4 = currentChannel.aliasName.." -                                ";
+		end
+		return false, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11
+	end
+	return false, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11
+end
+
+local function filter_hide(self, event, ...)
+	local arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11 = ...
 	if (currentChannel.name) then
 		currentChannel.id = GetChannelName(currentChannel.name);
 		if (arg8 == currentChannel.id) then
-			if (event == "CHAT_MSG_CHANNEL") then
-				-- the message is shown in this ChatFrame ?
---				local info;
---				local found = 0;
---				local channelLength = strlen(arg4);
---				for index, value in pairs(self.channelList) do
---					if ( channelLength > strlen(value) ) then
---						-- arg9 is the channel name without the number in front...
---						if ( ((arg7 > 0) and (self.zoneChannelList[index] == arg7)) or (strupper(value) == strupper(arg9)) ) then
---							found = 1;
---							info = ChatTypeInfo["CHANNEL"..arg8];
---							break;
---						end
---					end
---				end
---				if (found==0) or not info then
---					return;
---				end
-				
-				-- unpack PIPE_ENTITIE
-				arg1 = string.gsub(arg1, PIPE_ENTITIE, "|")
-				
-				-- Hack to change the channel name :
-				-- ChatFrame_OnEvent shows "["..gsub(arg4, "%s%-%s.*", "").."] "..body
-				-- channelLength = strlen(arg4) is used to find if the channel is shown in this ChatFrame (as above)
-				-- -> arg4 is set to name we want to show concatenate with " -" and many spaces which will delete by the gsub call
-				if (currentChannel.slashCmdUpper) then
-					arg4 = currentChannel.aliasName.." -                                ";
-				end
-			elseif (event == "CHAT_MSG_CHANNEL_JOIN") then
-				GuildAds_ChatDebug(GA_DEBUG_CHANNEL_HIGH,  arg1)
-				return;
-			elseif (event == "CHAT_MSG_CHANNEL_LEAVE") then
-				GuildAds_ChatDebug(GA_DEBUG_CHANNEL_HIGH,  arg1)
-				return;
-			elseif (event == "CHAT_MSG_CHANNEL_NOTICE") then
-				GuildAds_ChatDebug(GA_DEBUG_CHANNEL_HIGH,  arg1);
-				return;
-			elseif (event == "CHAT_MSG_CHANNEL_NOTICE_USER") then
-				GuildAds_ChatDebug(GA_DEBUG_CHANNEL_HIGH,  "%s (%s)", arg1, arg5);
-				return;
-			elseif (event == "CHAT_MSG_CHANNEL_LIST") and currentChannel.onChannelListComplete then
-				return;
-			end
+			GuildAds_ChatDebug(GA_DEBUG_CHANNEL_HIGH,  arg1)
+			return true
 		end
 	end
-	-- call the default ChatFrame_OnEvent
-	SimpleComm_Old_ChatFrame_MessageEventHandler(self, event, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11);
+	return false, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11
 end
 
-local function filter_message(msg)
-	-- Hide if this is an internal message
-	if currentChannel.isChatMessageVisible and currentChannel.isChatMessageVisible(msg) then
-		return true
+local function filter_CHANNEL_NOTICE_USER(self, event, ...)
+	local arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11 = ...
+	if (currentChannel.name) then
+		currentChannel.id = GetChannelName(currentChannel.name);
+		if (arg8 == currentChannel.id) then
+			GuildAds_ChatDebug(GA_DEBUG_CHANNEL_HIGH,  "%s (%s)", arg1, arg5);
+			return true
+		end
 	end
-	return false, msg
+	return false, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11
+end
+
+local function filter_CHANNEL_LIST(self, event, ...)
+	local arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11 = ...
+	if (currentChannel.name) then
+		currentChannel.id = GetChannelName(currentChannel.name);
+		if (arg8 == currentChannel.id) and currentChannel.onChannelListComplete then
+			return true
+		end
+	end
+	return false, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11
 end
 ---------------------------------------------------------------------------------
 --
@@ -786,14 +778,6 @@ function SimpleComm_Join(Channel, Password)
 	
 	if firstJoin then
 		firstJoin = nil;
-		
-		-- hook ChatFrame events to filter the messages
-		-- delayed hook to ensure (more or less) that GuildAds gets to filter the messages before other addons
-		SimpleComm_Old_ChatFrame_MessageEventHandler = ChatFrame_MessageEventHandler;
-		ChatFrame_MessageEventHandler = SimpleComm_New_ChatFrame_MessageEventHandler;
-
-		-- remove previous message filter (built into SimpleComm_New_ChatFrame_MessageEventHandler)
-		ChatFrame_RemoveMessageEventFilter("CHAT_MSG_CHANNEL", filter_message)
 
 		-- Set timer
 		frame:Show();
@@ -852,7 +836,13 @@ local function onLoad()
 	frame:RegisterEvent("CHAT_MSG_CHANNEL_JOIN")
 	frame:RegisterEvent("CHAT_MSG_CHANNEL_LEAVE")
 	frame:RegisterEvent("CHAT_MSG_SYSTEM")
+	
 	ChatFrame_AddMessageEventFilter("CHAT_MSG_CHANNEL", filter_message)
+	ChatFrame_AddMessageEventFilter("CHAT_MSG_CHANNEL_JOIN", filter_hide)
+	ChatFrame_AddMessageEventFilter("CHAT_MSG_CHANNEL_LEAVE", filter_hide)
+	ChatFrame_AddMessageEventFilter("CHAT_MSG_CHANNEL_NOTICE", filter_hide)
+	ChatFrame_AddMessageEventFilter("CHAT_MSG_CHANNEL_NOTICE_USER", filter_CHANNEL_NOTICE_USER)
+	ChatFrame_AddMessageEventFilter("CHAT_MSG_CHANNEL_LIST", filter_CHANNEL_LIST)
 end
 
 onLoad()
