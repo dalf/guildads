@@ -493,7 +493,14 @@ GuildAdsGuild = {
 			getglobal(levelField):SetTextColor(lcolor.r, lcolor.g, lcolor.b);
 			getglobal(levelField):Show();
 			getglobal(classField):SetText(GuildAdsDB.profile.Main:getClassNameFromId(GuildAdsDB.profile.Main:get(playerName, GuildAdsDB.profile.Main.Class)));
-			getglobal(classField):SetTextColor(lcolor.r, lcolor.g, lcolor.b);
+			local WoWClassId = GuildAdsDB.profile.Main:getWoWClassIdFromClassId(GuildAdsDB.profile.Main:get(playerName, GuildAdsDB.profile.Main.Class))
+			local classTextColor
+			if WoWClassId then
+				classTextColor = RAID_CLASS_COLORS[WoWClassId];
+			else
+				classTextColor = lcolor
+			end
+			getglobal(classField):SetTextColor(classTextColor.r, classTextColor.g, classTextColor.b);
 			getglobal(classField):Show();
 			getglobal(raceField):SetText(GuildAdsDB.profile.Main:getRaceNameFromId(GuildAdsDB.profile.Main:get(playerName, GuildAdsDB.profile.Main.Race)));
 			getglobal(raceField):SetTextColor(lcolor.r, lcolor.g, lcolor.b);
@@ -598,18 +605,26 @@ GuildAdsGuild = {
 			end;
 			FilterNames = GUILDADS_CLASSES;
 			local index = 1;
+			local fallbackColor = { r=1, g=0.86, b=0 }
 			for k,filterDesc in pairs(g_AdFilters) do
 				local info = { };
 				info.text = GUILDADS_CLASSES[filterDesc.id];
+				local ClassId = GuildAdsDB.profile.Main:getClassIdFromName(info.text)
+				local WoWClassId = GuildAdsDB.profile.Main:getWoWClassIdFromClassId(ClassId)
+				local classTextColor
+				if WoWClassId then
+					classTextColor = RAID_CLASS_COLORS[WoWClassId];
+				else
+					classTextColor = fallbackColor
+				end
+				local classColor = string.format("|cff%02x%02x%02x", classTextColor.r*255, classTextColor.g*255, classTextColor.b*255 )
+				info.text = classColor..info.text.."|r"
 				info.value = filterDesc.id;
 				if GuildAdsGuild.getProfileValue("Filters", filterDesc.id) then
 					info.checked = 1;
 				else
 					info.checked = nil;
 				end
-				info.textR = 1;
-				info.textG = 0.86;
-				info.textB = 0;
 				info.keepShownOnClick = 1;
 				info.func = GuildAdsGuild.classFilter.onClick;
 				UIDropDownMenu_AddButton(info);

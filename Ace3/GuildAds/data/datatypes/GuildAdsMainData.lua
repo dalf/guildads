@@ -99,6 +99,15 @@ function GuildAdsMainDataType:getClassIdFromWoWClassId(WoWClassId)
 	return GAClasses[WoWClassId]
 end
 
+function GuildAdsMainDataType:getWoWClassIdFromClassId(ClassId)
+	for name, id in pairs(GAClasses) do
+		if (id == ClassId) then
+			return name
+		end
+	end
+	return false;
+end
+
 function GuildAdsMainDataType:getClassIdFromName(ClassName)
 	for id, name in pairs(GUILDADS_CLASSES) do
 		if (name == ClassName) then
