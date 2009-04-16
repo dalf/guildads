@@ -1134,7 +1134,11 @@ GuildAdsTrade = {
 									for link in pairs(linkTable) do
 										local itemLink = LPTFunc:ItemInSet(-link,"Tradeskill.RecipeLinks")
 										if itemLink then
-											item="item:"..itemLink..":0:0:0:0:0:0:0:"..UnitLevel("player")
+											if tonumber(itemLink) < 0 then
+												item="enchant:"..tostring(-tonumber(itemLink))
+											else
+												item="item:"..itemLink..":0:0:0:0:0:0:0:"..UnitLevel("player")
+											end
 										else
 											item="enchant:"..tostring(link)
 											GuildAdsTrade.debug("LibPeriodicTable doesn't have the item that enchant:"..tostring(link).." makes. Please report.")
