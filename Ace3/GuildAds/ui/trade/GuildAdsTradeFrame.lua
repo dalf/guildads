@@ -1119,6 +1119,7 @@ GuildAdsTrade = {
 					local item8
 					local itemVisibleCache = {};
 					local t, linkTable;
+					local LPTunknown = {}
 					local players = GuildAdsDB.channel[GuildAds.channelName]:getPlayers();
 					for playerName in pairs(players) do
 						if GuildAdsTrade.data.playerIsVisible(adtype, playerName) then
@@ -1141,7 +1142,10 @@ GuildAdsTrade = {
 											end
 										else
 											item="enchant:"..tostring(link)
-											GuildAdsTrade.debug("LibPeriodicTable doesn't have the item that enchant:"..tostring(link).." makes. Please report.")
+											if not LPTunknown[link] then
+												GuildAdsTrade.debug("LibPeriodicTable: unknown enchant:"..tostring(link)..". Please report.")
+												LPTunknown[link] = true
+											end
 										end
 										itemTable[item]={ e="enchant:"..tostring(link) }
 									end
