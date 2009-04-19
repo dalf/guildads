@@ -411,9 +411,16 @@ GuildAdsFaction = {
 							factionName:SetTextColor(ocolor.r, ocolor.g, ocolor.b);
 							
 							-- Normalize values
-							local barMax = linear[j].t - linear[j].b;
-							local barValue = linear[j].v - linear[j].b;
-							local barMin = 0;
+							local barMax, barMin, barValue
+							if not linear[j].t or not linear[j].b then
+								barMin, barMax = GuildAdsFaction.factionButton.getFactionMinMax(linear[j].v)
+								barValue = linear[j].v - barMin
+								barMax = barMax - barMin
+							else
+								barMax = linear[j].t - linear[j].b;
+								barValue = linear[j].v - linear[j].b;
+							end
+							barMin = 0;
 				
 							--factionBar.id = factionIndex;
 							factionBar.standingText = factionStanding;
@@ -471,8 +478,30 @@ GuildAdsFaction = {
 				end
 			end
 		
-		end
+		end;
 		
+		getFactionMinMax = function(reputation)
+			if reputation >= 42000 then
+				barMin, barMax = 42000, 43000
+			elseif reputation >= 21000 then
+				barMin, barMax = 21000, 42000
+			elseif reputation >= 9000 then
+				barMin, barMax = 9000, 21000
+			elseif reputation >= 3000 then
+				barMin, barMax = 3000, 9000
+			elseif reputation >= 0 then
+				barMin, barMax = 0, 3000
+			elseif reputation >= -3000 then
+				barMin, barMax = -3000, 0
+			elseif reputation >= -6000 then
+				barMin, barMax = -6000, -3000
+			elseif reputation >= -42000 then
+				barMin, barMax = -42000, -6000
+			else
+				barMin, barMax = -42000, 43000
+			end
+			return barMin, barMax
+		end;
 	}
 	
 }
