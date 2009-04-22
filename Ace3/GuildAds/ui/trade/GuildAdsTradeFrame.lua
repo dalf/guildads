@@ -1132,22 +1132,26 @@ GuildAdsTrade = {
 									-- trade: link... build table of items with enchant links
 									itemTable = {}
 									linkTable = LTLFunc:Decode(item, true, false); 
-									for link in pairs(linkTable) do
-										local itemLink = LPTFunc:ItemInSet(-link,"Tradeskill.RecipeLinks")
-										if itemLink then
-											if tonumber(itemLink) < 0 then
-												item="enchant:"..tostring(-tonumber(itemLink))
+									if linkTable then
+										for link in pairs(linkTable) do
+											local itemLink = LPTFunc:ItemInSet(-link,"Tradeskill.RecipeLinks")
+											if itemLink then
+												if tonumber(itemLink) < 0 then
+													item="enchant:"..tostring(-tonumber(itemLink))
+												else
+													item="item:"..itemLink..":0:0:0:0:0:0:0:"..UnitLevel("player")
+												end
 											else
-												item="item:"..itemLink..":0:0:0:0:0:0:0:"..UnitLevel("player")
+												item="enchant:"..tostring(link)
+												if not LPTunknown[link] then
+													GuildAdsTrade.debug("LibPeriodicTable: unknown enchant:"..tostring(link)..". Please report.")
+													LPTunknown[link] = true
+												end
 											end
-										else
-											item="enchant:"..tostring(link)
-											if not LPTunknown[link] then
-												GuildAdsTrade.debug("LibPeriodicTable: unknown enchant:"..tostring(link)..". Please report.")
-												LPTunknown[link] = true
-											end
+											itemTable[item]={ e="enchant:"..tostring(link) }
 										end
-										itemTable[item]={ e="enchant:"..tostring(link) }
+									else
+										GuildAdsTrade.debug("LibTradeLinks: Can't handle trade link:"..tostring(item))
 									end
 									item, data = next(itemTable)
 								end
