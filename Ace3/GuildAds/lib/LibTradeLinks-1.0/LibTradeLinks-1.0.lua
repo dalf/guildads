@@ -1,5 +1,5 @@
 local MAJOR = "LibTradeLinks-1.0";
-local MINOR = "9767";
+local MINOR = "9806";
 
 local LibTradeLinks, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 
