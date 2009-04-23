@@ -68,6 +68,9 @@ GUILDADS_HEADER_EVENT		= "Events";
 GUILDADS_HEADER_FORUM		= "Forum";
 GUILDADS_HEADER_QUEST		= QUESTS_LABEL; -- "Quests";
 
+GUILDADS_SKILL_TOOLTIP		= "TradeLink available"
+GUILDADS_SKILL_TOOLTIP2		= "Click to open tradelink\nShift-click to send tradelink"
+
 GUILDADS_QUEST_GROUP		= "Quest group";
 GUILDADS_QUEST_NAME		= "Quest name";
 GUILDADS_QUEST_TYPE		= "Difficulty";

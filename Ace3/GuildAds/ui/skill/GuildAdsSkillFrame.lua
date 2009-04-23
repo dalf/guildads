@@ -458,6 +458,35 @@ GuildAdsSkill = {
 		
 		end
 		
+	};
+	
+	skillAdButton = {
+		onClick = function(self, button)
+			GuildAdsSkill.debug("onClick");
+			if GuildAdsDB.profile.TradeSkill then
+				local tradeLink, professionName = GuildAdsDB.profile.TradeSkill:GetTradeLink(self.player, self.id)
+				if tradeLink then
+					if ( IsModifiedClick("CHATLINK") ) then
+						local link = "|cffffd000|H"..tradeLink.."|h["..professionName.."]|h|r"
+						ChatEdit_InsertLink(link);
+					else
+						SetItemRef(tradeLink)
+					end
+				end
+			end
+		end;
+		
+		onEnter = function(self)
+			if GuildAdsDB.profile.TradeSkill then
+				if GuildAdsDB.profile.TradeSkill:GetTradeLink(self.player, self.id) then
+					GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
+					GameTooltip:SetText(HIGHLIGHT_FONT_COLOR_CODE..GUILDADS_SKILL_TOOLTIP..FONT_COLOR_CODE_CLOSE);
+					GameTooltip:AddLine(GUILDADS_SKILL_TOOLTIP2, GuildAdsUITools.helpColor.r, GuildAdsUITools.helpColor.g, GuildAdsUITools.helpColor.b);
+					GameTooltip:Show();
+				end
+			end			
+		end;
+		
 	}
 	
 }

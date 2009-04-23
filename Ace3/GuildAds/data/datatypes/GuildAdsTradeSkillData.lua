@@ -206,6 +206,21 @@ function GuildAdsTradeSkillDataType:UpdateTradeSkills()
 	end
 end
 
+function GuildAdsTradeSkillDataType:GetTradeLink(playerName, professionID)
+	local skillName = GUILDADS_SKILLS[professionID];
+	if skillName and playerName then
+		for itemLink, _, data in GuildAdsDB.profile.TradeSkill:iterator(playerName, nil) do
+			local start, _, professionID = string.find(itemLink, "trade:([0-9]+):.*");
+			if professionID then
+				local professionName = GetSpellInfo(professionID)
+				if professionName and professionName == skillName then
+					return itemLink, professionName
+				end
+			end
+		end
+	end			
+end
+
 function GuildAdsTradeSkillDataType:deleteWoW2TradeSkillItems()
 	-- delete the items from WOW2
 	local tmp = {};

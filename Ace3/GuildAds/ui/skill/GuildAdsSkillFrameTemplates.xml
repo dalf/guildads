@@ -101,6 +101,12 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 			<OnLoad>
 				self:RegisterForClicks("LeftButtonDown", "RightButtonDown");
 			</OnLoad>
+			<OnClick>
+				GuildAdsSkill.skillAdButton.onClick(self, button);
+			</OnClick>
+			<OnEnter>
+				GuildAdsSkill.skillAdButton.onEnter(self);
+			</OnEnter>
 			<OnLeave>
 				GameTooltip:Hide();
 			</OnLeave>
