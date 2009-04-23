@@ -471,6 +471,11 @@ GuildAdsTradeTooltip = {
 					for link in pairs(linkTable) do
 						local itemLink = LPTFunc:ItemInSet(-link,"Tradeskill.RecipeLinks")
 						if itemLink then
+							if tonumber(itemLink) < 0 then
+								item="enchant:"..tostring(-tonumber(itemLink))
+							else
+								item="item:"..itemLink..":0:0:0:0:0:0:0:"..level
+							end
 							item="item:"..itemLink..":0:0:0:0:0:0:0:"..level
 						else
 							item="enchant:"..tostring(link)
