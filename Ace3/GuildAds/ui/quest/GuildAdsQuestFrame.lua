@@ -359,7 +359,7 @@ GuildAdsQuest = {
 					table.sort(data.p, GuildAdsQuest.sortData.predicateFunctions.quester);
 					tinsert(tmp, data)
 				end
-				workingTable = {} -- free memory
+				workingTable = nil -- free memory
 				GuildAdsQuest.data.cache = tmp;
 				GuildAdsQuest.sortData.doIt(GuildAdsQuest.data.cache);
 			end
