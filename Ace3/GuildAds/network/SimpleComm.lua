@@ -103,46 +103,12 @@ local SetCVar = _G.SetCVar
 
 ---------------------------------------------------------------------------------
 --
--- new/del/deep
+-- new/del/deepDel
 -- 
 ---------------------------------------------------------------------------------
-local new, del, deepDel
-do
-	local list = setmetatable({},{__mode='k'})
-	function new(...)
-		local t = next(list)
-		if t then
-			list[t] = nil
-			for i = 1, select('#', ...) do
-				t[i] = select(i, ...)
-			end
-			return t
-		else
-			return {...}
-		end
-	end
-	function del(t)
-		for k in pairs(t) do
-			t[k] = nil
-		end
-		t[''] = true
-		t[''] = nil
-		list[t] = true
-		return nil
-	end
-	function deepDel(t)
-		for k,v in pairs(t) do
-			if type(v) == "table" then
-				deepDel(v)
-			end
-			t[k] = nil
-		end
-		t[''] = true
-		t[''] = nil
-		list[t] = true
-		return nil
-	end
-end
+local new = GuildAds.new
+local del = GuildAds.del
+local deepDel = GuildAds.deepDel
 
 ---------------------------------------------------------------------------------
 --

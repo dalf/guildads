@@ -35,6 +35,65 @@ end
 
 ---------------------------------------------------------------------------------
 --
+-- new/del/deepDel
+-- 
+---------------------------------------------------------------------------------
+local new, new_kv, del, deepDel
+do
+	local list = setmetatable({},{__mode='k'})
+	function new(...)
+		local t = next(list)
+		if t then
+			list[t] = nil
+			for i = 1, select('#', ...) do
+				t[i] = select(i, ...)
+			end
+			return t
+		else
+			return {...}
+		end
+	end
+	function new_kv(...)
+		local t = next(list)
+		if t then
+			list[t] = nil
+		else
+			t = {}
+		end
+		for i = 1, select('#', ...),2 do
+			t[select(i, ...)] = select(i+1, ...)
+		end
+		return t
+	end
+	function del(t)
+		if type(t)=="table" then
+			for k in pairs(t) do
+				t[k] = nil
+			end
+			t[''] = true
+			t[''] = nil
+			list[t] = true
+		end
+		return nil
+	end
+	function deepDel(t)
+		if type(t)=="table" then
+			for k,v in pairs(t) do
+				if type(v) == "table" then
+					deepDel(v)
+				end
+				t[k] = nil
+			end
+			t[''] = true
+			t[''] = nil
+			list[t] = true
+		end
+		return nil
+	end
+end
+
+---------------------------------------------------------------------------------
+--
 -- GuildAds addon
 -- 
 ---------------------------------------------------------------------------------
@@ -49,6 +108,10 @@ GuildAds.playerName = UnitName("player")
 GuildAds.guildName = false
 GuildAds.windows = {}
 GuildAds.db = GAAceDatabase:new("GuildAdsDatabase")
+
+GuildAds.new = new
+GuildAds.del = del
+GuildAds.deepDel = deepDel
 
 function GuildAds:OnInitialize()
 	GuildAds_ChatDebug(GA_DEBUG_GLOBAL,"[GuildAds:Initialize] begin");
