@@ -110,6 +110,7 @@ GuildAds.windows = {}
 GuildAds.db = GAAceDatabase:new("GuildAdsDatabase")
 
 GuildAds.new = new
+GuildAds.new_kv = new_kv
 GuildAds.del = del
 GuildAds.deepDel = deepDel
 
