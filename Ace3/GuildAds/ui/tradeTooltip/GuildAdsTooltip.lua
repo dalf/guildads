@@ -469,17 +469,15 @@ GuildAdsTradeTooltip = {
 				local level = tostring(UnitLevel("player"))
 				if linkTable then
 					for link in pairs(linkTable) do
+						item="enchant:"..tostring(link)
+						itemTable[item]=true
 						local itemLink = LPTFunc:ItemInSet(-link,"Tradeskill.RecipeLinks")
 						if itemLink then
-							if tonumber(itemLink) < 0 then
-								item="enchant:"..tostring(-tonumber(itemLink))
-							else
+							if tonumber(itemLink) > 0 then
 								item="item:"..itemLink..":0:0:0:0:0:0:0:"..level
+								itemTable[item]=true
 							end
-						else
-							item="enchant:"..tostring(link)
 						end
-						itemTable[item]=true
 					end
 				end
 				item = next(itemTable)
