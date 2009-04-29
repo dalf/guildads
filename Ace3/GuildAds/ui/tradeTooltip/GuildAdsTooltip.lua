@@ -476,7 +476,6 @@ GuildAdsTradeTooltip = {
 							else
 								item="item:"..itemLink..":0:0:0:0:0:0:0:"..level
 							end
-							item="item:"..itemLink..":0:0:0:0:0:0:0:"..level
 						else
 							item="enchant:"..tostring(link)
 						end
