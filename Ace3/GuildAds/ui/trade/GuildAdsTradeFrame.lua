@@ -1120,6 +1120,7 @@ GuildAdsTrade = {
 					local itemVisibleCache = {};
 					local t, linkTable;
 					local LPTunknown = {}
+					local level = tostring(UnitLevel("player"))
 					local players = GuildAdsDB.channel[GuildAds.channelName]:getPlayers();
 					for playerName in pairs(players) do
 						if GuildAdsTrade.data.playerIsVisible(adtype, playerName) then
@@ -1139,7 +1140,7 @@ GuildAdsTrade = {
 												if tonumber(itemLink) < 0 then
 													item="enchant:"..tostring(-tonumber(itemLink))
 												else
-													item="item:"..itemLink..":0:0:0:0:0:0:0:"..UnitLevel("player")
+													item="item:"..itemLink..":0:0:0:0:0:0:0:"..level
 												end
 											else
 												item="enchant:"..tostring(link)
