@@ -187,7 +187,9 @@ GuildAdsQuest = {
 				end
 				if button=="LeftButton" and IsShiftKeyDown() and ChatFrameEditBox:IsVisible() then
 					local questLink = "quest:"..self.questId..":"..self.data.l
-					local questLink = "|c"..self.data.c.."|H"..questLink.."|h["..self.data.n.."]|h|r"
+					local color = GetDifficultyColor(self.data.l);
+					color = string.format("ff%2x%2x%2x",color.r*255,color.g*255,color.b*255)
+					local questLink = "|c"..color.."|H"..questLink.."|h["..self.data.n.."]|h|r"
 					ChatFrameEditBox:Insert(questLink);
 				end
 				if button == "RightButton" then
