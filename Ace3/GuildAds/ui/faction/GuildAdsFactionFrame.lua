@@ -41,6 +41,11 @@ local GUILDADS_FACTION_GROUP_OPTION = {
 --- Index of the ad currently selected
 local g_GlobalAdSelectedId;
 
+local new = GuildAds.new
+local new_kv = GuildAds.new_kv
+local del = GuildAds.del
+local deepDel = GuildAds.deepDel
+
 GuildAdsFaction = {
 	metaInformations = { 
 		name = "Reputation",
@@ -83,6 +88,10 @@ GuildAdsFaction = {
 		if type(GuildAdsFaction.getRawProfileValue(nil, "OnlyLevel80"))=="nil" then
 			GuildAdsFaction.setProfileValue(nil, "OnlyLevel80", true);
 		end
+
+		if type(GuildAdsFaction.getRawProfileValue(nil, "ShowOfflines"))=="nil" then
+			GuildAdsFaction.setProfileValue(nil, "ShowOfflines", true);
+		end
 		-- "Horde", "Horde Forces", "Outland", "Shattrath City", "Steamwheedle Cartel", "Other"
 		-- "Faction", "Faction Forces", "Outland", "Shattrath City", "Steamwheedle Cartel", "Other"
 		-- 1, 2, 3, 4, 5, 6
@@ -92,6 +101,11 @@ GuildAdsFaction = {
 				GuildAdsFaction.setProfileValue(nil, groupname, true); -- initialise all group settings to true (first run)
 			end
 		end
+	end;
+	
+	onOnline = function(playerName, status)
+		GuildAdsFaction.data.resetCache();
+		GuildAdsFaction.factionButton.updateAll(nil, true);
 	end;
 	
 	onDBUpdate = function(dataType, playerName, id)
@@ -107,6 +121,7 @@ GuildAdsFaction = {
 		
 		GuildAdsFaction.updateCheckButton(GuildAds_FactionHideCollapsedCheckButton, GuildAdsFaction.getProfileValue(nil, "HideCollapsed"));
 		GuildAdsFaction.updateCheckButton(GuildAds_FactionOnlyLevel80CheckButton, GuildAdsFaction.getProfileValue(nil, "OnlyLevel80"));
+		GuildAdsFaction.updateCheckButton(GuildAds_FactionShowOfflinesCheckButton, GuildAdsFaction.getProfileValue(nil, "ShowOfflines"));
 		
 		GuildAdsFaction.updateCheckButton(GuildAds_FactionShowFactionCheckButton, GuildAdsFaction.getProfileValue(nil, "ShowFaction"));
 		GuildAdsFaction.updateCheckButton(GuildAds_FactionShowFactionForcesCheckButton, GuildAdsFaction.getProfileValue(nil, "ShowFactionForces"));
@@ -144,15 +159,17 @@ GuildAdsFaction = {
 		cache = nil;
 		
 		resetCache = function()
-			GuildAdsFaction.data.cache = nil;
+			GuildAdsFaction.data.cacheReset = true;
 		end;
 		
 		get = function(updateData)	
-			if not GuildAdsFaction.data.cache or updateData then
+			if not GuildAdsFaction.data.cache or updateData or GuildAdsFaction.data.cacheReset then
 				GuildAdsFaction.debug("reset cache");
+				
+				GuildAdsFaction.data.cacheReset = nil
 				local insertHeader;
 				
-				local workFactions = {}
+				local workFactions = new()
 				for id, name in pairs(GUILDADS_FACTIONS) do
 					local group=GUILDADS_FACTION_GROUPS[id];
 					if GuildAdsFaction.getProfileValue(nil, GUILDADS_FACTION_GROUP_OPTION[group]) then
@@ -160,14 +177,15 @@ GuildAdsFaction = {
 					end
 				end
 				
-				GuildAdsFaction.data.cache = {};
+				deepDel(GuildAdsFaction.data.cache);
+				GuildAdsFaction.data.cache = new();
 				
 				local hideCollapsed=false; -- hide collapsed headers unless all headers are collapsed
 				if GuildAdsFaction.getProfileValue(nil, "HideCollapsed") then
 					for id, name in pairs(workFactions) do
 						if GuildAdsFaction.getProfileValue("Filters", id) then
 							for playerName, _, data in GuildAdsFactionDataType:iterator(nil, id) do
-								if not GuildAdsGuild.getProfileValue(nil, "HideOfflines") or GuildAdsGuild.isOnline(playerName) then
+								if GuildAdsFaction.getProfileValue(nil, "ShowOfflines") or GuildAdsGuild.isOnline(playerName) then
 									if not (GuildAdsFaction.getProfileValue(nil, "OnlyLevel80") and ((GuildAdsDB.profile.Main:get(playerName, GuildAdsDB.profile.Main.Level) or 0)<GUILDADS_PLAYER_MAX_LEVEL)) then
 										hideCollapsed=true;
 									end
@@ -176,25 +194,21 @@ GuildAdsFaction = {
 						end
 					end
 				end
-				--if hideCollapsed then 
-				--	GuildAdsFaction.debug("hideCollapsed=true");
-				--else
-				--	GuildAdsFaction.debug("hideCollapsed=false");
-				--end
+
 				-- for each faction
 				for id, name in pairs(workFactions) do
 					local factionOpen=GuildAdsFaction.getProfileValue("Filters", id);
 					insertHeader = true;
 					-- for each player
 					for playerName, _, data in GuildAdsFactionDataType:iterator(nil, id) do
-						if not GuildAdsGuild.getProfileValue(nil, "HideOfflines") or GuildAdsGuild.isOnline(playerName) then
+						if GuildAdsFaction.getProfileValue(nil, "ShowOfflines") or GuildAdsGuild.isOnline(playerName) then
 							if not (GuildAdsFaction.getProfileValue(nil, "OnlyLevel80") and ((GuildAdsDB.profile.Main:get(playerName, GuildAdsDB.profile.Main.Level) or 0)<GUILDADS_PLAYER_MAX_LEVEL)) then
 								if insertHeader and (not hideCollapsed or factionOpen) then
-									tinsert(GuildAdsFaction.data.cache, {i=id, h=factionOpen } );
+									tinsert(GuildAdsFaction.data.cache, new_kv("i", id, "h", factionOpen) );
 									insertHeader = nil;
 								end
 								if factionOpen then
-									tinsert(GuildAdsFaction.data.cache, {i=id, p=playerName, v=data.v, b=data.b, t=data.t, s=data.s });
+									tinsert(GuildAdsFaction.data.cache, new_kv("i", id, "p", playerName, "v", data.v, "b", data.b, "t", data.t, "s", data.s ));
 								end
 							end
 						end
@@ -386,16 +400,12 @@ GuildAdsFaction = {
 				
 				-- for each buttons
 				while (i <= GUILDADS_NUM_GLOBAL_FACTION_BUTTONS) do
-					--local button = getglobal("GuildAdsReputationBar"..i);
 					local factionBar = getglobal("GuildAdsReputationBar"..i);
 					local factionHeader = getglobal("GuildAdsReputationHeader"..i);
 					local factionHeaderText = getglobal("GuildAdsReputationHeader"..i.."NormalText");
-					--GuildAdsFaction.debug("i="..i.." j="..j);
 					if (j <= linearSize) then
-						--GuildAdsFaction.debug("linear[j].i="..linear[j].i);
 						
 						if (linear[j].p) then
-							--GuildAdsFaction.debug("Player="..linear[j].p);
 							-- update internal data
 							factionBar.player = linear[j].p;
 							factionBar.id = linear[j].i;
@@ -429,7 +439,6 @@ GuildAdsFaction = {
 							factionBar:SetValue(barValue);
 							color = FACTION_BAR_COLORS[linear[j].s];
 							factionBar:SetStatusBarColor(color.r, color.g, color.b);
-							--factionBar:SetID(factionIndex);
 							factionBar:Show();
 							factionHeader:Hide();
 							
@@ -437,9 +446,6 @@ GuildAdsFaction = {
 					
 							getglobal("GuildAdsReputationBar"..i.."Highlight1"):Hide();
 							getglobal("GuildAdsReputationBar"..i.."Highlight2"):Hide();
-
-							-- create a ads
-							--GuildAdsFaction.factionButton.update(factionBar, g_GlobalAdSelectedId==linear[j].i, linear[j]);
 						else
 							-- update internal data
 							factionHeader.player = nil;
@@ -452,14 +458,11 @@ GuildAdsFaction = {
 								factionHeader:SetNormalTexture("Interface\\Buttons\\UI-MinusButton-Up"); 
 							end
 							
-							--GuildAdsFaction.debug("Header="..GuildAdsFactionDataType:getNameFromId(linear[j].i));
 							-- empty line
 							factionHeaderText:SetText(GuildAdsFactionDataType:getNameFromId(linear[j].i));
 							factionBar:Hide();
 							factionHeader:Show();
-							--GuildAdsFaction.factionButton.delete(button);
 						end
-						--button:Show();
 						j = j+1;
 					else
 						factionBar:Hide();

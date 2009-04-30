@@ -543,7 +543,7 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 			</Button>
 			<Frame name="GuildAdsFactionOptionsFrame" inherits="GuildAdsConfig_OptionFrameBoxTemplate" parent="GuildAdsFactionFrame">
 				<Size>
-					<AbsDimension x="200" y="270"/>
+					<AbsDimension x="200" y="302"/>
 				</Size>
 				<Anchors>
 					<!-- <Anchor point="TOP"> -->
@@ -624,9 +624,37 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 						</Scripts>
 					</CheckButton>
 					
-					<CheckButton name="GuildAds_FactionShowFactionCheckButton" inherits="GuildAdsConfig_CheckButton">
+					<CheckButton name="GuildAds_FactionShowOfflinesCheckButton" inherits="GuildAdsConfig_CheckButton">
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="GuildAds_FactionOnlyLevel80CheckButton" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="0" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Layers>
+							<Layer level="ARTWORK">
+								<FontString name="$parentLabel" inherits="GameFontNormalSmall" text="SHOW_OFFLINE_MEMBERS" >
+									<Anchors>
+										<Anchor point="LEFT" relativePoint="RIGHT">
+											<Offset>
+												<AbsDimension x="5" y="1"/>
+											</Offset>
+										</Anchor>
+									</Anchors>
+								</FontString>
+							</Layer>
+						</Layers>
+						<Scripts>
+							<OnClick>
+								GuildAdsFaction.filters.checkButtonSetProfile(this,"ShowOfflines");
+							</OnClick>
+						</Scripts>
+					</CheckButton>
+					
+					<CheckButton name="GuildAds_FactionShowFactionCheckButton" inherits="GuildAdsConfig_CheckButton">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="GuildAds_FactionShowOfflinesCheckButton" relativePoint="BOTTOMLEFT">
 								<Offset>
 									<AbsDimension x="0" y="-20" />
 								</Offset>
