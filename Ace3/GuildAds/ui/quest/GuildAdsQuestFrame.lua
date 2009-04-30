@@ -32,6 +32,11 @@ GuildAdsQuest = {
 	GUILDADS_QUESTBUTTONSIZEY = 16;
 	
 	onInit = function()
+		if (GuildAdsQuest.getProfileValue(nil, "HideOfflines")) then
+			GuildAdsQuestShowOfflinesCheckButton:SetChecked(0);
+		else
+			GuildAdsQuestShowOfflinesCheckButton:SetChecked(1);
+		end
 	end;
 	
 	onShow = function()
@@ -73,6 +78,13 @@ GuildAdsQuest = {
 		end;
 	end;
 
+	onConfigChanged = function(path, key, value)
+		if key=="HideOfflines" then
+			GuildAdsQuest.data.resetCache();
+			GuildAdsQuest.questButtonsUpdate();
+		end
+	end;
+	
 	delayedUpdate = function()
 		GuildAdsQuestFrame.update = 1;
 	end;
@@ -104,18 +116,18 @@ GuildAdsQuest = {
 		--if GuildAdsQuestFrame:IsVisible() then
 			GuildAdsQuest.debug("questButtonsUpdate("..tostring(updateData)..")");
 			local offset = FauxScrollFrame_GetOffset(GuildAdsQuestScrollFrame);
-		
+			
 			local linear = GuildAdsQuest.data.get(updateData);
 			local linearSize = #linear;
-	
+				
 			-- init
 			local i = 1;
 			local j = i + offset;
 			local k = 0;
 			local currentQuest, button, currentIndex, numPlayers;
 			local currentSelection = GuildAdsQuest.currentSelectedQuestId;
-			if currentSelection then
-				currentIndex = GuildAdsQuest.getLinearIndex(linear, currentSelection)
+			currentIndex = GuildAdsQuest.getLinearIndex(linear, currentSelection)
+			if currentIndex then
 				if type(linear[currentIndex].p) == "string" then
 					numPlayers = 1
 				else
@@ -123,6 +135,8 @@ GuildAdsQuest = {
 				end
 				linearSize = linearSize + numPlayers
 				belowCurrent = currentIndex + numPlayers
+			else
+				currentSelection = nil
 			end
 
 			-- for each buttons
@@ -415,6 +429,16 @@ GuildAdsQuest = {
 			GuildAdsQuest.data.cacheReset = true
 		end;
 		
+		isVisible = function(playerName)
+			if GuildAdsQuest.getProfileValue(nil, "HideOfflines") then
+				if GuildAdsComm:IsOnLine(playerName) or GuildAdsUITools:IsAccountOnline(playerName) then
+					return true
+				end
+				return false
+			end
+			return true
+		end;
+		
 		get = function(updateData)
 			local ret = GuildAdsQuest.data.get2(updateData)
 			if #ret == 0 then
@@ -436,25 +460,27 @@ GuildAdsQuest = {
 				-- create linear list of all quests				
 				local datatype = GuildAdsDB.profile.Quest;
 				for playerName in pairs(players) do
-					for questId, _, data in datatype:iterator(playerName, nil) do
-						--GuildAdsQuest.debug("playerName = "..playerName.."   questId = "..questId);
-						if workingTable[questId] then
-							if type(workingTable[questId].s) ~= "table" then
-								workingTable[questId].s = new_kv(workingTable[questId].p, workingTable[questId].s )
+					if GuildAdsQuest.data.isVisible(playerName) then
+						for questId, _, data in datatype:iterator(playerName, nil) do
+							--GuildAdsQuest.debug("playerName = "..playerName.."   questId = "..questId);
+							if workingTable[questId] then
+								if type(workingTable[questId].s) ~= "table" then
+									workingTable[questId].s = new_kv(workingTable[questId].p, workingTable[questId].s )
+								end
+								workingTable[questId].s[playerName] = data.s
+								
+								if type(workingTable[questId].c) ~= "table" then
+									workingTable[questId].c = new_kv(workingTable[questId].p, workingTable[questId].c)
+								end
+								workingTable[questId].c[playerName] = data.c
+	
+								if type(workingTable[questId].p) ~= "table" then
+									workingTable[questId].p = new(workingTable[questId].p)
+								end
+								tinsert(workingTable[questId].p, playerName)
+							else
+								workingTable[questId] = new_kv("id", questId, "g", data.g, "n", data.n, "r", data.r, "l", data.l, "c", data.c, "s", data.s, "p", playerName)
 							end
-							workingTable[questId].s[playerName] = data.s
-							
-							if type(workingTable[questId].c) ~= "table" then
-								workingTable[questId].c = new_kv(workingTable[questId].p, workingTable[questId].c)
-							end
-							workingTable[questId].c[playerName] = data.c
-
-							if type(workingTable[questId].p) ~= "table" then
-								workingTable[questId].p = new(workingTable[questId].p)
-							end
-							tinsert(workingTable[questId].p, playerName)
-						else
-							workingTable[questId] = new_kv("id", questId, "g", data.g, "n", data.n, "r", data.r, "l", data.l, "c", data.c, "s", data.s, "p", playerName)
 						end
 					end
 				end

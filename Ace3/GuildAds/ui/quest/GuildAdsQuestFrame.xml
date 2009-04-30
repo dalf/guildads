@@ -561,7 +561,48 @@
 					</OnVerticalScroll>
 				</Scripts>
 			</ScrollFrame>
-			
+			<CheckButton name="GuildAdsQuestShowOfflinesCheckButton" hidden="false">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsMainWindowFrame" relativePoint="TOPLEFT">
+						<Offset>
+							<AbsDimension x="75" y="-35"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Size>
+					<AbsDimension x="20" y="20"/>
+				</Size>
+				<NormalTexture file="Interface\Buttons\UI-CheckBox-Up"/>
+				<PushedTexture file="Interface\Buttons\UI-CheckBox-Down"/>
+				<HighlightTexture file="Interface\Buttons\UI-CheckBox-Highlight" alphaMode="ADD"/>
+				<CheckedTexture file="Interface\Buttons\UI-CheckBox-Check"/>
+				<DisabledCheckedTexture file="Interface\Buttons\UI-CheckBox-Check-Disabled"/>
+				<Layers>
+					<Layer level="ARTWORK">
+						<FontString name="GuildAdsQuestShowOfflinesCheckButtonText" inherits="GameFontNormalSmall" text="SHOW_OFFLINE_MEMBERS">
+							<Anchors>
+								<Anchor point="LEFT" relativePoint="RIGHT">
+									<Offset>
+										<AbsDimension x="5" y="1"/>
+									</Offset>
+								</Anchor>
+							</Anchors>
+						</FontString>	
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnClick>
+						if ( self:GetChecked() ) then
+							PlaySound("igMainMenuOptionCheckBoxOn");
+							GuildAdsQuest.setProfileValue(nil, "HideOfflines", nil);
+						else
+							PlaySound("igMainMenuOptionCheckBoxOff");
+							GuildAdsQuest.setProfileValue(nil, "HideOfflines", true);
+						end
+					</OnClick>
+				</Scripts>
+			</CheckButton>
+
 		</Frames>
 		<Scripts> 
 			<OnLoad>
