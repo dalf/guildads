@@ -43,9 +43,6 @@ GuildAdsQuest = {
 		GuildAdsQuest.questButtonsUpdate();
 	end;
 	
-	onConfigChanged = function(path, key, value)
-	end;
-	
 	onDBUpdate = function(dataType, playerName, id)
 		GuildAdsQuest.data.resetCache();
 		GuildAdsQuest.delayedUpdate();
