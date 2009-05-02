@@ -178,6 +178,10 @@ GuildAdsTrade = {
 			end
 		})
 		
+		setmetatable(GuildAdsTrade.data.tradeLinkCache, {
+			__mode="v",
+		})
+		
 		PanelTemplates_SelectTab(GuildAds_MyTab1);
 		PanelTemplates_DeselectTab(GuildAds_MyTab2);
 		PanelTemplates_DeselectTab(GuildAds_MyTab3);
@@ -819,6 +823,7 @@ GuildAdsTrade = {
 				getglobal(ownerField):SetText(playerName);
 			else
 				ga_table_erase(GuildAdsTrade.exchangeButton.t);
+				table.sort(playerName, GuildAdsTrade.sortData.predicateFunctions.crafter);
 				-- playerName table is sorted: online, accountOnline, offline
 				local c=0
 				for _, name in ipairs(playerName) do
@@ -1028,6 +1033,7 @@ GuildAdsTrade = {
 	
 	data = {
 		cache = {};
+		tradeLinkCache = {};
 		
 		resetCache = function(adtype)
 			if adtype then
@@ -1120,7 +1126,7 @@ GuildAdsTrade = {
 				return true;
 			end
 		end;
-	
+		
 		get = function(tab, updateData)
 			if not GuildAdsTrade.data.cache[tab] or updateData or GuildAdsTrade.data.cacheReset then
 				GuildAdsTrade.data.cacheReset = nil
@@ -1151,15 +1157,24 @@ GuildAdsTrade = {
 					local players = GuildAdsDB.channel[GuildAds.channelName]:getPlayers();
 					local LTLFunc = LibStub("LibTradeLinks-1.0")
 					local LPTFunc = LibStub("LibPeriodicTable-3.1")
+					local playerIsVisible = GuildAdsTrade.data.playerIsVisible
+					local adIsVisible = GuildAdsTrade.data.adIsVisible
 					for playerName in pairs(players) do
-						if GuildAdsTrade.data.playerIsVisible(adtype, playerName) then
+						if playerIsVisible(adtype, playerName) then
 							for item, _, data in datatype:iterator(playerName, nil) do
 								local _, _, linkType = string.find(item, "^([^:]+):.*$")
 								local itemTable
 								if linkType == "trade" then
 									-- trade: link... build table of items with enchant links
 									itemTable = new()
-									linkTable = LTLFunc:Decode(item, true, false); 
+									local _, _, spellid, rawlink = string.find(item, "trade:([^:]+):[^:]+:[^:]+:[^:]+:([^:]+)");
+									local shortTradeLink = spellid..":"..rawlink
+									if not GuildAdsTrade.data.tradeLinkCache[shortTradeLink] then
+										linkTable = LTLFunc:Decode(item, true, false); 
+										GuildAdsTrade.data.tradeLinkCache[shortTradeLink] = linkTable
+									else
+										linkTable = GuildAdsTrade.data.tradeLinkCache[shortTradeLink]
+									end
 									if linkTable then
 										for link in pairs(linkTable) do
 											local itemLink = LPTFunc:ItemInSet(-link,"Tradeskill.RecipeLinks")
@@ -1178,7 +1193,6 @@ GuildAdsTrade = {
 											end
 											itemTable[item]=new_kv("e", "enchant:"..tostring(link) )
 										end
-										del(linkTable) -- safe: LTL returns a new table every time
 									else
 										GuildAdsTrade.debug("LibTradeLinks: Can't handle trade link:"..tostring(item))
 									end
@@ -1197,7 +1211,7 @@ GuildAdsTrade = {
 										end
 									else
 										if tmptable[item8] == nil then
-											if GuildAdsTrade.data.adIsVisible(adtype, playerName, item, data) then
+											if adIsVisible(adtype, playerName, item, data) then
 												tmptable[item8] = new_kv("i", item, 1, playerName, "t", adtype, "e", data.e, "q", data.q);
 											else
 												tmptable[item8] = false
@@ -1210,24 +1224,25 @@ GuildAdsTrade = {
 										item = nil
 									end
 								end
-								del(itemTable)
+								deepDel(itemTable)
 							end
 						end
 					end
 					del(LPTunknown)
 					local info;
+					local t = GuildAdsTrade.data.cache[tab]
 					for key,value in pairs(tmptable) do
 						if type(value) == "table" then
 							info = GuildAds_ItemInfo[value.i] or emptyTable;
 							value.l = info.minlevel;
 							value.p = value
-							tinsert(GuildAdsTrade.data.cache[tab], value)
+							tinsert(t, value)
 						end
 					end
 					del(tmptable) -- must not deepDel as it deletes database data otherwise!
-					for _, data in pairs(GuildAdsTrade.data.cache[tab]) do
-						table.sort(data.p, GuildAdsTrade.sortData.predicateFunctions.crafter);
-					end
+					--for _, data in pairs(t) do
+					--	table.sort(data.p, GuildAdsTrade.sortData.predicateFunctions.crafter);
+					--end
 				else
 					for _, item, playerName, data in datatype:iterator() do
 						if GuildAdsTrade.data.adIsVisible(adtype, playerName, item, data) then
