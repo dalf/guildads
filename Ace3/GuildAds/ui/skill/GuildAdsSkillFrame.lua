@@ -8,6 +8,11 @@
 -- Licence: GPL version 2 (General Public License)
 ----------------------------------------------------------------------------------
 
+local new = GuildAds.new
+local new_kv = GuildAds.new_kv
+local del = GuildAds.del
+local deepDel = GuildAds.deepDel
+
 GUILDADSSKILL_TAB_PROFESSION = 1;
 GUILDADSSKILL_TAB_SKILL = 2;
 
@@ -119,7 +124,11 @@ GuildAdsSkill = {
 				}
 			);
 		end
-		
+		if (GuildAdsSkill.getProfileValue(nil, "HideOfflines")) then
+			GuildAdsSkillShowOfflinesCheckButton:SetChecked(0);
+		else
+			GuildAdsSkillShowOfflinesCheckButton:SetChecked(1);
+		end
 		GuildAdsDB.profile.Skill:registerUpdate(GuildAdsSkill.onDBUpdate);
 	end;
 	
@@ -129,6 +138,13 @@ GuildAdsSkill = {
 	
 	onShow = function()
 		GuildAdsSkill.filterBySkillButton.initializeTab();
+	end;
+	
+	onConfigChanged = function(path, key, value)
+		if key=="HideOfflines" then
+			GuildAdsSkill.data.resetCache();
+			GuildAdsSkill.skillButton.updateAll(nil, true);
+		end
 	end;
 	
 	selectTab = function(tab)
@@ -150,15 +166,28 @@ GuildAdsSkill = {
 		cache = nil;
 		
 		resetCache = function()
-			GuildAdsSkill.data.cache = nil;
+			GuildAdsSkill.data.cacheReset = true
+		end;
+		
+		isVisible = function(playerName)
+			if GuildAdsSkill.getProfileValue(nil, "HideOfflines") then
+				if GuildAdsComm:IsOnLine(playerName) or GuildAdsUITools:IsAccountOnline(playerName) then
+					return true
+				end
+				return false
+			end
+			return true
 		end;
 		
 		get = function(updateData)	
-			if not GuildAdsSkill.data.cache or updateData then
+			if not GuildAdsSkill.data.cache or updateData or GuildAdsSkill.data.cacheReset then
 				GuildAdsSkill.debug("reset cache");
+				GuildAdsSkill.data.cacheReset = nil
+
 				local insertHeader;
 				
-				GuildAdsSkill.data.cache = {};
+				deepDel(GuildAdsSkill.data.cache);
+				GuildAdsSkill.data.cache = new();
 
 				-- for each skill
 				for id, name in pairs(GUILDADS_SKILLS) do
@@ -167,10 +196,12 @@ GuildAdsSkill = {
 						-- for each player
 						for playerName, _, data in GuildAdsSkillDataType:iterator(nil, id) do
 							if insertHeader then
-								tinsert(GuildAdsSkill.data.cache, {i=id } );
+								tinsert(GuildAdsSkill.data.cache, new_kv("i", id) );
 								insertHeader = nil;
 							end
-							tinsert(GuildAdsSkill.data.cache, {i=id, p=playerName, v=data.v, m=data.m });
+							if GuildAdsSkill.data.isVisible(playerName) then
+								tinsert(GuildAdsSkill.data.cache, new_kv("i", id, "p", playerName, "v", data.v, "m", data.m ));
+							end
 						end
 					end
 				end
