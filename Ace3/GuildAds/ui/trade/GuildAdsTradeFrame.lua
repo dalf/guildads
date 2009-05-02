@@ -8,10 +8,16 @@
 -- Licence: GPL version 2 (General Public License)
 ----------------------------------------------------------------------------------
 
+local new = GuildAds.new
+local new_kv = GuildAds.new_kv
+local del = GuildAds.del
+local deepDel = GuildAds.deepDel
+
 GUILDADS_MSG_TYPE_REQUEST = 1;
 GUILDADS_MSG_TYPE_AVAILABLE = 2;
 
 local g_AdFilters = {}; 
+local emptyTable = {}
 
 GuildAdsTrade = {
 	metaInformations = { 
@@ -161,6 +167,17 @@ GuildAdsTrade = {
 			GuildAds_Filter_ZoneDropDown:Hide();
 		end
 		
+		setmetatable(GuildAdsTrade.exchangeButton.playerColor, {
+			__mode="v",
+			__index = function(t,k)
+				local c, hex = GuildAdsUITools:GetPlayerColor(k)
+				local hex = hex..k.."|r"
+				local v = new_kv("c", c, "h", hex)
+				t[k] = v
+				return v
+			end
+		})
+		
 		PanelTemplates_SelectTab(GuildAds_MyTab1);
 		PanelTemplates_DeselectTab(GuildAds_MyTab2);
 		PanelTemplates_DeselectTab(GuildAds_MyTab3);
@@ -215,6 +232,11 @@ GuildAdsTrade = {
 		end
 	end;
 	
+	onOnline = function(playerName, status)
+		del(GuildAdsTrade.exchangeButton.playerColor[playerName]) -- this deletes the values and marks table as free
+		GuildAdsTrade.exchangeButton.playerColor[playerName] = nil -- this clears our reference to the table
+	end;
+	
 	onUpdate = function(self, elapsed)
 		if self.update then
 			self.update = self.update - elapsed;
@@ -251,7 +273,7 @@ GuildAdsTrade = {
 			end
 			if (tochat ~= nil) then
 				GuildAdsMinimapButtonCore.addAlertFunction(function ()
-					local info = GuildAds_ItemInfo[item] or {};
+					local info = GuildAds_ItemInfo[item] or emptyTable;
 					local quantity = "";
 					local itemlink = item;
 					local _, _, _, hex = GuildAds_GetItemQualityColor(info.quality or 1);
@@ -327,7 +349,7 @@ GuildAdsTrade = {
 	ItemFilter = {
 	
 		init = function()
-			local FilterNames = {};
+			local FilterNames;
 			if (ReagentData) then
 				FilterNames = GUILDADS_ITEMS;
 			else
@@ -346,7 +368,7 @@ GuildAdsTrade = {
 			local index = 1;
 			FilterNames = GUILDADS_ITEMS;
 			for k,instance in pairs(GuildAdsTrade.GuildAds_ItemFilterOrder) do
-				local info = { };
+				local info = new();
 				info.text = GUILDADS_ITEMS[instance];
 				if (FilterNames[instance]) then
 					info.value = filters[index].id;
@@ -362,7 +384,8 @@ GuildAdsTrade = {
 					info.func = GuildAdsTrade.ItemFilter.onClick;
 					UIDropDownMenu_AddButton(info);
 					index = index + 1;
-				end 
+				end
+				del(info)
 			end
 		end;
 		
@@ -408,26 +431,28 @@ GuildAdsTrade = {
 					button.adType = adType;
 					button.item = linear[j].i;
 					button.playerName = linear[j].p;
-					button.data = linear[j].d;
 					button.recipe = linear[j].e;
 					button.count = linear[j].q;
 					button.minlevel = linear[j].l;
+					button.comment = linear[j].c;
+					button.time = linear[j]._t;
 					
 					-- update button
 					local selected = 	(GuildAdsTrade.currentPlayerName == button.playerName) 
 									and (GuildAdsTrade.currentItem == button.item)
 									and (GuildAdsTrade.currentAdType == adType);
-					GuildAdsTrade.exchangeButton.update(button, selected, linear[j].i, linear[j].p, linear[j].d);
+					GuildAdsTrade.exchangeButton.update(button, selected, linear[j].i, linear[j].p);
 					button:Show();
 					j = j+1;
 				else
 					button.adType = nil;
 					button.item = nil;
 					button.playerName = nil;
-					button.data = nil;
 					button.recipe = nil;
 					button.count = nil;
 					button.minlevel = nil;
+					button.comment = nil;
+					button.time = nil;
 					button:Hide();
 				end
 			
@@ -618,7 +643,7 @@ GuildAdsTrade = {
 		end
 		
 		if newSelection then
-			data = data or {};
+			data = data or emptyTable;
 			if quantity or data.c then
 				quantity = (quantity or 0) + (data.q or 0);
 			else
@@ -666,6 +691,8 @@ GuildAdsTrade = {
 	
 	exchangeButton = {
 		t = {};
+		playerColor = {};
+		
 		currentButton = false;
 		--checkedList = { [GuildAdsTrade.TAB_REQUEST]={}; [GuildAdsTrade.TAB_AVAILABLE]={}; [GuildAdsTrade.TAB_CRAFTABLE]={} };
 		checkedList = { [1]={}; [2]={}; [3]={} };
@@ -750,13 +777,13 @@ GuildAdsTrade = {
 	 		end
 	 		if datatype then
 	 			--data = datatype:getRevision(author, item);
-	 			GuildAdsTrade.debug("item "..item.." at player "..author.." has revision "..tostring(data));
-	 			--GuildAdsTrade.debug("deleting item "..item.." from player "..author);
+	 			--GuildAdsTrade.debug("item "..item.." at player "..author.." has revision "..tostring(data));
+	 			GuildAdsTrade.debug("deleting item "..item.." from player "..author);
 	 			datatype:set(author,item,nil);
 	 		end
 		end;
 		
-		update = function(button, selected, item, playerName, data)
+		update = function(button, selected, item, playerName)
 			local buttonName= button:GetName();
 		
 			local titleField = buttonName.."Title";
@@ -786,27 +813,23 @@ GuildAdsTrade = {
 			end
 			
 			-- online/offline highlight
+			local playerColor = GuildAdsTrade.exchangeButton.playerColor -- color cache
 			if type(playerName)=="string" then
-				ownerColor = GuildAdsUITools:GetPlayerColor(playerName)
+				ownerColor = playerColor[playerName].c
 				getglobal(ownerField):SetText(playerName);
 			else
 				ga_table_erase(GuildAdsTrade.exchangeButton.t);
-				local online, accountOnline, atLeastOneOnline, atLeastOneOnlineAccount;
+				-- playerName table is sorted: online, accountOnline, offline
+				local c=0
 				for _, name in ipairs(playerName) do
-					online = GuildAdsComm:IsOnLine(name);
-					accountOnline = GuildAdsUITools:IsAccountOnline(name)
-					atLeastOneOnline = atLeastOneOnline or online
-					atLeastOneOnlineAccount = atLeastOneOnlineAccount or accountOnline
-					local _, c = GuildAdsUITools:GetPlayerColor(name)
-					tinsert(GuildAdsTrade.exchangeButton.t, c..name.."|r")
+					tinsert(GuildAdsTrade.exchangeButton.t, playerColor[name].h)
+					c=c+#name
+					if c>45 then
+						break -- the field most likely hasn't room for more than 50 characters excl
+					end
+					c=c+2 -- ", "
 				end
-				if atLeastOneOnline then
-					ownerColor = GuildAdsUITools.onlineColor[true]
-				elseif atLeastOneOnlineAccount then
-					ownerColor = GuildAdsUITools.accountOnlineColor[true]
-				else
-					ownerColor = GuildAdsUITools.onlineColor[false]
-				end
+				ownerColor = playerColor[playerName[1]].c;
 				getglobal(ownerField):SetText(table.concat(GuildAdsTrade.exchangeButton.t, ", "));
 			end
 			getglobal(ownerField):SetTextColor(ownerColor.r, ownerColor.g, ownerColor.b);
@@ -840,10 +863,10 @@ GuildAdsTrade = {
 			getglobal(countField):SetText(button.count or "");
 				
 			-- creationtime
-			if data._t then
+			if button.time then
 				getglobal(sinceField):Show();
 				getglobal(sinceField):SetTextColor(ownerColor["r"], ownerColor["g"], ownerColor["b"]);
-				getglobal(sinceField):SetText(GuildAdsDB:FormatTime(data._t));
+				getglobal(sinceField):SetText(GuildAdsDB:FormatTime(button.time));
 			else
 				if button.minlevel then
 					getglobal(sinceField):Show();
@@ -892,7 +915,6 @@ GuildAdsTrade = {
 			
 			local item;-- = obj.item;
 			local playerName = obj.playerName;
-			local data = obj.data;
 			
 			-- set tooltip
 			local itemInfo;
@@ -906,11 +928,11 @@ GuildAdsTrade = {
 				GameTooltip:SetOwner(obj, "ANCHOR_BOTTOMRIGHT");
 				GameTooltip:SetHyperlink(item);
 				
-				if data.c then
-					GuildAdsUITools:TooltipAddText(GameTooltip, LABEL_NOTE..": "..data.c);
+				if obj.comment then
+					GuildAdsUITools:TooltipAddText(GameTooltip, LABEL_NOTE..": "..obj.comment);
 				end
-				if data._t then
-					GameTooltip:AddLine(string.format(GUILDADS_SINCE, GuildAdsDB:FormatTime(data._t)), GuildAdsUITools.noteColor.r, GuildAdsUITools.noteColor.g, GuildAdsUITools.noteColor.b);
+				if obj.time then
+					GameTooltip:AddLine(string.format(GUILDADS_SINCE, GuildAdsDB:FormatTime(obj.time)), GuildAdsUITools.noteColor.r, GuildAdsUITools.noteColor.g, GuildAdsUITools.noteColor.b);
 				end
 				if GuildAdsTrade.currentTab == GuildAdsTrade.TAB_CRAFTABLE and item == self.item then
 					GameTooltip:AddLine(GUILDADS_TRADE_ALT_TOOLTIP, GuildAdsUITools.helpColor.r, GuildAdsUITools.helpColor.g, GuildAdsUITools.helpColor.b);
@@ -924,7 +946,7 @@ GuildAdsTrade = {
 			
 			-- update hightlight
 			if type(playerName)=="string" then
-				local ownerColor = GuildAdsUITools.onlineColor[GuildAdsComm:IsOnLine(playerName)];
+				local ownerColor = GuildAdsTrade.exchangeButton.playerColor[playerName].c;
 				getglobal(obj:GetName().."Highlight"):SetVertexColor(ownerColor.r, ownerColor.g, ownerColor.b);
 			elseif type(playerName)=="table" then
 				-- TODO ...
@@ -1011,7 +1033,7 @@ GuildAdsTrade = {
 			if adtype then
 				GuildAdsTrade.data.cache[adtype] = nil;
 			else
-				GuildAdsTrade.data.cache = {};
+				GuildAdsTrade.data.cacheReset = true
 			end
 		end;
 		
@@ -1100,7 +1122,8 @@ GuildAdsTrade = {
 		end;
 	
 		get = function(tab, updateData)
-			if not GuildAdsTrade.data.cache[tab] or updateData then
+			if not GuildAdsTrade.data.cache[tab] or updateData or GuildAdsTrade.data.cacheReset then
+				GuildAdsTrade.data.cacheReset = nil
 				local datatype;
 				local adtype = GuildAdsTrade.TabToAdType[tab];
 				if tab == GuildAdsTrade.TAB_REQUEST then
@@ -1112,26 +1135,30 @@ GuildAdsTrade = {
 				else
 					error("bad tab for GuildAdsTrade.data.get("..tostring(tab)..")", 3);
 				end
-				GuildAdsTrade.data.cache[tab] = {};
+				if type(GuildAdsTrade.data.cache[tab])=="table" then
+					for k,v in pairs(GuildAdsTrade.data.cache[tab]) do
+						GuildAdsTrade.data.cache[tab][k] = del(v)
+					end
+					GuildAdsTrade.data.cache[tab] = del(GuildAdsTrade.data.cache[tab])
+				end
+				GuildAdsTrade.data.cache[tab] = new();
 				if (tab == GuildAdsTrade.TAB_CRAFTABLE) then
-					local emptytable = {};
-					local tmptable = {};
+					local tmptable = new();
 					local item8
-					local itemVisibleCache = {};
 					local t, linkTable;
-					local LPTunknown = {}
+					local LPTunknown = new()
 					local level = tostring(UnitLevel("player"))
 					local players = GuildAdsDB.channel[GuildAds.channelName]:getPlayers();
+					local LTLFunc = LibStub("LibTradeLinks-1.0")
+					local LPTFunc = LibStub("LibPeriodicTable-3.1")
 					for playerName in pairs(players) do
 						if GuildAdsTrade.data.playerIsVisible(adtype, playerName) then
-							local LTLFunc = LibStub("LibTradeLinks-1.0")
-							local LPTFunc = LibStub("LibPeriodicTable-3.1")
 							for item, _, data in datatype:iterator(playerName, nil) do
 								local _, _, linkType = string.find(item, "^([^:]+):.*$")
 								local itemTable
 								if linkType == "trade" then
 									-- trade: link... build table of items with enchant links
-									itemTable = {}
+									itemTable = new()
 									linkTable = LTLFunc:Decode(item, true, false); 
 									if linkTable then
 										for link in pairs(linkTable) do
@@ -1149,8 +1176,9 @@ GuildAdsTrade = {
 													LPTunknown[link] = true
 												end
 											end
-											itemTable[item]={ e="enchant:"..tostring(link) }
+											itemTable[item]=new_kv("e", "enchant:"..tostring(link) )
 										end
+										del(linkTable) -- safe: LTL returns a new table every time
 									else
 										GuildAdsTrade.debug("LibTradeLinks: Can't handle trade link:"..tostring(item))
 									end
@@ -1168,15 +1196,12 @@ GuildAdsTrade = {
 											t.q=t.q or data.q;
 										end
 									else
-										if not itemVisibleCache[item8] then								
+										if tmptable[item8] == nil then
 											if GuildAdsTrade.data.adIsVisible(adtype, playerName, item, data) then
-												itemVisibleCache[item8] = 1
+												tmptable[item8] = new_kv("i", item, 1, playerName, "t", adtype, "e", data.e, "q", data.q);
 											else
-												itemVisibleCache[item8] = 0
+												tmptable[item8] = false
 											end
-										end
-										if itemVisibleCache[item8] == 1 then
-											tmptable[item8]={ i=item, [1]=playerName, d=data, t=adtype, e=data.e, q=data.q };
 										end
 									end
 									if type(itemTable) == "table" then
@@ -1185,25 +1210,28 @@ GuildAdsTrade = {
 										item = nil
 									end
 								end
+								del(itemTable)
 							end
 						end
 					end
-					itemVisibleCache = nil
+					del(LPTunknown)
 					local info;
 					for key,value in pairs(tmptable) do
-						info = GuildAds_ItemInfo[value.i] or emptytable;
-						value.l = info.minlevel;
-						value.p = value
-						tinsert(GuildAdsTrade.data.cache[tab], value)
+						if type(value) == "table" then
+							info = GuildAds_ItemInfo[value.i] or emptyTable;
+							value.l = info.minlevel;
+							value.p = value
+							tinsert(GuildAdsTrade.data.cache[tab], value)
+						end
 					end
-					tmptable = nil
+					del(tmptable) -- must not deepDel as it deletes database data otherwise!
 					for _, data in pairs(GuildAdsTrade.data.cache[tab]) do
 						table.sort(data.p, GuildAdsTrade.sortData.predicateFunctions.crafter);
 					end
 				else
 					for _, item, playerName, data in datatype:iterator() do
 						if GuildAdsTrade.data.adIsVisible(adtype, playerName, item, data) then
-							tinsert(GuildAdsTrade.data.cache[tab], { i=item, p=playerName, d=data, t=adtype, q=data.q });
+							tinsert(GuildAdsTrade.data.cache[tab], new_kv("i", item, "p", playerName, "c", data.c, "t", adtype, "q", data.q, "_t", data._t ));
 						end
 					end
 				end
@@ -1607,7 +1635,7 @@ GuildAdsTrade = {
 		
 		addPlayer = function(playerName)
 			local _, color = GuildAdsUITools:GetPlayerColor(playerName);
-			local info = { };
+			local info = new();
 			info.text =  color..playerName.."|r";
 			info.value = playerName;
 			info.notCheckable = 1;
@@ -1616,7 +1644,8 @@ GuildAdsTrade = {
 			-- info.func = ToggleDropDownMenu;
 			-- info.arg1 = 2;
 			-- info.arg2 = playerName
-			UIDropDownMenu_AddButton(info, 1);			
+			UIDropDownMenu_AddButton(info, 1);
+			del(info)
 		end;
 		
 		initialize = function(frame, level)
