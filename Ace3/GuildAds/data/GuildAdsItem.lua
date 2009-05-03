@@ -86,8 +86,8 @@ do
 	end
 
 	-- patch 2.0.2 : to be call be OnTooltipSetItem handler
-	function ItemReady()
-		GuildAds_ChatDebug(GA_DEBUG_STORAGE, "  - ItemReady: %s", tostring(_ITT.currentItemRef));
+	function ItemReady(self)
+		GuildAds_ChatDebug(GA_DEBUG_STORAGE, "  - ItemReady: %s (debug %s)", tostring(_ITT.currentItemRef), tostring(self));
 		if not _ITT.currentItemRef then
 			-- unknown error occured. Drop remaining items from queue and signal iteminfo ready
 			-- This is just a crude workaround
