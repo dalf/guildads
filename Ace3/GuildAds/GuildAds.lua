@@ -38,26 +38,42 @@ end
 -- new/del/deepDel
 -- 
 ---------------------------------------------------------------------------------
+GA_new_table = 0
+GA_reuse_table = 0
 local new, new_kv, del, deepDel
 do
+	local debugmt = {
+		__index = function(t,k)
+			geterrorhandler()("Trying to access freed table: key "..tostring(k).."\n"..debugstack())
+		end;
+		__newindex = function(t,k,v)
+			geterrorhandler()("Trying to insert new key in freed table: "..tostring(k).." with value "..tostring(v).."\n"..debugstack())
+		end;
+	}
 	local list = setmetatable({},{__mode='k'})
 	function new(...)
 		local t = next(list)
 		if t then
+			setmetatable(t, nil)
 			list[t] = nil
 			for i = 1, select('#', ...) do
 				t[i] = select(i, ...)
 			end
+			GA_reuse_table = GA_reuse_table + 1
 			return t
 		else
+			GA_new_table = GA_new_table + 1
 			return {...}
 		end
 	end
 	function new_kv(...)
 		local t = next(list)
 		if t then
+			setmetatable(t, nil)
 			list[t] = nil
+			GA_reuse_table = GA_reuse_table + 1
 		else
+			GA_new_table = GA_new_table + 1
 			t = {}
 		end
 		for i = 1, select('#', ...),2 do
@@ -73,6 +89,7 @@ do
 			t[''] = true
 			t[''] = nil
 			list[t] = true
+			setmetatable(t, debugmt)
 		end
 		return nil
 	end
@@ -87,6 +104,7 @@ do
 			t[''] = true
 			t[''] = nil
 			list[t] = true
+			setmetatable(t, debugmt)
 		end
 		return nil
 	end
