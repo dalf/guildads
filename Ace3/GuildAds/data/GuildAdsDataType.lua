@@ -148,17 +148,35 @@ function GuildAdsDataType:setMostRecentVersion(version)
 end
 
 --[[ about events ]]
+local errorLog = {}
+local function errorHandler(msg)
+	tinsert(errorLog, msg .. "\nCall stack: \n" .. debugstack());
+	GuildAdsTask:AddNamedSchedule("causeErrors", 0.01, nil, nil, causeErrors, nil)
+end
+
+local function causeErrors()
+	local errorText = errorLog[1]
+	if errorText then
+		tremove(errorLog,1)
+		GuildAdsTask:AddNamedSchedule("causeErrors", 0.01, nil, nil, causeErrors, nil)
+		geterrorhandler()(errorText)
+	end
+end
+GuildAdsDataType.causeErrors = causeErrors;
+
 function GuildAdsDataType:triggerUpdate(playerName, id)
 	if self.eventRegistry then
 		GuildAds_ChatDebug(GA_DEBUG_STORAGE, "["..self.metaInformations.name..","..playerName..","..tostring(id).."] triggerUpdate - begin");
 		for obj, method in pairs(self.eventRegistry) do
 			if method == true then
 				GuildAds_ChatDebug(GA_DEBUG_STORAGE, "  - function");
-				obj(self, playerName, id)
+				xpcall(function() obj(self, playerName, id) end, errorHandler)
+				--obj(self, playerName, id)
 			else
 				if( obj[method] ) then 
 					GuildAds_ChatDebug(GA_DEBUG_STORAGE, "  - method");
-					obj[method](obj, self, playerName, id);
+					xpcall(function() obj[method](obj, self, playerName, id) end, errorHandler)
+					--obj[method](obj, self, playerName, id);
 				end
 			end
 		end
@@ -186,11 +204,13 @@ function GuildAdsDataType:triggerTransactionReceived(playerName, newKeys, delete
 		for obj, method in pairs(self.transactionReceivedRegistry) do
 			if method == true then
 				GuildAds_ChatDebug(GA_DEBUG_STORAGE, "  - function");
-				obj(self, playerName, newKeys, deletedKeys)
+				xpcall(function() obj(self, playerName, newKeys, deletedKeys) end, errorHandler)
+				--obj(self, playerName, newKeys, deletedKeys)
 			else
 				if( obj[method] ) then 
 					GuildAds_ChatDebug(GA_DEBUG_STORAGE, "  - method");
-					obj[method](obj, self, playerName, newKeys, deletedKeys);
+					xpcall(function() obj[method](obj, self, playerName, newKeys, deletedKeys) end, errorHandler)
+					--obj[method](obj, self, playerName, newKeys, deletedKeys);
 				end
 			end
 		end
