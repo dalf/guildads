@@ -208,17 +208,27 @@ end
 
 function GuildAdsTradeSkillDataType:GetTradeLink(playerName, professionID)
 	local skillName = GUILDADS_SKILLS[professionID];
-	if skillName and playerName then
+	local LTLFunc = LibStub("LibTradeLinks-1.0")
+	local allSkills = LTLFunc:GetSkillIds()
+	if skillName and playerName and allSkills then
+		-- for every trade link the player has
 		for itemLink, _, data in GuildAdsDB.profile.TradeSkill:iterator(playerName, nil) do
 			local start, _, professionID = string.find(itemLink, "trade:([0-9]+):.*");
 			if professionID then
-				local professionName = GetSpellInfo(professionID)
-				if professionName and professionName == skillName then
-					return itemLink, professionName
+				professionID = tonumber(professionID)
+				-- find the LTL-skillId with which the professionID matches
+				for _, skillId in pairs(allSkills) do
+					local Data = LTLFunc:GetData(skillId)
+					if Data then
+						-- very big assumption: First entry is the spell id of the profession (not true for mining but has no effect here).
+						if GetSpellInfo(Data[1]) == skillName then
+							return itemLink, skillName
+						end
+					end
 				end
 			end
 		end
-	end			
+	end
 end
 
 function GuildAdsTradeSkillDataType:deleteWoW2TradeSkillItems()
