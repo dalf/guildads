@@ -112,7 +112,7 @@ GuildAdsPlugin = {
 			local pluginName = plugin.metaInformations.name;
 			
 			-- add plugin to GuildAdsPlugin.PluginsList
-			GuildAdsPlugin.PluginsList[pluginName] = plugin;
+			tinsert(GuildAdsPlugin.PluginsList, plugin);
 			
 			-- set debug function
 			plugin.debug = function(message)
@@ -183,7 +183,11 @@ GuildAdsPlugin = {
 	deregister = function(plugin)
 		local valid, errorMessage = GuildAdsPlugin.isPluginValid (plugin);
 		if valid then
-			GuildAdsPlugin.PluginsList[plugin.metaInformations.name] = nil;
+			for k,v in pairs(GuildAdsPlugin.PluginsList) do
+				if v.metaInformations.name == plugin.metaInformations.name then
+					GuildAdsPlugin.PluginsList[k] = nil;
+				end
+			end
 			-- call onChannelLeave()
 			return true;
 		else
@@ -262,27 +266,27 @@ end
 
 function GuildAdsPlugin_OnInit()
 	-- call onInit
-  	for pluginName, plugin in pairs(GuildAdsPlugin.PluginsList) do
+  	for _, plugin in ipairs(GuildAdsPlugin.PluginsList) do
 		if type(plugin.onInit) == "function" then
-			GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "onInit: "..pluginName);
+			GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "onInit: "..plugin.metaInformations.name);
 			safecall(plugin.onInit)
 		end
 	end
 end
 
 function GuildAdsPlugin_OnChannelJoin()
-	for pluginName, plugin in pairs(GuildAdsPlugin.PluginsList) do
+	for _, plugin in ipairs(GuildAdsPlugin.PluginsList) do
 		if type(plugin.onChannelJoin) == "function" then
-			GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "onChannelJoin: "..pluginName);
+			GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "onChannelJoin: "..plugin.metaInformations.name);
 			safecall(plugin.onChannelJoin)
 		end
 	end
 end
 
 function GuildAdsPlugin_OnChannelLeave()
-	for pluginName, plugin in pairs(GuildAdsPlugin.PluginsList) do
+	for _, plugin in ipairs(GuildAdsPlugin.PluginsList) do
 		if type(plugin.onChannelLeave) == "function" then
-			GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "onChannelLeave: "..pluginName);
+			GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "onChannelLeave: "..plugin.metaInformations.name);
 			safecall(plugin.onChannelLeave)
 		end
 	end
@@ -290,7 +294,7 @@ end
 
 function GuildAdsPlugin_OnEvent(ltype, ...)
 	local method = EventIdToMethod[ltype];
-	for pluginName, plugin in pairs(GuildAdsPlugin.PluginsList) do
+	for _, plugin in ipairs(GuildAdsPlugin.PluginsList) do
 		if type(plugin[method]) == "function" then
 			safecall(plugin[method], ...)
 		end
