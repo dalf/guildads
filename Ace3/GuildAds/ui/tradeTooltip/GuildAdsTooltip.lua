@@ -65,11 +65,11 @@ local keyTable = setmetatable({}, {
 GuildAdsKeyTable = keyTable
 
 --------------------------------------------------------------------------
-RECIPEBOOK_RECIPEWORD = "Recipe" 
-RECIPEBOOK_WORD_TRANSMUTE = "Transmute";
-RECIPEBOOK_REGEX_SKILL = string.gsub(string.gsub(ITEM_MIN_SKILL, "%%s", "%(%[%%w%%s%]+%)" ), "%(%%d%)", "%%%(%(%%d+%)%%%)");
-RECIPEBOOK_REGEX_REPUTATION = string.gsub(string.gsub(ITEM_REQ_REPUTATION, "%-", "%%%-"), "%%s", "%(%[%%w %]+%)" );
-RECIPEBOOK_REGEX_SPECIALTY = string.gsub(ITEM_REQ_SKILL, "%%s", "%(%[%%w%%s%]+%)" );
+local RECIPEBOOK_RECIPEWORD = "Recipe" 
+local RECIPEBOOK_WORD_TRANSMUTE = "Transmute";
+local RECIPEBOOK_REGEX_SKILL = string.gsub(string.gsub(ITEM_MIN_SKILL, "%%s", "%(%[%%w%%s%]+%)" ), "%(%%d%)", "%%%(%(%%d+%)%%%)");
+local RECIPEBOOK_REGEX_REPUTATION = string.gsub(string.gsub(ITEM_REQ_REPUTATION, "%-", "%%%-"), "%%s", "%(%[%%w %]+%)" );
+local RECIPEBOOK_REGEX_SPECIALTY = string.gsub(ITEM_REQ_SKILL, "%%s", "%(%[%%w%%s%]+%)" );
 local CRAFTED_BY = string.gsub(ITEM_CREATED_BY, "cff00ff00", "cffffff00")
 
 local function RB_ParseItemLink(link)
@@ -145,7 +145,18 @@ local function formatData(dataTypeName, data)
 		return " ", 1, 1, 1;
 	end
 end
-	
+
+local function unpackIterator(text, start)
+	local s, e, o = string.find(text, "([^x]+)x[0-9]+", start or 1);
+	if s and e and o then
+		return e+2, o; -- +1 = ";", +2 : next message
+	end
+end
+
+local function unpackItemIterator(text)
+	return unpackIterator, text;
+end
+
 local emptyTable = {}
 local function addGuildAdsInfo(tooltip, itemLink)
 	local itemKey = keyTable[itemLink]
@@ -222,6 +233,56 @@ local function addGuildAdsInfo(tooltip, itemLink)
 				end
 			end
 			tooltip:Show()
+		end
+		if true then
+			local gatooltip = GuildAdsTooltip
+			--gatooltip:ClearLines()
+			gatooltip:SetOwner(tooltip, "ANCHOR_PRESERVE");
+			gatooltip:SetParent(tooltip);
+			
+			linesAdded = false
+			gatooltip:AddLine("Is used in:")
+			if itemKey > 0 then
+				for item, items, set in LibStub("LibPeriodicTable-3.1"):IterateSet("TradeskillResultMats.Reverse") do
+					if item==itemKey then
+						--local items = LibStub("LibPeriodicTable-3.1"):ItemInSet(itemKey, "TradeskillResultMats.Reverse")
+						--gatooltip:AddLine(items);
+						local level = tostring(UnitLevel("player"))
+						set = set:gsub("TradeskillResultMats.Reverse.","")
+						local header
+						if items then
+							for index, item in unpackItemIterator(items) do
+								local itemLink
+								if tonumber(item) > 0 then
+									itemLink="item:"..item..":0:0:0:0:0:0:0:"..level
+								else
+									itemLink="enchant:"..tostring(-tonumber(item))
+								end
+								local itemInfo = GuildAds_ItemInfo[itemLink] or {};
+								if (itemLink and itemInfo and itemInfo.name) then
+				  					local r, g, b, hex = GuildAds_GetItemQualityColor(itemInfo.quality);
+				  					local link = hex.."|H"..itemLink.."|h["..itemInfo.name.."]|h|r";
+				  					if not header then
+				  						gatooltip:AddLine(set)
+				  						header = true
+				  					end
+				  					if GuildAdsItems[keyTable[itemLink]] then
+										gatooltip:AddLine("   "..link)
+									else
+										gatooltip:AddLine("   "..link.." (guildads unknown)")
+									end
+									linesAdded = true
+								end
+							end
+						end
+					end
+				end
+			end
+			if not linesAdded then
+				gatooltip:ClearLines()
+			else
+				gatooltip:Show()
+			end
 		end
 	end
 end

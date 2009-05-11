@@ -10,4 +10,23 @@
 		</Scripts>
 	</Frame>
 -->
+	<GameTooltip name="GuildAdsTooltip" parent="GameToolTip" inherits="GameTooltipTemplate">
+		<Anchors>
+			<Anchor point="TOPLEFT" relativeTo="GameTooltip" relativePoint="TOPRIGHT">
+				<Offset>
+					<AbsDimension x="0" y="0"/>
+				</Offset>
+			</Anchor>
+		</Anchors>
+		<Scripts>
+			<OnLoad>
+				--GameTooltip_OnLoad(self);
+				--self:SetPadding(16);
+				--self:RegisterForDrag("LeftButton");
+				--self:SetOwner(UIParent,"ANCHOR_PRESERVE")
+				self:SetScale(0.8)
+				--self:SetUserPlaced(true);
+			</OnLoad>
+		</Scripts>
+	</GameTooltip>
 </Ui>
