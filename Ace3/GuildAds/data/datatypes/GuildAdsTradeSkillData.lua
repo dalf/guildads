@@ -17,6 +17,7 @@
 ]]
 
 local clearedWoW2
+local wowIdToGuildAdsId = {}
 
 GuildAdsTradeSkillDataType = GuildAdsTableDataType:new({
 	metaInformations = {
@@ -43,6 +44,19 @@ AceEvent:Embed(GuildAdsTradeSkillDataType)
 
 function GuildAdsTradeSkillDataType:Initialize()
 	self:RegisterEvent("PLAYER_ENTERING_WORLD", "enterWorld");
+	-- create wowSkillId to GuildAds skill ID mapping
+	LTLFunc = LibStub("LibTradeLinks-1.0")
+	wowIdToGuildAdsId[LTLFunc.SKILL_ALCHEMY] = 4
+	wowIdToGuildAdsId[LTLFunc.SKILL_BLACKSMITHING] = 5
+	wowIdToGuildAdsId[LTLFunc.SKILL_COOKING] = 12
+	wowIdToGuildAdsId[LTLFunc.SKILL_ENCHANTING] = 9
+	wowIdToGuildAdsId[LTLFunc.SKILL_ENGINEERING] = 6
+	wowIdToGuildAdsId[LTLFunc.SKILL_FIRSTAID] = 11
+	wowIdToGuildAdsId[LTLFunc.SKILL_JEWELCRAFTING] = 14
+	wowIdToGuildAdsId[LTLFunc.SKILL_LEATHERWORKING] = 7
+	wowIdToGuildAdsId[LTLFunc.SKILL_MINING] = 2
+	wowIdToGuildAdsId[LTLFunc.SKILL_TAILORING] = 8
+	wowIdToGuildAdsId[LTLFunc.SKILL_INSCRIPTION] = 15
 end
 
 function GuildAdsTradeSkillDataType:enterWorld()
@@ -209,22 +223,17 @@ end
 function GuildAdsTradeSkillDataType:GetTradeLink(playerName, professionID)
 	local skillName = GUILDADS_SKILLS[professionID];
 	local LTLFunc = LibStub("LibTradeLinks-1.0")
-	local allSkills = LTLFunc:GetSkillIds()
-	if skillName and playerName and allSkills then
+	if skillName and playerName then
 		-- for every trade link the player has
 		for itemLink, _, data in GuildAdsDB.profile.TradeSkill:iterator(playerName, nil) do
-			local start, _, professionID = string.find(itemLink, "trade:([0-9]+):.*");
-			if professionID then
-				professionID = tonumber(professionID)
+			local start, _, tradeLinkID = string.find(itemLink, "trade:([0-9]+):.*");
+			if tradeLinkID then
+				tradeLinkID = tonumber(tradeLinkID)
 				-- find the LTL-skillId with which the professionID matches
-				for _, skillId in pairs(allSkills) do
-					local Data = LTLFunc:GetData(skillId)
-					if Data then
-						-- very big assumption: First entry is the spell id of the profession (not true for mining but has no effect here).
-						if GetSpellInfo(Data[1]) == skillName then
-							return itemLink, skillName
-						end
-					end
+				local wowProfessionId = LTLFunc:GetSkillId(tradeLinkID)
+				local GuildAdsSkillId = wowIdToGuildAdsId[wowProfessionId]
+				if GuildAdsSkillId == professionID then
+					return itemLink, skillName
 				end
 			end
 		end
