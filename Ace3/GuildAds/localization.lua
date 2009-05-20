@@ -6,6 +6,8 @@ GUILDADS_UPGRADE_TIP		= "New GuildAds available: ";
 GUILDADS_UPGRADE_TIP		= "There is a newer version of GuildAds available: ";
 GUILDADS_STATUS_TIP		= "Remaining searches:";
 
+GUILDADS_MAJOR_VERSION		= "GuildAds: New incompatible protocol noticed. Please upgrade."
+
 -- Options frame
 GUILDADS_OPTIONS_TITLE		= "GuildAds options";
 GUILDADS_CHAT_OPTIONS		= "Chat settings";

@@ -275,8 +275,20 @@ function GuildAdsComm:GetChannelStatus()
 	return status, chatStatus, s, t_min, t_max
 end
 
+local mostRecentSeenProtocol = tonumber(GUILDADS_VERSION_PROTOCOL)
+
 function GuildAdsComm.FilterText(text)
-	return text:find(GUILDADS_MSG_PREFIX_REGEX, 1) ~= nil
+	local s, e, version = text:find(GUILDADS_MSG_PREFIX_REGEX, 1)
+	if s~= nil then
+		version = tonumber(version)
+		if version and version > mostRecentSeenProtocol then
+			DEFAULT_CHAT_FRAME:AddMessage("\124cffff8080"..GUILDADS_MAJOR_VERSION.."\124r")
+			mostRecentSeenProtocol = version
+		end
+		return true
+	else
+		return false
+	end
 end
 
 function GuildAdsComm.OnJoin(self)
@@ -796,7 +808,7 @@ end
 local string_find = string.find
 local string_sub = string.sub
 local table_insert = table.insert
-function ssplit( inSplitPattern, str)
+local function ssplit( inSplitPattern, str)
 	outResults = { }
 	local theStart = 1
 	local theSplitStart, theSplitEnd = string_find( str, inSplitPattern, theStart )
