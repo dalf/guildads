@@ -45,8 +45,7 @@ local keyTable = setmetatable({}, {
 			local start, _, linkType, itemId = string.find(itemRef, "([^:]+):([^:]+)")
 			if start then
 				
-				local key = (linkType=="item") and tonumber(itemId) or -tonumber(itemId)
-				
+				local key = (linkType=="item") and tonumber(itemId) or ((linkType=="enchant") and -tonumber(itemId) or false)
 				
 				rawset(t, itemLink, key)
 				
