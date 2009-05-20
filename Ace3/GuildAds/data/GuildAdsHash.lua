@@ -78,25 +78,14 @@ function GuildAdsHash:CreateEmptyHashTree(level)
 	return tree;
 end
 
-function GuildAdsHash:RemoveNumberPlayers()
-	players = GuildAdsDB.channel[GuildAds.channelName]:getPlayers();
-	for playerName in pairs(players) do
-		if tostring(playerName):match("[0-9]+") then
-			GuildAdsDB.channel[GuildAds.channelName]:deletePlayer(playerName);
-		end
-	end
-end
-
 function GuildAdsHash:CreateHashTree()
 	local tree, path, hashMask, CheckSums;
 	local tmp, numIDs, numHashes, maxShared, maxV;
 	
-	GuildAdsHash:RemoveNumberPlayers(); -- this is to be removed eventually. Numberplayers "1", "2", etc. were inserted into the database on error. This is the cleanup.
-	
 	tree={};
 	GuildAdsHash:setMetaTable(tree);
 	
-	players = GuildAdsDB.channel[GuildAds.channelName]:getPlayers();
+	players = GuildAdsDB.channel[GuildAds.channelName]:getPlayers(true); -- true: get all players (normal + virtual)
 
 	tmp = {}
 	numIDs=0;

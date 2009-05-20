@@ -57,14 +57,33 @@ function GuildAdsDBChannel:getRaw()
 	return self.db;
 end
 
-function GuildAdsDBChannel:getPlayers()
-	return self.db.Players;
+function GuildAdsDBChannel:isVirtualPlayer(playerName)
+	return playerName:find(":") ~= nil
+end
+
+function GuildAdsDBChannel:getPlayers(includeVirtual)
+	if includeVirtual then
+		local t={}
+		for k,v in pairs(self.db.Players) do
+			t[k]=v
+		end
+		for k,v in pairs(self.db.VirtualPlayers) do
+			t[k]=v
+		end
+		return t;
+	else
+		return self.db.Players;
+	end
 end
 
 function GuildAdsDBChannel:addPlayer(playerName)
 	if self:isPlayerAllowed(playerName) then
-		if not self.db.Players[playerName] then
-			self.db.Players[playerName] = true;
+		if not self.db.Players[playerName] and not self.db.VirtualPlayers[playerName] then
+			if self:isVirtualPlayer(playerName) then
+				self.db.VirtualPlayers[playerName] = true;
+			else
+				self.db.Players[playerName] = true;
+			end
 			-- old profile data may exist in the database, make sure the hash tree is updated
 			for name, profileDT in pairs(GuildAdsDB.profile) do
 				if profileDT:getRevision(playerName) > 0 then -- speed-up
@@ -80,7 +99,7 @@ function GuildAdsDBChannel:addPlayer(playerName)
 end
 
 function GuildAdsDBChannel:deletePlayer(playerName)
-	if self.db.Players[playerName] then
+	if self.db.Players[playerName] or self.db.VirtualPlayers[playerName] then
 		GuildAds_ChatDebug(GA_DEBUG_STORAGE,"clearing datatypes for player "..playerName);
 		for name, profileDT in pairs(GuildAdsDB.profile) do
 			--GuildAds:Print("clearing "..name.." for player "..playerName);
@@ -94,6 +113,7 @@ function GuildAdsDBChannel:deletePlayer(playerName)
 			end
 		end
 		self.db.Players[playerName] = nil;
+		self.db.VirtualPlayers[playerName] = nil;
 		self:triggerEvent( self.PLAYER, playerName);
 	end
 end
@@ -104,7 +124,7 @@ function GuildAdsDBChannel:deletePlayers(id)
 	if id then
 		players = { [id]=true }; -- don't check the whole list if we know only 1 id has changed.
 	else
-		players = GuildAdsDB.channel[GuildAds.channelName]:getPlayers();
+		players = GuildAdsDB.channel[GuildAds.channelName]:getPlayers(true);
 	end
 	local workingTable = {};
 	for playerName in pairs(players) do
