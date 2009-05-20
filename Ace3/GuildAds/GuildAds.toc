@@ -24,9 +24,9 @@ lib\AceGUI-3.0\AceGUI-3.0.xml
 lib\AceConfig-3.0\AceConfig-3.0.xml
 lib\LibPeriodicTable-3.1\LibPeriodicTable-3.1.lua
 lib\LibPeriodicTable-3.1\LibPeriodicTable-3.1-Tradeskill\LibPeriodicTable-3.1-Tradeskill.lua
+lib\LibPeriodicTable-3.1\LibPeriodicTable-3.1-TradeskillResultMats\LibPeriodicTable-3.1-TradeskillResultMats.lua
 lib\LibTradeLinks-1.0\LibTradeLinks-1.0.lua
-lib\LibTradeLinks-1.0\LiveData.lua
-lib\LibTradeLinks-1.0\BetaData.lua
+lib\LibTradeLinks-1.0\9901.lua
 lib\LibCompress\lib.xml
 revision.lua
 localization.lua

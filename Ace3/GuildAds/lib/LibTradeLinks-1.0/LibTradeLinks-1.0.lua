@@ -1,5 +1,5 @@
 local MAJOR = "LibTradeLinks-1.0";
-local MINOR = "9835";
+local MINOR = "9901";
 
 local LibTradeLinks, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 
@@ -62,80 +62,76 @@ local UnitGUID = _G.UnitGUID;
 local Data = { };
 local BlackList = { };
 local BoPList = { };
+local Builds = { };
 
 --------------------------------------------------------------------------------
 -- Base 64 decode                                                             --
 --------------------------------------------------------------------------------
-local DecodeBase64Char;
-local EncodeBase64Char;
-local Base64MatchString;
 
--- NOTE: Patches after 3.0.3 use a standard Base64 encoding, so
---       check build number to determine which method to use
-if tonumber((select(2, GetBuildInfo()))) > 9183 then
-	Base64MatchString = "[A-Za-z0-9+/]";
-	local base64chars = {
-		'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
-		'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z',
-		'0','1','2','3','4','5','6','7','8','9','+','/'
-	};
-	local base64values = {
-		-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
-		-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
-		-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 62, -1, -1, -1, 63, 
-		52, 53, 54, 55, 56, 57, 58, 59, 60, 61, -1, -1, -1, -1, -1, -1,
-		-1, 00, 01, 02, 03, 04, 05, 06, 07, 08, 09, 10, 11, 12, 13, 14, 
-		15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, -1, -1, -1, -1, -1, 
-		-1, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
-		41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, -1, -1, -1, -1, -1}; 
+local Base64MatchString = "[A-Za-z0-9+/]";
+local base64chars = {
+	'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
+	'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z',
+	'0','1','2','3','4','5','6','7','8','9','+','/'
+};
+local base64values = {
+	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
+	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
+	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 62, -1, -1, -1, 63, 
+	52, 53, 54, 55, 56, 57, 58, 59, 60, 61, -1, -1, -1, -1, -1, -1,
+	-1, 00, 01, 02, 03, 04, 05, 06, 07, 08, 09, 10, 11, 12, 13, 14, 
+	15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, -1, -1, -1, -1, -1, 
+	-1, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
+	41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, -1, -1, -1, -1, -1}; 
 
-	function DecodeBase64Char(c)
-		c = strbyte(c);
-		if c < 0 or c > 127 then
-			return -1;
-		end
-		return base64values[c + 1];
+local function DecodeBase64Char(c)
+	c = strbyte(c);
+	if c < 0 or c > 127 then
+		return -1;
 	end
+	return base64values[c + 1];
+end
 
-	function EncodeBase64Char(val)
-		if val < 0 or val > 63 then
-			return '-';
-		else
-			return base64chars[val + 1];
-		end
+local function EncodeBase64Char(val)
+	if val < 0 or val > 63 then
+		return '-';
+	else
+		return base64chars[val + 1];
 	end
-else
-	Base64MatchString = "[<-{]";
-	-- This is build <= 9183, use old version, which is a simple offset of 60.
-	function DecodeBase64Char(c)
-		return strbyte(c) - 60;
-	end
+end
 
-	function EncodeBase64Char(val)
-		return strchar(60 + val);
-	end
-	
+local function getBuild(buildNumber)
+	return tonumber(buildNumber) or tonumber((select(2, GetBuildInfo())));
 end
 
 --------------------------------------------------------------------------------
--- Return the build version for which the trade data is valid                 --
+-- Register a build number                                                    --
+--------------------------------------------------------------------------------
+function LibTradeLinks:RegisterBuild(buildVersion)
+	Builds[#Builds + 1] = buildVersion;
+	table.sort(Builds, function(a,b) return b < a end);
+end
+
+
+--------------------------------------------------------------------------------
+-- Return the build versions for which the trade data is valid                --
 --------------------------------------------------------------------------------
 function LibTradeLinks:GetBuildVersion()
-	return MINOR;
+	return unpack(Builds);
 end
 
 --------------------------------------------------------------------------------
 -- Set the black list containing non-recipe spellIds                          --
 --------------------------------------------------------------------------------
-function LibTradeLinks:SetBlackList(blackList)
-	BlackList = blackList;
+function LibTradeLinks:SetBlackList(buildNumber, blackList)
+	BlackList[buildNumber] = blackList;
 end
 
 --------------------------------------------------------------------------------
 -- Set the black list containing non-recipe spellIds                          --
 --------------------------------------------------------------------------------
-function LibTradeLinks:SetBoPList(bopList)
-	BoPList = bopList;
+function LibTradeLinks:SetBoPList(buildNumber, bopList)
+	BoPList[buildNumber] = bopList;
 end
 
 --------------------------------------------------------------------------------
@@ -143,23 +139,28 @@ end
 -- the profession to add, and data is a table containing spellId in the order --
 -- as they appear in the trade-link bitmask.                                  --
 --------------------------------------------------------------------------------
-function LibTradeLinks:AddData(skillId, professionIdList, spellIdList)
-	local idList = {};
-	for _, id in next, professionIdList do idList[id] = id; end
-	Data[skillId] = {
-		SkillId = skillId,
-		ProfessionIdList = idList,
-		MainProfessionId = professionIdList[1],
-		Label = GetSpellInfo(professionIdList[1]),
-		Data = spellIdList,
-	};
+function LibTradeLinks:AddData(buildNumber, skillId, professionIdList, spellIdList)
+	if Data[skillId] then
+		Data[skillId].Data[buildNumber] = spellIdList;
+		for _, id in next, professionIdList do Data[skillId].ProfessionIdList[id] = id; end
+	else
+		local idList = {};
+		for _, id in next, professionIdList do idList[id] = id; end
+		Data[skillId] = {
+			SkillId = skillId,
+			ProfessionIdList = idList,
+			MainProfessionId = professionIdList[1],
+			Label = GetSpellInfo(professionIdList[1]),
+			Data = { [buildNumber] = spellIdList, },
+		};
+	end
 end
 
 --------------------------------------------------------------------------------
 -- Return the table containing spellIds for the specified skill id            --
 --------------------------------------------------------------------------------
-function LibTradeLinks:GetData(skillId)
-	return Data[skillId] and Data[skillId].Data or nil;
+function LibTradeLinks:GetData(skillId, buildNumber)
+	return Data[skillId] and Data[skillId].Data[getBuild(buildNumber)];
 end
 
 --------------------------------------------------------------------------------
@@ -173,9 +174,7 @@ end
 -- Return the name of the specified skillId                                   --
 --------------------------------------------------------------------------------
 function LibTradeLinks:GetSkillName(skillId)
-	if Data[skillId] then
-		return Data[skillId].Label;
-	end
+	return Data[skillId] and Data[skillId].Label;
 end
 --------------------------------------------------------------------------------
 -- Returna s Base64 encoded bitmask, represented by the table t. Function     --
@@ -245,8 +244,12 @@ end
 --------------------------------------------------------------------------------
 -- Decode a trade-link and return a table of contained spell Ids              --
 -- If purge is specified, black-listed spells are purged from the list        --
+-- Returns:                                                                   --
+--      1: table of spellIds                                                  --
+--      2: skillId                                                            --
+--      3: true if data for current build used, false otherwise               --
 --------------------------------------------------------------------------------
-function LibTradeLinks:Decode(link, purgeNonRecipe, purgeBoP)
+function LibTradeLinks:Decode(link, purgeNonRecipe, purgeBoP, buildNumber)
 	assert(type(link) == "string", "Error, LibTradeLinks:Decode() requires a string as first argument");
 
 	local profession, guid, skills = link:match("trade:(%d+):%d+:%d+:([0-9a-fA-F]+):(" .. Base64MatchString .. "+)");
@@ -254,7 +257,7 @@ function LibTradeLinks:Decode(link, purgeNonRecipe, purgeBoP)
 		profession = tonumber(profession);
 		for skillId, data in next, Data do
 			if data.ProfessionIdList[profession] then
-				return self:Purge(Decode64(skills, data.Data), purgeNonRecipe, purgeBoP), skillId;
+				return self:Purge(Decode64(skills, self:GetData(skillId, buildNumber)), purgeNonRecipe, purgeBoP), skillId, getBuild() == getBuild(buildNumber);
 			end
 		end
 	end
@@ -263,8 +266,8 @@ end
 --------------------------------------------------------------------------------
 -- Decode a trade-link, and write to ChatFrame1 a list of all spells linked.  --
 --------------------------------------------------------------------------------
-function LibTradeLinks:DecodeOut(link, purgeNonRecipe, purgeBoP)
-	local spells = self:Decode(link, purgeNonRecipe, purgeBoP);
+function LibTradeLinks:DecodeOut(link, purgeNonRecipe, purgeBoP, buildNumber)
+	local spells = self:Decode(link, purgeNonRecipe, purgeBoP, buildNumber);
 	if spells then
 		ChatFrame1:AddMessage(link .. " contains:");
 		local out = "";
@@ -304,4 +307,41 @@ function LibTradeLinks:Purge(spells, purgeNonRecipe, purgeBoP)
 	end
 	
 	return spells;
+end
+
+--------------------------------------------------------------------------------
+-- Returns the specialization spells for the passed skillId                   --
+-- If a trade-link is passed, returns the specialization spells contained     --
+--------------------------------------------------------------------------------
+function LibTradeLinks:GetSpecializationSpells(skillId, buildNumber)
+	if type(skillId) == "string" then
+		local spells, skillId = self:Decode(skillId, nil, nil, buildNumber);
+		if not spells then
+			return;
+		end
+		
+		local list = Data[skillId].ProfessionIdList;
+		for id, _ in next, spells do
+			if not list[id] then
+				list[id] = nil;
+			end
+		end
+		
+		return list;
+	end
+	
+	assert(type(skillId) == "number" and Data[skillId], "LibTradeLinks:GetSpecializationSpells() Requires a valid skill ID or tradelink as argument");
+	return Data[skillId].ProfessionIdList;
+end
+
+--------------------------------------------------------------------------------
+-- Returns the skillId for the passed profession spell id, or nil             --
+--------------------------------------------------------------------------------
+function LibTradeLinks:GetSkillId(professionSpell)
+	assert(type(professionSpell) == "number", "LibTradeLinks:GetSkillId() requires a numerical spell id as argument");
+	for skillId, data in next, Data do
+		if data.ProfessionIdList[professionSpell] then
+			return skillId;
+		end
+	end
 end
