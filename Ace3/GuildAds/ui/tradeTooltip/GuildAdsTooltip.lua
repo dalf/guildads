@@ -234,19 +234,14 @@ local function addGuildAdsInfo(tooltip, itemLink)
 			end
 			tooltip:Show()
 		end
-		if true then
+		if GuildAdsExtraTooltip and tooltip:IsVisible() then
 			local gatooltip = GuildAdsTooltip
-			--gatooltip:ClearLines()
-			gatooltip:SetOwner(tooltip, "ANCHOR_PRESERVE");
-			gatooltip:SetParent(tooltip);
 			
-			linesAdded = false
-			gatooltip:AddLine("Is used in:")
+			local lines = {}
+			tinsert(lines, "Is used in:");
 			if itemKey > 0 then
 				for item, items, set in LibStub("LibPeriodicTable-3.1"):IterateSet("TradeskillResultMats.Reverse") do
 					if item==itemKey then
-						--local items = LibStub("LibPeriodicTable-3.1"):ItemInSet(itemKey, "TradeskillResultMats.Reverse")
-						--gatooltip:AddLine(items);
 						local level = tostring(UnitLevel("player"))
 						set = set:gsub("TradeskillResultMats.Reverse.","")
 						local header
@@ -263,24 +258,46 @@ local function addGuildAdsInfo(tooltip, itemLink)
 				  					local r, g, b, hex = GuildAds_GetItemQualityColor(itemInfo.quality);
 				  					local link = hex.."|H"..itemLink.."|h["..itemInfo.name.."]|h|r";
 				  					if not header then
-				  						gatooltip:AddLine(set)
+				  						tinsert(lines, set)
 				  						header = true
 				  					end
 				  					if GuildAdsItems[keyTable[itemLink]] then
-										gatooltip:AddLine("   "..link)
+										tinsert(lines, "   "..link)
 									else
-										gatooltip:AddLine("   "..link.." (guildads unknown)")
+										tinsert(lines, "   "..link.." (guildads unknown)")
 									end
-									linesAdded = true
 								end
 							end
 						end
 					end
 				end
 			end
-			if not linesAdded then
-				gatooltip:ClearLines()
-			else
+			if #lines > 1 then
+				tooltip:Show()
+				gatooltip:SetOwner(tooltip, "ANCHOR_PRESERVE");
+				gatooltip:SetParent(tooltip);
+				local maxWidth = 0
+				for _, line in pairs(lines) do
+					GuildAdsTooltipDummyText:SetText(line)
+					local width = GuildAdsTooltipDummyText:GetWidth()
+					if width > maxWidth then
+						maxWidth = width
+					end
+				end
+				maxWidth = maxWidth * 0.8
+				if (maxWidth + 2) < (UIParent:GetWidth() - GameTooltip:GetRight() ) then
+					gatooltip:ClearAllPoints();
+					gatooltip:SetPoint("TOPLEFT", GameTooltip, "TOPRIGHT", 0, 0)
+					for _, line in pairs(lines) do
+						gatooltip:AddLine(line)
+					end
+				else
+					gatooltip:ClearAllPoints();
+					gatooltip:SetPoint("TOPRIGHT", GameTooltip, "TOPLEFT", 0, 0)
+					for _, line in pairs(lines) do
+						gatooltip:AddLine(line)
+					end
+				end
 				gatooltip:Show()
 			end
 		end

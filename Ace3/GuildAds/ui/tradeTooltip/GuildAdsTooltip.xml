@@ -29,4 +29,15 @@
 			</OnLoad>
 		</Scripts>
 	</GameTooltip>
+	<Frame>
+		<Layers>
+			<Layer level="BACKGROUND">
+				<FontString name="GuildAdsTooltipDummyText" inherits="Tooltip_Med" hidden="true">
+					<Size>
+						<AbsDimension x="0" y="14"/>
+					</Size>
+				</FontString>
+			</Layer>
+		</Layers>
+	</Frame>
 </Ui>
