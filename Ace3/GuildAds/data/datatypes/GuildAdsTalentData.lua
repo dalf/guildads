@@ -8,6 +8,41 @@
 -- Licence: GPL version 2 (General Public License)
 ----------------------------------------------------------------------------------
 
+local Base64MatchString, base64chars, base64values, DecodeBase64Char, EncodeBase64Char
+do
+	Base64MatchString = "[A-Za-z0-9+/]";
+	local base64chars = {
+		'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
+		'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z',
+		'0','1','2','3','4','5','6','7','8','9','+','/'
+	};
+	local base64values = {
+		-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
+		-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
+		-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 62, -1, -1, -1, 63, 
+		52, 53, 54, 55, 56, 57, 58, 59, 60, 61, -1, -1, -1, -1, -1, -1,
+		-1, 00, 01, 02, 03, 04, 05, 06, 07, 08, 09, 10, 11, 12, 13, 14, 
+		15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, -1, -1, -1, -1, -1, 
+		-1, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
+		41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, -1, -1, -1, -1, -1}; 
+
+	function DecodeBase64Char(c)
+		c = strbyte(c);
+		if c < 0 or c > 127 then
+			return -1;
+		end
+		return base64values[c + 1];
+	end
+
+	function EncodeBase64Char(val)
+		if val < 0 or val > 63 then
+			return '-';
+		else
+			return base64chars[val + 1];
+		end
+	end
+end
+
 GuildAdsTalentDataType = GuildAdsTableDataType:new({
 	metaInformations = {
 		name = "Talent",
@@ -28,10 +63,10 @@ GuildAdsTalentDataType = GuildAdsTableDataType:new({
 			[6] = { key="co", codec="Integer" },	-- column
 			[7] = { key="cr", codec="Integer" },	-- currentRank
 			[8] = { key="mr", codec="Integer" },	-- maxRank
-			[9] = { key="p", codec="Integer" },	-- meetsPrereq
+			[9] = { key="p", codec="Integer" },	-- meetsPrereq -- turns out to be _always_ 1 (no need to share)
 			[10] = { key="pt", codec="Integer" },	-- Prereq:tier
 			[11] = { key="pc", codec="Integer" },	-- Prereq:column
-			[12] = { key="pl", codec="Integer" },	-- Prereq:isLearnable
+			[12] = { key="pl", codec="Integer" },	-- Prereq:isLearnable -- is 1 if talent at (Prereq:tier, Prereq:column) is maxed (not really necessary to share)
 		}
 	}
 });
@@ -60,19 +95,20 @@ AceEvent:Embed(GuildAdsTalentDataType)
 -- 	pointsSpent can be calculated by summing currenRank inside each tab and therefore doesn't have to be shared.
 --
 
+-- Update: Dual talent support requires one more talent tree to be shared. Both trees have much in common:
+-- Static/Common: name, nameTalent, iconTexture, iconPath, background, tier, column, maxRank, Prereq:tier, Prereq:column
+-- Dynamic/per tree: numTalents(can be calculated from currentRank), currentRank, meetsPrereq(always 1), Prereq:isLearnable(can be discovered from currentRank and static data)
+-- This leaves only currentRank to be shared(!!) :-)
+-- 
+-- Static part is to be shared is if no talent points are spent.
+-- Dynamic part only shares what is different from Static part.
 
 function GuildAdsTalentDataType:Initialize()
 	self:RegisterEvent("CHARACTER_POINTS_CHANGED","onEvent");
-	--self:RegisterEvent("VARIABLES_LOADED","onEvent");
-	--GuildAdsTalentDataType:onEvent();
 	GuildAdsTask:AddNamedSchedule("GuildAdsTalentDataTypeInit", 8, nil, nil, self.onEvent, self)
 end
 
 function GuildAdsTalentDataType:onEvent()
-	--if not GetTalentInfo(1,1) then
-	--	return
-	--end
-
 	-- parse complete talent tree now
 	local name, iconTexture, pointsSpent, background, numTalents, tabIndex;
 	local talentIndex, nameTalent, talentLink, iconPath, tier, column, currentRank, maxRank, isExceptional, meetsPrereq, ptier, pcolumn, isLearnable;
@@ -105,6 +141,34 @@ function GuildAdsTalentDataType:onEvent()
 																pl=isLearnable});
 		end
 	end
+	
+	-- build a talent link
+	-- talentspec:<class id>:<wowbuildinfo>:XXXXXXXXXXXXXXX:YYYYYYYYYYYYYY:ZZZZZZZZZZZZZ
+	local talentLinkTable={};
+	tinsert(talentLinkTable, "talentspec:")
+	local _, WoWClassId = UnitClass("player")
+	tinsert(talentLinkTable, GuildAdsMainDataType:getClassIdFromWoWClassId(WoWClassId))
+	tinsert(talentLinkTable, ":")
+	tinsert(talentLinkTable, (select(2,GetBuildInfo()))) -- not ready upon login
+	local rest
+	for i=1,GetNumTalentTabs() do
+		local q=false;
+		tinsert(talentLinkTable,":")
+		for j=1,GetNumTalents(i) do
+			_,_,_,_,currentRank = GetTalentInfo(i,j);
+			if q then
+				tinsert(talentLinkTable, EncodeBase64Char(rest+currentRank*8))
+			else
+				rest = currentRank;
+			end
+			q=not q
+		end
+		if not q then
+			tinsert(talentLinkTable,EncodeBase64Char(rest))
+		end
+	end
+	local talentLink = table.concat(talentLinkTable,"")
+	GuildAdsTalentDataType.myLink = talentLink
 end
 
 function GuildAdsTalentDataType:getTableForPlayer(author)
