@@ -10,9 +10,19 @@
 
 -- local AceHook = LibStub("AceHook-3.0")
 
+-- temporary fix until LibTradeLinks is fixed.
+local LTLBlackList = { 3273,3274,7924,10846,27028,45542,10846,2018,3100,3538,9785,9788,9787,17039,17040,17041,29844,51300,2108,3104,3811,10656,10660,10658,10662,32549,51302,2259,3101,3464,11611,28596,28677,28675,28672,51304,53042,60893,2550,3102,3413,818,18260,33359,51296,2580,2575,2576,2656,3564,8388,10248,29354,32606,50310,53120,53121,53122,53123,53124,53040,3908,3909,3910,12180,26801,26798,26797,26790,51309,59390,4036,4037,4038,12656,20222,20219,4073,12749,19804,13166,13258,30350,49383,51306,56273,7411,7412,7413,13262,13920,28029,51313,25229,25230,28894,28895,28897,31252,51311,55534,45357,45358,45359,45360,45361,45363,51005,52175,61177,61288 }
+local function LTLPurge(spells)
+	if type(spells)=="table" then
+		for _, spellId in next, LTLBlackList do
+			spells[spellId] = nil;
+		end
+	end
+end
+
 local GuildAdsDB = GuildAdsDB
-GuildAdsItems = {}
-GuildAdsCrafts = {}
+local GuildAdsItems = {}
+local GuildAdsCrafts = {}
 
 local _G = getfenv()
 
@@ -543,6 +553,7 @@ GuildAdsTradeTooltip = {
 				-- trade: link... build table of items with enchant links
 				itemTable = {}
 				local linkTable = LTLFunc:Decode(item, true, false); 
+				LTLPurge(linkTable);
 				local level = tostring(UnitLevel("player"))
 				if linkTable then
 					for link in pairs(linkTable) do
