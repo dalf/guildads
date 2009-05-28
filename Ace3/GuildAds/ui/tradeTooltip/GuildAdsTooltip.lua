@@ -166,6 +166,87 @@ local function unpackItemIterator(text)
 	return unpackIterator, text;
 end
 
+local function getExtraTipLines(itemKey)
+	local lines = {}
+	tinsert(lines, GUILDADS_TOOLTIP_USED);
+	if itemKey > 0 then
+		local t = GuildAdsItems[itemKey]
+		for item, items, set in LibStub("LibPeriodicTable-3.1"):IterateSet("TradeskillResultMats.Reverse") do
+			if item==itemKey then
+				local level = tostring(UnitLevel("player"))
+				set = set:gsub("TradeskillResultMats.Reverse.","")
+				local header
+				if items then
+					for index, item in unpackItemIterator(items) do
+						local itemLink
+						if tonumber(item) > 0 then
+							itemLink="item:"..item..":0:0:0:0:0:0:0:"..level
+						else
+							itemLink="enchant:"..tostring(-tonumber(item))
+						end
+						local itemInfo = GuildAds_ItemInfo[itemLink] or {};
+						if (itemLink and itemInfo and itemInfo.name) then
+		  					local r, g, b, hex = GuildAds_GetItemQualityColor(itemInfo.quality);
+		  					local link = hex..itemInfo.name.."|r";
+		  					if not header then
+		  						tinsert(lines, set)
+		  						header = true
+		  					end
+		  					local gai = GuildAdsItems[keyTable[itemLink]]
+		  					if gai then
+		  						if gai.TradeSkill and gai.TradeSkill[GuildAds.playerName] then
+									tinsert(lines, "   + "..link)
+								else
+									tinsert(lines, "   "..link)
+								end
+							else
+								tinsert(lines, "   - "..link)
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+	return lines
+end
+
+local function setPoints(tooltip)
+	GuildAdsTooltip:ClearAllPoints();
+	local maxWidth = GuildAdsExtraTipWidth or 0
+	if (maxWidth + 2) < (UIParent:GetWidth() - tooltip:GetRight() ) then
+		GuildAdsTooltip:SetPoint("TOPLEFT", tooltip, "TOPRIGHT", 0, 0)
+	else
+		GuildAdsTooltip:SetPoint("TOPRIGHT", tooltip, "TOPLEFT", 0, 0)
+	end
+
+end
+
+local hooks = {}
+
+local function hookOnSizeChanged(self, width, height)
+	if hooks[self] then
+		if GuildAdsExtraTipLastParent == self then 
+			setPoints(self)
+		end
+	end
+end
+
+-- Called to apply a pre-hook on the given tooltip's event.
+local function hookscript(tip,script,hook)
+	local orig = tip:GetScript(script)
+	hooks[tip] = hooks[tip] or {origs = {}, hooks = {}}
+	hooks[tip].origs[script] = orig
+	local h = function(...)
+		if hooks[tip].hooks[script] then
+			hook(...)
+		end
+		if orig then orig(...) end
+	end
+	hooks[tip].hooks[script] = h
+	tip:SetScript(script,h)
+end
+
 local emptyTable = {}
 local function addGuildAdsInfo(tooltip, itemLink)
 	local itemKey = keyTable[itemLink]
@@ -178,12 +259,18 @@ local function addGuildAdsInfo(tooltip, itemLink)
 			if infosR or infosA then
 				local i=1
 				while (infosR[i] or infosA[i]) and i<5 do
-					local msgR, msgRr, msgRg, msgRb = formatData("TradeNeed", infosR[i])
-					local msgA, msgAr, msgAg, msgAb = formatData("TradeOffer", infosA[i])
+					local msgR, msgRr, msgRg, msgRb = formatData(nil, nil)
+					if GuildAdsTradeTooltip.getProfileValue(nil, "ShowAsk") then
+						msgR, msgRr, msgRg, msgRb = formatData("TradeNeed", infosR[i])
+					end
+					local msgA, msgAr, msgAg, msgAb = formatData(nil, nil)
+					if GuildAdsTradeTooltip.getProfileValue(nil, "ShowHave") then
+						msgA, msgAr, msgAg, msgAb = formatData("TradeOffer", infosA[i])
+					end
 					tooltip:AddDoubleLine(msgR, msgA, msgRr, msgRg, msgRb, msgAr, msgAg, msgAb)
 					i= i+1
 				end
-				if infosC then
+				if infosC and GuildAdsTradeTooltip.getProfileValue(nil, "ShowCraftedBy") then
 					-- = table.concat(infosC, ", ", 1, 10)
 					local o = ""
 					local glue = ""
@@ -204,87 +291,59 @@ local function addGuildAdsInfo(tooltip, itemLink)
 				tooltip:Show()
 			end
 		end
-		
-		local valid, skill, itemid = RB_ParseItemLink(itemLink)
-		if valid then
-			local aknow, alearn, ahave, banked, rank, spec, rep, honor, makes
-			rank, spec, rep, honor, makes = RB_GetSkillInfo(tooltip, skill)
-			local craftKey = nameToKey[makes]
-			--[[
-			tooltip:AddDoubleLine("make:", "'"..tostring(makes).."'")
-			tooltip:AddDoubleLine("skill:", skill)
-			tooltip:AddDoubleLine("rank:", rank)
-			tooltip:AddDoubleLine("rep:", rep)
-			tooltip:AddDoubleLine("honor:", honor)
-			tooltip:AddDoubleLine("key:", craftKey)
-			]]
-			local t = GuildAdsItems[craftKey]
-			if t then
-				local infosC = t.TradeSkill
-				-- tooltip:AddDoubleLine("t:", tostring(t))
-				-- tooltip:AddDoubleLine("infosC:", tostring(infosC))
-				if infosC then
-					local o = ""
-					local glue = ""
-					local c = 1
-					for k,v in pairs(infosC) do
-					 	if c>4 then
-					 		o = o..", ..."
-					 		break
-					 	end
-						o = o..glue..tostring(k)
-						glue = ", "
-						c = c + 1
-					end
-					if c>1 then
-						tooltip:AddLine(string.format(CRAFTED_BY, o))
-					end
-				end
-			end
-			tooltip:Show()
-		end
-		if GuildAdsExtraTooltip and tooltip:IsVisible() then
-			local gatooltip = GuildAdsTooltip
-			
-			local lines = {}
-			tinsert(lines, "Is used in:");
-			if itemKey > 0 then
-				for item, items, set in LibStub("LibPeriodicTable-3.1"):IterateSet("TradeskillResultMats.Reverse") do
-					if item==itemKey then
-						local level = tostring(UnitLevel("player"))
-						set = set:gsub("TradeskillResultMats.Reverse.","")
-						local header
-						if items then
-							for index, item in unpackItemIterator(items) do
-								local itemLink
-								if tonumber(item) > 0 then
-									itemLink="item:"..item..":0:0:0:0:0:0:0:"..level
-								else
-									itemLink="enchant:"..tostring(-tonumber(item))
-								end
-								local itemInfo = GuildAds_ItemInfo[itemLink] or {};
-								if (itemLink and itemInfo and itemInfo.name) then
-				  					local r, g, b, hex = GuildAds_GetItemQualityColor(itemInfo.quality);
-				  					local link = hex.."|H"..itemLink.."|h["..itemInfo.name.."]|h|r";
-				  					if not header then
-				  						tinsert(lines, set)
-				  						header = true
-				  					end
-				  					if GuildAdsItems[keyTable[itemLink]] then
-										tinsert(lines, "   "..link)
-									else
-										tinsert(lines, "   "..link.." (guildads unknown)")
-									end
-								end
-							end
+		if GuildAdsTradeTooltip.getProfileValue(nil, "ShowCraftedBy") then
+			local valid, skill, itemid = RB_ParseItemLink(itemLink)
+			if valid then
+				local aknow, alearn, ahave, banked, rank, spec, rep, honor, makes
+				rank, spec, rep, honor, makes = RB_GetSkillInfo(tooltip, skill)
+				local craftKey = nameToKey[makes]
+				--[[
+				tooltip:AddDoubleLine("make:", "'"..tostring(makes).."'")
+				tooltip:AddDoubleLine("skill:", skill)
+				tooltip:AddDoubleLine("rank:", rank)
+				tooltip:AddDoubleLine("rep:", rep)
+				tooltip:AddDoubleLine("honor:", honor)
+				tooltip:AddDoubleLine("key:", craftKey)
+				]]
+				local t = GuildAdsItems[craftKey]
+				if t then
+					local infosC = t.TradeSkill
+					-- tooltip:AddDoubleLine("t:", tostring(t))
+					-- tooltip:AddDoubleLine("infosC:", tostring(infosC))
+					if infosC then
+						local o = ""
+						local glue = ""
+						local c = 1
+						for k,v in pairs(infosC) do
+						 	if c>4 then
+						 		o = o..", ..."
+						 		break
+						 	end
+							o = o..glue..tostring(k)
+							glue = ", "
+							c = c + 1
+						end
+						if c>1 then
+							tooltip:AddLine(string.format(CRAFTED_BY, o))
 						end
 					end
 				end
+				tooltip:Show()
 			end
+		end
+		if GuildAdsTradeTooltip.getProfileValue(nil, "ShowCraftableTooltip") and tooltip:IsVisible() then
+			local gatooltip = GuildAdsTooltip
+			
+			-- hook if not hooked
+			if not hooks[tooltip] or not hooks[tooltip].hooks["OnSizeChanged"] then
+				hookscript(tooltip, "OnSizeChanged", hookOnSizeChanged)
+			end
+			
+			lines = getExtraTipLines(itemKey)
+			GuildAdsExtraTipLastParent = tooltip
+			
 			if #lines > 1 then
 				tooltip:Show()
-				gatooltip:SetOwner(tooltip, "ANCHOR_PRESERVE");
-				gatooltip:SetParent(tooltip);
 				local maxWidth = 0
 				for _, line in pairs(lines) do
 					GuildAdsTooltipDummyText:SetText(line)
@@ -293,21 +352,20 @@ local function addGuildAdsInfo(tooltip, itemLink)
 						maxWidth = width
 					end
 				end
-				maxWidth = maxWidth * 0.8
-				if (maxWidth + 2) < (UIParent:GetWidth() - GameTooltip:GetRight() ) then
-					gatooltip:ClearAllPoints();
-					gatooltip:SetPoint("TOPLEFT", GameTooltip, "TOPRIGHT", 0, 0)
-					for _, line in pairs(lines) do
-						gatooltip:AddLine(line)
-					end
-				else
-					gatooltip:ClearAllPoints();
-					gatooltip:SetPoint("TOPRIGHT", GameTooltip, "TOPLEFT", 0, 0)
-					for _, line in pairs(lines) do
-						gatooltip:AddLine(line)
-					end
+				maxWidth = maxWidth * GuildAdsTradeTooltip.clipTooltipScale(GuildAdsTradeTooltip.getProfileValue(nil, "TooltipScale") or 1.0)
+				GuildAdsExtraTipWidth = maxWidth
+				gatooltip:ClearLines();
+				gatooltip:ClearAllPoints();
+				gatooltip:SetOwner(tooltip, "ANCHOR_PRESERVE");
+				gatooltip:SetParent(tooltip);
+				setPoints(tooltip);
+				for _, line in pairs(lines) do
+					gatooltip:AddLine(line)
 				end
 				gatooltip:Show()
+			else
+				gatooltip:ClearLines();
+				gatooltip:Hide()
 			end
 		end
 	end
@@ -486,7 +544,14 @@ GuildAdsTradeTooltip = {
 
 	metaInformations = { 
 		name = "TradeTooltip",
-        guildadsCompatible = 200,
+	        guildadsCompatible = 200,
+	        ui = {
+	        	options = {
+				frame = "GuildAdsTradeTooltipOptionsFrame",
+				tab = "GuildAdsTradeTooltipOptionsTab",
+				priority = 3
+			}
+		}
 	};
 		
 	onInit = function()
@@ -494,6 +559,64 @@ GuildAdsTradeTooltip = {
 		-- TODO : add support for LootLink, ItemMatrix, KC_Items 
 		installHooks(GameTooltip, Hooks)
 		installHooks(ItemRefTooltip, Hooks)
+		GuildAdsTooltip:SetScale(GuildAdsTradeTooltip.clipTooltipScale(GuildAdsTradeTooltip.getProfileValue(nil, "TooltipScale") or 1.0))
+	end;
+	
+	onShowOptions = function()	
+		if GuildAdsTradeTooltip.getProfileValue(nil, "ShowCraftableTooltip") then
+			GuildAdsTradeTooltip_ShowCraftableTooltipCheckButton:SetChecked(1);
+		else
+			GuildAdsTradeTooltip_ShowCraftableTooltipCheckButton:SetChecked(0);
+		end
+		
+		if GuildAdsTradeTooltip.getProfileValue(nil, "ShowCraftedBy") then
+			GuildAds_ShowMyAdsCheckButton:SetChecked(1);
+		else
+			GuildAds_ShowMyAdsCheckButton:SetChecked(0);
+		end
+		
+		if (GuildAdsTradeTooltip.getProfileValue(nil, "ShowAsk")) then
+			GuildAdsTradeTooltip_ShowAskCheckButton:SetChecked(1);
+		else
+			GuildAdsTradeTooltip_ShowAskCheckButton:SetChecked(0);
+		end
+	
+		if (GuildAdsTradeTooltip.getProfileValue(nil, "ShowHave")) then
+			GuildAdsTradeTooltip_ShowHaveCheckButton:SetChecked(1);
+		else
+			GuildAdsTradeTooltip_ShowHaveCheckButton:SetChecked(0);
+		end
+		local scale = GuildAdsTradeTooltip.getProfileValue(nil, "TooltipScale")
+		scale = GuildAdsTradeTooltip.clipTooltipScale(scale)
+		GuildAdsTradeTooltip.setProfileValue(nil, "TooltipScale", scale)
+		GuildAdsTradeTooltip_ExtraTooltipScale:SetValue(scale);
+	end;
+	
+	saveOptions = function()
+		if GuildAdsTradeTooltipOptionsFrame:IsVisible() then
+			GuildAdsTradeTooltip.setProfileValue(nil, "ShowCraftableTooltip", GuildAdsTradeTooltip_ShowCraftableTooltipCheckButton:GetChecked() or nil);
+			GuildAdsTradeTooltip.setProfileValue(nil, "ShowCraftedBy", GuildAdsTradeTooltip_ShowCraftedByCheckButton:GetChecked() or nil);
+			GuildAdsTradeTooltip.setProfileValue(nil, "ShowAsk", GuildAdsTradeTooltip_ShowAskCheckButton:GetChecked() and true);
+			GuildAdsTradeTooltip.setProfileValue(nil, "ShowHave", GuildAdsTradeTooltip_ShowHaveCheckButton:GetChecked() and true);
+			local scale = GuildAdsTradeTooltip_ExtraTooltipScale:GetValue()
+			scale = GuildAdsTradeTooltip.clipTooltipScale(scale)
+			GuildAdsTradeTooltip.setProfileValue(nil, "TooltipScale", scale)
+			GuildAdsTradeTooltip_ExtraTooltipScale:SetValue(scale);
+			GuildAdsTooltip:SetScale(scale);
+		end
+	end;
+	
+	clipTooltipScale = function(scale)
+		return scale and (scale<0.5 and 0.5 or (scale>1.0 and 1.0 or scale)) or 1.0
+	end;
+	
+	onConfigChanged = function(path, key, value)
+		--[[
+		if key=="HideOfflinePlayer" or key=="HideMyAds" then
+			GuildAdsTradeTooltip.data.resetCache();
+			GuildAdsTradeTooltip.updateCurrentTab();
+		end
+		]]
 	end;
 	
 	onChannelJoin = function()

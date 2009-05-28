@@ -1,15 +1,7 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 
 	<Script file="GuildAdsTooltip.lua"/>
-<!--
-	<Frame name="GuildAdsGameTooltip" parent="GameTooltip" hidden="false">
-		<Scripts>
-			<OnShow>
-				GuildAdsTradeTooltip.addInformations(GameTooltip);
-			</OnShow>
-		</Scripts>
-	</Frame>
--->
+
 	<GameTooltip name="GuildAdsTooltip" parent="GameToolTip" inherits="GameTooltipTemplate">
 		<Anchors>
 			<Anchor point="TOPLEFT" relativeTo="GameTooltip" relativePoint="TOPRIGHT">
@@ -20,12 +12,7 @@
 		</Anchors>
 		<Scripts>
 			<OnLoad>
-				--GameTooltip_OnLoad(self);
-				--self:SetPadding(16);
-				--self:RegisterForDrag("LeftButton");
-				--self:SetOwner(UIParent,"ANCHOR_PRESERVE")
-				self:SetScale(0.8)
-				--self:SetUserPlaced(true);
+				--self:SetScale(0.8)
 			</OnLoad>
 		</Scripts>
 	</GameTooltip>

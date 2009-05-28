@@ -79,6 +79,7 @@ ui\trade\GuildAdsTradeOptionsFrame.xml
 ui\trade\GuildAdsShiftClick.xml
 ui\tradeCraft\GuildAdsCraftFrame.xml
 ui\tradeTooltip\GuildAdsTooltip.xml
+ui\tradeTooltip\GuildAdsTooltipOptionsFrame.xml
 ui\skill\GuildAdsSkillFrame.xml
 ui\faction\GuildAdsFactionFrame.xml
 ui\inventory\GuildAdsInventoryFrame.xml

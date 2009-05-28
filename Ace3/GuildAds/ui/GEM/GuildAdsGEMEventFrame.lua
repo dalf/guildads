@@ -29,7 +29,7 @@ GuildAdsGEMEvent = {
 			options = {
 				frame = "GEMOptionsFrame",
 				tab = "GuildAdsGEMOptionTab",
-				priority = 3
+				priority = 4
 			}
 		}
 	

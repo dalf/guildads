@@ -1,0 +1,197 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.blizzard.com/wow/ui/FrameXML/UI.xsd">
+	
+	<Button name="GuildAdsTradeTooltipOptionsTab" inherits="GuildAdsWindowTabTemplate" text="GUILDADS_TOOLTIP_TAB" />
+	
+	<Frame name="GuildAdsTradeTooltipOptionsFrame" inherits="GuildAdsConfig_OptionFrameBoxTemplate" parent="GuildAdsOptionsWindowFrame">
+		<Size>
+			<AbsDimension x="380" y="145"/>
+		</Size>
+		<Anchors>
+			<Anchor point="TOP">
+				<Offset>
+					<AbsDimension x="0" y="-30"/>
+				</Offset>
+			</Anchor>
+		</Anchors>
+		<Layers>
+			<Layer level="ARTWORK">
+				<FontString name="$parentTitleLabel" inherits="GameFontHighlightSmall" text="GUILDADS_TOOLTIP_OPTIONS">
+					<Anchors>
+						<Anchor point="TOP" relativePoint="TOP">
+							<Offset>
+								<AbsDimension x="0" y="-10"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		<Frames>
+	
+			<CheckButton name="GuildAdsTradeTooltip_ShowCraftedByCheckButton" inherits="GuildAdsConfig_CheckButton">
+				<Anchors>
+					<Anchor point="TOPLEFT">
+						<Offset>
+							<AbsDimension x="20" y="-25"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Layers>
+					<Layer level="ARTWORK">
+						<FontString name="$parentLabel" inherits="GameFontNormalSmall" text="GUILDADS_TOOLTIP_SHOW_CRAFTED_BY" >
+							<Anchors>
+								<Anchor point="LEFT" relativePoint="RIGHT">
+									<Offset>
+										<AbsDimension x="5" y="1"/>
+									</Offset>
+								</Anchor>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnClick>
+						if ( self:GetChecked() ) then
+							PlaySound("igMainMenuOptionCheckBoxOff");
+						else
+							PlaySound("igMainMenuOptionCheckBoxOn");
+						end
+					</OnClick>
+				</Scripts>
+			</CheckButton>
+			
+			<CheckButton name="GuildAdsTradeTooltip_ShowAskCheckButton" inherits="GuildAdsConfig_CheckButton">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsTradeTooltip_ShowCraftedByCheckButton" relativePoint="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="0" y="0" />
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Layers>
+					<Layer level="ARTWORK">
+						<FontString name="$parentLabel" inherits="GameFontNormalSmall" text="GUILDADS_TOOLTIP_SHOW_NEW">
+							<Anchors>
+								<Anchor point="LEFT" relativePoint="RIGHT">
+									<Offset>
+										<AbsDimension x="5" y="1"/>
+									</Offset>
+								</Anchor>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnClick>
+						if ( self:GetChecked() ) then
+							--GuildAdsTradeTooltip.setProfileValue(nil, "ShowAsk", true);
+							PlaySound("igMainMenuOptionCheckBoxOn");
+						else
+							--GuildAdsTradeTooltip.setProfileValue(nil, "ShowAsk", nil);
+							PlaySound("igMainMenuOptionCheckBoxOff");
+						end
+					</OnClick>
+				</Scripts>
+			</CheckButton>
+	
+			<CheckButton name="GuildAdsTradeTooltip_ShowHaveCheckButton" inherits="GuildAdsConfig_CheckButton">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsTradeTooltip_ShowAskCheckButton" relativePoint="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="0" y="0" />
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Layers>
+					<Layer level="ARTWORK">
+						<FontString name="$parentLabel" inherits="GameFontNormalSmall" text="GUILDADS_TOOLTIP_SHOW_HAVE">
+							<Anchors>
+								<Anchor point="LEFT" relativePoint="RIGHT">
+									<Offset>
+										<AbsDimension x="5" y="1"/>
+									</Offset>
+								</Anchor>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnClick>
+						if ( self:GetChecked() ) then
+							--GuildAdsTradeTooltip.setProfileValue(nil, "ShowHave", true);
+							PlaySound("igMainMenuOptionCheckBoxOn");
+						else
+							--GuildAdsTradeTooltip.setProfileValue(nil, "ShowHave", nil);
+							PlaySound("igMainMenuOptionCheckBoxOff");
+						end
+					</OnClick>
+				</Scripts>
+			</CheckButton>
+
+			<CheckButton name="GuildAdsTradeTooltip_ShowCraftableTooltipCheckButton" inherits="GuildAdsConfig_CheckButton">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsTradeTooltip_ShowHaveCheckButton" relativePoint="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="0" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Layers>
+					<Layer level="ARTWORK">
+						<FontString name="$parentLabel" inherits="GameFontNormalSmall" text="GUILDADS_TOOLTIP_SHOW_EXTRA_TOOLTIP" >
+							<Anchors>
+								<Anchor point="LEFT" relativePoint="RIGHT">
+									<Offset>
+										<AbsDimension x="5" y="1"/>
+									</Offset>
+								</Anchor>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnClick>
+						if ( self:GetChecked() ) then
+							PlaySound("igMainMenuOptionCheckBoxOff");
+						else
+							PlaySound("igMainMenuOptionCheckBoxOn");
+						end
+					</OnClick>
+				</Scripts>
+			</CheckButton>
+		
+			<Slider name="GuildAdsTradeTooltip_ExtraTooltipScale" inherits="OptionsSliderTemplate">
+	    			<Size>
+					<AbsDimension x="330" y="16"/>
+				</Size>
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsTradeTooltip_ShowCraftableTooltipCheckButton" relativePoint="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="10" y="-10"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						getglobal(self:GetName().."Text"):SetText(GUILDADS_TOOLTIP_SCALE);
+						getglobal(self:GetName().."High"):SetText("1");
+						getglobal(self:GetName().."Low"):SetText("0.5");
+						self:SetMinMaxValues(0.5,1);
+						self:SetValueStep(0.01);
+					</OnLoad>
+					<OnValueChanged>
+						GuildAdsTradeTooltip.setConfigValue(nil, "TooltipScale", self:GetValue());
+					</OnValueChanged>
+				</Scripts>
+			</Slider>
+		</Frames>
+		<Scripts>
+			<OnShow>
+				GuildAdsTradeTooltip.onShowOptions();
+			</OnShow>
+		</Scripts>
+	</Frame>
+	
+</Ui>

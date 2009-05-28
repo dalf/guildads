@@ -18,7 +18,7 @@ GuildAdsMinimapButtonCore = {
 				frame = "GuildAdsMinimapButtonOptions",
 				tab = "GuildAdsMinimapButtonTab",
 				tooltip = GUILDADS_ICON_OPTIONS,
-				priority = 4
+				priority = 5
 			}
 		}
 	};
