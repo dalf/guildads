@@ -570,9 +570,9 @@ GuildAdsTradeTooltip = {
 		end
 		
 		if GuildAdsTradeTooltip.getProfileValue(nil, "ShowCraftedBy") then
-			GuildAds_ShowMyAdsCheckButton:SetChecked(1);
+			GuildAdsTradeTooltip_ShowCraftedByCheckButton:SetChecked(1);
 		else
-			GuildAds_ShowMyAdsCheckButton:SetChecked(0);
+			GuildAdsTradeTooltip_ShowCraftedByCheckButton:SetChecked(0);
 		end
 		
 		if (GuildAdsTradeTooltip.getProfileValue(nil, "ShowAsk")) then
@@ -604,6 +604,14 @@ GuildAdsTradeTooltip = {
 			GuildAdsTradeTooltip_ExtraTooltipScale:SetValue(scale);
 			GuildAdsTooltip:SetScale(scale);
 		end
+	end;
+	
+	defaultsOptions = function()
+		GuildAdsTradeTooltip_ShowCraftableTooltipCheckButton:SetChecked(1);
+		GuildAdsTradeTooltip_ShowCraftedByCheckButton:SetChecked(1);
+		GuildAdsTradeTooltip_ShowAskCheckButton:SetChecked(1);
+		GuildAdsTradeTooltip_ShowHaveCheckButton:SetChecked(1);
+		GuildAdsTradeTooltip_ExtraTooltipScale:SetValue(1.0);
 	end;
 	
 	clipTooltipScale = function(scale)
