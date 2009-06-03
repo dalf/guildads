@@ -121,7 +121,7 @@ GuildAdsTalentUI = {
 	end;
 	
 	GetNumTalentTabs = function()
-		return 3;
+		return 3; -- should iterate through all of the datatype to get the max value
 	end;
 	
 	GetTalentTabInfo = function(tabIndex)
@@ -167,11 +167,28 @@ GuildAdsTalentUI = {
 		return "", "", 0,0, 0,0,0,0;
 	end;
 	
-	GetTalentPrereqs = function(tabIndex , talentIndex )
+	GetIsLearnable = function(tabIndex, tier, column)
+		local data = GuildAdsDB.profile.Talent:get(GuildAdsInspectWindow.playerName, tostring(tabIndex)..":0");
+		if data and data.n then
+			for talentIndex = 1, data.nt do
+				local d = GuildAdsDB.profile.Talent:get(GuildAdsInspectWindow.playerName, tostring(tabIndex)..":"..tostring(talentIndex));
+				if d and d.ti == tier and d.co == column then
+					if d.cr == d.mr then
+						return "1"
+					else
+						return
+					end
+				end
+			end
+		end
+	end;
+	
+	GetTalentPrereqs = function(tabIndex, talentIndex)
 		if GuildAdsInspectWindow.playerName then
 			local data = GuildAdsDB.profile.Talent:get(GuildAdsInspectWindow.playerName, tostring(tabIndex)..":"..tostring(talentIndex));
 			if data and data.pt then
-				return data.pt, data.pc, data.pl;
+				--return data.pt, data.pc, data.pl;
+				return data.pt, data.pc, GuildAdsTalentUI.GetIsLearnable(tabIndex, data.ti, data.co);
 			end
 		end
 	end;
