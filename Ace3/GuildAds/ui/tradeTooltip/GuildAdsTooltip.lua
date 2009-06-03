@@ -164,9 +164,10 @@ local function getExtraTipLines(itemKey)
 		for item, items, set in LibStub("LibPeriodicTable-3.1"):IterateSet("TradeskillResultMats.Reverse") do
 			if item==itemKey then
 				local level = tostring(UnitLevel("player"))
-				set = set:gsub("TradeskillResultMats.Reverse.","")
-				local header
+				local set = set:gsub("TradeskillResultMats.Reverse.","")
+				local headerInserted
 				if items then
+					profItems = {}
 					for index, item in unpackItemIterator(items) do
 						local itemLink
 						if tonumber(item) > 0 then
@@ -174,25 +175,47 @@ local function getExtraTipLines(itemKey)
 						else
 							itemLink="enchant:"..tostring(-tonumber(item))
 						end
+						local link
 						local itemInfo = GuildAds_ItemInfo[itemLink] or {};
-						if (itemLink and itemInfo and itemInfo.name) then
+						if (itemInfo and itemInfo.name) then
 		  					local r, g, b, hex = GuildAds_GetItemQualityColor(itemInfo.quality);
-		  					local link = hex..itemInfo.name.."|r";
-		  					if not header then
-		  						tinsert(lines, set)
-		  						header = true
-		  					end
-		  					local gai = GuildAdsItems[keyTable[itemLink]]
-		  					if gai then
-		  						if gai.TradeSkill and gai.TradeSkill[GuildAds.playerName] then
-									tinsert(lines, "   + "..link)
-								else
-									tinsert(lines, "   "..link)
-								end
+		  					link = hex..itemInfo.name.."|r";
+		  				else
+		  					link = itemLink
+		  				end
+	  					if not headerInserted then
+	  						tinsert(lines, set)
+	  						headerInserted = true
+	  					end
+	  					local t = {}
+	  					local gai = GuildAdsItems[keyTable[itemLink]]
+	  					if gai then
+	  						if gai.TradeSkill and gai.TradeSkill[GuildAds.playerName] then
+								t.i = "   + "..link
 							else
-								tinsert(lines, "   - "..link)
+								t.i = "   "..link
 							end
+						else
+							t.i = "   - "..link
 						end
+						local skillLevel = LibStub("LibPeriodicTable-3.1"):ItemInSet(tonumber(item), "TradeskillLevels."..set)
+						local found, start, orange, yellow, green, gray 
+						if skillLevel then
+							start, _, orange, yellow, green, gray = skillLevel:find("([^/]+)/([^/]+)/([^/]+)/([^/]+)")
+							if start then
+								t.l = tonumber(gray)
+							else
+								t.l = 0
+							end
+						else
+							t.l = 0
+						end
+						--t.i = t.i.." "..tostring(t.l)
+						tinsert(profItems, t)
+					end
+					sort(profItems, function(a,b) if a.l < b.l then return false else if a.l > b.l then return true else return nil end end end)
+					for k,v in pairs(profItems) do
+						tinsert(lines, v.i)
 					end
 				end
 			end
@@ -550,6 +573,19 @@ GuildAdsTradeTooltip = {
 		installHooks(GameTooltip, Hooks)
 		installHooks(ItemRefTooltip, Hooks)
 		GuildAdsTooltip:SetScale(GuildAdsTradeTooltip.clipTooltipScale(GuildAdsTradeTooltip.getProfileValue(nil, "TooltipScale") or 1.0))
+		
+		-- find newest data in LibTradeLinks
+		local LTLDataVersion = tonumber((select(2,GetBuildInfo())))
+		local ltl = LibStub("LibTradeLinks-1.0");
+		while LTLDataVersion > 1 do
+			local data = ltl:GetData(ltl.SKILL_ALCHEMY, LTLDataVersion)
+			if data then
+				GuildAdsTradeTooltip.LTLDataVersion = LTLDataVersion
+				break
+			end
+			LTLDataVersion = LTLDataVersion - 1
+		end
+
 	end;
 	
 	onShowOptions = function()	
@@ -673,7 +709,7 @@ GuildAdsTradeTooltip = {
 			if linkType == "trade" then
 				-- trade: link... build table of items with enchant links
 				itemTable = {}
-				local linkTable = LTLFunc:Decode(item, true, false); 
+				local linkTable = LTLFunc:Decode(item, true, false, GuildAdsTradeTooltip.LTLDataVersion); 
 				local level = tostring(UnitLevel("player"))
 				if linkTable then
 					for link in pairs(linkTable) do
