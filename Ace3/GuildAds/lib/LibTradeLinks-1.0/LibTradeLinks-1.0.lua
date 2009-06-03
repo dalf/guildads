@@ -1,5 +1,5 @@
 local MAJOR = "LibTradeLinks-1.0";
-local MINOR = "9901";
+local MINOR = "9902";
 
 local LibTradeLinks, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 
@@ -257,7 +257,7 @@ function LibTradeLinks:Decode(link, purgeNonRecipe, purgeBoP, buildNumber)
 		profession = tonumber(profession);
 		for skillId, data in next, Data do
 			if data.ProfessionIdList[profession] then
-				return self:Purge(Decode64(skills, self:GetData(skillId, buildNumber)), purgeNonRecipe, purgeBoP), skillId, getBuild() == getBuild(buildNumber);
+				return self:Purge(Decode64(skills, self:GetData(skillId, buildNumber)), purgeNonRecipe, purgeBoP, buildNumber), skillId, getBuild() == getBuild(buildNumber);
 			end
 		end
 	end
@@ -291,17 +291,18 @@ end
 -- Purge the specified list of spells for non-recipe spells and recipees that --
 -- create BoP items.                                                          --
 --------------------------------------------------------------------------------
-function LibTradeLinks:Purge(spells, purgeNonRecipe, purgeBoP)
+function LibTradeLinks:Purge(spells, purgeNonRecipe, purgeBoP, buildNumber)
 	assert(type(spells) == "table", "Error, LibTradeLinks:Purge() requires a table as first argument");
+	buildNumber = getBuild(buildNumber);
 	
-	if purgeNonRecipe and BlackList then
-		for _, spellId in next, BlackList do
+	if purgeNonRecipe and BlackList[buildNumber] then
+		for _, spellId in next, BlackList[buildNumber] do
 			spells[spellId] = nil;
 		end
 	end
 	
-	if purgeBoP and BoPList then
-		for _, spellId in next, BoPList do
+	if purgeBoP and BoPList[buildNumber] then
+		for _, spellId in next, BoPList[buildNumber] do
 			spells[spellId] = nil;
 		end
 	end
@@ -338,7 +339,10 @@ end
 -- Returns the skillId for the passed profession spell id, or nil             --
 --------------------------------------------------------------------------------
 function LibTradeLinks:GetSkillId(professionSpell)
-	assert(type(professionSpell) == "number", "LibTradeLinks:GetSkillId() requires a numerical spell id as argument");
+	if type(professionSpell) == "string" then
+		professionSpell = tonumber(professionSpell:match("trade:(%d+):%d+:%d+:"));
+	end
+	assert(type(professionSpell) == "number", "LibTradeLinks:GetSkillId() requires a numerical spell id or a trade-link as argument");
 	for skillId, data in next, Data do
 		if data.ProfessionIdList[professionSpell] then
 			return skillId;
