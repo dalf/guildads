@@ -37,6 +37,11 @@ GuildAdsQuest = {
 		else
 			GuildAdsQuestShowOfflinesCheckButton:SetChecked(1);
 		end
+		if (GuildAdsQuest.getProfileValue(nil, "ShowOnlyMyQuests")) then
+			GuildAdsQuestShowMyQuestsCheckButton:SetChecked(1);
+		else
+			GuildAdsQuestShowMyQuestsCheckButton:SetChecked(0);
+		end
 	end;
 	
 	onShow = function()
@@ -76,7 +81,7 @@ GuildAdsQuest = {
 	end;
 
 	onConfigChanged = function(path, key, value)
-		if key=="HideOfflines" then
+		if key=="HideOfflines" or key=="ShowOnlyMyQuests" then
 			GuildAdsQuest.data.resetCache();
 			GuildAdsQuest.questButtonsUpdate();
 		end
@@ -426,9 +431,22 @@ GuildAdsQuest = {
 			GuildAdsQuest.data.cacheReset = true
 		end;
 		
-		isVisible = function(playerName)
+		isPlayerVisible = function(playerName)
 			if GuildAdsQuest.getProfileValue(nil, "HideOfflines") then
 				if GuildAdsComm:IsOnLine(playerName) or GuildAdsUITools:IsAccountOnline(playerName) then
+					return true
+				end
+				return false
+			end
+			return true
+		end;
+		
+		isQuestVisible = function(questId, playerName)
+			if GuildAdsQuest.getProfileValue(nil, "ShowOnlyMyQuests") then
+				if playerName == GuildAds.playerName then
+					return true
+				end
+				if GuildAdsDB.profile.Quest:get(GuildAds.playerName, questId) then
 					return true
 				end
 				return false
@@ -457,7 +475,7 @@ GuildAdsQuest = {
 				-- create linear list of all quests				
 				local datatype = GuildAdsDB.profile.Quest;
 				for playerName in pairs(players) do
-					if GuildAdsQuest.data.isVisible(playerName) then
+					if GuildAdsQuest.data.isPlayerVisible(playerName) then
 						for questId, _, data in datatype:iterator(playerName, nil) do
 							--GuildAdsQuest.debug("playerName = "..playerName.."   questId = "..questId);
 							if workingTable[questId] then
@@ -476,7 +494,9 @@ GuildAdsQuest = {
 								end
 								tinsert(workingTable[questId].p, playerName)
 							else
-								workingTable[questId] = new_kv("id", questId, "g", data.g, "n", data.n, "r", data.r, "l", data.l, "c", data.c, "s", data.s, "p", playerName)
+								if GuildAdsQuest.data.isQuestVisible(questId, playerName) then
+									workingTable[questId] = new_kv("id", questId, "g", data.g, "n", data.n, "r", data.r, "l", data.l, "c", data.c, "s", data.s, "p", playerName)
+								end
 							end
 						end
 					end

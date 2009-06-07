@@ -594,10 +594,51 @@
 					<OnClick>
 						if ( self:GetChecked() ) then
 							PlaySound("igMainMenuOptionCheckBoxOn");
-							GuildAdsQuest.setProfileValue(nil, "HideOfflines", nil);
+							GuildAdsQuest.setProfileValue(nil, "HideOfflines", false);
 						else
 							PlaySound("igMainMenuOptionCheckBoxOff");
 							GuildAdsQuest.setProfileValue(nil, "HideOfflines", true);
+						end
+					</OnClick>
+				</Scripts>
+			</CheckButton>
+			<CheckButton name="GuildAdsQuestShowMyQuestsCheckButton" hidden="false">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsMainWindowFrame" relativePoint="TOPLEFT">
+						<Offset>
+							<AbsDimension x="75" y="-50"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Size>
+					<AbsDimension x="20" y="20"/>
+				</Size>
+				<NormalTexture file="Interface\Buttons\UI-CheckBox-Up"/>
+				<PushedTexture file="Interface\Buttons\UI-CheckBox-Down"/>
+				<HighlightTexture file="Interface\Buttons\UI-CheckBox-Highlight" alphaMode="ADD"/>
+				<CheckedTexture file="Interface\Buttons\UI-CheckBox-Check"/>
+				<DisabledCheckedTexture file="Interface\Buttons\UI-CheckBox-Check-Disabled"/>
+				<Layers>
+					<Layer level="ARTWORK">
+						<FontString name="GuildAdsQuestShowMyQuestsCheckButtonText" inherits="GameFontNormalSmall" text="GUILDADS_QUEST_ONLYMYQUESTS">
+							<Anchors>
+								<Anchor point="LEFT" relativePoint="RIGHT">
+									<Offset>
+										<AbsDimension x="5" y="1"/>
+									</Offset>
+								</Anchor>
+							</Anchors>
+						</FontString>	
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnClick>
+						if ( self:GetChecked() ) then
+							PlaySound("igMainMenuOptionCheckBoxOn");
+							GuildAdsQuest.setProfileValue(nil, "ShowOnlyMyQuests", true);
+						else
+							PlaySound("igMainMenuOptionCheckBoxOff");
+							GuildAdsQuest.setProfileValue(nil, "ShowOnlyMyQuests", false);
 						end
 					</OnClick>
 				</Scripts>
