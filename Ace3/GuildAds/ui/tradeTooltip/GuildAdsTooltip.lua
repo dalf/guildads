@@ -686,10 +686,10 @@ GuildAdsTradeTooltip = {
 	end;
 	
 	onTransactionCraftUpdate = function(dataType, playerName, newKeys, deletedKeys)
-		for _, item in pairs(newKeys) do
+		for _, item in pairs(deletedKeys) do
 			GuildAdsTradeTooltip.onCraftUpdate(dataType, playerName, item)
 		end
-		for _, item in pairs(deletedKeys) do
+		for _, item in pairs(newKeys) do
 			GuildAdsTradeTooltip.onCraftUpdate(dataType, playerName, item)
 		end
 	end;
@@ -739,27 +739,6 @@ GuildAdsTradeTooltip = {
 				end
 				local t = GuildAdsItems[key][dataTypeName]
 				t[playerName] = info and true or nil
-				--[[
-				if info then
-					local f = function(k, v)
-					if v==playerName then
-						return k;
-					end
-					end;
-					local index = table.foreach(t, f);
-					if not index then
-						table.insert(t, playerName)
-					end
-				else
-					local f = function(k, v)
-					if v==playerName then
-						return k;
-					end
-					end;
-					local index = table.foreach(t, f);
-					table.remove(t, index);
-				end
-				]]
 			end
 			if type(itemTable) == "table" then
 				item = next(itemTable, item)
