@@ -305,7 +305,9 @@ local function sendQueue()
 			if not currentChannel.disconnected[message.to] then
 				-- GuildAds_ChatDebug(GA_DEBUG_CHANNEL, "Sending to "..message.to..": "..message.text..")");
 				assert(text:len() + currentChannel.prefix:len() + 1<=255, "Too long addon message");
+				GuildAdsDatabase.lastAddonMessageSent = currentChannel.prefix..text;
 				SendAddonMessage(currentChannel.prefix, text, "WHISPER", message.to);
+				GuildAdsDatabase.lastAddonMessageSent = nil;
 				sentBytes = sentBytes + string.len(text);
 				num_messages = num_messages + 1
 			end
@@ -314,7 +316,9 @@ local function sendQueue()
 			text = table_concat(currentChannel.drunkTemplate)
 			-- GuildAds_ChatDebug(GA_DEBUG_CHANNEL, "Send to the channel: %s", text);
 			assert(text:len()<=255, "Too long chat message");
+			GuildAdsDatabase.lastChatMessageSent = text;
 			SendChatMessage(text, "CHANNEL", nil, currentChannel.id);
+			GuildAdsDatabase.lastChatMessageSent = nil;
 			sentBytes = sentBytes + string.len(text);
 			num_messages = num_messages + 1
 		end

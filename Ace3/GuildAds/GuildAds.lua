@@ -135,6 +135,20 @@ GuildAds.deepDel = deepDel
 function GuildAds:OnInitialize()
 	GuildAds_ChatDebug(GA_DEBUG_GLOBAL,"[GuildAds:Initialize] begin");
 	
+	-- check to see if 
+	if GuildAdsDatabase then
+		if GuildAdsDatabase.lastAddonMessageSent then
+			GuildAdsDatabase.disconnectAddonMessage = GuildAdsDatabase.lastAddonMessageSent;
+			DEFAULT_CHAT_FRAME:AddMessage("If you were disconnected, GuildAds seems to have cause it by sending a bad message to the Addon channel.");
+			DEFAULT_CHAT_FRAME:AddMessage("/run DEFAULT_CHAT_FRAME:AddMessage(GuildAdsDatabase.disconnectAddonMessage)");
+		end
+		if GuildAdsDatabase.lastChatMessageSent then
+			GuildAdsDatabase.disconnectChatMessage = GuildAdsDatabase.lastChatMessageSent;
+			DEFAULT_CHAT_FRAME:AddMessage("If you were disconnected, GuildAds seems to have cause it by sending a bad message to the Chat channel.");
+			DEFAULT_CHAT_FRAME:AddMessage("/run DEFAULT_CHAT_FRAME:AddMessage(GuildAdsDatabase.disconnectChatMessage)");
+		end
+	end
+	
 	-- Initialize options
 	creg:RegisterOptionsTable("GuildAds", GuildAds.options)
 	ccmd:CreateChatCommand("guildads", "GuildAds")
