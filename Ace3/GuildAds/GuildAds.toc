@@ -28,6 +28,7 @@ lib\LibPeriodicTable-3.1\LibPeriodicTable-3.1-TradeskillResultMats\LibPeriodicTa
 lib\LibPeriodicTable-3.1\LibPeriodicTable-3.1-TradeskillLevels\LibPeriodicTable-3.1-TradeskillLevels.lua
 lib\LibTradeLinks-1.0\LibTradeLinks-1.0.lua
 lib\LibTradeLinks-1.0\9901.lua
+lib\LibTradeLinks-1.0\9947.lua
 lib\LibCompress\lib.xml
 revision.lua
 localization.lua

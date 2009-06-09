@@ -573,19 +573,6 @@ GuildAdsTradeTooltip = {
 		installHooks(GameTooltip, Hooks)
 		installHooks(ItemRefTooltip, Hooks)
 		GuildAdsTooltip:SetScale(GuildAdsTradeTooltip.clipTooltipScale(GuildAdsTradeTooltip.getProfileValue(nil, "TooltipScale") or 1.0))
-		
-		-- find newest data in LibTradeLinks
-		local LTLDataVersion = tonumber((select(2,GetBuildInfo())))
-		local ltl = LibStub("LibTradeLinks-1.0");
-		while LTLDataVersion > 1 do
-			local data = ltl:GetData(ltl.SKILL_ALCHEMY, LTLDataVersion)
-			if data then
-				GuildAdsTradeTooltip.LTLDataVersion = LTLDataVersion
-				break
-			end
-			LTLDataVersion = LTLDataVersion - 1
-		end
-
 	end;
 	
 	onShowOptions = function()	
@@ -709,7 +696,7 @@ GuildAdsTradeTooltip = {
 			if linkType == "trade" then
 				-- trade: link... build table of items with enchant links
 				itemTable = {}
-				local linkTable = LTLFunc:Decode(item, true, false, GuildAdsTradeTooltip.LTLDataVersion); 
+				local linkTable = LTLFunc:Decode(item, true, false, (LTLFunc:GetBuildVersion()));
 				local level = tostring(UnitLevel("player"))
 				if linkTable then
 					for link in pairs(linkTable) do

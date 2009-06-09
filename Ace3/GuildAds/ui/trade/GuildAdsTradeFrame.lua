@@ -182,18 +182,6 @@ GuildAdsTrade = {
 			__mode="v",
 		})
 		
-		-- find newest data in LibTradeLinks
-		local LTLDataVersion = tonumber((select(2,GetBuildInfo())))
-		local ltl = LibStub("LibTradeLinks-1.0");
-		while LTLDataVersion > 1 do
-			local data = ltl:GetData(ltl.SKILL_ALCHEMY, LTLDataVersion)
-			if data then
-				GuildAdsTrade.LTLDataVersion = LTLDataVersion
-				break
-			end
-			LTLDataVersion = LTLDataVersion - 1
-		end
-		
 		PanelTemplates_SelectTab(GuildAds_MyTab1);
 		PanelTemplates_DeselectTab(GuildAds_MyTab2);
 		PanelTemplates_DeselectTab(GuildAds_MyTab3);
@@ -1169,6 +1157,7 @@ GuildAdsTrade = {
 					local players = GuildAdsDB.channel[GuildAds.channelName]:getPlayers();
 					local LTLFunc = LibStub("LibTradeLinks-1.0")
 					local LPTFunc = LibStub("LibPeriodicTable-3.1")
+					local LTLDataVersion = (LTLFunc:GetBuildVersion())
 					local playerIsVisible = GuildAdsTrade.data.playerIsVisible
 					local adIsVisible = GuildAdsTrade.data.adIsVisible
 					for playerName in pairs(players) do
@@ -1182,7 +1171,7 @@ GuildAdsTrade = {
 									local _, _, spellid, rawlink = string.find(item, "trade:([^:]+):[^:]+:[^:]+:[^:]+:([^:]+)");
 									local shortTradeLink = spellid..":"..rawlink
 									if not GuildAdsTrade.data.tradeLinkCache[shortTradeLink] then
-										linkTable = LTLFunc:Decode(item, true, false, GuildAdsTrade.LTLDataVersion);
+										linkTable = LTLFunc:Decode(item, true, false, LTLDataVersion);
 										GuildAdsTrade.data.tradeLinkCache[shortTradeLink] = linkTable
 									else
 										linkTable = GuildAdsTrade.data.tradeLinkCache[shortTradeLink]
