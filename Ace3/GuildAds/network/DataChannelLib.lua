@@ -183,7 +183,7 @@ local onEvent = function(self, event, arg1, arg2, arg3, arg4, arg5, arg6, arg7, 
 				self.Channels[channelName].ID = GetChannelName(channelName);
 			end
 		end
-		if arg1=="YOU_JOINED" and arg8==1 then
+		if arg1=="YOU_JOINED" then
 			joinWaitingChannels();
 		end
 	elseif event=="CHAT_MSG_SYSTEM" then
