@@ -144,7 +144,7 @@ GuildAdsForum = {
 				else
 					GuildAdsForumReplyButton:Enable();
 				end
-				local start, _, expectedAuthor = string.find(GuildAdsForum.currentSelectedPostId, "([^:]+)[0-9]+$");
+				local start, _, expectedAuthor = string.find(GuildAdsForum.currentSelectedPostId, "([^:]-)[0-9]+$");
 				if expectedAuthor == GuildAds.playerName then
 					GuildAdsForumPostButton:SetText(GUILDADS_FORUM_EDITPOST);
 					GuildAdsForumPostButton:Enable();
@@ -390,7 +390,7 @@ GuildAdsForum = {
 				local unreadPosts = {}
 				local datatype = GuildAdsDB.channel[GuildAds.channelName].Forum;
 				for postid in datatype:iteratorIds() do
-					local start, _, expectedAuthor = string.find(postid, "([^:]*)[0-9]*$");
+					local start, _, expectedAuthor = string.find(postid, "([^:]-)[0-9]+$");
 					local data, author = nil, nil;
 					if expectedAuthor and players[expectedAuthor] then
 						author = expectedAuthor;
