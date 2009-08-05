@@ -1,4 +1,4 @@
-﻿## Interface: 30100
+﻿## Interface: 30200
 ## Title: GuildAds
 ## Author: Zarkan, Fkaï, Galmok
 ## Version: 2.5
@@ -29,6 +29,7 @@ lib\LibPeriodicTable-3.1\LibPeriodicTable-3.1-TradeskillLevels\LibPeriodicTable-
 lib\LibTradeLinks-1.0\LibTradeLinks-1.0.lua
 lib\LibTradeLinks-1.0\9901.lua
 lib\LibTradeLinks-1.0\9947.lua
+lib\LibTradeLinks-1.0\10192.lua
 lib\LibCompress\lib.xml
 revision.lua
 localization.lua
