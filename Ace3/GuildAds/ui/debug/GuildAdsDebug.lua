@@ -289,6 +289,7 @@ GuildAds_DebugPlugin = {
 		tooltip:AddDoubleLine("Level 2 hash search", gacs.HashSearch[2], 		0.5, 1, 1, 0.5, 1, 1)
 		tooltip:AddDoubleLine("Revision search", gacs.RevisionSearch, 			1, 1, 1, 1, 1, 1)
 		tooltip:AddDoubleLine("Transaction", gacs.Transaction, 					0.5, 1, 1, 0.5, 1, 1)
+		tooltip:AddDoubleLine("Accepted transaction", gacs.AcceptedTransaction, 					0.5, 1, 1, 0.5, 1, 1)
 		tooltip:AddDoubleLine("Join", gacs.Join, 								0.5, 1, 1, 0.5, 1, 1)
 		tooltip:AddDoubleLine("Leave", gacs.Leave, 								1, 1, 1, 1, 1, 1)
 		tooltip:AddDoubleLine("Token problem", gacs.TokenProblem, 				0.5, 1, 1, 0.5, 1, 1)

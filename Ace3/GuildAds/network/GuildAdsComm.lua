@@ -188,6 +188,7 @@ GuildAdsComm = GuildAds:NewModule("GuildAdsComm", {
 		RevisionSearch 			= 0,
 		HashSearch				= {},
 		Transaction				= 0,
+		AcceptedTransaction = 0,
 		TokenProblem			= 0,
 		Join					= 0,
 		Leave					= 0,
@@ -1032,6 +1033,8 @@ function GuildAdsComm:ReceiveOpenTransaction(channelName, personName, dataTypeNa
 			DTS:ReceiveOpenTransaction(self.transactions[personName], playerName, fromRevision, toRevision, version or 1);
 			if self.transactions[personName].ignore then
 				GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"|cffff1e00Ignore|r ReceiveOpenTransaction(%s, %s, %s) (blacklisted)", tostring(DTS), playerName, fromRevision);
+			elseif self.transactions[personName]._valid then
+				self.stats.AcceptedTransaction = self.stats.AcceptedTransaction + 1
 			end
 		else
 			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"|cffff1e00Ignore|r ReceiveOpenTransaction(%s, %s, %s) (my update)", tostring(DTS), playerName, fromRevision);
