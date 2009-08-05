@@ -242,11 +242,11 @@ GuildAdsQuest = {
 			else
 				groupField:SetText(quest.g);
 			end
-			local color = QuestDifficultyColor["header"];
+			local color = QuestDifficultyColors["header"];
 			groupField:SetTextColor(color.r, color.g, color.b);
 			groupField:Show();
 			
-			local dcolor = GetDifficultyColor(quest.l);
+			local dcolor = GetQuestDifficultyColor(quest.l);
 			local color = new_kv("r", dcolor.r, "g", dcolor.g, "b", dcolor.b)
 			if expanded and quest.c then
 				local c = quest.c
