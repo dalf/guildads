@@ -310,7 +310,7 @@ GuildAdsQuest = {
 				if ( GuildAdsQuestTagDummyText:GetWidth() > tempWidth ) then
 					textWidth = tempWidth;
 				else
-					textWidth = QuestLogDummyText:GetWidth();
+					textWidth = GuildAdsQuestTagDummyText:GetWidth();
 				end
 				
 				nameField:SetWidth(textWidth);
