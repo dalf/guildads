@@ -248,6 +248,31 @@ GuildAdsGuild = {
 	
 	---------------------------------------------------------------------------------
 	--
+	-- Update guild list
+	--
+	---------------------------------------------------------------------------------	
+	guildListUpdate = function(updateData)
+		if updateData or not GuildAdsGuild.guildList then
+			GuildAdsGuild.guildList = {}
+		end
+		if IsInGuild() then
+			GuildRoster();
+			-- TODO should wait for the GUILD_ROSTER_UPDATE event
+			local numAllGuildMembers = GetNumGuildMembers(true);
+			if (numAllGuildMembers>=0) then 
+				for currentplayer = 1,numAllGuildMembers do
+					local name, rank, rankIndex, level, class, zone, note, officernote, online, status, WoWClassId = GetGuildRosterInfo(currentplayer);
+					
+					if name then
+						GuildAdsGuild.guildList[name] = true;
+					end
+				end
+			end
+		end
+	end;
+	
+	---------------------------------------------------------------------------------
+	--
 	-- Update global ad buttons in the UI
 	-- 
 	---------------------------------------------------------------------------------
@@ -257,6 +282,7 @@ GuildAdsGuild = {
 			local offset = FauxScrollFrame_GetOffset(GuildAdsPeopleGlobalAdScrollFrame);
 		
 			local linear = GuildAdsGuild.data.get(updateData);
+			GuildAdsGuild.guildListUpdate(true)
 			local linearSize = #linear;
 			
 			local linearAccount;
@@ -476,6 +502,14 @@ GuildAdsGuild = {
 				suffix = "+"
 			else
 				suffix = "";
+			end
+			
+			if GuildAdsGuild.guildList and not GuildAdsGuild.guildList[playerName] then
+				local guildName = GetGuildInfo("player");
+				local playerGuild = GuildAdsDB.profile.Main:get(playerName, GuildAdsDB.profile.Main.Guild)
+				if playerGuild == guildName then
+					suffixGuild = suffixGuild.."!"
+				end
 			end
 			
 			if reroll then
