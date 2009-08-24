@@ -44,17 +44,22 @@ o=list:GetRandom(); print(o); list:Delete(o);
 o=list:GetRandom(); print(o); list:Delete(o);
 ]]
 
+local new = GuildAds.new
+local new_kv = GuildAds.new_kv
+local del = GuildAds.del
+local deepDel = GuildAds.deepDel
+
 -- The function Insert, Prepend and more can be implemented but haven't been so yet.
 
 GuildAdsList = {};
 function GuildAdsList:new(t)
 	if (t==nil) then
-		t = {};
+		t = new();
 	end
 	if t.head==nil then
-		t.first = { next={} };
-		t.idx = {}; -- used to quickly find an object: idx[obj]=list_info
-		t.list = {}; -- used to make random access into the list: list[1]=obj, list[2]=obj, ... ([1] is not necessarily the first object in the list)
+		t.first = new_kv('next', new());
+		t.idx = new(); -- used to quickly find an object: idx[obj]=list_info
+		t.list = new(); -- used to make random access into the list: list[1]=obj, list[2]=obj, ... ([1] is not necessarily the first object in the list)
 		t.last = t.first.next;
 		t.last.prev = t.first;
 	end
@@ -65,13 +70,13 @@ end
 
 function GuildAdsList:Append(obj,data)
 	if not self.idx[obj] then
-		local new;
-		new={ obj=obj, data=data, next=self.last , prev=self.last.prev };
-		self.last.prev.next = new;
-		self.last.prev = new;
-		self.idx[obj]=new;
+		local _new;
+		_new = new_kv('obj', obj, 'data', data, 'next', self.last, 'prev', self.last.prev);
+		self.last.prev.next = _new;
+		self.last.prev = _new;
+		self.idx[obj] = _new;
 		table.insert(self.list,obj);
-		new.idx=#self.list;
+		_new.idx=#self.list;
 	end
 end
 
@@ -89,15 +94,21 @@ function GuildAdsList:Delete(obj)
 			self.list[t.idx]=self.list[#self.list];
 		end
 		self.list[#self.list]=nil;
+		del(self.idx[obj]);
 		self.idx[obj]=nil;
 	end
 end
 
 function GuildAdsList:DeleteAll()
-	self.first.next = self.last;
-	self.last.prev = self.first;
-	self.idx = {};
-	self.list = {};
+	local first = self:First()
+	while first do
+		self:Delete(first);
+		first = self:First()
+	end
+--	self.first.next = self.last;
+--	self.last.prev = self.first;
+--	self.idx = new();
+--	self.list = new();
 end
 
 -- This function takes an index (1,2,3,..) and returns the object at that index.

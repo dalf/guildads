@@ -8,6 +8,12 @@
 -- Licence: GPL version 2 (General Public License)
 ----------------------------------------------------------------------------------
 
+local new = GuildAds.new
+local new_kv = GuildAds.new_kv
+local del = GuildAds.del
+local deepDel = GuildAds.deepDel
+
+
 GuildAdsDTS = {};
 
 function GuildAdsDTS:new(dataType)
@@ -201,7 +207,7 @@ end
 function GuildAdsDTS:SendTransactionData(playerName, fromRevision)
 	local currentRevision = self.dataType:getRevision(playerName);
 	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"currentRevision="..currentRevision);
-	local t = {};
+	local t = new();
 	local newEntries = 0;
 	-- send new entries >r1
 	for id, _, data, revision in self.dataType:iterator(playerName) do
@@ -222,14 +228,16 @@ function GuildAdsDTS:SendTransactionData(playerName, fromRevision)
 		-- idealement : 1-10, 12-15, 17-30 au lieu de la liste complete
 		GuildAdsComm:SendOldRevision(self.dataType, playerName, t)
 	end
+	del(t)
 end
 
 function GuildAdsDTS:SendTransactionKeys(playerName, fromRevision)
-	keys = {};
+	keys = new();
 	for id, _, data in self.dataType:iterator(playerName) do
 		keys[id] = data;
 	end
 	GuildAdsComm:SendKeys(self.dataType, playerName, keys)
+	del(keys)
 end
 
 --------------------------------------------------------------------------------
@@ -252,8 +260,8 @@ function GuildAdsDTS:ReceiveOpenTransaction(transaction, playerName, fromRevisio
 	local currentRevision = self.dataType:getRevision(playerName);
 	if currentRevision<toRevision and currentRevision>=fromRevision then
 		transaction._valid = true;
-		transaction.newKeys = {};		-- tables should come from a table re-use pool
-		transaction.deletedKeys = {};
+		transaction.newKeys = new();
+		transaction.deletedKeys = new();
 	end
 	
 end
@@ -262,7 +270,7 @@ function GuildAdsDTS:ReceiveCloseTransaction(transaction)
 	if transaction._valid then
 		if transaction._IntegrityProblem then
 			-- gather existing items to send using the delete
-			local tmp={}
+			local tmp=new()
 			local oldRevision = self.dataType:getRevision(transaction.playerName);
 			for id, _, data, revision in self.dataType:iterator(transaction.playerName) do
 				-- new items were not sendt using a transaction-trigger
@@ -275,7 +283,8 @@ function GuildAdsDTS:ReceiveCloseTransaction(transaction)
 			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "revision (after) = "..tostring(self.dataType:getRevision(transaction.playerName)))
 			GuildAdsHash:UpdateHashTree(GuildAdsHash.DT[transaction.dataTypeName], transaction.playerName, not transaction._IntegrityProblem);
 			self:QueueSearch(transaction.playerName);
-			self.dataType:triggerTransactionReceived(transaction.playerName, {}, tmp);
+			self.dataType:triggerTransactionReceived(transaction.playerName, new(), tmp);
+			del(tmp)
 		else
 			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "revision (before) = "..tostring(self.dataType:getRevision(transaction.playerName)))
 			self.dataType:setRevision(transaction.playerName, transaction.toRevision);

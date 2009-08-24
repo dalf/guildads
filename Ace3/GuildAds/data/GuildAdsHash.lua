@@ -19,6 +19,11 @@ local table_concat = table.concat
 local string_format = string.format
 local string_byte = string.byte
 
+local new = GuildAds.new
+local new_kv = GuildAds.new_kv
+local del = GuildAds.del
+local deepDel = GuildAds.deepDel
+
 -- dont make new empty tables all the time (used by ReceiveSearch)
 local emptytable = {}
 
@@ -250,7 +255,7 @@ function GuildAdsHash:UpdateTree(tree, playerName, dataTypeName)
 		-- hashID exists but ID wasn't there. Add ID to leaf (hashID) and sort them. Then recalculate leaf and path checksum.
 		GuildAds_ChatDebug(GA_DEBUG_HASH, "hashID found %s",table_concat(path,","));
 		if self.DT[dataTypeName]:getRevision(playerName) > 0 then
-			tinsert(treepath.d,{ hashID=hashID, ID=ID, p=playerName, dt=self.DT[dataTypeName] });
+			tinsert(treepath.d,new_kv('hashID', hashID, 'ID', ID, 'p', playerName, 'dt', self.DT[dataTypeName] ));
 			sort(treepath.d, function(a,b) if a.ID<b.ID then return true; else return false; end; end);
 			treepath.h=GuildAdsHash:CalculateLeafChecksum(treepath.d);
 			GuildAds_ChatDebug(GA_DEBUG_HASH, "checksum=%s (after)",treepath.h);
@@ -261,7 +266,7 @@ function GuildAdsHash:UpdateTree(tree, playerName, dataTypeName)
 		GuildAds_ChatDebug(GA_DEBUG_HASH, "hashID not found. Creating %s",table_concat(path,","))
 		if self.DT[dataTypeName]:getRevision(playerName) > 0 then
 			GuildAds_ChatDebug(GA_DEBUG_HASH, "Path %s is not found.",table_concat(path,","));
-			tree[path]={ d={ { hashID=hashID, ID=ID, p=playerName, dt=self.DT[dataTypeName] } } };
+			tree[path]=new_kv( 'd', new( new_kv('hashID', hashID, 'ID', ID, 'p', playerName, 'dt', self.DT[dataTypeName]) ) );
 			tree[path].h=GuildAdsHash:CalculateLeafChecksum(tree[path].d);
 			GuildAdsHash:CalculatePathChecksums(tree,path);
 		end
@@ -278,15 +283,16 @@ function GuildAdsHash:RemoveID(tree,playerName,dataTypeName)
 	path=GuildAdsHash:SplitHash(hashID);
 	
 	if tree then
-		treepath=tree[path]; -- just an optimisation
+		local treepath=tree[path]; -- just an optimisation
 		if treepath and treepath.d then
 			for k,v in pairs(treepath.d) do -- small loop, with 12 bit hash (path length = 3), 500 unique ids usually gives no more than 2 loops.
 				if v.ID == ID then
 					GuildAds_ChatDebug(GA_DEBUG_HASH, "ID found. Deleting %s", ID);
-					treepath.d[k]=nil; -- removing an ID does not change the order. No sort necessary.
+					treepath.d[k]=del(treepath.d[k]); -- removing an ID does not change the order. No sort necessary.
 					if #treepath.d>0 then
 						treepath.h=GuildAdsHash:CalculateLeafChecksum(treepath.d); -- update leaf checksum
 					else
+						deepDel(tree[path])
 						tree[path]=nil; -- delete leaf
 					end
 					GuildAdsHash:CalculatePathChecksums(tree,path);
@@ -320,7 +326,7 @@ end
 -- recalculate path checksum 
 function GuildAdsHash:CalculatePathChecksums(tree, path)
 	local i,p,t;
-	p={ [0]=tree }
+	p=new_kv( 0, tree )
 	t=tree;
 	for k,v in pairs(path) do
 		tinsert(p,t[v]);
@@ -378,7 +384,7 @@ function GuildAdsHash:GetHexHash(t)
 		if t[i] and t[i].h then
 			s=string_format("%04x",t[i].h)..s;
 		else
-			s="XXXX"..s;
+			s="XXXX"..s; -- excessive string garbage
 		end
 	end
 	return s;
@@ -389,9 +395,9 @@ function GuildAdsHash:CompareHexHash(h1,h2)
 	r="";
 	for i=1,64,4 do
 		if string_sub(h1,i,i+3)==string_sub(h2,i,i+3) then
-			r=r.."0";
+			r=r.."0";  -- excessive string garbage
 		else
-			r=r.."1";
+			r=r.."1";  -- excessive string garbage
 		end
 	end
 	return r;
@@ -408,7 +414,7 @@ function GuildAdsHash:NumToBase64(n)
 end
 
 function GuildAdsHash:GetBase64Hash(t)
-	s={};
+	s=new()
 	for i=15,0,-1 do
 		if t and t[i] and t[i].h then
 			table_insert(s,GuildAdsHash:NumToBase64(t[i].h));
@@ -421,7 +427,7 @@ end
 
 function GuildAdsHash:CompareBase64Hash(h1,h2)
 	local i,r;
-	r={};
+	r=new()
 	for i=1,48,3 do
 		if string_sub(h1,i,i+2)==string_sub(h2,i,i+2) then
 			table_insert(r,"0");
@@ -448,7 +454,7 @@ end
 function GuildAdsHash:IntegerToPathElement(r)
 	local path
 	local i;
-	path={}
+	path=new()
 	for i=0,15,1 do
 		if bit_band(r,1)==1 then
 			table_insert(path,i)
@@ -510,10 +516,18 @@ end
 
 function GuildAdsHash:stringToPath(str)
 	if str=="" then
-		return {}
+		return new()
 	else
-		return {strsplit(",",str)}
+		-- following could be replaced by 'return {strsplit(",",str)}' but then tables wouldn't be reused
+		local fields = new()
+		str=str..","
+		str:gsub("([^,]*),", function(c) table.insert(fields, c) end)
+		return fields
 	end
+end
+
+function GuildAdsHash:pathLength(path)
+	return (path=="" and 0) or select("#", strsplit(",",path))
 end
 
 function GuildAdsHash:SendSearch(path, hashSequence)
@@ -537,14 +551,14 @@ end
 function GuildAdsHash:ReceiveSearch(path, hashSequence)
 	if not self.search[path] then
 		GuildAds_ChatDebug(GA_DEBUG_HASH,"GuildAdsHash:ReceiveSearch %s", path);
-		self.search[path] = {
-			bestPlayerName = GuildAdsComm.playerTree[GuildAds.playerName].i, -- playername as index
-			path = self:stringToPath(path);
-			hashSequence = hashSequence,
-			hashChanged = self:CompareBase64HashToInteger(self:GetBase64Hash(self.tree[path]), hashSequence);
-			amount = #((self.tree[path] or emptytable).d or emptytable);  -- number of IDs for this path (or 0).
-			numplayers = 1; -- the number of players the bestPlayerName is drawn from (used to calculate probabilities)
-		};
+		self.search[path] = new_kv(
+			'bestPlayerName', GuildAdsComm.playerTree[GuildAds.playerName].i, -- playername as index
+			'path', self:stringToPath(path),
+			'hashSequence', hashSequence,
+			'hashChanged', self:CompareBase64HashToInteger(self:GetBase64Hash(self.tree[path]), hashSequence),
+			'amount', #((self.tree[path] or emptytable).d or emptytable),  -- number of IDs for this path (or 0).
+			'numplayers', 1 -- the number of players the bestPlayerName is drawn from (used to calculate probabilities)
+		);
 	else
 		GuildAds_ChatDebug(GA_DEBUG_HASH,"  - Hash search already in progress");
 	end
@@ -639,10 +653,12 @@ function GuildAdsHash:ReceiveHashSearchResult(path, hashChanged, who, amount, DT
 				end
 			end
 		end
+		del(self.search[path]);
 		self.search[path]=nil;
 	end
 end
 
 function GuildAdsHash:DeleteAllSearches()
-	GuildAdsHash.search={};
+	del(GuildAdsHash.search)
+	GuildAdsHash.search=new();
 end

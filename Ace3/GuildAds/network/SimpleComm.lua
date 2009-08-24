@@ -107,6 +107,7 @@ local SetCVar = _G.SetCVar
 -- 
 ---------------------------------------------------------------------------------
 local new = GuildAds.new
+local new_kv = GuildAds.new_kv
 local del = GuildAds.del
 local deepDel = GuildAds.deepDel
 
@@ -327,7 +328,8 @@ local function sendQueue()
 		previousMessage.next = message.next;
 		
 		-- go to next message (previousMessage keeps the same value)
-		message = message.next
+		del(message)
+		message = previousMessage.next
 	end
 	
 	currentChannel.extraBytes = currentChannel.extraBytes + sentBytes - SIMPLECOMM_CHARACTERSPERTICK_MAX;
@@ -423,16 +425,18 @@ local function parseOneMessage(author, text, channel, drunk)
 		-- update packet and currentChannel.messageStack
 		if newText then
 			if last then
+				del(currentChannel.messageStack[id])
 				currentChannel.messageStack[id] = nil;
 				packet = newText;
 			else
-				currentChannel.messageStack[id] = {
-					text = newText;
-					number = packetNumber;
-				};
+				currentChannel.messageStack[id] = new_kv(
+					'text', newText,
+					'number', packetNumber
+				);
 				packet = nil;
 			end
 		else
+			del(currentChannel.messageStack[id])
 			currentChannel.messageStack[id] = nil;
 			packet = nil;
 		end
@@ -646,11 +650,11 @@ function SimpleComm_SendMessage(who, text)
 			queueLast.length = queueLast.length + textLength + 1
 		elseif textLength<= currentChannel.maxMessageLength then
 			-- normal message
-			currentChannel.outboundQueueLast.next = {
-				to=who, 
-				text=text,
-				length=textLength
-			};
+			currentChannel.outboundQueueLast.next = new_kv(
+				'to', who, 
+				'text', text,
+				'length', textLength
+			);
 			currentChannel.outboundQueueLast = currentChannel.outboundQueueLast.next;
 		else
 			-- split the message into smaller one.
@@ -661,11 +665,11 @@ function SimpleComm_SendMessage(who, text)
 				text = string.sub(text, currentChannel.maxMessageLength+1);
 				tmp = splitSerialize(packetNumber, text=="", tmp)
 				-- add a packet
-				currentChannel.outboundQueueLast.next = {
-					to = who;
-					text = tmp;
-					length = tmp:len();
-				};
+				currentChannel.outboundQueueLast.next = new_kv(
+					'to', who,
+					'text', tmp,
+					'length', tmp:len()
+				);
 				currentChannel.outboundQueueLast = currentChannel.outboundQueueLast.next;
 				-- next packet
 				packetNumber = packetNumber + 1;
