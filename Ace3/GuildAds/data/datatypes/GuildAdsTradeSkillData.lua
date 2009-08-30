@@ -108,17 +108,7 @@ function GuildAdsTradeSkillDataType:UpdateTradeSkills()
 				tmp[link]=true
 				if not t[link] then
 					GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "GuildAdsTradeSkillDataType: Adding TradeSkill Link "..link)
-					self:set(GuildAds.playerName, link, { s=skillId })
-					-- remove previous link(s) of the same type
-					local thisProfession = link:match("^trade:(%d+):.*");
-					local craft = self:getTableForPlayer(GuildAds.playerName);
-					for item, data in pairs(craft) do
-						local prof = link:match("^trade:(%d+):.*");
-						if prof and prof==thisProfession and item~=link then
-							self:set(GuildAds.playerName, item, nil);
-							deleted = deleted + 1
-						end
-					end
+					self:set(GuildAds.playerName, link, { s=skillId, q=select(2, GetBuildInfo()) })
 					added = added + 1
 				end
 			end
