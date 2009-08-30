@@ -572,6 +572,19 @@ GuildAdsTradeTooltip = {
 		-- TODO : add support for LootLink, ItemMatrix, KC_Items 
 		installHooks(GameTooltip, Hooks)
 		installHooks(ItemRefTooltip, Hooks)
+		-- set default options
+		if type(GuildAdsTradeTooltip.getRawProfileValue(nil, "ShowCraftableTooltip"))=="nil" then
+			GuildAdsTradeTooltip.setProfileValue(nil, "ShowCraftableTooltip", true);
+		end
+		if type(GuildAdsTradeTooltip.getRawProfileValue(nil, "ShowCraftedBy"))=="nil" then
+			GuildAdsTradeTooltip.setProfileValue(nil, "ShowCraftedBy", true);
+		end
+		if type(GuildAdsTradeTooltip.getRawProfileValue(nil, "ShowAsk"))=="nil" then
+			GuildAdsTradeTooltip.setProfileValue(nil, "ShowAsk", true);
+		end
+		if type(GuildAdsTradeTooltip.getRawProfileValue(nil, "ShowHave"))=="nil" then
+			GuildAdsTradeTooltip.setProfileValue(nil, "ShowHave", true);
+		end
 		GuildAdsTooltip:SetScale(GuildAdsTradeTooltip.clipTooltipScale(GuildAdsTradeTooltip.getProfileValue(nil, "TooltipScale") or 1.0))
 	end;
 	
@@ -607,10 +620,10 @@ GuildAdsTradeTooltip = {
 	
 	saveOptions = function()
 		if GuildAdsTradeTooltipOptionsFrame:IsVisible() then
-			GuildAdsTradeTooltip.setProfileValue(nil, "ShowCraftableTooltip", GuildAdsTradeTooltip_ShowCraftableTooltipCheckButton:GetChecked() or nil);
-			GuildAdsTradeTooltip.setProfileValue(nil, "ShowCraftedBy", GuildAdsTradeTooltip_ShowCraftedByCheckButton:GetChecked() or nil);
-			GuildAdsTradeTooltip.setProfileValue(nil, "ShowAsk", GuildAdsTradeTooltip_ShowAskCheckButton:GetChecked() and true);
-			GuildAdsTradeTooltip.setProfileValue(nil, "ShowHave", GuildAdsTradeTooltip_ShowHaveCheckButton:GetChecked() and true);
+			GuildAdsTradeTooltip.setProfileValue(nil, "ShowCraftableTooltip", GuildAdsTradeTooltip_ShowCraftableTooltipCheckButton:GetChecked() and true or false);
+			GuildAdsTradeTooltip.setProfileValue(nil, "ShowCraftedBy", GuildAdsTradeTooltip_ShowCraftedByCheckButton:GetChecked() and true or false);
+			GuildAdsTradeTooltip.setProfileValue(nil, "ShowAsk", GuildAdsTradeTooltip_ShowAskCheckButton:GetChecked() and true or false);
+			GuildAdsTradeTooltip.setProfileValue(nil, "ShowHave", GuildAdsTradeTooltip_ShowHaveCheckButton:GetChecked() and true or false);
 			local scale = GuildAdsTradeTooltip_ExtraTooltipScale:GetValue()
 			scale = GuildAdsTradeTooltip.clipTooltipScale(scale)
 			GuildAdsTradeTooltip.setProfileValue(nil, "TooltipScale", scale)
