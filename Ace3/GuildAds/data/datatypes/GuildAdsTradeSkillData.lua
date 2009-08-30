@@ -45,7 +45,7 @@ AceEvent:Embed(GuildAdsTradeSkillDataType)
 function GuildAdsTradeSkillDataType:Initialize()
 	self:RegisterEvent("PLAYER_ENTERING_WORLD", "enterWorld");
 	-- create wowSkillId to GuildAds skill ID mapping
-	LTLFunc = LibStub("LibTradeLinks-1.0")
+	local LTLFunc = LibStub("LibTradeLinks-1.0")
 	wowIdToGuildAdsId[LTLFunc.SKILL_ALCHEMY] = 4
 	wowIdToGuildAdsId[LTLFunc.SKILL_BLACKSMITHING] = 5
 	wowIdToGuildAdsId[LTLFunc.SKILL_COOKING] = 12
