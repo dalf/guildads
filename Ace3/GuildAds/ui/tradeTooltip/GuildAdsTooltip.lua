@@ -227,7 +227,7 @@ end
 local function setPoints(tooltip)
 	GuildAdsTooltip:ClearAllPoints();
 	local maxWidth = GuildAdsExtraTipWidth or 0
-	if (maxWidth + 2) < (UIParent:GetWidth() - tooltip:GetRight() ) then
+	if (maxWidth + 2) < (UIParent:GetWidth() - (tooltip:GetRight() or 0)) then
 		GuildAdsTooltip:SetPoint("TOPLEFT", tooltip, "TOPRIGHT", 0, 0)
 	else
 		GuildAdsTooltip:SetPoint("TOPRIGHT", tooltip, "TOPLEFT", 0, 0)
