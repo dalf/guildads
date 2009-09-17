@@ -396,7 +396,7 @@ GuildAdsFaction = {
 				-- init
 				local i = 1;
 				local j = i + offset;
-				GuildAdsFaction.debug("GuildAdsFaction.factionButton.updateAll ("..linearSize..") ("..offset..")");
+				--GuildAdsFaction.debug("GuildAdsFaction.factionButton.updateAll ("..linearSize..") ("..offset..")");
 				
 				-- for each buttons
 				while (i <= GUILDADS_NUM_GLOBAL_FACTION_BUTTONS) do
@@ -409,9 +409,11 @@ GuildAdsFaction = {
 							-- update internal data
 							factionBar.player = linear[j].p;
 							factionBar.id = linear[j].i;
+							
+							local barMin, barMax, standingId = GuildAdsFaction.factionButton.getFactionMinMax(linear[j].v)
 
 							--local factionStanding = GetText("FACTION_STANDING_LABEL"..linear[j].s, gender);
-							local factionStanding = getglobal("FACTION_STANDING_LABEL"..linear[j].s);
+							local factionStanding = getglobal("FACTION_STANDING_LABEL"..(linear[j].s or standingId));
 							getglobal("GuildAdsReputationBar"..i.."FactionStanding"):SetText(factionStanding);
 							
 							local factionName = getglobal("GuildAdsReputationBar"..i.."FactionName");
@@ -421,15 +423,8 @@ GuildAdsFaction = {
 							factionName:SetTextColor(ocolor.r, ocolor.g, ocolor.b);
 							
 							-- Normalize values
-							local barMax, barMin, barValue
-							if not linear[j].t or not linear[j].b then
-								barMin, barMax = GuildAdsFaction.factionButton.getFactionMinMax(linear[j].v)
-								barValue = linear[j].v - barMin
-								barMax = barMax - barMin
-							else
-								barMax = linear[j].t - linear[j].b;
-								barValue = linear[j].v - linear[j].b;
-							end
+							barMax = (linear[j].t or barMax) - (linear[j].b or barMin)
+							barValue = linear[j].v - (linear[j].b or barMin)
 							barMin = 0;
 				
 							--factionBar.id = factionIndex;
@@ -437,7 +432,7 @@ GuildAdsFaction = {
 							factionBar.tooltip = HIGHLIGHT_FONT_COLOR_CODE.." "..barValue.." / "..barMax..FONT_COLOR_CODE_CLOSE;
 							factionBar:SetMinMaxValues(0, barMax);
 							factionBar:SetValue(barValue);
-							color = FACTION_BAR_COLORS[linear[j].s];
+							color = FACTION_BAR_COLORS[(linear[j].s or standingId)];
 							factionBar:SetStatusBarColor(color.r, color.g, color.b);
 							factionBar:Show();
 							factionHeader:Hide();
@@ -484,26 +479,27 @@ GuildAdsFaction = {
 		end;
 		
 		getFactionMinMax = function(reputation)
+			local barMin, barMax, standingId
 			if reputation >= 42000 then
-				barMin, barMax = 42000, 43000
+				barMin, barMax, standingId = 42000, 43000, 8
 			elseif reputation >= 21000 then
-				barMin, barMax = 21000, 42000
+				barMin, barMax, standingId = 21000, 42000, 7
 			elseif reputation >= 9000 then
-				barMin, barMax = 9000, 21000
+				barMin, barMax, standingId = 9000, 21000, 6
 			elseif reputation >= 3000 then
-				barMin, barMax = 3000, 9000
+				barMin, barMax, standingId = 3000, 9000, 5
 			elseif reputation >= 0 then
-				barMin, barMax = 0, 3000
+				barMin, barMax, standingId = 0, 3000, 4
 			elseif reputation >= -3000 then
-				barMin, barMax = -3000, 0
+				barMin, barMax, standingId = -3000, 0, 3
 			elseif reputation >= -6000 then
-				barMin, barMax = -6000, -3000
+				barMin, barMax, standingId = -6000, -3000, 2
 			elseif reputation >= -42000 then
-				barMin, barMax = -42000, -6000
+				barMin, barMax, standingId = -42000, -6000, 1
 			else
-				barMin, barMax = -42000, 43000
+				barMin, barMax, standingId = -42000, 43000, 4
 			end
-			return barMin, barMax
+			return barMin, barMax, standingId
 		end;
 	}
 	

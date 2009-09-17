@@ -62,7 +62,7 @@ function GuildAdsFactionDataType:onEvent(event, arg1)
 			if (isHeader == nil) then
 				local id = self:getIdFromName(factionName);
 				if (id > 0) then
-					self:set(playerName, id, { v=earnedValue; b=bottomValue; t=topValue; s=standingId });
+					self:set(playerName, id, { v=earnedValue });
 					if not self:get(playerName, id) then
 						added = added + 1
 					end
