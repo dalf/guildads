@@ -96,6 +96,7 @@ AceEvent:Embed(GuildAdsTalentRankDataType)
 
 function GuildAdsTalentRankDataType:Initialize()
 	self:RegisterEvent("CHARACTER_POINTS_CHANGED","onEvent");
+	self:RegisterEvent("PLAYER_TALENT_UPDATE","onEvent");
 	GuildAdsTask:AddNamedSchedule("GuildAdsTalentRankDataTypeInit", 8, nil, nil, self.onEvent, self)
 end
 
@@ -132,7 +133,7 @@ function GuildAdsTalentRankDataType:onEvent()
 		local ng = GetNumGlyphSockets();
 		for i = 1, ng do
 			tinsert(glyphTable, sep)
-			local enabled, glyphType, glyphSpellID, icon = GetGlyphSocketInfo(i);
+			local enabled, glyphType, glyphSpellID, icon = GetGlyphSocketInfo(i, talentGroup);
 			if ( enabled ) then
 				--local link = GetGlyphLink(i);-- Retrieves the Glyph's link (nil of no glyph in Socket);
 				if ( glyphSpellID ) then
