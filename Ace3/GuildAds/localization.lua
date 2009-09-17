@@ -7,6 +7,7 @@ GUILDADS_UPGRADE_TIP		= "There is a newer version of GuildAds available: ";
 GUILDADS_STATUS_TIP		= "Remaining searches:";
 
 GUILDADS_MAJOR_VERSION		= "GuildAds: New incompatible protocol noticed. Please upgrade."
+GUILDADS_OLD_PROTOCOL = "%s is using old and incompatible protocol"
 GUILDADS_BLACKLISTED_PLAYER = "GuildAds: Blacklisted player %s attempts to log on."
 
 -- Options frame
