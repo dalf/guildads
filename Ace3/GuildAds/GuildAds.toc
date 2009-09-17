@@ -1,7 +1,7 @@
 ﻿## Interface: 30200
 ## Title: GuildAds
 ## Author: Zarkan, Fkaï, Galmok
-## Version: 2.5
+## Version: 2.6
 ## Notes: Guild Ads
 ## Notes-frFR: Les annonces de la guilde
 ## Notes-ruRU: Обмен внутри Гилдии
@@ -58,6 +58,7 @@ data\datatypes\GuildAdsTradeOfferData.lua
 data\datatypes\GuildAdsInventoryData.lua
 data\datatypes\GuildAdsTradeSkillData.lua
 data\datatypes\GuildAdsTalentData.lua
+data\datatypes\GuildAdsTalentRankData.lua
 data\datatypes\GuildAdsForumData.lua
 data\datatypes\GuildAdsQuestData.lua
 network\DataChannelLib.lua

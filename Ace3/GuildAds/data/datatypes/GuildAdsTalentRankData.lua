@@ -1,10 +1,10 @@
 ----------------------------------------------------------------------------------
 --
--- GuildAdsTalentData.lua
+-- GuildAdsTalentRankData.lua
 --
 -- Author: Galmok of European Stormrage (Horde)
 -- URL : http://guildads.sourceforge.net
--- Email : guildads@gmail.com, galmok@gmail.com
+-- Email : galmok@gmail.com
 -- Licence: GPL version 2 (General Public License)
 ----------------------------------------------------------------------------------
 
@@ -43,9 +43,9 @@ do
 	end
 end
 
-GuildAdsTalentDataType = GuildAdsTableDataType:new({
+GuildAdsTalentRankDataType = GuildAdsTableDataType:new({
 	metaInformations = {
-		name = "Talent",
+		name = "TalentRank",
 		version = 1,
 		guildadsCompatible = 200,
 		parent = GuildAdsDataType.PROFILE,
@@ -53,26 +53,17 @@ GuildAdsTalentDataType = GuildAdsTableDataType:new({
 		depend = { "Main" }
 	};
 	schema = {
-		id = "String", -- (tab number):(talent number), e.g. 1:1, 3:15, 2:22.... 1:0, 2:0 and 3:0 are special; they hold tab specific data.
+		id = "String", -- "1" = talent group 1, "2" = talent group 2, "A" = active talent group (number held in 'b')
 		data = {
-			[1] = { key="n", codec="String" },		-- name | nameTalent
-			[2] = { key="t", codec="Texture" },	-- iconTexture | iconPath
-			[3] = { key="b", codec="Texture" },	-- background
-			[4] = { key="nt", codec="Integer" },	-- numTalents
-			[5] = { key="ti", codec="Integer" },	-- tier
-			[6] = { key="co", codec="Integer" },	-- column
-			[7] = { key="cr", codec="Integer" },	-- currentRank
-			[8] = { key="mr", codec="Integer" },	-- maxRank
-			[9] = { key="p", codec="Integer" },	-- meetsPrereq -- turns out to be _always_ 1 (no need to share)
-			[10] = { key="pt", codec="Integer" },	-- Prereq:tier
-			[11] = { key="pc", codec="Integer" },	-- Prereq:column
-			[12] = { key="pl", codec="Integer" },	-- Prereq:isLearnable -- is 1 if talent at (Prereq:tier, Prereq:column) is maxed (not really necessary to share)
+			[1] = { key="t", codec="String" },	-- talent data link			"XXXXXXXXXXXXXXX:YYYYYYYYYYYYYY:ZZZZZZZZZZZZZ"
+			[2] = { key="g", codec="String" },	-- glyph data						"<glyph spell id 1>:<glyph spell id 2>:...:<glyph spell id x>"
+			[3] = { key="b", codec="Integer" },	-- wow build on which this link is based (stored data in GuildAdsTalentDataType MUST match or talents probably wont be shown correctly)
 		}
 	}
 });
 
 local AceEvent = LibStub("AceEvent-3.0")
-AceEvent:Embed(GuildAdsTalentDataType)
+AceEvent:Embed(GuildAdsTalentRankDataType)
 
 
 -- Lots of information needs to be transferred, some of it class relevant (visuals of talent frame) and some of it player relevant (talent points)
@@ -103,71 +94,97 @@ AceEvent:Embed(GuildAdsTalentDataType)
 -- Static part is to be shared is if no talent points are spent.
 -- Dynamic part only shares what is different from Static part.
 
-function GuildAdsTalentDataType:Initialize()
+function GuildAdsTalentRankDataType:Initialize()
 	self:RegisterEvent("CHARACTER_POINTS_CHANGED","onEvent");
-	GuildAdsTask:AddNamedSchedule("GuildAdsTalentDataTypeInit", 8, nil, nil, self.onEvent, self)
+	GuildAdsTask:AddNamedSchedule("GuildAdsTalentRankDataTypeInit", 8, nil, nil, self.onEvent, self)
 end
 
-function GuildAdsTalentDataType:onEvent()
-	local _, WoWClassId = UnitClass("player")
-	-- parse complete talent tree now
-	local name, iconTexture, pointsSpent, background, numTalents, tabIndex;
-	local talentIndex, nameTalent, talentLink, iconPath, tier, column, currentRank, maxRank, isExceptional, meetsPrereq, ptier, pcolumn, isLearnable;
-	for tabIndex=1,GetNumTalentTabs() do
-		name, iconTexture, pointsSpent, background = GetTalentTabInfo( tabIndex );
-		numTalents = GetNumTalents(tabIndex);
-		self:set(":"..WoWClassId, tostring(tabIndex)..":0", { n=name, t=iconTexture, b=background, nt=numTalents} );
-		self:set(GuildAds.playerName, tostring(tabIndex)..":0", nil); -- delete old data
-		for talentIndex=1,numTalents do
-			nameTalent, iconPath, tier, column, currentRank, maxRank, isExceptional, meetsPrereq = GetTalentInfo(tabIndex, talentIndex);
-			ptier, pcolumn, isLearnable = GetTalentPrereqs( tabIndex , talentIndex );
-			talentLink=GetTalentLink(tabIndex, talentIndex); -- talent:<talentid>:<currentrank or -1 if not available yet>
-			if talentLink then
-				nameTalent=talentLink;
+function GuildAdsTalentRankDataType:onEvent()
+	for talentGroup = 1, GetNumTalentGroups() do
+		-- parse complete talent tree now
+		local name, iconTexture, pointsSpent, background, numTalents, tabIndex;
+		local talentIndex, nameTalent, talentLink, iconPath, tier, column, currentRank, maxRank, isExceptional, meetsPrereq, ptier, pcolumn, isLearnable;
+		local talentLinkTable={};
+		local sep = "";
+		local _, WoWClassId = UnitClass("player")
+		-- pack talent info
+		local rest
+		for tabIndex = 1, GetNumTalentTabs() do
+			tinsert(talentLinkTable, sep)
+			local q = false;
+			for talentIndex = 1, GetNumTalents(tabIndex) do
+				_,_,_,_,currentRank = GetTalentInfo(tabIndex, talentIndex, false, false, talentGroup);
+				if q then
+					tinsert(talentLinkTable, EncodeBase64Char(rest+currentRank*8))
+				else
+					rest = currentRank;
+				end
+				q=not q
 			end
-			currentRank = 0;
-			isLearnable = nil; 
-			self:set(":"..WoWClassId, tostring(tabIndex)..":"..tostring(talentIndex), { n=nameTalent, 
-																t=iconPath,
-																ti=tier,
-																co=column,
-																cr=currentRank,
-																mr=maxRank,
-																p=meetsPrereq,
-																pt=ptier,
-																pc=pcolumn,
-																pl=isLearnable});
-			self:set(GuildAds.playerName, tostring(tabIndex)..":"..tostring(talentIndex), nil);
+			if q then
+				tinsert(talentLinkTable,EncodeBase64Char(rest))
+			end
+			sep = ":"
 		end
+		-- pack glyph info
+		local glyphTable = {}
+		local sep = "";
+		local ng = GetNumGlyphSockets();
+		for i = 1, ng do
+			tinsert(glyphTable, sep)
+			local enabled, glyphType, glyphSpellID, icon = GetGlyphSocketInfo(i);
+			if ( enabled ) then
+				--local link = GetGlyphLink(i);-- Retrieves the Glyph's link (nil of no glyph in Socket);
+				if ( glyphSpellID ) then
+					tinsert(glyphTable, glyphSpellID);
+					--DEFAULT_CHAT_FRAME:AddMessage("Glyph Socket "..i.." contains "..link);
+				else
+					tinsert(glyphTable, "");
+					--DEFAULT_CHAT_FRAME:AddMessage("Glyph Socket "..i.." is unlocked and empty!");
+				end
+			else
+				tinsert(glyphTable, "-");
+				--DEFAULT_CHAT_FRAME:AddMessage("Glyph Socket "..i.." is locked!");
+			end
+			sep = ":";
+		end
+		-- store it
+		local data = {
+			t = table.concat(talentLinkTable,""),
+			g = table.concat(glyphTable,""),
+			b = (select(2,GetBuildInfo()))
+		}
+		self:set(GuildAds.playerName, tostring(tabIndex)..":"..tostring(talentIndex), nil);
+		self:set(GuildAds.playerName, tostring(talentGroup), data);
 	end
-	-- add virtual player to the list
-	GuildAdsDB.channel[GuildAdsComm.channelName]:addPlayer(":"..WoWClassId);
+	-- store active talent group
+	self:set(GuildAds.playerName, "A", { b=GetActiveTalentGroup() });
 end
 
-function GuildAdsTalentDataType:getTableForPlayer(author)
+function GuildAdsTalentRankDataType:getTableForPlayer(author)
 	if not author then
 		error("author is nil", 2);
 	end
-	return self.profile:getRaw(author).talent;
+	return self.profile:getRaw(author).talentrank;
 end
 
-function GuildAdsTalentDataType:get(author, id)
+function GuildAdsTalentRankDataType:get(author, id)
 	if not author then
 		error("author is nil", 2);
 	end
-	return self.profile:getRaw(author).talent[id];
+	return self.profile:getRaw(author).talentrank[id];
 end
 
-function GuildAdsTalentDataType:getRevision(author)
-	return self.profile:getRaw(author).talent._u or 0;
+function GuildAdsTalentRankDataType:getRevision(author)
+	return self.profile:getRaw(author).talentrank._u or 0;
 end
 
-function GuildAdsTalentDataType:setRevision(author, revision)
-	self.profile:getRaw(author).talent._u = revision;
+function GuildAdsTalentRankDataType:setRevision(author, revision)
+	self.profile:getRaw(author).talentrank._u = revision;
 end
 
-function GuildAdsTalentDataType:setRaw(author, id, info, revision)
-	local talent = self.profile:getRaw(author).talent;
+function GuildAdsTalentRankDataType:setRaw(author, id, info, revision)
+	local talent = self.profile:getRaw(author).talentrank;
 	talent[id] = info;
 	if info then
 		talent[id]._u = revision;
@@ -175,10 +192,10 @@ function GuildAdsTalentDataType:setRaw(author, id, info, revision)
 	end
 end
 
-function GuildAdsTalentDataType:set(author, id, info)
-	local keys={ "n", "t", "b", "nt", "ti", "co", "cr", "mr", "p", "pt", "pc", "pl" };
+function GuildAdsTalentRankDataType:set(author, id, info)
+	local keys={ "t", "g", "b" };
 	local changed=false;
-	local talent = self.profile:getRaw(author).talent;
+	local talent = self.profile:getRaw(author).talentrank;
 	if info then
 		if talent[id]==nil then
 			changed=true;
@@ -205,5 +222,5 @@ function GuildAdsTalentDataType:set(author, id, info)
 	end
 end
 
-GuildAdsTalentDataType:register();
+GuildAdsTalentRankDataType:register();
 

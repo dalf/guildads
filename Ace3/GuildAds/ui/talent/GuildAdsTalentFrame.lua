@@ -8,6 +8,41 @@
 -- Licence: GPL version 2 (General Public License)
 ----------------------------------------------------------------------------------
 
+local Base64MatchString, base64chars, base64values, DecodeBase64Char, EncodeBase64Char
+do
+	Base64MatchString = "[A-Za-z0-9+/]";
+	local base64chars = {
+		'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
+		'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z',
+		'0','1','2','3','4','5','6','7','8','9','+','/'
+	};
+	local base64values = {
+		-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
+		-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
+		-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 62, -1, -1, -1, 63, 
+		52, 53, 54, 55, 56, 57, 58, 59, 60, 61, -1, -1, -1, -1, -1, -1,
+		-1, 00, 01, 02, 03, 04, 05, 06, 07, 08, 09, 10, 11, 12, 13, 14, 
+		15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, -1, -1, -1, -1, -1, 
+		-1, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
+		41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, -1, -1, -1, -1, -1}; 
+
+	function DecodeBase64Char(c)
+		c = strbyte(c);
+		if c < 0 or c > 127 then
+			return -1;
+		end
+		return base64values[c + 1];
+	end
+
+	function EncodeBase64Char(val)
+		if val < 0 or val > 63 then
+			return '-';
+		else
+			return base64chars[val + 1];
+		end
+	end
+end
+
 local firstShow = true
 
 GuildAdsTalentUI = {
@@ -79,6 +114,7 @@ GuildAdsTalentUI = {
 		local self=GuildAdsTalentUI;
 		local selectedTab = PanelTemplates_GetSelectedTab(GuildAdsTalentFrame);
 		local talentName, iconPath, tier, column, currentRank, maxRank = self.GetTalentInfo(selectedTab, id);
+		talentName = this.link
 		GameTooltip:SetOwner(this, "ANCHOR_RIGHT");
 		if GuildAds_ExplodeItemRef(talentName) then
 			GameTooltip:SetHyperlink(talentName);
@@ -120,30 +156,88 @@ GuildAdsTalentUI = {
 		self:Update();
 	end;
 	
+	LinkSetRank = function(link, rank)
+		return link:gsub("(talent:[0-9]+:)(%-?[0-9]+)", "%1"..tostring(rank))
+	end;
+	
+	GetCurrentRankHelper = function(tabIndex, ...)
+		return select(tabIndex, ...)
+	end;
+	
+	GetCurrentRank = function(talentString, tabIndex, talentIndex)
+		local tabTalentString = GuildAdsTalentUI.GetCurrentRankHelper(tabIndex, string.split(":", talentString))
+		local stringIndex = math.floor((talentIndex-1)/2)+1
+		local c = tabTalentString:sub(stringIndex, stringIndex)
+		local v = DecodeBase64Char(c)
+		if math.fmod(talentIndex, 2) == 0 then
+			v = bit.rshift(v,3)
+		end
+		v = bit.band(v, 7)
+		return v
+	end;
+	
+	GetTalentGlyphString = function()
+		if GuildAdsInspectWindow.playerName then
+			local data = GuildAdsDB.profile.TalentRank:get(GuildAdsInspectWindow.playerName, "A"); -- get active talent group
+			if data and data.b then
+				local talent = GuildAdsDB.profile.TalentRank:get(GuildAdsInspectWindow.playerName, tostring(data.b)); -- get active talent link
+				if talent then
+					return talent.t, talent.g, talent.b
+				end
+			end
+		end
+		return nil, nil, nil
+	end;
+	
 	GetNumTalentTabs = function()
-		return 3; -- should iterate through all of the datatype to get the max value
+		local talentString = GuildAdsTalentUI.GetTalentGlyphString()
+		if talentString then
+			return GuildAdsTalentUI.GetCurrentRankHelper("#", string.split(":", talentString))
+		end
+		return 3 -- default
 	end;
 	
 	GetTalentTabInfo = function(tabIndex)
 		if GuildAdsInspectWindow.playerName then
-			local data = GuildAdsDB.profile.Talent:get(GuildAdsInspectWindow.playerName, tostring(tabIndex)..":0");
-			if data and data.n then
-				local pointsSpent=0; -- to be calculated
-				for talentIndex=1,data.nt do
-					local d=GuildAdsDB.profile.Talent:get(GuildAdsInspectWindow.playerName, tostring(tabIndex)..":"..tostring(talentIndex));
-					if d then
-						pointsSpent=pointsSpent+(d.cr or 0);
-					end
+			local GAClass = GuildAdsDB.profile.Main:get(GuildAdsInspectWindow.playerName, GuildAdsDB.profile.Main.Class);
+			if GAClass then
+				local wowClassId = GuildAdsMainDataType:getWoWClassIdFromClassId(GAClass)
+				local virtual = ":"..wowClassId
+				local data = GuildAdsDB.profile.Talent:get(virtual, tostring(tabIndex)..":0");
+				if not data then
+					data = GuildAdsDB.profile.Talent:get(GuildAdsInspectWindow.playerName, tostring(tabIndex)..":0");
 				end
-				return data.n or "", data.t or "", pointsSpent, data.b or "";
+				local pointsSpent=0; -- to be calculated
+				if data then
+					if data and data.n then
+						local talentString = GuildAdsTalentUI.GetTalentGlyphString()
+						for talentIndex=1, data.nt do
+							local cr
+							if talentString then
+								cr = talentString and GuildAdsTalentUI.GetCurrentRank(talentString, tabIndex, talentIndex);
+							else
+								local d=GuildAdsDB.profile.Talent:get(GuildAdsInspectWindow.playerName, tostring(tabIndex)..":"..tostring(talentIndex));
+								cr = d and d.cr;
+							end
+							pointsSpent=pointsSpent+(cr or 0);
+						end
+					end
+					return data.n or "", data.t or "", pointsSpent, data.b or "";
+				end
 			end
 		end
 		return "","",0,"";
 	end;
 		
-	GetNumTalents = function(tabIndex)
+	GetNumTalents = function(tabIndex) -- already good
 		if GuildAdsInspectWindow.playerName then
-			local data = GuildAdsDB.profile.Talent:get(GuildAdsInspectWindow.playerName, tostring(tabIndex)..":0");
+			local GAClass = GuildAdsDB.profile.Main:get(GuildAdsInspectWindow.playerName, GuildAdsDB.profile.Main.Class);
+			local wowClassId = GuildAdsMainDataType:getWoWClassIdFromClassId(GAClass)
+			local virtual = ":"..wowClassId
+			local data = GuildAdsDB.profile.Talent:get(virtual, tostring(tabIndex)..":0");
+			if not data then
+				data = GuildAdsDB.profile.Talent:get(GuildAdsInspectWindow.playerName, tostring(tabIndex)..":0");
+			end
 			if data and data.nt then
 				return data.nt;
 			end
@@ -153,27 +247,52 @@ GuildAdsTalentUI = {
 	
 	GetTalentInfo = function(tabIndex, talentIndex)
 		if GuildAdsInspectWindow.playerName then
-			local data = GuildAdsDB.profile.Talent:get(GuildAdsInspectWindow.playerName, tostring(tabIndex)..":"..tostring(talentIndex));
+			-- get class data
+			local GAClass = GuildAdsDB.profile.Main:get(GuildAdsInspectWindow.playerName, GuildAdsDB.profile.Main.Class);
+			local wowClassId = GuildAdsMainDataType:getWoWClassIdFromClassId(GAClass)
+			local virtual = ":"..wowClassId
+			local data = GuildAdsDB.profile.Talent:get(virtual, tostring(tabIndex)..":"..tostring(talentIndex));
+			if not data then
+				-- show old data instead of showing nothing
+				data = GuildAdsDB.profile.Talent:get(GuildAdsInspectWindow.playerName, tostring(tabIndex)..":"..tostring(talentIndex));
+			end
 			if data and data.n then
 				if not data.t then
 					local name, rank, texture = GetSpellInfo(data.n);
 					name="|cff71d5ff|Hspell:"..tostring(data.n).."|h["..tostring(name).."]|h|r"
 					return name, texture, data.ti, data.co, data.cr, data.mr, 0, data.p;
 				else
-					return data.n, data.t, data.ti, data.co, data.cr, data.mr, 0, data.p;
+					local talentString = GuildAdsTalentUI.GetTalentGlyphString()
+					local currentrank = talentString and GuildAdsTalentUI.GetCurrentRank(talentString, tabIndex, talentIndex) or data.cr;
+					-- modify talent:x:y link in data.n here. Values 0-5 come from currentrank, -1 from ?
+					local link = data.n
+					link = talentString and GuildAdsTalentUI.LinkSetRank(link, currentrank) or link; -- this only sets 0 to 5. The -1 is tricky!
+					return data.n, data.t, data.ti, data.co, currentrank, data.mr, 0, data.p;
 				end
 			end
 		end
-		return "", "", 0,0, 0,0,0,0;
+		return "", "", 0,0, 0,0,0,0;		
 	end;
+	-- talent color: ff4e96f7
 	
 	GetIsLearnable = function(tabIndex, tier, column)
-		local data = GuildAdsDB.profile.Talent:get(GuildAdsInspectWindow.playerName, tostring(tabIndex)..":0");
+		local GAClass = GuildAdsDB.profile.Main:get(GuildAdsInspectWindow.playerName, GuildAdsDB.profile.Main.Class);
+		local wowClassId = GuildAdsMainDataType:getWoWClassIdFromClassId(GAClass)
+		local virtual = ":"..wowClassId
+		local data = GuildAdsDB.profile.Talent:get(virtual, tostring(tabIndex)..":0");
+		if not data then
+			data = GuildAdsDB.profile.Talent:get(GuildAdsInspectWindow.playerName, tostring(tabIndex)..":0");
+		end
 		if data and data.n then
 			for talentIndex = 1, data.nt do
-				local d = GuildAdsDB.profile.Talent:get(GuildAdsInspectWindow.playerName, tostring(tabIndex)..":"..tostring(talentIndex));
+				local d = GuildAdsDB.profile.Talent:get(virtual, tostring(tabIndex)..":"..tostring(talentIndex));
+				if not d then
+					d = GuildAdsDB.profile.Talent:get(GuildAdsInspectWindow.playerName, tostring(tabIndex)..":"..tostring(talentIndex));
+				end
 				if d and d.ti == tier and d.co == column then
-					if d.cr == d.mr then
+					local talentString = GuildAdsTalentUI.GetTalentGlyphString()
+					local currentrank = talentString and GuildAdsTalentUI.GetCurrentRank(talentString, tabIndex, talentIndex) or d.cr;			
+					if currentrank == d.mr then
 						return "1"
 					else
 						return
@@ -185,7 +304,13 @@ GuildAdsTalentUI = {
 	
 	GetTalentPrereqs = function(tabIndex, talentIndex)
 		if GuildAdsInspectWindow.playerName then
-			local data = GuildAdsDB.profile.Talent:get(GuildAdsInspectWindow.playerName, tostring(tabIndex)..":"..tostring(talentIndex));
+			local GAClass = GuildAdsDB.profile.Main:get(GuildAdsInspectWindow.playerName, GuildAdsDB.profile.Main.Class);
+			local wowClassId = GuildAdsMainDataType:getWoWClassIdFromClassId(GAClass)
+			local virtual = ":"..wowClassId
+			local data = GuildAdsDB.profile.Talent:get(virtual, tostring(tabIndex)..":"..tostring(talentIndex));
+			if not data then
+				data = GuildAdsDB.profile.Talent:get(GuildAdsInspectWindow.playerName, tostring(tabIndex)..":"..tostring(talentIndex));
+			end
 			if data and data.pt then
 				--return data.pt, data.pc, data.pl;
 				return data.pt, data.pc, GuildAdsTalentUI.GetIsLearnable(tabIndex, data.ti, data.co);
@@ -255,6 +380,7 @@ GuildAdsTalentUI = {
 			if ( i <= numTalents ) then
 				-- Set the button info
 				name, iconTexture, tier, column, rank, maxRank, isExceptional, meetsPrereq = self.GetTalentInfo(PanelTemplates_GetSelectedTab(GuildAdsTalentFrame), i);
+				button.link = name
 				getglobal("GuildAdsTalentFrameTalent"..i.."Rank"):SetText(rank);
 				self.SetTalentButtonLocation(button, tier, column);
 				self.TALENT_BRANCH_ARRAY[tier][column].id = button:GetID();
@@ -290,6 +416,7 @@ GuildAdsTalentUI = {
 					getglobal("GuildAdsTalentFrameTalent"..i.."Rank"):Show();
 				else
 					SetItemButtonDesaturated(button, 1, 0.65, 0.65, 0.65);
+					button.link = GuildAdsTalentUI.LinkSetRank(button.link, "-1");
 					getglobal("GuildAdsTalentFrameTalent"..i.."Slot"):SetVertexColor(0.5, 0.5, 0.5);
 					if ( rank == 0 ) then
 						getglobal("GuildAdsTalentFrameTalent"..i.."RankBorder"):Hide();
@@ -662,6 +789,7 @@ GuildAdsTalentUI = {
 	TalentButton_OnClick = function(self, button)
 		if ( IsModifiedClick("CHATLINK") ) then
 			local link = GuildAdsTalentUI.GetTalentInfo(PanelTemplates_GetSelectedTab(GuildAdsTalentFrame), self:GetID());
+			link = self.link
 			if ( link ) then
 				ChatEdit_InsertLink(link);
 			end
