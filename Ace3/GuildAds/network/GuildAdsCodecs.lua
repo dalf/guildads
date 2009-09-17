@@ -368,6 +368,7 @@ GuildAdsCodecColor.SerializeColorData = {
 	["ffff2020"]="D"; -- red quest
 	["ffffd000"]="N"; -- enchant link/trade link
 	["ff71d5ff"]="S"; -- spell link
+	["ff4e96f7"]="T"; -- talent link
 };
 
 GuildAdsCodecColor.UnserializeColorData = {
@@ -384,6 +385,7 @@ GuildAdsCodecColor.UnserializeColorData = {
 	["D"]="ffff2020";
 	["N"]="ffffd000";
 	["S"]="ff71d5ff";
+	["T"]="ff4e96f7";
 };
 
 GuildAdsCodecColor.ColorMetaTable = {
