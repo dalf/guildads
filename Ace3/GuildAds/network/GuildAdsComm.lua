@@ -281,15 +281,23 @@ function GuildAdsComm:GetChannelStatus()
 	return status, chatStatus, s, t_min, t_max
 end
 
+local number_GUILDADS_VERSION_PROTOCOL = tonumber(GUILDADS_VERSION_PROTOCOL)
 local mostRecentSeenProtocol = tonumber(GUILDADS_VERSION_PROTOCOL)
+local playerProtocolVersion = {}
 
-function GuildAdsComm.FilterText(text)
+function GuildAdsComm.FilterText(text, author)
 	local s, e, version = text:find(GUILDADS_MSG_PREFIX_REGEX, 1)
 	if s~= nil then
 		version = tonumber(version)
 		if version and version > mostRecentSeenProtocol then
 			DEFAULT_CHAT_FRAME:AddMessage("\124cffff8080"..GUILDADS_MAJOR_VERSION.."\124r")
 			mostRecentSeenProtocol = version
+		end
+		if version and version < number_GUILDADS_VERSION_PROTOCOL then
+			if (playerProtocolVersion[author] or 0) < number_GUILDADS_VERSION_PROTOCOL then
+				GuildAdsMinimapButtonCore.addAlertText(string.format("\124cffff8080"..GUILDADS_OLD_PROTOCOL.."\124r", author or ""));
+			end
+			playerProtocolVersion[author] = number_GUILDADS_VERSION_PROTOCOL
 		end
 		return true
 	else
