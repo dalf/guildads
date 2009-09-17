@@ -108,6 +108,10 @@ function GuildAdsTalentDataType:Initialize()
 	GuildAdsTask:AddNamedSchedule("GuildAdsTalentDataTypeInit", 8, nil, nil, self.onEvent, self)
 end
 
+local LinkSetRank = function(link, rank)
+		return link:gsub("(talent:[0-9]+:)(%-?[0-9]+)", "%1"..tostring(rank))
+end;
+	
 function GuildAdsTalentDataType:onEvent()
 	local _, WoWClassId = UnitClass("player")
 	-- parse complete talent tree now
@@ -123,7 +127,7 @@ function GuildAdsTalentDataType:onEvent()
 			ptier, pcolumn, isLearnable = GetTalentPrereqs( tabIndex , talentIndex );
 			talentLink=GetTalentLink(tabIndex, talentIndex); -- talent:<talentid>:<currentrank or -1 if not available yet>
 			if talentLink then
-				nameTalent=talentLink;
+				nameTalent = LinkSetRank(talentLink, "0");
 			end
 			currentRank = 0;
 			isLearnable = nil; 
