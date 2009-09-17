@@ -374,6 +374,8 @@ GuildAdsDBchannelMT = {
 			t = {
 				Players = {
 				};
+				VirtualPlayers = {
+				};
 			};
 			GuildAdsDB.db.channels[channelName] = t;
 		end;
