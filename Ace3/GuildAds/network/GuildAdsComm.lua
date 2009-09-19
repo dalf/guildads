@@ -312,6 +312,10 @@ function GuildAdsComm.OnJoin(self)
 	-- add my self to the channel
 	GuildAdsDB.channel[self.channelName]:addPlayer(GuildAds.playerName);
 	
+	-- add my class to the channel
+	local _, WoWClassId = UnitClass("player")
+	GuildAdsDB.channel[GuildAdsComm.channelName]:addPlayer(":"..WoWClassId);
+	
 	-- I'm online
 	self:SetOnlineStatus(GuildAds.playerName, true);
 	

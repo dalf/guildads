@@ -144,8 +144,6 @@ function GuildAdsTalentDataType:onEvent()
 			self:set(GuildAds.playerName, tostring(tabIndex)..":"..tostring(talentIndex), nil);
 		end
 	end
-	-- add virtual player to the list
-	GuildAdsDB.channel[GuildAdsComm.channelName]:addPlayer(":"..WoWClassId);
 end
 
 function GuildAdsTalentDataType:getTableForPlayer(author)
