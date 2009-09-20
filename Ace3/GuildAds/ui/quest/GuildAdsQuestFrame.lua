@@ -581,34 +581,26 @@ GuildAdsQuest = {
 			
 			player = function(a, b)
 				if a.p and b.p then
-					if type(a.p)=="table" then
-						-- take the first on the list (player online, account online, offline)
-						local ap = a.p[1]
-						local bp = b.p[1]
-						-- compare the online status on the first player
-						local oa = 	(GuildAdsComm:IsOnLine(ap) and 2) or 
-									(GuildAdsUITools:IsAccountOnline(ap) and 1) or
-									0
-						local ob = 	(GuildAdsComm:IsOnLine(bp) and 2) or 
-									(GuildAdsUITools:IsAccountOnline(bp) and 1) or
-									0
-						if oa~=ob then
-							return oa<ob
-						end
-						-- compare by name
-						local ap = table.concat(a.p,", ");	-- BUG : string/table problem
-						local bp = table.concat(b.p,", ");
-						if ap<bp then
-							return false;
-						elseif ap>bp then
-							return true;
-						end
-					elseif (type(a.p)=="string") then
-						if (a.p < b.p) then
-							return false;
-						elseif (a.p > b.p) then
-							return true;
-						end
+					-- take the first on the list (player online, account online, offline)
+					local ap = type(a.p)=="string" and a.p or a.p[1]
+					local bp = type(b.p)=="string" and b.p or b.p[1]
+					-- compare the online status on the first player
+					local oa = 	(GuildAdsComm:IsOnLine(ap) and 2) or 
+								(GuildAdsUITools:IsAccountOnline(ap) and 1) or
+								0
+					local ob = 	(GuildAdsComm:IsOnLine(bp) and 2) or 
+								(GuildAdsUITools:IsAccountOnline(bp) and 1) or
+								0
+					if oa~=ob then
+						return oa<ob
+					end
+					-- compare by name
+					local ap = type(a.p)=="string" and a.p or table.concat(a.p,", ");
+					local bp = type(b.p)=="string" and b.p or table.concat(b.p,", ");
+					if ap<bp then
+						return false;
+					elseif ap>bp then
+						return true;
 					end
 				end
 				return nil;
