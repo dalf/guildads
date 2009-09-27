@@ -147,66 +147,6 @@
 						</Anchor>
 					</Anchors>
 				</FontString>
-				<Texture name="GuildAdsTalentFramePointsLeft" file="Interface\Common\Common-Input-Border">
-					<Size>
-						<AbsDimension x="8" y="20"/>
-					</Size>
-					<Anchors>
-						<Anchor point="TOPLEFT" relativeTo="GuildAdsTalentFrame">
-							<Offset>
-								<AbsDimension x="75" y="-48"/>
-							</Offset>
-						</Anchor>
-					</Anchors>
-					<TexCoords left="0" right="0.0625" top="0" bottom="0.625"/>
-				</Texture>
-				<Texture name="GuildAdsTalentFramePointsMiddle" file="Interface\Common\Common-Input-Border">
-					<Size>
-						<AbsDimension x="248" y="20"/>
-					</Size>
-					<Anchors>
-						<Anchor point="LEFT" relativeTo="GuildAdsTalentFramePointsLeft" relativePoint="RIGHT"/>
-					</Anchors>
-					<TexCoords left="0.0625" right="0.9375" top="0" bottom="0.625"/>
-				</Texture>
-				<Texture name="GuildAdsTalentFramePointsRight" file="Interface\Common\Common-Input-Border">
-					<Size>
-						<AbsDimension x="8" y="20"/>
-					</Size>
-					<Anchors>
-						<Anchor point="LEFT" relativeTo="GuildAdsTalentFramePointsMiddle" relativePoint="RIGHT"/>
-					</Anchors>
-					<TexCoords left="0.9375" right="1.0" top="0" bottom="0.625"/>
-				</Texture>
-				<FontString name="GuildAdsTalentFrameSpentPoints" inherits="GameFontNormalSmall">
-					<Anchors>
-						<Anchor point="TOP" relativeTo="GuildAdsTalentFramePointsMiddle">
-							<Offset>
-								<AbsDimension x="0" y="-5"/>
-							</Offset>
-						</Anchor>
-					</Anchors>
-				</FontString>
-				<FontString name="GuildAdsTalentFrameTalentPointsText" inherits="GameFontHighlightSmall">
-					<Anchors>
-						<Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMLEFT">
-							<Offset>
-								<AbsDimension x="252" y="87"/>
-							</Offset>
-						</Anchor>
-					</Anchors>
-				</FontString>
-				<!--
-				<FontString name="GuildAdsTalentFrameTalentPoints" inherits="GameFontNormalSmall" text="CHARACTER_POINTS1_COLON">
-					<Anchors>
-						<Anchor point="RIGHT" relativeTo="GuildAdsTalentFrameTalentPointsText" relativePoint="LEFT">
-							<Offset>
-								<AbsDimension x="-3" y="0"/>
-							</Offset>
-						</Anchor>
-					</Anchors>
-				</FontString>
-				-->
 			</Layer>
 		</Layers>
 		<Frames>
@@ -225,24 +165,130 @@
 					</OnClick>
 				</Scripts>
 			</Button>
-			<Button name="GuildAdsTalentFrameCancelButton" inherits="UIPanelButtonTemplate" text="CLOSE">
+			<Button name="GuildAdsTalentFrameCancelButton" inherits="UIPanelButtonTemplate" text="CLOSE" hidden="true">
 				<Size>
-					<AbsDimension x="80" y="22"/>
+					<AbsDimension x="110" y="22"/>
 				</Size>
 				<Anchors>
 					<Anchor point="CENTER" relativePoint="TOPLEFT">
 						<Offset>
-							<AbsDimension x="305" y="-420"/>
+							<AbsDimension x="290" y="-420"/>
 						</Offset>
 					</Anchor>
 				</Anchors>
 				<Scripts>
 					<OnClick>
 						--HideUIPanel(this:GetParent());
-						GuildAdsInspectWindowFrame:Hide();
+						--GuildAdsInspectWindowFrame:Hide();
+						GuildAdsTalentUI.ShowOther_onClick(self);
 					</OnClick>
 				</Scripts>
 			</Button>
+			<Button name="GuildAdsTalentFrameActivateButton" inherits="UIPanelButtonTemplate2" text="GUILDADS_TALENT_SHOWINACTIVE">
+				<Size x="80" y="22"/>
+				<Anchors>
+					<Anchor point="TOP">
+						<Offset x="10" y="-45"/>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<!--
+					<OnLoad function="PlayerTalentFrameActivateButton_OnLoad"/>
+					<OnClick function="PlayerTalentFrameActivateButton_OnClick"/>
+					<OnShow function="PlayerTalentFrameActivateButton_OnShow"/>
+					<OnHide function="PlayerTalentFrameActivateButton_OnHide"/>
+					<OnEvent function="PlayerTalentFrameActivateButton_OnEvent"/>
+					-->
+					<OnShow>
+						GuildAdsTalentUI.GuildAdsTalentFrameActivateButton_onShow(self);
+					</OnShow>
+					<OnClick>
+						--HideUIPanel(this:GetParent());
+						--GuildAdsInspectWindowFrame:Hide();
+						GuildAdsTalentUI.GuildAdsTalentFrameActivateButton_onClick(self);
+					</OnClick>
+				</Scripts>
+			</Button>
+			<Frame name="GuildAdsTalentFramePointsBar">
+				<Size x="331" y="26"/>
+				<Anchors>
+					<Anchor point="LEFT">
+						<Offset x="16" y="0"/>
+					</Anchor>
+					<Anchor point="RIGHT">
+						<Offset x="-36" y="0"/>
+					</Anchor>
+					<Anchor point="BOTTOM">
+						<Offset x="0" y="81"/>
+					</Anchor>
+				</Anchors>
+				<Layers>
+					<Layer level="BACKGROUND">
+						<Texture name="$parentBackground" file="Interface\Buttons\UI-Button-Borders2" setAllPoints="true">
+							<Size x="331" y="26"/>
+							<TexCoords left="0.0" right="0.646484375" top="0.2109375" bottom="0.4140625"/>
+						</Texture>
+					</Layer>
+					<Layer level="BORDER">
+						<Texture name="$parentBorderLeft" file="Interface\Buttons\UI-Button-Borders2">
+							<Size x="6" y="18"/>
+							<Anchors>
+								<Anchor point="LEFT">
+									<Offset x="4" y="0"/>
+								</Anchor>
+								<Anchor point="TOP">
+									<Offset x="0" y="-5"/>
+								</Anchor>
+								<Anchor point="BOTTOM">
+									<Offset x="0" y="5"/>
+								</Anchor>
+							</Anchors>
+							<TexCoords left="0.0" right="0.01171875" top="0.421875" bottom="0.5625"/>
+						</Texture>
+						<Texture name="$parentBorderRight" file="Interface\Buttons\UI-Button-Borders2">
+							<Size x="6" y="18"/>
+							<Anchors>
+								<Anchor point="RIGHT">
+									<Offset x="-4" y="0"/>
+								</Anchor>
+								<Anchor point="TOP">
+									<Offset x="0" y="-5"/>
+								</Anchor>
+								<Anchor point="BOTTOM">
+									<Offset x="0" y="5"/>
+								</Anchor>
+							</Anchors>
+							<TexCoords left="0.3046875" right="0.31640625" top="0.421875" bottom="0.5625"/>
+						</Texture>
+						<Texture name="$parentBorderMiddle" file="Interface\Buttons\UI-Button-Borders2">
+							<Anchors>
+								<Anchor point="TOPLEFT" relativeTo="$parentBorderLeft" relativePoint="TOPRIGHT"/>
+								<Anchor point="BOTTOMRIGHT" relativeTo="$parentBorderRight" relativePoint="BOTTOMLEFT"/>
+							</Anchors>
+							<TexCoords left="0.01171875" right="0.3046875" top="0.421875" bottom="0.5625"/>
+						</Texture>
+					</Layer>
+					<Layer level="ARTWORK">
+						<FontString name="GuildAdsTalentFrameSpentPoints" inherits="GameFontNormalSmall" justifyH="LEFT">
+							<Size x="0" y="15"/>
+							<Anchors>
+								<Anchor point="LEFT">
+									<Offset x="12" y="1"/>
+								</Anchor>
+							</Anchors>
+						</FontString>
+						<FontString name="GuildAdsTalentFrameTalentPointsText" inherits="GameFontNormalSmall" justifyH="RIGHT">
+							<Size x="0" y="15"/>
+							<Anchors>
+								<Anchor point="RIGHT">
+									<Offset x="-12" y="1"/>
+								</Anchor>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+			</Frame>
+
 			<Button name="GuildAdsTalentFrameTab1" inherits="GuildAdsTalentTabTemplate" id="1">
 				<Anchors>
 					<Anchor point="BOTTOMLEFT">
@@ -270,7 +316,7 @@
 					</Anchor>
 				</Anchors>
 			</Button>
-			<Button name="GuildAdsTalentFrameTab4" inherits="GuildAdsTalentTabTemplate" id="4">
+			<Button name="GuildAdsTalentFrameTab4" inherits="GuildAdsTalentTabTemplate" id="4" hidden="true">
 				<Anchors>
 					<Anchor point="LEFT" relativeTo="GuildAdsTalentFrameTab3" relativePoint="RIGHT">
 						<Offset>
@@ -279,7 +325,7 @@
 					</Anchor>
 				</Anchors>
 			</Button>
-			<Button name="GuildAdsTalentFrameTab5" inherits="GuildAdsTalentTabTemplate" id="5">
+			<Button name="GuildAdsTalentFrameTab5" inherits="GuildAdsTalentTabTemplate" id="5" hidden="true">
 				<Anchors>
 					<Anchor point="LEFT" relativeTo="GuildAdsTalentFrameTab4" relativePoint="RIGHT">
 						<Offset>
@@ -297,6 +343,9 @@
 						<Offset>
 							<AbsDimension x="-65" y="-77"/>
 						</Offset>
+					</Anchor>
+					<Anchor point="BOTTOM" relativeTo="GuildAdsTalentFramePointsBar" relativePoint="TOP">
+						<Offset x="0" y="0"/>
 					</Anchor>
 				</Anchors>
 				<Layers>

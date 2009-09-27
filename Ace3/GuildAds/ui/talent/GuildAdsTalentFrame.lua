@@ -71,9 +71,6 @@ GuildAdsTalentUI = {
 			self.TALENT_BRANCH_ARRAY={};
 			local loaded, reason = LoadAddOn("Blizzard_TalentUI"); -- need it because it defines many needed constants
 		
-			--this:RegisterEvent("CHARACTER_POINTS_CHANGED");
-			--this:RegisterEvent("SPELLS_CHANGED");
-			--this:RegisterEvent("UNIT_PORTRAIT_UPDATE");
 			for i=1, MAX_NUM_TALENT_TIERS do
 				self.TALENT_BRANCH_ARRAY[i] = {};
 				for j=1, NUM_TALENT_COLUMNS do
@@ -82,6 +79,7 @@ GuildAdsTalentUI = {
 			end
 			GuildAdsTalentFrameScrollFrameScrollBarScrollDownButton:SetScript("OnClick", self.DownArrow_OnClick);
 			--GuildAdsDB.profile.Talent:registerUpdate(GuildAdsTalentUI.onDBUpdate);
+			GuildAdsTalentUI.GuildAdsTalentFrameActivateButton_onClick(GuildAdsTalentFrameActivateButton);
 		end
 	end;
 	
@@ -90,24 +88,14 @@ GuildAdsTalentUI = {
 		
 		self.onFirstShow();
 	
-		-- Stop buttons from flashing after skill up
-		--SetButtonPulse(TalentMicroButton, 0, 1);
-
 		PlaySound("TalentScreenOpen");
-		--UpdateMicroButtons();
 
 		self:Update();
 
 		-- Set flag
 		if ( self.TALENT_FRAME_WAS_SHOWN ~= 1 ) then
 			self.TALENT_FRAME_WAS_SHOWN = 1;
-			--UIFrameFlash(GuildAdsTalentScrollButtonOverlay, 0.5, 0.5, 60);
 		end
-	end;
-	
-	isTalentLink = function(link)
-		-- "|cff71d5ff|Hspell:14785|h[Silent Resolve]|h|r"
-		return nil
 	end;
 	
 	talentButtonOnEnter = function(this, id)
@@ -121,33 +109,11 @@ GuildAdsTalentUI = {
 		else
 			GameTooltip:SetText(HIGHLIGHT_FONT_COLOR_CODE..talentName..FONT_COLOR_CODE_CLOSE);
 		end
-		--[[
-		GameTooltip:AddLine(HIGHLIGHT_FONT_COLOR_CODE.."Rank "..tostring(currentRank).."/"..tostring(maxRank)..FONT_COLOR_CODE_CLOSE);
-		if GuildAdsTalentFrame.pointsSpent then
-			local ptier,pcolumn = self.GetTalentPrereqs(selectedTab, id);
-			if ptier then
-				local pname, _, _, _, pcurrentRank, pmaxRank = self.GetTalentInfo(selectedTab, self.TALENT_BRANCH_ARRAY[ptier][pcolumn].id);
-				if pcurrentRank == 0 then
-					local points = " points ";
-					if pmaxRank == 1 then
-						points = " point ";
-					end
-					GameTooltip:AddLine(RED_FONT_COLOR_CODE.."Requires "..tostring(pmaxRank)..points.."in "..pname..FONT_COLOR_CODE_CLOSE);
-				end
-			end
-			if GuildAdsTalentFrame.pointsSpent < (tier-1)*5 then
-				local name = self.GetTalentTabInfo(PanelTemplates_GetSelectedTab(GuildAdsTalentFrame));
-				GameTooltip:AddLine(RED_FONT_COLOR_CODE.."Requires "..tostring((tier-1)*5).." points in "..name.. " Talents"..FONT_COLOR_CODE_CLOSE);
-			end
-		end
-		--]]
 		GameTooltip:Show();
 	end;
 	
 	OnHide = function()
-		--UpdateMicroButtons();
 		PlaySound("TalentScreenClose");
-		--UIFrameFlashStop(GuildAdsTalentScrollButtonOverlay);
 	end;
 	
 	onDBUpdate = function(dataType, playerName, talent)
@@ -176,11 +142,50 @@ GuildAdsTalentUI = {
 		return v
 	end;
 	
+	GuildAdsTalentFrameActivateButton_onClick = function(self)
+		if GuildAdsTalentUI.shownSpec then
+			local prevSpec = GuildAdsTalentUI.shownSpec
+			if GuildAdsTalentUI.shownSpec == "1" then
+				GuildAdsTalentUI.shownSpec = "2"
+			else
+				GuildAdsTalentUI.shownSpec = "1"
+			end
+			if not GuildAdsDB.profile.TalentRank:get(GuildAdsInspectWindow.playerName, GuildAdsTalentUI.shownSpec) then
+				GuildAdsTalentUI.shownSpec = prevSpec
+			end
+		else
+			GuildAdsTalentUI.shownSpec = "1"
+		end
+		GuildAdsTalentUI.onShow();
+	end;
+	
+	GuildAdsTalentFrameActivateButton_onShow = function(self)
+		local data = GuildAdsDB.profile.TalentRank:get(GuildAdsInspectWindow.playerName, "A")
+		if data then
+			self:Show();
+			if GuildAdsTalentUI.shownSpec == tostring(data.b) then
+				self:SetText(GUILDADS_TALENT_SHOWINACTIVE)
+			else
+				self:SetText(GUILDADS_TALENT_SHOWACTIVE)
+			end
+			self:SetWidth(self:GetTextWidth() + 40);
+			local data = GuildAdsDB.profile.TalentRank:get(GuildAdsInspectWindow.playerName, "2")
+			if data then
+				self:Enable();
+			else
+				self:Disable();
+			end
+		else
+			self:Hide();
+		end
+	end;
+	
 	GetTalentGlyphString = function()
 		if GuildAdsInspectWindow.playerName then
 			local data = GuildAdsDB.profile.TalentRank:get(GuildAdsInspectWindow.playerName, "A"); -- get active talent group
 			if data and data.b then
-				local talent = GuildAdsDB.profile.TalentRank:get(GuildAdsInspectWindow.playerName, tostring(data.b)); -- get active talent link
+				--local talent = GuildAdsDB.profile.TalentRank:get(GuildAdsInspectWindow.playerName, tostring(data.b)); -- get active talent link
+				local talent = GuildAdsDB.profile.TalentRank:get(GuildAdsInspectWindow.playerName, GuildAdsTalentUI.shownSpec); -- get active talent link
 				if talent then
 					return talent.t, talent.g, talent.b
 				end
@@ -322,7 +327,7 @@ GuildAdsTalentUI = {
 		local self=GuildAdsTalentUI;
 		
 		self.onFirstShow();
-		
+		GuildAdsTalentUI.GuildAdsTalentFrameActivateButton_onShow(GuildAdsTalentFrameActivateButton);
 		-- Initialize talent tables if necessary
 		local numTalents = self.GetNumTalents(PanelTemplates_GetSelectedTab(GuildAdsTalentFrame));
 		-- Setup Tabs
