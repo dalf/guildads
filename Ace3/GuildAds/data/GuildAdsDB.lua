@@ -367,7 +367,7 @@ GuildAdsDBchannelMT = {
 	
 	-- TODO : gerer le case des noms
 	getChannel = function(channelName)
-		GuildAds_ChatDebug(GA_DEBUG_STORAGE, "Ask channel["..channelName.."]");
+		GuildAds_ChatDebug(GA_DEBUG_STORAGE, "Ask channel[%s]", tostring(channelName));
 		channelName = GuildAdsDBchannelMT.getChannelKey(channelName);
 		local t = GuildAdsDB.db.channels[channelName];
 		if t == nil then
@@ -680,3 +680,72 @@ function GuildAdsDB:FormatTime(ref, relative)
 		return prefix..string.format(GetText("INT_GENERAL_DURATION_MIN"), minute);
 	end
 end
+
+-- http://www.wowwiki.com/GameTime:Get
+--<PREFIX>_GameTime = {
+
+  -----------------------------------------------------------
+  -- function <PREFIX>_GameTime:Get()
+  --
+  -- Return game time as (h,m,s) where s has 3 decimals of
+  -- precision (though it's only likely to be precise down
+  -- to ~20th of seconds since we're dependent on frame
+  -- refreshrate).
+  --
+  -- During the first minute of play, the seconds will
+  -- consistenly be "00", since we haven't observed any
+  -- minute changes yet.
+  --
+  --
+
+function GuildAdsDB:GetGameTime()
+  	if(self.LastMinuteTimer == nil) then
+  		local h,m = GetGameTime();
+  		return h,m,0;
+  	end
+  	local s = GetTime() - self.LastMinuteTimer;
+  	if(s>59.999) then
+  		s=59.999;
+  	end
+  	return self.LastGameHour, self.LastGameMinute, s;
+  end
+
+
+  -----------------------------------------------------------
+  -- function <PREFIX>_GameTime:OnUpdate()
+  --
+  -- Called by: Private frame <OnUpdate> handler
+  --
+  -- Construct high precision server time by polling for
+  -- server minute changes and remembering GetTime() when it
+  -- last did
+  --
+
+function GuildAdsDB:GetGameTimeOnUpdate()
+  	local h,m = GetGameTime();
+  	if(self.LastGameMinute == nil) then
+  		self.LastGameHour = h;
+  		self.LastGameMinute = m;
+  		return;
+  	end
+  	if(self.LastGameMinute == m) then
+  		return;
+  	end
+  	self.LastGameHour = h;
+  	self.LastGameMinute = m;
+  	self.LastMinuteTimer = GetTime();
+  end
+
+  -----------------------------------------------------------
+  -- function <PREFIX>_GameTime:Initialize()
+  --
+  -- Create frame to pulse OnUpdate() for us
+  --
+
+function GuildAdsDB:GetGameTimeInitialize()
+  	self.Frame = CreateFrame("Frame");
+  	self.Frame:SetScript("OnUpdate", function() self:GetGameTimeOnUpdate(); end);
+  end
+--}
+
+GuildAdsDB:GetGameTimeInitialize();
