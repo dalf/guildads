@@ -695,7 +695,8 @@ function SimpleComm_Initialize(
 					FilterText,
 					OnJoin, OnLeave, OnSomeoneJoin, OnSomeoneLeave, OnMessage, 
 					FlagListener, StatusListener)
-	SetCVar("spamFilter", 0)
+	SetCVar("spamFilter", 0) -- dont hide multiple identical lines from same sender (this may not be necessary as GuildAds most likely does not send 2 or more identical lines right after each other)
+	SetCVar("profanityFilter", 0); -- enables words like "slut" and such. Enabling profanity filter could easily cause datacorruption!
 	
 	currentChannel.prefix = Prefix
 	currentChannel.drunkTemplate[1] = Prefix.."\t"
