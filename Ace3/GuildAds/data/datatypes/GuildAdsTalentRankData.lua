@@ -95,9 +95,14 @@ AceEvent:Embed(GuildAdsTalentRankDataType)
 -- Dynamic part only shares what is different from Static part.
 
 function GuildAdsTalentRankDataType:Initialize()
+	self:RegisterEvent("PLAYER_ENTERING_WORLD", "enterWorld");
+end
+
+function GuildAdsTalentRankDataType:enterWorld()
+	self:UnregisterEvent("PLAYER_ENTERING_WORLD");
 	self:RegisterEvent("CHARACTER_POINTS_CHANGED","onEvent");
 	self:RegisterEvent("PLAYER_TALENT_UPDATE","onEvent");
-	GuildAdsTask:AddNamedSchedule("GuildAdsTalentRankDataTypeInit", 8, nil, nil, self.onEvent, self)
+	GuildAdsTask:AddNamedSchedule("GuildAdsTalentRankDataTypeInit", 4, nil, nil, self.onEvent, self)
 end
 
 function GuildAdsTalentRankDataType:onEvent()
