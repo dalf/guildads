@@ -292,7 +292,8 @@ function GuildAdsHash:RemoveID(tree,playerName,dataTypeName)
 					if #treepath.d>0 then
 						treepath.h=GuildAdsHash:CalculateLeafChecksum(treepath.d); -- update leaf checksum
 					else
-						deepDel(tree[path])
+						del(tree[path].d)
+						del(tree[path])
 						tree[path]=nil; -- delete leaf
 					end
 					GuildAdsHash:CalculatePathChecksums(tree,path);
