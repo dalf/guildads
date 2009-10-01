@@ -19,6 +19,11 @@ local lastSentMessages, lastSentBytes, lastReceivedMessages, lastReceivedBytes =
 local lastBandwidthOut, lastBandwidthIn = 0,0
 local instantMeasure = false
 
+local new = GuildAds.new
+local new_kv = GuildAds.new_kv
+local del = GuildAds.del
+local deepDel = GuildAds.deepDel
+
 local getObjectCPUUsage = function(obj, includeSubroutines)
 	local t, c = 0,0
 	for _, f in pairs(obj) do
@@ -317,7 +322,26 @@ GuildAds_DebugPlugin = {
 				local db = statsPerDB.db[i]
 				tmp = tmp..string.format("%s (%i), ", db[2], statsPerDB.count[db[1]])
 			end
-			tooltip:AddLine(tmp, 1, 1, 1)
+			tooltip:AddLine(tmp, 1, 1, 1, true)
+			local t=new()
+			for dataTypeName, count in pairs(gacs.TransactionDataType) do
+				tinsert(t, dataTypeName)
+			end
+			sort(t, function(a,b) 
+				if gacs.TransactionDataType[a]<gacs.TransactionDataType[b] then
+					return false
+				elseif gacs.TransactionDataType[a]>gacs.TransactionDataType[b] then 
+					return true 
+				else 
+					return nil 
+				end
+			end)
+			local tmp = "Transactiontypes: "
+			for _, dataTypeName in ipairs(t) do
+				tmp = tmp..string.format("%s (%i), ", dataTypeName, gacs.TransactionDataType[dataTypeName]);
+			end
+			del(t)
+			tooltip:AddLine(tmp, 0.5, 1, 1, true)
 		end
 		
 		if not scriptProfile then

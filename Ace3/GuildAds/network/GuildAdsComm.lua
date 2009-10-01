@@ -193,6 +193,7 @@ GuildAdsComm = GuildAds:NewModule("GuildAdsComm", {
 		RevisionSearch 			= 0,
 		HashSearch				= {},
 		Transaction				= 0,
+		TransactionDataType = {},
 		AcceptedTransaction = 0,
 		TokenProblem			= 0,
 		Join					= 0,
@@ -1025,6 +1026,7 @@ end
 
 function GuildAdsComm:ReceiveOpenTransaction(channelName, personName, dataTypeName, playerName, fromRevision, toRevision, version)
 	self.stats.Transaction = self.stats.Transaction + 1
+	self.stats.TransactionDataType[dataTypeName] = (self.stats.TransactionDataType[dataTypeName] or 0) + 1
 	if self.playerMeta[personName] then
 		local databaseId = self.playerMeta[personName].databaseId
 		local statsPerDB = self.stats.TransactionPerDatabase
