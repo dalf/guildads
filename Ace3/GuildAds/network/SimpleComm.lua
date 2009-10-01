@@ -535,7 +535,7 @@ end
 -- 
 ---------------------------------------------------------------------------------
 local function filter_message(self, event, ...)
-	local arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11 = ...
+	local arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12 = ...
 	
 	-- Hide if this is an internal message
 	if currentChannel.isChatMessageVisible and currentChannel.isChatMessageVisible(arg1, arg2) then
@@ -555,13 +555,12 @@ local function filter_message(self, event, ...)
 		if (currentChannel.slashCmdUpper) then
 			arg4 = currentChannel.aliasName.." -                                ";
 		end
-		return false, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11
 	end
-	return false, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11
+	return false, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12
 end
 
 local function filter_hide(self, event, ...)
-	local arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11 = ...
+	local arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12 = ...
 	if (currentChannel.name) then
 		currentChannel.id = GetChannelName(currentChannel.name);
 		if (arg8 == currentChannel.id) then
@@ -569,11 +568,11 @@ local function filter_hide(self, event, ...)
 			return true
 		end
 	end
-	return false, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11
+	return false, ...
 end
 
 local function filter_CHANNEL_NOTICE_USER(self, event, ...)
-	local arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11 = ...
+	local arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12 = ...
 	if (currentChannel.name) then
 		currentChannel.id = GetChannelName(currentChannel.name);
 		if (arg8 == currentChannel.id) then
@@ -581,18 +580,18 @@ local function filter_CHANNEL_NOTICE_USER(self, event, ...)
 			return true
 		end
 	end
-	return false, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11
+	return false, ...
 end
 
 local function filter_CHANNEL_LIST(self, event, ...)
-	local arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11 = ...
+	local arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12 = ...
 	if (currentChannel.name) then
 		currentChannel.id = GetChannelName(currentChannel.name);
 		if (arg8 == currentChannel.id) and currentChannel.onChannelListComplete then
 			return true
 		end
 	end
-	return false, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11
+	return false, ...
 end
 ---------------------------------------------------------------------------------
 --
