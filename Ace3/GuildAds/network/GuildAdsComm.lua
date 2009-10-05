@@ -997,6 +997,7 @@ function GuildAdsComm:ReceiveSearch(channelName, personName, dataTypeName, playe
 	self.token = lasttoken
 	-- removing my own queued search for the same datatype/player
 	self:DequeueSearch(self.DTS[dataTypeName], playerName);
+	GuildAdsTask:DeleteNamedSchedule("QueueSearch"..dataTypeName)
 end
 
 function GuildAdsComm:ReceiveSearchResultToParent(channelName, personName, dataTypeName, playerName, who, revision, weight, worstRevision, version)
@@ -1238,12 +1239,27 @@ end
 
 --------------------------------------------------------------------------------
 --
--- When database is updated
+-- When database is updated locally
 -- 
 --------------------------------------------------------------------------------
+local cooldown = {}
 function GuildAdsComm:OnDBUpdate(dataType, playerName, id)
 	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"[GuildAdsComm:OnDBUpdate] (%s, %s)", dataType.metaInformations.name, playerName);
-	self:QueueSearch(self.DTS[dataType.metaInformations.name], playerName);
+	if playerName == GuildAds.playerName then
+		local now = time()
+		local cd = cooldown[dataType.metaInformations.name]
+		if cd and cd+300>now then
+			-- 5 minutes since last update hasn't passed yet
+			-- set a schedule to queue this search later
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"[GuildAdsComm:OnDBUpdate] delaying (%s, %s) for %i seconds", dataType.metaInformations.name, playerName, cd+300-now+10);
+			GuildAdsTask:AddNamedSchedule("QueueSearch"..dataType.metaInformations.name, cd+300-now+10, nil, nil, GuildAdsComm.QueueSearch, GuildAdsComm, self.DTS[dataType.metaInformations.name], playerName);
+		else
+			self:QueueSearch(self.DTS[dataType.metaInformations.name], playerName);
+			cooldown[dataType.metaInformations.name] = now
+		end
+	else
+		self:QueueSearch(self.DTS[dataType.metaInformations.name], playerName);
+	end
 	GuildAdsHash:UpdateHashTree(dataType, playerName, id);
 	if dataType.metaInformations.name=="Admin" then
 		local channelRoot=GuildAdsDB.channel[GuildAds.channelName];
