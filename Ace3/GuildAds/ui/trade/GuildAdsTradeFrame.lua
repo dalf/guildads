@@ -1370,10 +1370,10 @@ GuildAdsTrade = {
 			end;
 		
 			since = function(a, b)
-				if a.d._t and b.d._t then
-					if (a.d._t < b.d._t ) then
+				if a._t and b._t then
+					if (a._t < b._t ) then
 						return false;
-					elseif (a.d._t > b.d._t ) then
+					elseif (a._t > b._t ) then
 						return true;
 					end
 				end
