@@ -1248,8 +1248,8 @@ function GuildAdsComm:OnDBUpdate(dataType, playerName, id)
 	if playerName == GuildAds.playerName then
 		local now = time()
 		local cd = cooldown[dataType.metaInformations.name]
-		if cd and cd+300>now then
-			-- 5 minutes since last update hasn't passed yet
+		if cd and cd+600>now then
+			-- 10 minutes since last update hasn't passed yet
 			-- set a schedule to queue this search later
 			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"[GuildAdsComm:OnDBUpdate] delaying (%s, %s) for %i seconds", dataType.metaInformations.name, playerName, cd+300-now+10);
 			GuildAdsTask:AddNamedSchedule("QueueSearch"..dataType.metaInformations.name, cd+300-now+10, nil, nil, GuildAdsComm.QueueSearch, GuildAdsComm, self.DTS[dataType.metaInformations.name], playerName);
