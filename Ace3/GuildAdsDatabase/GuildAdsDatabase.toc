@@ -1,10 +1,10 @@
-## Interface: 30200
+## Interface: 30300
 ## Title: GuildAds Backup Database
-## Author: Galmok
+## Author: Galmok@Stormrage-EU
 ## Version: 2.6
 ## DefaultState: Enabled
 ## RequiredDeps: GuildAds
-## LoadOnDemand: 0
+## LoadOnDemand: 1
 ## SavedVariables: GuildAdsBackupDatabase
 GuildAdsDatabase.lua
 GuildAdsBackupDB.lua

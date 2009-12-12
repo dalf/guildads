@@ -1,9 +1,18 @@
+----------------------------------------------------------------------------------
+--
+-- GuildAdsBackupDB.lua
+--
+-- Author: Galmok@Stormrage-EU
+-- URL : http://guildads.sourceforge.net
+-- Email : galmok@gmail.com
+-- Licence: GPL version 2 (General Public License)
+----------------------------------------------------------------------------------
+
 -- GuildAdsBackupDatabase is meant to hold a copy of the data part of GuildAdsDatabase,
 -- either to merge with the current GuildAdsDatabase to speed up synchronizing or 
 -- created rom the current GuildAdsDatabase to distribute to other players to help them 
 -- get synchronized faster.
--- The entire logic is (will be) placed in GuildAds itself.
-
+--
 local function deepcopy(object)
     local lookup_table = {}
     local function _copy(object)
@@ -23,19 +32,38 @@ local function deepcopy(object)
     return _copy(object)
 end
 
+-- if GuildAdsBackupDatabase exists, then it means a savedvariables file has been copied to the addon directory.
+if GuildAdsBackupDatabase then
+	GuildAdsBackupDatabase2 = GuildAdsBackupDatabase 
+end
 
 if not GuildAdsBackupDatabase then
 	GuildAdsBackupDatabase = {}
 end
 
 GuildAdsBackupDB = {
+
+	initialized = false;
+
 	Initialize = function()
 		SlashCmdList["GUILDADSDB"] = GuildAdsBackupDB.Command;
 		SLASH_GUILDADSDB1 = "/guildadsdb";
+		-- listen for ADDON_LOADED
+		frame = CreateFrame("Frame", nil, UIParent)
+		frame:SetScript("OnEvent", GuildAdsBackupDB.OnEvent)
+		frame:RegisterEvent("ADDON_LOADED")
+	end;
+	
+	OnEvent = function(event)
+		-- At this time, savedvariables file has been loaded and possibly overwritten the variable from the addon.
+		GuildAdsBackupDB.initialized = true
 	end;
 	
 	Command = function(msg)
-		ChatFrame1:AddMessage("/guildadsdb called with argument "..tostring(msg));
+		if not GuildAdsBackupDB.initialized then
+			ChatFrame1:AddMessage("Not initialized yet.")
+			return
+		end
 		if msg=="backup" then
 			-- make a copy of the active/in-use data of guildads right now
 			
@@ -109,8 +137,6 @@ GuildAdsBackupDB = {
 				ChatFrame1:AddMessage(string.format("This data is for the channel %s but you are on channel %s. Can't restore.", GuildAdsBackupDatabase.channel, GuildAds.channelName.."@"..GuildAds.factionName))
 			end
 			
-			-- wait until not receiving a transaction (not sure how)
-			
 			-- copy data into database
 			ChatFrame1:AddMessage("Restoring channel data")
 			GuildAdsDatabase.Data[GuildAds.realmName].channels[GuildAds.channelName.."@"..GuildAds.factionName] = deepcopy(GuildAdsBackupDatabase["ChannelData"])
@@ -123,8 +149,9 @@ GuildAdsBackupDB = {
 			GuildAdsHash.tree = GuildAdsHash:CreateHashTree()
 			
 			ChatFrame1:AddMessage("GuildAds database has been restored.");
+			ChatFrame1:AddMessage("To free addon memory, you should relog now.");
 		else
-			ChatFrame1:AddMessage(string.format("Unsupported argument %s", msg));
+			ChatFrame1:AddMessage("Usage: /guildadsdb [backup|restore]");
 		end
 	end;
 	
