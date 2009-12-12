@@ -153,6 +153,9 @@ function GuildAds:OnInitialize()
 	creg:RegisterOptionsTable("GuildAds", GuildAds.options)
 	ccmd:CreateChatCommand("guildads", "GuildAds")
 	
+	-- Register command to load GuildAdsDatabase
+	GuildAds:RegisterChatCommand("guildadsdb", "BackupCmd");
+	
 	-- Initialize GuildAdsTask
 	GuildAdsTask:Initialize();
 	
@@ -198,6 +201,15 @@ function GuildAds:OnInitialize()
   	GuildAds_ChatDebug(GA_DEBUG_GLOBAL,"[GuildAdsPlugin_OnInit] end");
 		
 	GuildAds_ChatDebug(GA_DEBUG_GLOBAL,"[GuildAds:Initialize] end");
+end
+
+function GuildAds:BackupCmd(msg)
+	local loaded, reason = LoadAddOn("GuildAdsDatabase");
+	if not loaded then
+		ChatFrame1:AddMessage("Could not load GuildAdsDatabase addon.");
+	else
+		GuildAdsBackupDB.Command(msg)
+	end
 end
 
 function GuildAds:JoinChannel()
