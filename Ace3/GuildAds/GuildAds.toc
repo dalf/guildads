@@ -8,7 +8,7 @@
 ## OptionalDeps: ReagentData,GuildEventManager2,LibPeriodicTable-3.1
 ## DefaultState: Enabled
 ## LoadOnDemand: 0
-## SavedVariables: GuildAdsDatabase
+## SavedVariables: GuildAdsDatabase,  LIB_TRADE_LINKS_PATCH_DATA
 ## X-eMail: guildads AT gmail DOT com
 ## X-Website: http://guildads.sf.net
 ## X-License: GPL v2
@@ -27,8 +27,8 @@ lib\LibPeriodicTable-3.1\LibPeriodicTable-3.1-Tradeskill\LibPeriodicTable-3.1-Tr
 lib\LibPeriodicTable-3.1\LibPeriodicTable-3.1-TradeskillResultMats\LibPeriodicTable-3.1-TradeskillResultMats.lua
 lib\LibPeriodicTable-3.1\LibPeriodicTable-3.1-TradeskillLevels\LibPeriodicTable-3.1-TradeskillLevels.lua
 lib\LibTradeLinks-1.0\LibTradeLinks-1.0.lua
-lib\LibTradeLinks-1.0\10192.lua
 lib\LibTradeLinks-1.0\10314.lua
+lib\LibTradeLinks-1.0\LTL_DataUpdate.lua
 lib\LibCompress\lib.xml
 revision.lua
 localization.lua
