@@ -240,6 +240,21 @@ function GuildAdsTradeSkillDataType:GetTradeLink(playerName, professionID)
 	end
 end
 
+-- returns the profession mastery (if there is any)
+function GuildAdsTradeSkillDataType:GetProfessionMastery(playerName, professionID)
+	local LTLFunc = LibStub("LibTradeLinks-1.0")
+	local name, texture, offset, numberSpells = GetSpellTabInfo(1)
+	for s = offset + 1, offset + numberSpells do
+		local spell, rank = GetSpellName(s, BOOKTYPE_SPELL)
+		local link = GetSpellLink(spell)
+		local s, e, spellId = link.find("\124Hspell:(.*)\124h.*\124h")
+		local wowProfessionId = LTLFunc:GetSkillId(tonumber(spellId))
+		if wowProfessionId == professionID then
+			return spellId
+		end
+	end
+end
+
 function GuildAdsTradeSkillDataType:deleteWoW2TradeSkillItems()
 	-- delete the items from WOW2
 	local tmp = {};
