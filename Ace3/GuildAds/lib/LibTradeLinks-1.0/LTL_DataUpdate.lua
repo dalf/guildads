@@ -245,7 +245,7 @@ local TradeLink = {}
 
 		progressBar:EnableMouse()
 		progressBar.titleText = progressBar:CreateFontString(nil,"ARTWORK","GameFontNormalSmall")
-		progressBar.titleText:SetText("Guild Craft")
+		progressBar.titleText:SetText("GuildAds")
 		progressBar.titleText:SetPoint("BOTTOMLEFT", progressBar, "TOPLEFT",10, 0)
 		
 
