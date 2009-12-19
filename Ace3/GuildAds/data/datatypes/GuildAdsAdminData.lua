@@ -107,7 +107,7 @@ function GuildAdsAdminDataType:set(author, id, info)
 			self.db.Admin[id] = {};
 		end
 		local Admin = self.db.Admin[id];
-		if Admin[author]==nil or info.a~=Admin[author].a or info.c~=Admin[author].c or into.t~=Admin[author].t then
+		if Admin[author]==nil or info.a~=Admin[author].a or info.c~=Admin[author].c or info.t~=Admin[author].t then
 			local revision = self:getRevision(author)+1;
 			self:setRevision(author, revision);
 			info._u = revision;
