@@ -156,6 +156,12 @@ function GuildAds:OnInitialize()
 	-- Register command to load GuildAdsDatabase
 	GuildAds:RegisterChatCommand("guildadsdb", "BackupCmd");
 	
+	-- register command to reset LibTradeLink scan data
+	GuildAds:RegisterChatCommand("resetltldata", function()
+		LIB_TRADE_LINKS_PATCH_DATA = {}
+		ReloadUI()
+	end )
+	
 	-- Initialize GuildAdsTask
 	GuildAdsTask:Initialize();
 	
