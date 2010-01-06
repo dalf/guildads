@@ -551,9 +551,6 @@
 							<OnShow>
 								--self:SetText(SEARCH);
 							</OnShow>
-							<OnEnterPressed>
-								--self:ClearFocus();
-							</OnEnterPressed>
 							<OnEditFocusLost>
 								--self:HighlightText(0, 0);
 							</OnEditFocusLost>
