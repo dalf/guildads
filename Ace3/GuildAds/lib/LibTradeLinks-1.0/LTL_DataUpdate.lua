@@ -245,7 +245,7 @@ local TradeLink = {}
 
 		progressBar:EnableMouse()
 		progressBar.titleText = progressBar:CreateFontString(nil,"ARTWORK","GameFontNormalSmall")
-		progressBar.titleText:SetText("GuildAds (relog if scan doesn't start)")
+		progressBar.titleText:SetText("GuildAds (relog or /resetltldata if scan doesn't start)")
 		progressBar.titleText:SetPoint("BOTTOMLEFT", progressBar, "TOPLEFT",10, 0)
 		
 
