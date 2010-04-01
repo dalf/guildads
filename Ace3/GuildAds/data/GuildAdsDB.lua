@@ -77,7 +77,7 @@ function GuildAdsDBChannel:getPlayers(includeVirtual)
 end
 
 function GuildAdsDBChannel:addPlayer(playerName)
-	if self:isPlayerAllowed(playerName) then
+	if (self:isPlayerAllowed(playerName)) then
 		if not self.db.Players[playerName] and not self.db.VirtualPlayers[playerName] then
 			if self:isVirtualPlayer(playerName) then
 				self.db.VirtualPlayers[playerName] = true;
@@ -128,8 +128,8 @@ function GuildAdsDBChannel:deletePlayers(id)
 	end
 	local workingTable = {};
 	for playerName in pairs(players) do
-		--GuildAds:Print("Checking player "..playerName..": allowed="..tostring(self:isPlayerAllowed(playerName)));
-		if not self:isPlayerAllowed(playerName) then
+		--GuildAds:Print("Checking player "..playerName..": allowed="..tostring((self:isPlayerAllowed(playerName))));
+		if not (self:isPlayerAllowed(playerName)) then
 			tinsert(workingTable, playerName);
 			if playerName==GuildAds.playerName then
 				leaveChannel=true;
@@ -188,20 +188,20 @@ function GuildAdsDBChannel:isPlayerAllowed(playerName)
 	end
 	guildName=guildName or "";
 	local dataType = GuildAdsDB.channel[GuildAds.channelName].Admin;
-	local adminPlayer=dataType:getNewestData(playerName);
-	local adminGuild=dataType:getNewestData("@"..guildName);
+	local adminPlayer,playerAdminBy = dataType:getNewestData(playerName);
+	local adminGuild,guildAdminBy = dataType:getNewestData("@"..guildName);
 	-- player can either be allowed, not allowed or undefined (=allowed)
 	if not adminPlayer and not adminGuild then	-- neither player nor guild mentioned in black- or whitelist
-		return true;
+		return true, nil;
 	end
 	if adminPlayer and not adminGuild then		-- only player is mentioned
-		return adminPlayer.a;
+		return adminPlayer.a, playerAdminBy;
 	end
 	if not adminPlayer and adminGuild then		-- only guild is mentioned
-		return adminGuild.a;
+		return adminGuild.a, guildAdsminBy;
 	end
 	-- both guild and player mentioned (both have to be allowed)
-	return adminPlayer.a and adminGuild.a;
+	return adminPlayer.a and adminGuild.a, playerAdminBy and playerAdminBy or guildAdsminBy; -- (guild blacklist rarely used)
 	
 	--[[	
 	if channelRoot.blackList.guilds[guildName] or channelRoot.blackList.players[playerName] then
@@ -286,7 +286,7 @@ function GuildAdsDBChannel:CheckACL(playerName)
 												adminGuild.a and "" or " not"));
 		return adminPlayer.a and adminGuild.a;
 
-		--GuildAds:Print("Player "..id.." is "..(GuildAdsDB.channel[GuildAds.channelName]:isPlayerAllowed(id) and "allowed" or "not allowed").." access.");
+		--GuildAds:Print("Player "..id.." is "..((GuildAdsDB.channel[GuildAds.channelName]:isPlayerAllowed(id)) and "allowed" or "not allowed").." access.");
 	end
 end
 

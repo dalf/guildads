@@ -899,7 +899,7 @@ function GuildAdsComm:ReceiveMeta(channelName, personName, revision, revisionStr
 	end
 	if personName ~= GuildAds.playerName then
 		if not GuildAdsDB.channel[GuildAds.channelName]:isPlayerAllowed(personName) then
-			DEFAULT_CHAT_FRAME:AddMessage(string.format("\124cffff8080%s\124r", GUILDADS_BLACKLISTED_PLAYER, personName))
+			DEFAULT_CHAT_FRAME:AddMessage(string.format(string.format("\124cffff8080%s\124r", GUILDADS_BLACKLISTED_PLAYER), personName))
 		end
 		-- Add this player to the current channel
 		GuildAdsDB.channel[GuildAds.channelName]:addPlayer(personName);
@@ -1046,9 +1046,10 @@ function GuildAdsComm:ReceiveOpenTransaction(channelName, personName, dataTypeNa
 			end
 			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"ReceiveOpenTransaction(%s, %s, %s)", tostring(DTS), playerName, fromRevision);
 			-- add transaction
+			local allowed, adminBy = GuildAdsDB.channel[GuildAds.channelName]:isPlayerAllowed(playerName);
 			self.transactions[personName] = new_kv(
 				'playerName', playerName,
-				'ignore', not GuildAdsDB.channel[GuildAds.channelName]:isPlayerAllowed(playerName),
+				'ignore', not allowed,
 				'dataTypeName', dataTypeName,
 				'fromRevision', fromRevision,
 				'toRevision', toRevision,
@@ -1059,6 +1060,11 @@ function GuildAdsComm:ReceiveOpenTransaction(channelName, personName, dataTypeNa
 			DTS:ReceiveOpenTransaction(self.transactions[personName], playerName, fromRevision, toRevision, version or 1);
 			if self.transactions[personName].ignore then
 				GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"|cffff1e00Ignore|r ReceiveOpenTransaction(%s, %s, %s) (blacklisted)", tostring(DTS), playerName, fromRevision);
+				-- find out who has blacklisted that player and queue Admin/<that player>
+				if self.DTS["Admin"] and adminBy then
+					GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"|cffff1e00Ignore|r ReceiveOpenTransaction: Queueing Admin/%s ", adminBy);
+					self:QueueSearch(self.DTS["Admin"], adminBy);
+				end
 			elseif self.transactions[personName]._valid then
 				self.stats.AcceptedTransaction = self.stats.AcceptedTransaction + 1
 			end

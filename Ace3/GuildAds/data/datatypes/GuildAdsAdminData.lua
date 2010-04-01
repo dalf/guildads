@@ -74,13 +74,14 @@ function GuildAdsAdminDataType:getRevision(author)
 end
 
 function GuildAdsAdminDataType:getNewestData(pg)
-	local newestData;
+	local newestData, newestAuthor;
 	for author, id, data in self:iterator(nil,pg) do
 		if (not newestData and data.t) or (newestData.t and data.t and data.t>newestData.t) then
-			newestData=data;
+			newestData = data;
+			newestAuthor = author
 		end
 	end
-	return newestData;
+	return newestData, newestAuthor;
 end
 
 function GuildAdsAdminDataType:setRaw(author, id, info, revision)
