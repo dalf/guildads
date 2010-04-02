@@ -980,7 +980,91 @@
 					</Frame>
 				</Frames>
 			</Frame>
-		
+
+			<CheckButton name="GuildAdsTradeShowOfflinesCheckButton" hidden="false">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsMainWindowFrame" relativePoint="TOPLEFT">
+						<Offset>
+							<AbsDimension x="75" y="-35"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Size>
+					<AbsDimension x="20" y="20"/>
+				</Size>
+				<NormalTexture file="Interface\Buttons\UI-CheckBox-Up"/>
+				<PushedTexture file="Interface\Buttons\UI-CheckBox-Down"/>
+				<HighlightTexture file="Interface\Buttons\UI-CheckBox-Highlight" alphaMode="ADD"/>
+				<CheckedTexture file="Interface\Buttons\UI-CheckBox-Check"/>
+				<DisabledCheckedTexture file="Interface\Buttons\UI-CheckBox-Check-Disabled"/>
+				<Layers>
+					<Layer level="ARTWORK">
+						<FontString name="GuildAdsTradeShowOfflinesCheckButtonText" inherits="GameFontNormalSmall" text="SHOW_OFFLINE_MEMBERS">
+							<Anchors>
+								<Anchor point="LEFT" relativePoint="RIGHT">
+									<Offset>
+										<AbsDimension x="5" y="1"/>
+									</Offset>
+								</Anchor>
+							</Anchors>
+						</FontString>	
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnClick>
+						if ( self:GetChecked() ) then
+							PlaySound("igMainMenuOptionCheckBoxOn");
+							GuildAdsTrade.setProfileValue(nil, "HideOfflinePlayer", nil);
+						else
+							PlaySound("igMainMenuOptionCheckBoxOff");
+							GuildAdsTrade.setProfileValue(nil, "HideOfflinePlayer", true);
+						end
+					</OnClick>
+				</Scripts>
+			</CheckButton>
+
+			<CheckButton name="GuildAdsTradeShowOldCheckButton" hidden="true">
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="GuildAdsTradeShowOfflinesCheckButtonText" relativePoint="RIGHT">
+						<Offset>
+							<AbsDimension x="20" y="-1"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Size>
+					<AbsDimension x="20" y="20"/>
+				</Size>
+				<NormalTexture file="Interface\Buttons\UI-CheckBox-Up"/>
+				<PushedTexture file="Interface\Buttons\UI-CheckBox-Down"/>
+				<HighlightTexture file="Interface\Buttons\UI-CheckBox-Highlight" alphaMode="ADD"/>
+				<CheckedTexture file="Interface\Buttons\UI-CheckBox-Check"/>
+				<DisabledCheckedTexture file="Interface\Buttons\UI-CheckBox-Check-Disabled"/>
+				<Layers>
+					<Layer level="ARTWORK">
+						<FontString name="GuildAdsTradeShowOldCheckButtonText" inherits="GameFontNormalSmall" text="GUILDADS_TRADE_SHOWOLD">
+							<Anchors>
+								<Anchor point="LEFT" relativePoint="RIGHT">
+									<Offset>
+										<AbsDimension x="5" y="1"/>
+									</Offset>
+								</Anchor>
+							</Anchors>
+						</FontString>	
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnClick>
+						if ( self:GetChecked() ) then
+							PlaySound("igMainMenuOptionCheckBoxOn");
+							GuildAdsTrade.setProfileValue(nil, "ShowOld", true);
+						else
+							PlaySound("igMainMenuOptionCheckBoxOff");
+							GuildAdsTrade.setProfileValue(nil, "ShowOld", nil);
+						end
+					</OnClick>
+				</Scripts>
+			</CheckButton>
+
 		</Frames>
 		
 		<Scripts> 

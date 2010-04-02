@@ -107,10 +107,12 @@ function GuildAdsTradeSkillDataType:UpdateTradeSkills()
 			if link then
 				tmp[link]=true
 				if not t[link] then
+					added = added - 1
+				end
 					GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "GuildAdsTradeSkillDataType: Adding TradeSkill Link "..link)
 					self:set(GuildAds.playerName, link, { s=skillId, q=select(2, GetBuildInfo()) })
 					added = added + 1
-				end
+				--end
 			end
 		end
 

@@ -211,6 +211,19 @@ GuildAdsTrade = {
 		GuildAdsAddButtonLookFor:Disable();
 		GuildAdsAddButtonAvailable:Disable();
 		GuildAdsRemoveButton:Disable();
+		
+		if (GuildAdsTrade.getProfileValue(nil, "HideOfflinePlayer")) then
+			GuildAdsTradeShowOfflinesCheckButton:SetChecked(0);
+		else
+			GuildAdsTradeShowOfflinesCheckButton:SetChecked(1);
+		end
+
+		if (GuildAdsTrade.getProfileValue(nil, "ShowOld")) then
+			GuildAdsTradeShowOldCheckButton:SetChecked(1);
+		else
+			GuildAdsTradeShowOldCheckButton:SetChecked(0);
+		end
+
 	end;
 	
 	onChannelJoin = function()
@@ -230,7 +243,7 @@ GuildAdsTrade = {
 	end;
 	
 	onConfigChanged = function(path, key, value)
-		if key=="HideOfflinePlayer" or key=="HideMyAds" then
+		if key=="HideOfflinePlayer" or key=="ShowOld" or key=="HideMyAds" then
 			GuildAdsTrade.data.resetCache();
 			GuildAdsTrade.updateCurrentTab();
 		end
@@ -488,6 +501,7 @@ GuildAdsTrade = {
 			GuildListAdExchangeListFrame:Show();
 			GuildAdsTradeFilterFrame:Show();
 			GuildAds_DateFilter:Show();
+			GuildAdsTradeShowOldCheckButton:Hide();
 			GuildAdsTrade.select_since_minlevel();
 			if (ReagentData) then
 				GuildAds_Filter_ZoneDropDown:Show();
@@ -507,6 +521,7 @@ GuildAdsTrade = {
 			GuildListAdExchangeListFrame:Show();
 			GuildAdsTradeFilterFrame:Show();
 			GuildAds_DateFilter:Show();
+			GuildAdsTradeShowOldCheckButton:Hide();
 			GuildAdsTrade.select_since_minlevel();
 			if (ReagentData) then
 				GuildAds_Filter_ZoneDropDown:Show();
@@ -525,6 +540,7 @@ GuildAdsTrade = {
 			GuildListAdExchangeListFrame:Show();
 			GuildAdsTradeFilterFrame:Show();
 			GuildAds_DateFilter:Hide();
+			GuildAdsTradeShowOldCheckButton:Show();
 			GuildAdsTrade.select_since_minlevel(true);
 			if (ReagentData) then
 				GuildAds_Filter_ZoneDropDown:Show();
@@ -542,6 +558,7 @@ GuildAdsTrade = {
 			GuildListAdExchangeListFrame:Hide();
 			GuildAdsTradeFilterFrame:Hide();
 			getglobal("GuildAds_Filter_ZoneDropDown"):Hide();
+			GuildAdsTradeShowOldCheckButton:Hide();
 			GuildListAdMyAdsFrame:Show();
 			
 			GuildAdsTrade.myAds.updateMyAdsFrame();
@@ -1056,6 +1073,13 @@ GuildAdsTrade = {
 			return true;			
 		end;
 		
+		tradelinkIsVisible = function(link, data)
+			if GuildAdsTrade.getProfileValue(nil, "ShowOld") or (data and data.q and data.q == select(2, GetBuildInfo())) then
+				return true;
+			end
+			return false;
+		end;
+		
 		adIsVisible = function(adtype, author, item, data)
 			-- show offline player
 			if GuildAdsTrade.getProfileValue(nil, "HideOfflinePlayer") and not GuildAdsComm:IsOnLine(author) then
@@ -1160,6 +1184,7 @@ GuildAdsTrade = {
 					local LTLDataVersion = (LTLFunc:GetBuildVersion())
 					local playerIsVisible = GuildAdsTrade.data.playerIsVisible
 					local adIsVisible = GuildAdsTrade.data.adIsVisible
+					local tradelinkIsVisible = GuildAdsTrade.data.tradelinkIsVisible
 					for playerName in pairs(players) do
 						if playerIsVisible(adtype, playerName) then
 							for item, _, data in datatype:iterator(playerName, nil) do
@@ -1168,34 +1193,37 @@ GuildAdsTrade = {
 								if linkType == "trade" then
 									-- trade: link... build table of items with enchant links
 									itemTable = new()
-									local _, _, spellid, rawlink = string.find(item, "trade:([^:]+):[^:]+:[^:]+:[^:]+:([^:]+)");
-									local shortTradeLink = spellid..":"..rawlink
-									if not GuildAdsTrade.data.tradeLinkCache[shortTradeLink] then
-										linkTable = LTLFunc:Decode(item, true, false, LTLDataVersion);
-										GuildAdsTrade.data.tradeLinkCache[shortTradeLink] = linkTable
-									else
-										linkTable = GuildAdsTrade.data.tradeLinkCache[shortTradeLink]
-									end
-									if linkTable then
-										for link in pairs(linkTable) do
-											local itemLink = LPTFunc:ItemInSet(-link,"Tradeskill.RecipeLinks")
-											if itemLink then
-												if tonumber(itemLink) < 0 then
-													item="enchant:"..tostring(-tonumber(itemLink))
-												else
-													item="item:"..itemLink..":0:0:0:0:0:0:0:"..level
-												end
-											else
-												item="enchant:"..tostring(link)
-												if not LPTunknown[link] then
-													GuildAdsTrade.debug("LibPeriodicTable: unknown enchant:"..tostring(link)..". Please report.")
-													LPTunknown[link] = true
-												end
-											end
-											itemTable[item]=new_kv("e", "enchant:"..tostring(link) )
+									-- is tradelink from this client build?
+									if tradelinkIsVisible(item, data) then
+										local _, _, spellid, rawlink = string.find(item, "trade:([^:]+):[^:]+:[^:]+:[^:]+:([^:]+)");
+										local shortTradeLink = spellid..":"..rawlink
+										if not GuildAdsTrade.data.tradeLinkCache[shortTradeLink] then
+											linkTable = LTLFunc:Decode(item, true, false, LTLDataVersion);
+											GuildAdsTrade.data.tradeLinkCache[shortTradeLink] = linkTable
+										else
+											linkTable = GuildAdsTrade.data.tradeLinkCache[shortTradeLink]
 										end
-									else
-										GuildAdsTrade.debug("LibTradeLinks: Can't handle trade link:"..tostring(item))
+										if linkTable then
+											for link in pairs(linkTable) do
+												local itemLink = LPTFunc:ItemInSet(-link,"Tradeskill.RecipeLinks")
+												if itemLink then
+													if tonumber(itemLink) < 0 then
+														item="enchant:"..tostring(-tonumber(itemLink))
+													else
+														item="item:"..itemLink..":0:0:0:0:0:0:0:"..level
+													end
+												else
+													item="enchant:"..tostring(link)
+													if not LPTunknown[link] then
+														GuildAdsTrade.debug("LibPeriodicTable: unknown enchant:"..tostring(link)..". Please report.")
+														LPTunknown[link] = true
+													end
+												end
+												itemTable[item]=new_kv("e", "enchant:"..tostring(link) )
+											end
+										else
+											GuildAdsTrade.debug("LibTradeLinks: Can't handle trade link:"..tostring(item))
+										end
 									end
 									item, data = next(itemTable)
 								end

@@ -64,6 +64,7 @@ GUILDADS_TRADE_NUMBER		= "Nb";
 GUILDADS_TRADE_OBJECT		= "Item";
 GUILDADS_TRADE_ACTIVE		= "Active";
 GUILDADS_TRADE_TYPE		= "Type";
+GUILDADS_TRADE_SHOWOLD	= "Include Old Tradeskill Links";
 GUILDADS_TRADE_SHIFTCLICKHELP 	= "To put an item here, shift-click it while this window is opened";
 GUILDADS_TRADE_MINLEVEL		= "MinLevel";
 GUILDADS_TRADE_ALT_TOOLTIP	= "Hold ALT for craft tooltip";
