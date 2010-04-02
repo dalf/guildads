@@ -902,7 +902,19 @@ function GuildAdsComm:ReceiveMeta(channelName, personName, revision, revisionStr
 			DEFAULT_CHAT_FRAME:AddMessage(string.format(string.format("\124cffff8080%s\124r", GUILDADS_BLACKLISTED_PLAYER), personName))
 		end
 		-- Add this player to the current channel
-		GuildAdsDB.channel[GuildAds.channelName]:addPlayer(personName);
+		local playerAdded, realPlayer = GuildAdsDB.channel[GuildAds.channelName]:addPlayer(personName);
+		-- Is any data of this player in our database? if not, then queue a bunch of searches.
+		if (playerAdded and realPlayer) or self.DTS.Main.dataType:getRevision(personName)==0 then
+			-- queue search for Main dataType last (it is most likely to exist)
+			for dataTypeName, DTS in pairs(self.DTS) do
+					if dataTypeName~="Main" then
+						self:QueueSearch(DTS, personName);
+						GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "ReceiveMeta Queuing search %s/%s", dataTypeName, personName);
+					end
+			end
+			self:QueueSearch(self.DTS.Main, personName);
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "ReceiveMeta Queuing search %s/%s", "Main", personName);			
+		end
 		-- This player is online
 		self:SetOnlineStatus(personName, true);
 		if channelName then

@@ -78,11 +78,13 @@ end
 
 function GuildAdsDBChannel:addPlayer(playerName)
 	if (self:isPlayerAllowed(playerName)) then
+		local realPlayer;
 		if not self.db.Players[playerName] and not self.db.VirtualPlayers[playerName] then
 			if self:isVirtualPlayer(playerName) then
 				self.db.VirtualPlayers[playerName] = true;
 			else
-				self.db.Players[playerName] = true; -- first sighting of playerName... queue searches
+				self.db.Players[playerName] = true; -- first sighting of playerName
+				realPlayer = true
 			end
 			-- old profile data may exist in the database, make sure the hash tree is updated
 			for name, profileDT in pairs(GuildAdsDB.profile) do
@@ -92,12 +94,11 @@ function GuildAdsDBChannel:addPlayer(playerName)
 			end
 			-- it should not be possible to have old channel data present so there is no need to check
 			
-			-- 
-			
 			self:triggerEvent(self.PLAYER, playerName);
 		end
-		return true;
+		return true, realPlayer;
 	end
+	return nil, nil
 end
 
 function GuildAdsDBChannel:deletePlayer(playerName)
