@@ -653,14 +653,7 @@ GuildAdsTradeTooltip = {
 		]]
 	end;
 	
-	onChannelJoin = function()
-		-- Register for events
-		GuildAdsDB.channel[GuildAds.channelName].TradeNeed:registerUpdate(GuildAdsTradeTooltip.onDBUpdate);
-		GuildAdsDB.channel[GuildAds.channelName].TradeOffer:registerUpdate(GuildAdsTradeTooltip.onDBUpdate);
-		GuildAdsDB.profile.TradeSkill:registerUpdate(GuildAdsTradeTooltip.onCraftUpdate);
-		GuildAdsDB.profile.TradeSkill:registerTransactionReceived(GuildAdsTradeTooltip.onTransactionCraftUpdate);
-		
-		-- Scan database
+	resetItems = function()
 		GuildAdsItems = {};
 		for _, item, playerName, data in GuildAdsDB.channel[GuildAds.channelName].TradeNeed:iterator() do
 			updateItem(item, playerName, "TradeNeed", info.q or 0, (not info.q) and true or false)
@@ -671,7 +664,18 @@ GuildAdsTradeTooltip = {
 		for _, item, playerName, data in GuildAdsDB.profile.TradeSkill:iterator() do
 			GuildAdsTradeTooltip.onCraftUpdate(GuildAdsDB.profile.TradeSkill, playerName, data.e)
 			GuildAdsTradeTooltip.onCraftUpdate(GuildAdsDB.profile.TradeSkill, playerName, item)
-		end
+		end		
+	end;
+	
+	onChannelJoin = function()
+		-- Register for events
+		GuildAdsDB.channel[GuildAds.channelName].TradeNeed:registerUpdate(GuildAdsTradeTooltip.onDBUpdate);
+		GuildAdsDB.channel[GuildAds.channelName].TradeOffer:registerUpdate(GuildAdsTradeTooltip.onDBUpdate);
+		GuildAdsDB.profile.TradeSkill:registerUpdate(GuildAdsTradeTooltip.onCraftUpdate);
+		GuildAdsDB.profile.TradeSkill:registerTransactionReceived(GuildAdsTradeTooltip.onTransactionCraftUpdate);
+		
+		-- Scan database
+		GuildAdsTradeTooltip.resetItems();
 	end;
 	
 	onChannelLeave = function()
@@ -709,7 +713,10 @@ GuildAdsTradeTooltip = {
 			if linkType == "trade" then
 				-- trade: link... build table of items with enchant links
 				itemTable = {}
-				local linkTable = LTLFunc:Decode(item, true, false, (LTLFunc:GetBuildVersion()));
+				local linkTable
+				if GuildAdsTrade and GuildAdsTrade.data.tradelinkIsVisible(item, info) then
+					linkTable = LTLFunc:Decode(item, true, false, (LTLFunc:GetBuildVersion()));
+				end
 				local level = tostring(UnitLevel("player"))
 				if linkTable then
 					for link in pairs(linkTable) do

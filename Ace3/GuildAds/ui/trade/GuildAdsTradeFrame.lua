@@ -247,6 +247,9 @@ GuildAdsTrade = {
 			GuildAdsTrade.data.resetCache();
 			GuildAdsTrade.updateCurrentTab();
 		end
+		if key=="ShowOld" and GuildAdsTradeTooltip then
+			GuildAdsTradeTooltip.resetItems();
+		end
 	end;
 	
 	onOnline = function(playerName, status)
