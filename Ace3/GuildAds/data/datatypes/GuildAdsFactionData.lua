@@ -59,7 +59,7 @@ function GuildAdsFactionDataType:onEvent(event, arg1)
 		local allHeadersOpen = true
 		for i = 1, GetNumFactions(), 1 do	
 			local factionName, description, standingId, bottomValue, topValue, earnedValue, atWarWith, canToggleAtWar, isHeader, isCollapsed, hasRep, isWatched, isChild = GetFactionInfo(i);
-			if (isHeader == nil) then
+			if (isHeader == nil or hasRep == 1) then
 				local id = self:getIdFromName(factionName);
 				if (id > 0) then
 					self:set(playerName, id, { v=earnedValue });

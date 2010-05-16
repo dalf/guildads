@@ -14,28 +14,29 @@ local GUILDADS_PLAYER_MAX_LEVEL = 80;
 local GUILDADS_FACTION_GROUPS = {
 					[1] = 1, [2] = 1, [3] = 1, [4] = 1, [5] = 1, [6] = 2,
 					[7] = 2,  [8] = 2, [9] = 1, [10] = 1, [11] = 1, [12] = 1,
-					[13] = 1, [14] = 2, [15] = 2, [16] = 2, [17] = 3, [18] = 3,
-					[19] = 3, [20] = 3, [21] = 3, [22] = 3, [23] = 3, [24] = 3,
-					[25] = 3, [26] = 9, [27] = 4, [28] = 4, [29] = 4, [30] = 4,
-					[31] = 4, [32] = 5, [33] = 5, [34] = 5, [35] = 5, [36] = 6,
-					[37] = 6, [38] = 9, [39] = 9, [40] = 6, [41] = 6, [42] = 9,
-					[43] = 6, [44] = 6, [45] = 6, [46] = 6, [47] = 6, [48] = 6,
-					[49] = 6, [50] = 9, [51] = 6, [52] = 9, [53] = 6, [54] = 6,
-					[55] = 4, [56] = 6,
-					[57] = 7, [58] = 7, [59] = 7, [60] = 7, [61] = 7, [62] = 7,
-					[63] = 7, [64] = 7, [65] = 7, [66] = 7, [67] = 7, [68] = 7,
-					[69] = 8, [70] = 8, [71] = 8
+					[13] = 1, [14] = 2, [15] = 2, [16] = 2, [17] = 4, [18] = 4,
+					[19] = 4, [20] = 4, [21] = 4, [22] = 4, [23] = 4, [24] = 4,
+					[25] = 4, [26] = 4, [27] = 5, [28] = 5, [29] = 5, [30] = 5,
+					[31] = 5, [32] = 3, [33] = 3, [34] = 3, [35] = 3, [36] = 0,
+					[37] = 0, [38] = 0, [39] = 0, [40] = 0, [41] = 0, [42] = 0,
+					[43] = 0, [44] = 0, [45] = 0, [46] = 6, [47] = 0, [48] = 0,
+					[49] = 6, [50] = 0, [51] = 4, [52] = 4, [53] = 0, [54] = 4,
+					[55] = 5, [56] = 7,
+					[57] = 7, [58] = 8, [59] = 9, [60] = 8, [61] = 8, [62] = 7,
+					[63] = 9, [64] = 7, [65] = 8, [66] = 8, [67] = 8, [68] = 7,
+					[69] = 7, [70] = 8, [71] = 8, [72] = 8, [73] = 8, [74] = 7
 				};
 local GUILDADS_FACTION_GROUP_OPTION = {
+					[0] = "ShowClassic";
 					[1] = "ShowFaction";
 					[2] = "ShowFactionForces";
-					[3] = "ShowOutland";
-					[4] = "ShowShattrathCity";
-					[5] = "ShowSteamwheedleCartel";
+					[3] = "ShowSteamwheedleCartel";
+					[4] = "ShowOutland";
+					[5] = "ShowShattrathCity";
 					[6] = "ShowOther";
 					[7] = "ShowNorthrend";
-					[8] = "ShowDalaran",
-					[9] = "ShowRaid"
+					[8] = "ShowNorthrendForces",
+					[9] = "ShowSholazarBasin"
 					};
 
 --- Index of the ad currently selected
@@ -65,20 +66,11 @@ GuildAdsFaction = {
 	
 	onInit = function()
 		if not GuildAdsFaction.getProfileValue(nil, "Filters") then
-			GuildAdsFaction.setProfileValue(nil, "Filters",  
-				{
-					[1] = true, [2] = true, [3] = true, [4] = true, [5] = true, [6] = true,
-					[7] = true,  [8] = true, [9] = true, [10] = true, [11] = true, [12] = true,
-					[13] = true, [14] = true, [15] = true, [16] = true, [17] = true, [18] = true,
-					[19] = true, [20] = true, [21] = true, [22] = true, [23] = true, [24] = true,
-					[25] = true, [26] = true, [27] = true, [28] = true, [29] = true, [30] = true,
-					[31] = true, [32] = true, [33] = true, [34] = true, [35] = true, [36] = true,
-					[37] = true, [38] = true, [39] = true, [40] = true, [41] = true, [42] = true,
-					[43] = true, [44] = true, [45] = true, [46] = true, [47] = true, [48] = true,
-					[49] = true, [50] = true, [51] = true, [52] = true, [53] = true, [54] = true,
-					[55] = true
-				}
-			);
+			local filters = {}
+			for faction=1, 74 do
+					filters[faction] = true;
+			end
+			GuildAdsFaction.setProfileValue(nil, "Filters",  filters);
 		end
 		
 		if type(GuildAdsFaction.getRawProfileValue(nil, "HideCollapsed"))=="nil" then
@@ -92,15 +84,27 @@ GuildAdsFaction = {
 		if type(GuildAdsFaction.getRawProfileValue(nil, "ShowOfflines"))=="nil" then
 			GuildAdsFaction.setProfileValue(nil, "ShowOfflines", true);
 		end
-		-- "Horde", "Horde Forces", "Outland", "Shattrath City", "Steamwheedle Cartel", "Other"
-		-- "Faction", "Faction Forces", "Outland", "Shattrath City", "Steamwheedle Cartel", "Other"
-		-- 1, 2, 3, 4, 5, 6
+		
 		local group, groupname;
 		for group, groupname in pairs(GUILDADS_FACTION_GROUP_OPTION) do
 			if type(GuildAdsFaction.getRawProfileValue(nil, groupname))=="nil" then
 				GuildAdsFaction.setProfileValue(nil, groupname, true); -- initialise all group settings to true (first run)
 			end
 		end
+		
+		-- Update faction specific labels
+		local faction = UnitFactionGroup("player");
+		GuildAds_FactionShowFactionCheckButtonLabel:SetText(string.format(GUILDADS_FACTION_SHOWFACTION, faction));
+		GuildAds_FactionShowFactionForcesCheckButtonLabel:SetText(string.format(GUILDADS_FACTION_SHOWFACTIONFORCES, faction));
+		if faction=="Horde" then
+			GuildAds_FactionShowNorthrendForcesCheckButtonLabel:SetText(GUILDADS_FACTION_SHOWHORDEEXPEDITION);
+		else
+			GuildAds_FactionShowNorthrendForcesCheckButtonLabel:SetText(GUILDADS_FACTION_SHOWALLIANCEVANGUARD);
+		end
+		
+		-- delete old configuration (too be removed in the future)
+		GuildAdsFaction.setProfileValue(nil, "ShowDalaran", nil);
+		GuildAdsFaction.setProfileValue(nil, "ShowRaid", nil);
 	end;
 	
 	onOnline = function(playerName, status)
@@ -123,15 +127,16 @@ GuildAdsFaction = {
 		GuildAdsFaction.updateCheckButton(GuildAds_FactionOnlyLevel80CheckButton, GuildAdsFaction.getProfileValue(nil, "OnlyLevel80"));
 		GuildAdsFaction.updateCheckButton(GuildAds_FactionShowOfflinesCheckButton, GuildAdsFaction.getProfileValue(nil, "ShowOfflines"));
 		
+		GuildAdsFaction.updateCheckButton(GuildAds_FactionShowClassicCheckButton, GuildAdsFaction.getProfileValue(nil, "ShowClassic"));
 		GuildAdsFaction.updateCheckButton(GuildAds_FactionShowFactionCheckButton, GuildAdsFaction.getProfileValue(nil, "ShowFaction"));
 		GuildAdsFaction.updateCheckButton(GuildAds_FactionShowFactionForcesCheckButton, GuildAdsFaction.getProfileValue(nil, "ShowFactionForces"));
+		GuildAdsFaction.updateCheckButton(GuildAds_FactionShowSteamwheedleCartelCheckButton, GuildAdsFaction.getProfileValue(nil, "ShowSteamwheedleCartel"));
 		GuildAdsFaction.updateCheckButton(GuildAds_FactionShowOutlandCheckButton, GuildAdsFaction.getProfileValue(nil, "ShowOutland"));
 		GuildAdsFaction.updateCheckButton(GuildAds_FactionShowShattrathCityCheckButton, GuildAdsFaction.getProfileValue(nil, "ShowShattrathCity"));
-		GuildAdsFaction.updateCheckButton(GuildAds_FactionShowSteamwheedleCartelCheckButton, GuildAdsFaction.getProfileValue(nil, "ShowSteamwheedleCartel"));
-		GuildAdsFaction.updateCheckButton(GuildAds_FactionShowOtherCheckButton, GuildAdsFaction.getProfileValue(nil, "ShowOther"));
 		GuildAdsFaction.updateCheckButton(GuildAds_FactionShowNorthrendCheckButton, GuildAdsFaction.getProfileValue(nil, "ShowNorthrend"));
-		GuildAdsFaction.updateCheckButton(GuildAds_FactionShowDalaranCheckButton, GuildAdsFaction.getProfileValue(nil, "ShowDalaran"));
-		GuildAdsFaction.updateCheckButton(GuildAds_FactionShowRaidCheckButton, GuildAdsFaction.getProfileValue(nil, "ShowRaid"));
+		GuildAdsFaction.updateCheckButton(GuildAds_FactionShowNorthrendForcesCheckButton, GuildAdsFaction.getProfileValue(nil, "ShowNorthrendForces"));
+		GuildAdsFaction.updateCheckButton(GuildAds_FactionShowSholazarBasinCheckButton, GuildAdsFaction.getProfileValue(nil, "ShowSholazarBasin"));
+		GuildAdsFaction.updateCheckButton(GuildAds_FactionShowOtherCheckButton, GuildAdsFaction.getProfileValue(nil, "ShowOther"));
 		
 		GuildAdsDB.profile.Faction:registerUpdate(GuildAdsFaction.onDBUpdate);
 		GuildAdsDB.profile.Faction:registerTransactionReceived(GuildAdsFaction.onReceivedTransaction);
