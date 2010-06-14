@@ -100,15 +100,17 @@ function GuildAdsList:Delete(obj)
 end
 
 function GuildAdsList:DeleteAll()
-	local first = self:First()
-	while first do
-		self:Delete(first);
-		first = self:First()
-	end
---	self.first.next = self.last;
---	self.last.prev = self.first;
---	self.idx = new();
---	self.list = new();
+	-- can cause endless loops! (don't know why)
+	--local first = self:First()
+	--while first do
+	--	self:Delete(first);
+	--	first = self:First()
+	--end
+  -- This wont free all tables to the our table pool, but can't loop forever.
+	self.first.next = self.last;
+	self.last.prev = self.first;
+	self.idx = new();
+	self.list = new();
 end
 
 -- This function takes an index (1,2,3,..) and returns the object at that index.
