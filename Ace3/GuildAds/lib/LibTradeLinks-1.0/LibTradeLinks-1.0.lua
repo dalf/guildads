@@ -233,6 +233,7 @@ local function Decode64(str, t, out)
 		local v = DecodeBase64Char(c);
 		for i = 0, 5 do
 			if band(v, blshift(1, i)) ~= 0 then
+				assert(t[offset * 6 + i + 1] ~= nil, "Error, LibTradeLinks:Decode64(): Available tradeskill data insufficient to decode bitmask (run /resetltldata)");
 				out[t[offset * 6 + i + 1]] = 1;
 			end
 		end
