@@ -3681,4 +3681,3 @@ LIB_TRADE_LINKS_PATCH_DATA[11723] = {
 			2108, -- [552]
 		},
 	}
-end
