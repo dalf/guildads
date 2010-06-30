@@ -91,13 +91,14 @@ GuildAdsInventory = {
 	
 	SlotOnClick = function(self, button)
 		if ( button == "LeftButton" ) then
-			if IsShiftKeyDown() and ChatFrameEditBox:IsVisible() then
+			local editbox = ChatEdit_GetActiveWindow()
+			if IsShiftKeyDown() and editbox then
 				local itemName,itemLink,itemRarity=GetItemInfo(self.itemRef); 
 				if (itemName) then
 					local r, g, b, hex = GetItemQualityColor(itemRarity)
 					local hexcol = string.gsub( hex, "|c(.+)", "%1" )
 					local link = "|c"..hexcol.."|H"..self.itemRef.."|h["..itemName.."]|h|r"
-					ChatFrameEditBox:Insert(link)
+					editbox:Insert(link)
 				end				
 			elseif IsControlKeyDown() then 
 				DressUpItemLink(self.itemRef); 

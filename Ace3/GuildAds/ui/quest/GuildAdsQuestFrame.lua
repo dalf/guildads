@@ -201,12 +201,13 @@ GuildAdsQuest = {
 					-- another quest was clicked = select
 					GuildAdsQuest.currentSelectedQuestId = self.questId;
 				end
-				if button=="LeftButton" and IsShiftKeyDown() and ChatFrameEditBox:IsVisible() then
+				local editbox = ChatEdit_GetActiveWindow()
+				if button=="LeftButton" and IsShiftKeyDown() and editbox then
 					local questLink = "quest:"..self.questId..":"..self.data.l
 					local color = GetQuestDifficultyColor(self.data.l);
 					color = string.format("ff%02x%02x%02x",color.r*255,color.g*255,color.b*255)
 					local questLink = "|c"..color.."|H"..questLink.."|h["..self.data.n.."]|h|r"
-					ChatFrameEditBox:Insert(questLink);
+					editbox:Insert(questLink);
 				end
 				if button == "RightButton" then
 					GuildAdsQuest.contextMenu.show(self.data);

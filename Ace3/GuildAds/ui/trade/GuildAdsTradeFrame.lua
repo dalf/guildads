@@ -722,7 +722,8 @@ GuildAdsTrade = {
 		checkedList = { [1]={}; [2]={}; [3]={} };
 		
 		onClick = function(self, button)
-			if self.item and button=="LeftButton" and IsShiftKeyDown() and ChatFrameEditBox:IsVisible() then 
+			local editbox = ChatEdit_GetActiveWindow()
+			if self.item and button=="LeftButton" and IsShiftKeyDown() and editbox then 
 				local thisitem,itemInfo;
 				if not IsAltKeyDown() then
 					thisItem=self.item;
@@ -734,7 +735,7 @@ GuildAdsTrade = {
   					local r, g, b, hex = GuildAds_GetItemQualityColor(itemInfo.quality);
   					--local hexcol = string.gsub( hex, "|c(.+)", "%1" );
   					local link = hex.."|H"..thisItem.."|h["..itemInfo.name.."]|h|r";
-  					ChatFrameEditBox:Insert(link);
+  					editbox:Insert(link);
 				end
 			else
 				GuildAdsTrade.select(self.adType, self.playerName, self.item);

@@ -96,12 +96,13 @@ GuildAdsPlayerMenu = {
 	whisper = function(self)
 		local owner = self.value;
 		if owner then
-			if ( not ChatFrameEditBox:IsVisible() ) then
+			local editbox = ChatEdit_GetActiveWindow()
+			if ( not editbox ) then
 				ChatFrame_OpenChat("/w "..owner.." ");
 			else
-				ChatFrameEditBox:SetText("/w "..owner.." ");
+				editbox:SetText("/w "..owner.." ");
+				ChatEdit_ParseText(editbox, 0);
 			end
-			ChatEdit_ParseText(ChatFrame1.editBox, 0);
 		end
 	end;
 	
@@ -124,10 +125,19 @@ GuildAdsPlayerMenu = {
 	who = function(self)
 		local owner = self.value;
 		if owner then
-			local text = ChatFrameEditBox:GetText();
-			ChatFrameEditBox:SetText("/who "..owner);
-			ChatEdit_SendText(ChatFrameEditBox);
-			ChatFrameEditBox:SetText(text);
+			local editbox = ChatEdit_GetActiveWindow() or ChatEdit_GetLastActiveWindow() or ChatFrame1EditBox
+			local oldtext = editbox:GetText();
+			local oldshow = editbox:IsShown();
+			local oldfocus = editbox:HasFocus();
+			editbox:SetText("/who "..owner);
+			ChatEdit_SendText(editbox);
+			editbox:SetText(oldtext);
+			if oldshow then
+				editbox:Show();
+			end
+			if oldfocus then
+				editbox:SetFocus();
+			end
 		end
 	end;
 
