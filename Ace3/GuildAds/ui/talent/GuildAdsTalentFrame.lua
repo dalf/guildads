@@ -438,24 +438,29 @@ GuildAdsTalentUI = {
 		local talent, glyphs, build = GuildAdsTalentUI.GetTalentGlyphString()
 
 		-- extract the glyph information of interest (which glyph...)
-		glyph = (function(...) return select(id,...) end)(string.split(":", glyphs))
-
-		-- extract glyph information (glyph id, major/minor type, texture path)
-		glyph, glyphType, iconFilename = string.split(",", glyph)
-		glyphType = tonumber(glyphType)
-		iconFilename = iconFilename and string.gsub(iconFilename, "\@", "Interface\\Spellbook\\");
-
-		if glyph and glyph~="-" and glyph~="" then
-			local spellname = GetSpellInfo(glyph)
-			enabled = true;
-			glyphSpell = glyph
-			glyphSpellLink = "\124cff71d5ff\124Hspell:"..glyph.."\124h["..spellname.."]\124h\124r";
-		elseif glyph=="-" then
-			-- glyph slot not enabled yet
+		if glyphs then
+			glyph = select(id, string.split(":", glyphs))
+				
+			-- extract glyph information (glyph id, major/minor type, texture path)
+			glyph, glyphType, iconFilename = string.split(",", glyph or "")
+			glyphType = tonumber(glyphType)
+			iconFilename = iconFilename and string.gsub(iconFilename, "\@", "Interface\\Spellbook\\");
+	
+			if glyph and glyph~="-" and glyph~="" then
+				local spellname = GetSpellInfo(glyph)
+				enabled = true;
+				glyphSpell = glyph
+				glyphSpellLink = "\124cff71d5ff\124Hspell:"..glyph.."\124h["..spellname.."]\124h\124r";
+			elseif glyph=="-" then
+				-- glyph slot not enabled yet
+				enabled, glyphType, glyphSpell, iconFilename = nil, nil, nil, nil;
+			else
+				-- glyph slot available, but nothing in it
+				enabled, glyphSpell, iconFilename = true, nil, nil;
+			end
+		else
+			-- glyph information not shared
 			enabled, glyphType, glyphSpell, iconFilename = nil, nil, nil, nil;
-		elseif glyph=="" then
-			-- glyph slot available, but nothing in it
-			enabled, glyphSpell, iconFilename = true, nil, nil;
 		end
 		
 		local isMinor = glyphType == 2;
