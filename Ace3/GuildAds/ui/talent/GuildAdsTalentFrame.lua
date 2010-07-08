@@ -8,6 +8,23 @@
 -- Licence: GPL version 2 (General Public License)
 ----------------------------------------------------------------------------------
 
+local GLYPHTYPE_MAJOR = 1;
+local GLYPHTYPE_MINOR = 2;
+local GLYPH_MINOR = { r = 0, g = 0.25, b = 1};
+local GLYPH_MAJOR = { r = 1, g = 0.25, b = 0};
+local NUM_GLYPH_SLOTS = 6
+local GLYPH_SLOTS = {};
+-- Empty Texture
+GLYPH_SLOTS[0] = { left = 0.78125, right = 0.91015625, top = 0.69921875, bottom = 0.828125 };
+-- Major Glyphs
+GLYPH_SLOTS[3] = { left = 0.392578125, right = 0.521484375, top = 0.87109375, bottom = 1 };
+GLYPH_SLOTS[1] = { left = 0, right = 0.12890625, top = 0.87109375, bottom = 1 };
+GLYPH_SLOTS[5] = { left = 0.26171875, right = 0.390625, top = 0.87109375, bottom = 1 };
+-- Minor Glyphs
+GLYPH_SLOTS[2] = { left = 0.130859375, right = 0.259765625, top = 0.87109375, bottom = 1 };
+GLYPH_SLOTS[6] = { left = 0.654296875, right = 0.783203125, top = 0.87109375, bottom = 1 };
+GLYPH_SLOTS[4] = { left = 0.5234375, right = 0.65234375, top = 0.87109375, bottom = 1 };
+
 local Base64MatchString, base64chars, base64values, DecodeBase64Char, EncodeBase64Char
 do
 	Base64MatchString = "[A-Za-z0-9+/]";
@@ -44,6 +61,7 @@ do
 end
 
 local firstShow = true
+local talentTabWidthCache = {}
 
 GuildAdsTalentUI = {
 	metaInformations = { 
@@ -60,7 +78,7 @@ GuildAdsTalentUI = {
 	};
 	
 	onInit = function()
-		PanelTemplates_SetNumTabs(GuildAdsTalentFrame, 3);
+		PanelTemplates_SetNumTabs(GuildAdsTalentFrame, 4);
 		PanelTemplates_SetTab(GuildAdsTalentFrame, 1);
 	end;
 	
@@ -80,6 +98,10 @@ GuildAdsTalentUI = {
 			GuildAdsTalentFrameScrollFrameScrollBarScrollDownButton:SetScript("OnClick", self.DownArrow_OnClick);
 			--GuildAdsDB.profile.Talent:registerUpdate(GuildAdsTalentUI.onDBUpdate);
 			GuildAdsTalentUI.GuildAdsTalentFrameActivateButton_onClick(GuildAdsTalentFrameActivateButton);
+			
+			-- make sure glyph ui covers all of the talent ui
+			local frameLevel = GuildAdsTalentFrame:GetFrameLevel() + 4;
+			GuildAdsGlyphFrame:SetFrameLevel(frameLevel);
 		end
 	end;
 	
@@ -325,32 +347,211 @@ GuildAdsTalentUI = {
 	
 	Update = function()
 		local self=GuildAdsTalentUI;
+		local selectedTab = PanelTemplates_GetSelectedTab(GuildAdsTalentFrame);
+		self.UpdateTabNames();
+		if selectedTab==4 then
+			GuildAdsTalentFrameScrollFrame:Hide();
+			GuildAdsGlyphFrame:Show();
+			GuildAdsTalentFrameActivateButton:Disable();
+			self.UpdateGlyphs();
+		else
+			GuildAdsTalentFrameScrollFrame:Show();
+			GuildAdsGlyphFrame:Hide();
+			GuildAdsTalentFrameActivateButton:Enable();
+			self.UpdateTalents();
+		end
+	end;
+	
+	UpdateTabNames = function()
+		local self=GuildAdsTalentUI;
+		local i, tab, name, iconTexture, pointsSpent;
+		local totalTabWidth = 0
+		local numTabs = self.GetNumTalentTabs();
+		for i=1, MAX_TALENT_TABS do
+			tab = getglobal("GuildAdsTalentFrameTab"..i);
+			if ( i <= numTabs ) then
+				name, iconTexture, pointsSpent = self.GetTalentTabInfo(i);
+				tab:SetText(name);
+				PanelTemplates_TabResize(tab, 0);
+				talentTabWidthCache[i] = PanelTemplates_GetTabWidth(tab);
+				totalTabWidth = totalTabWidth + talentTabWidthCache[i];
+				tab:Show();
+			else
+				tab:Hide();
+			end
+		end
+		-- glyph tab width
+		talentTabWidthCache[4] = PanelTemplates_GetTabWidth(GuildAdsTalentFrameTab4);
+		totalTabWidth = totalTabWidth + talentTabWidthCache[4];
+
+		-- readjust tab sizes to fit
+		local maxTotalTabWidth = GuildAdsTalentFrame:GetWidth();
+		while ( totalTabWidth >= maxTotalTabWidth ) do
+			-- progressively shave 10 pixels off of the largest tab until they all fit within the max width
+			local largestTab = 1;
+			for i = 2, #talentTabWidthCache do
+				if ( talentTabWidthCache[largestTab] < talentTabWidthCache[i] ) then
+					largestTab = i;
+				end
+			end
+			-- shave the width
+			talentTabWidthCache[largestTab] = talentTabWidthCache[largestTab] - 10;
+			-- apply the shaved width
+			tab = _G["GuildAdsTalentFrameTab"..largestTab];
+			PanelTemplates_TabResize(tab, 0, talentTabWidthCache[largestTab]);
+			-- now update the total width
+			totalTabWidth = totalTabWidth - 10;
+		end
+		-- tabs with new shorter text are sometimes still displayed with the previous width (which is too large)
+		for i = 1, #talentTabWidthCache do
+			tab = _G["GuildAdsTalentFrameTab"..i];
+			PanelTemplates_TabResize(tab, 0);
+		end
+		PanelTemplates_UpdateTabs(GuildAdsTalentFrame);
+	end;
+	
+	UpdateGlyphs = function()
+		for i = 1, NUM_GLYPH_SLOTS do
+			GuildAdsTalentUI.Glyph_UpdateSlot(_G["GuildAdsGlyphFrameGlyph"..i]);
+		end
+	end;
+
+	Glyph_OnLoad = function(self)
+		local name = self:GetName();
+		self:RegisterForClicks("LeftButtonUp", "RightButtonUp");
+		self.glyph = _G[name .. "Glyph"];
+		self.setting = _G[name .. "Setting"];
+		self.highlight = _G[name .. "Highlight"];
+		self.background = _G[name .. "Background"];
+		self.ring = _G[name .. "Ring"];
+		self.shine = _G[name .. "Shine"];
+		self.elapsed = 0;
+		self.tintElapsed = 0;
+		self.glyphType = nil;
+	end;
+
+	Glyph_UpdateSlot = function(self)
+		local id = self:GetID();
+		--local talentGroup = PlayerTalentFrame and PlayerTalentFrame.talentGroup;
+		--local enabled, glyphType, glyphSpell, iconFilename = GetGlyphSocketInfo(id, talentGroup);
+		local glyph, glyphSpellLink, enabled, glyphType, glyphSpell, iconFilename;
+		local talent, glyphs, build = GuildAdsTalentUI.GetTalentGlyphString()
+
+		-- extract the glyph information of interest (which glyph...)
+		glyph = (function(...) return select(id,...) end)(string.split(":", glyphs))
+
+		-- extract glyph information (glyph id, major/minor type, texture path)
+		glyph, glyphType, iconFilename = string.split(",", glyph)
+		glyphType = tonumber(glyphType)
+		iconFilename = iconFilename and string.gsub(iconFilename, "\@", "Interface\\Spellbook\\");
+
+		if glyph and glyph~="-" and glyph~="" then
+			local spellname = GetSpellInfo(glyph)
+			enabled = true;
+			glyphSpell = glyph
+			glyphSpellLink = "\124cff71d5ff\124Hspell:"..glyph.."\124h["..spellname.."]\124h\124r";
+		elseif glyph=="-" then
+			-- glyph slot not enabled yet
+			enabled, glyphType, glyphSpell, iconFilename = nil, nil, nil, nil;
+		elseif glyph=="" then
+			-- glyph slot available, but nothing in it
+			enabled, glyphSpell, iconFilename = true, nil, nil;
+		end
+		
+		local isMinor = glyphType == 2;
+		if ( isMinor ) then
+			GuildAdsTalentUI.Glyph_SetGlyphType(self, GLYPHTYPE_MINOR);
+		else
+			GuildAdsTalentUI.Glyph_SetGlyphType(self, GLYPHTYPE_MAJOR);
+		end
+	
+		if ( not enabled ) then
+			self.shine:Hide();
+			self.background:Hide();
+			self.glyph:Hide();
+			self.ring:Hide();
+			self.setting:SetTexture("Interface\\Spellbook\\UI-GlyphFrame-Locked");
+			self.setting:SetTexCoord(.1, .9, .1, .9);
+		elseif ( not glyphSpell ) then
+			self.spell = nil;
+			self.spellLink = nil;
+			self.shine:Show();
+			self.background:Show();
+			self.background:SetTexCoord(GLYPH_SLOTS[0].left, GLYPH_SLOTS[0].right, GLYPH_SLOTS[0].top, GLYPH_SLOTS[0].bottom);
+			self.glyph:Hide();
+			self.ring:Show();
+		else
+			self.spell = glyphSpell;
+			self.spellLink = glyphSpellLink;
+			self.shine:Show();
+			self.background:Show();
+			self.background:SetAlpha(1);
+			self.background:SetTexCoord(GLYPH_SLOTS[id].left, GLYPH_SLOTS[id].right, GLYPH_SLOTS[id].top, GLYPH_SLOTS[id].bottom);
+			self.glyph:Show();
+			if ( iconFilename ) then
+				self.glyph:SetTexture(iconFilename);
+			else
+				self.glyph:SetTexture("Interface\\Spellbook\\UI-Glyph-Rune1");
+			end
+			self.ring:Show();
+		end
+	end;
+	
+	Glyph_OnEnter = function(self)
+		if ( self.background:IsShown() ) then
+			self.highlight:Show();
+		end
+		if self.spellLink then
+			GameTooltip:SetOwner(this, "ANCHOR_RIGHT");
+			GameTooltip:SetHyperlink(self.spellLink);
+			GameTooltip:Show();
+		end
+	end;
+
+	Glyph_OnLeave = function(self)
+		self.highlight:Hide();
+		GameTooltip:Hide();
+	end;
+
+	Glyph_OnClick = function(self)
+		local id = self:GetID();
+		if ( IsModifiedClick("CHATLINK") ) then
+			local link = self.spellLink;
+			if ( link ) then
+				ChatEdit_InsertLink(link);
+			end
+		end
+	end;
+	
+	UpdateTalents = function()
+		local self=GuildAdsTalentUI;
 		
 		self.onFirstShow();
 		GuildAdsTalentUI.GuildAdsTalentFrameActivateButton_onShow(GuildAdsTalentFrameActivateButton);
 		-- Initialize talent tables if necessary
 		local numTalents = self.GetNumTalents(PanelTemplates_GetSelectedTab(GuildAdsTalentFrame));
 		-- Setup Tabs
-		local tab, name, iconTexture, pointsSpent, button;
-		local numTabs = self.GetNumTalentTabs();
+		local i, tab, name, iconTexture, pointsSpent, button;
+		--local numTabs = self.GetNumTalentTabs();
 		for i=1, MAX_TALENT_TABS do
 			tab = getglobal("GuildAdsTalentFrameTab"..i);
-			if ( i <= numTabs ) then
-				name, iconTexture, pointsSpent = self.GetTalentTabInfo(i);
+			--if ( i <= numTabs ) then
+				--name, iconTexture, pointsSpent = self.GetTalentTabInfo(i);
 				if ( i == PanelTemplates_GetSelectedTab(GuildAdsTalentFrame) ) then
 					-- If tab is the selected tab set the points spent info
+					name, iconTexture, pointsSpent = self.GetTalentTabInfo(i);
 					GuildAdsTalentFrameSpentPoints:SetFormattedText(MASTERY_POINTS_SPENT, name, HIGHLIGHT_FONT_COLOR_CODE..pointsSpent..FONT_COLOR_CODE_CLOSE)
 					GuildAdsTalentFrame.pointsSpent = pointsSpent;
 				end
-				tab:SetText(name);
-				PanelTemplates_TabResize(tab, 10);
-				tab:Show();
-			else
-				tab:Hide();
-			end
+				--tab:SetText(name);
+				--PanelTemplates_TabResize(tab, 10);
+				--tab:Show();
+			--else
+				--tab:Hide();
+			--end
 		end
-		PanelTemplates_SetNumTabs(GuildAdsTalentFrame, numTabs);
-		PanelTemplates_UpdateTabs(GuildAdsTalentFrame);
+		--PanelTemplates_SetNumTabs(GuildAdsTalentFrame, numTabs);
+		--PanelTemplates_UpdateTabs(GuildAdsTalentFrame);
 
 		-- Setup Frame
 		--SetPortraitTexture(GuildAdsTalentFramePortrait, "none");  --"player"
@@ -801,6 +1002,42 @@ GuildAdsTalentUI = {
 		end
 	end;
 
+	Glyph_SetGlyphType = function(glyph, glyphType)
+		glyph.glyphType = glyphType;
+		
+		glyph.setting:SetTexture("Interface\\Spellbook\\UI-GlyphFrame");
+		if ( glyphType == GLYPHTYPE_MAJOR ) then
+			glyph.glyph:SetVertexColor(GLYPH_MAJOR.r, GLYPH_MAJOR.g, GLYPH_MAJOR.b);
+			glyph.setting:SetWidth(108);
+			glyph.setting:SetHeight(108);
+			glyph.setting:SetTexCoord(0.740234375, 0.953125, 0.484375, 0.697265625);
+			glyph.highlight:SetWidth(108);
+			glyph.highlight:SetHeight(108);
+			glyph.highlight:SetTexCoord(0.740234375, 0.953125, 0.484375, 0.697265625);
+			glyph.ring:SetWidth(82);
+			glyph.ring:SetHeight(82);
+			glyph.ring:SetPoint("CENTER", glyph, "CENTER", 0, -1);
+			glyph.ring:SetTexCoord(0.767578125, 0.92578125, 0.32421875, 0.482421875);
+			glyph.shine:SetTexCoord(0.9609375, 1, 0.9609375, 1);
+			glyph.background:SetWidth(70);
+			glyph.background:SetHeight(70);
+		else
+			glyph.glyph:SetVertexColor(GLYPH_MINOR.r, GLYPH_MINOR.g, GLYPH_MINOR.b);
+			glyph.setting:SetWidth(86);
+			glyph.setting:SetHeight(86);
+			glyph.setting:SetTexCoord(0.765625, 0.927734375, 0.15625, 0.31640625);
+			glyph.highlight:SetWidth(86);
+			glyph.highlight:SetHeight(86);
+			glyph.highlight:SetTexCoord(0.765625, 0.927734375, 0.15625, 0.31640625);
+			glyph.ring:SetWidth(62);
+			glyph.ring:SetHeight(62);
+			glyph.ring:SetPoint("CENTER", glyph, "CENTER", 0, 1);
+			glyph.ring:SetTexCoord(0.787109375, 0.908203125, 0.033203125, 0.154296875);
+			glyph.shine:SetTexCoord(0.9609375, 1, 0.921875, 0.9609375);
+			glyph.background:SetWidth(64);
+			glyph.background:SetHeight(64);
+		end
+	end;
 }
 
 ---------------------------------------------------------------------------------

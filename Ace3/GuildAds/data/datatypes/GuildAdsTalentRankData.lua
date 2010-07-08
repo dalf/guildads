@@ -102,7 +102,7 @@ function GuildAdsTalentRankDataType:enterWorld()
 	self:UnregisterEvent("PLAYER_ENTERING_WORLD");
 	self:RegisterEvent("CHARACTER_POINTS_CHANGED","onEvent");
 	self:RegisterEvent("PLAYER_TALENT_UPDATE","onEvent");
-	GuildAdsTask:AddNamedSchedule("GuildAdsTalentRankDataTypeInit", 4, nil, nil, self.onEvent, self)
+	GuildAdsTask:AddNamedSchedule("GuildAdsTalentRankDataTypeInit", 8, nil, nil, self.onEvent, self)
 end
 
 function GuildAdsTalentRankDataType:onEvent()
@@ -142,10 +142,11 @@ function GuildAdsTalentRankDataType:onEvent()
 			if ( enabled ) then
 				--local link = GetGlyphLink(i);-- Retrieves the Glyph's link (nil of no glyph in Socket);
 				if ( glyphSpellID ) then
-					tinsert(glyphTable, glyphSpellID);
+					icon = string.gsub(icon, "Interface\\Spellbook\\", "\@")
+					tinsert(glyphTable, tostring(glyphSpellID)..","..tostring(glyphType)..","..icon);
 					--DEFAULT_CHAT_FRAME:AddMessage("Glyph Socket "..i.." contains "..link);
 				else
-					tinsert(glyphTable, "");
+					tinsert(glyphTable, ","..tostring(glyphType)..",");
 					--DEFAULT_CHAT_FRAME:AddMessage("Glyph Socket "..i.." is unlocked and empty!");
 				end
 			else
