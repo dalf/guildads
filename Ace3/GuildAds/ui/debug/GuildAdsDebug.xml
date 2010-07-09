@@ -26,6 +26,16 @@
 					</Anchor>
 				</Anchors>
 				<Frames>
+					<Frame name="$parentButtonFrame">
+						<Size x="29" y="29"/>
+						<Anchors>
+							<Anchor point="BOTTOMRIGHT" relativeTo="$parent" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="-1" y="0"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Frames>
 					<Button name="$parentBottomButton">
 						<Size>
 							<AbsDimension x="32" y="32"/>
@@ -33,7 +43,7 @@
 						<Anchors>
 							<Anchor point="BOTTOMLEFT">
 								<Offset>
-									<AbsDimension x="-32" y="-4"/>
+									<AbsDimension x="0" y="-4"/>
 								</Offset>
 							</Anchor>
 						</Anchors>
@@ -45,7 +55,7 @@
 						<Scripts>
 							<OnClick>
 								PlaySound("igChatBottom");
-								self:GetParent():ScrollToBottom();
+								self:GetParent():GetParent():ScrollToBottom();
 							</OnClick>
 						</Scripts>
 						<NormalTexture file="Interface\ChatFrame\UI-ChatIcon-ScrollEnd-Up"/>
@@ -76,7 +86,7 @@
 									self.clickDelay = MESSAGE_SCROLLBUTTON_INITIAL_DELAY;
 								else
 									PlaySound("igChatScrollDown");
-									self:GetParent():ScrollDown();
+									self:GetParent():GetParent():ScrollDown();
 								end
 							</OnClick>
 						</Scripts>
@@ -104,7 +114,7 @@
 									self.clickDelay = MESSAGE_SCROLLBUTTON_INITIAL_DELAY;
 								else
 									PlaySound("igChatScrollUp");
-									self:GetParent():ScrollUp();
+									self:GetParent():GetParent():ScrollUp();
 								end
 							</OnClick>
 						</Scripts>
@@ -113,6 +123,8 @@
 						<DisabledTexture file="Interface\ChatFrame\UI-ChatIcon-ScrollUp-Disabled"/>
 						<HighlightTexture file="Interface\Buttons\UI-Common-MouseHilight" alphaMode="ADD"/>
 					</Button>
+						</Frames>
+					</Frame>
 				</Frames>
 				<Scripts>
 					<OnHyperlinkClick>
