@@ -64,94 +64,14 @@ GuildAdsBackupDB = {
 			ChatFrame1:AddMessage("Not initialized yet.")
 			return
 		end
-		if msg=="backup" then
-			-- make a copy of the active/in-use data of guildads right now
-			
-			-- check to see if a transaction is happening and wait until it is over
-			if GuildAdsBackupDB.isUpdating() then
-				ChatFrame1:AddMessage("Transaction in progress. Please try again later.");
-				return;
-			end
-			
-			-- store revision number this database is from
-			GuildAdsBackupDatabase.version = GUILDADS_REVISION_NUMBER
-			
-			-- store realm name
-			GuildAdsBackupDatabase.realmName = GuildAds.realmName
-			
-			-- store the channel this database is from
-			GuildAdsBackupDatabase.channel = GuildAds.channelName.."@"..GuildAds.factionName
-			
-			-- store channel data
-			GuildAdsBackupDatabase["ChannelData"] = deepcopy(GuildAdsDatabase.Data[GuildAds.realmName].channels[GuildAds.channelName.."@"..GuildAds.factionName])
-			
-			-- clean up channel data (forum[id][author].n = nil)
-			for id, authors in pairs(GuildAdsBackupDatabase.ChannelData.forum) do
-				if authors then
-					for author, data in pairs(authors) do
-						if type(data)=="table" then
-							data.n = nil
-						end
-					end
-				end
-			end
-			
-			-- store profile data
-			GuildAdsBackupDatabase["ProfileData"] = deepcopy(GuildAdsDatabase.Data[GuildAds.realmName].profiles)
-			
-			-- clean up profile data (.s in craft tables should be nil'ed)
-			for author, profile in pairs(GuildAdsBackupDatabase.ProfileData) do
-				if profile.craft then
-					for id, links in pairs(profile.craft) do
-						if type(links)=="table" then
-							links.s = nil
-						end
-					end
-				end
-			end
-
-			ChatFrame1:AddMessage("GuildAds database is backed up. Restore with /guildadsdb restore");
-			
+		if msg=="info" then
+			GuildAdsBackupDB.Info();
+		elseif msg=="backup" then
+			GuildAdsBackupDB.Backup();
 		elseif msg=="restore" then
-
-			-- check to see if a transaction is happening and wait until it is over
-			if GuildAdsBackupDB.isUpdating() then
-				ChatFrame1:AddMessage("Transaction in progress. Please try again later.");
-				return;
-			end
-
-			-- check if the stored data fits
-			if not GuildAdsBackupDatabase.version then
-				ChatFrame1:AddMessage("No data to restore");
-			end
-			
-			if GuildAdsBackupDatabase.version ~= GUILDADS_REVISION_NUMBER then
-				ChatFrame1:AddMessage(string.format("This data was backed up using revision %s but you are using %s. Revisions must match.", GuildAdsBackupDatabase.version, GUILDADS_REVISION_NUMBER))
-			end
-			
-			if GuildAdsBackupDatabase.realmName ~= GuildAds.realmName then
-				ChatFrame1:AddMessage(string.format("This data is meant for the server %s. Can't restore.", GuildAdsBackupDatabase.realmName))
-			end
-			
-			if GuildAdsBackupDatabase.channel ~= GuildAds.channelName.."@"..GuildAds.factionName then
-				ChatFrame1:AddMessage(string.format("This data is for the channel %s but you are on channel %s. Can't restore.", GuildAdsBackupDatabase.channel, GuildAds.channelName.."@"..GuildAds.factionName))
-			end
-			
-			-- copy data into database
-			ChatFrame1:AddMessage("Restoring channel data")
-			GuildAdsDatabase.Data[GuildAds.realmName].channels[GuildAds.channelName.."@"..GuildAds.factionName] = deepcopy(GuildAdsBackupDatabase["ChannelData"])
-			
-			ChatFrame1:AddMessage("Restoring profile data")
-			GuildAdsDatabase.Data[GuildAds.realmName].profiles = deepcopy(GuildAdsBackupDatabase["ProfileData"])
-			
-			-- update hashtree
-			ChatFrame1:AddMessage("Updating hash tree")
-			GuildAdsHash.tree = GuildAdsHash:CreateHashTree()
-			
-			ChatFrame1:AddMessage("GuildAds database has been restored.");
-			ChatFrame1:AddMessage("To free addon memory, you should relog now.");
+			GuildAdsBackupDB.Restore();
 		else
-			ChatFrame1:AddMessage("Usage: /guildadsdb [backup|restore]");
+			ChatFrame1:AddMessage("Usage: /guildadsdb [info||backup||restore]");
 		end
 	end;
 	
@@ -161,6 +81,119 @@ GuildAdsBackupDB = {
 			 	return true
 		end
 		return false
+	end;
+	
+	Info = function()
+		ChatFrame1:AddMessage("Stored GuildAdsDatabase information:");
+		ChatFrame1:AddMessage("Requires GuildAds version: "..tostring(GuildAdsBackupDatabase.version));
+		ChatFrame1:AddMessage("From realm: "..tostring(GuildAdsBackupDatabase.realmName));
+		ChatFrame1:AddMessage("From channel: "..tostring(GuildAdsBackupDatabase.channel));
+		ChatFrame1:AddMessage("Created: "..tostring(GuildAdsBackupDatabase.timestamp));
+	end;
+	
+	Backup = function()
+		-- make a copy of the active/in-use data of guildads right now
+		
+		-- check to see if a transaction is happening and wait until it is over
+		if GuildAdsBackupDB.isUpdating() then
+			ChatFrame1:AddMessage("Transaction in progress. Please try again later.");
+			return;
+		end
+		
+		GuildAdsBackupDatabase.complete = false;
+		
+		-- store revision number this database is from
+		GuildAdsBackupDatabase.version = GUILDADS_REVISION_NUMBER
+		
+		-- store realm name
+		GuildAdsBackupDatabase.realmName = GuildAds.realmName
+		
+		-- store the channel this database is from
+		GuildAdsBackupDatabase.channel = GuildAds.channelName.."@"..GuildAds.factionName
+		
+		-- timestamp
+		GuildAdsBackupDatabase.timestamp = date("%Y/%m/%d %H:%M:%S");
+		
+		-- store channel data
+		GuildAdsBackupDatabase["ChannelData"] = deepcopy(GuildAdsDatabase.Data[GuildAds.realmName].channels[GuildAds.channelName.."@"..GuildAds.factionName])
+		
+		-- clean up channel data (forum[id][author].n = nil)
+		for id, authors in pairs(GuildAdsBackupDatabase.ChannelData.forum) do
+			if authors then
+				for author, data in pairs(authors) do
+					if type(data)=="table" then
+						data.n = nil
+					end
+				end
+			end
+		end
+		
+		-- store profile data
+		GuildAdsBackupDatabase["ProfileData"] = deepcopy(GuildAdsDatabase.Data[GuildAds.realmName].profiles)
+		
+		-- clean up profile data (.s in craft tables should be nil'ed)
+		for author, profile in pairs(GuildAdsBackupDatabase.ProfileData) do
+			if profile.craft then
+				for id, links in pairs(profile.craft) do
+					if type(links)=="table" then
+						links.s = nil
+					end
+				end
+			end
+		end
+
+		GuildAdsBackupDatabase.complete = true;
+
+		ChatFrame1:AddMessage("GuildAds database is backed up. Restore with /guildadsdb restore");		
+	end;
+	
+	Restore = function()
+		-- check to see if a transaction is happening and wait until it is over
+		if GuildAdsBackupDB.isUpdating() then
+			ChatFrame1:AddMessage("Transaction in progress. Please try again later.");
+			return;
+		end
+
+		-- check if the stored data fits
+		if not GuildAdsBackupDatabase.version then
+			ChatFrame1:AddMessage("No data to restore");
+			return;
+		end
+
+		-- Check if the backup is complete
+		if not GuildAdsBackupDatabase.complete then
+			ChatFrame1:AddMessage("This backup is not complete. Nothing restored.");
+			return;
+		end
+		
+		if GuildAdsBackupDatabase.version ~= GUILDADS_REVISION_NUMBER then
+			ChatFrame1:AddMessage(string.format("This data was backed up using revision %s but you are using %s. Revisions must match.", GuildAdsBackupDatabase.version, GUILDADS_REVISION_NUMBER))
+			return;
+		end
+		
+		if GuildAdsBackupDatabase.realmName ~= GuildAds.realmName then
+			ChatFrame1:AddMessage(string.format("This data is meant for the server %s. Can't restore.", GuildAdsBackupDatabase.realmName))
+			return;
+		end
+		
+		if GuildAdsBackupDatabase.channel ~= GuildAds.channelName.."@"..GuildAds.factionName then
+			ChatFrame1:AddMessage(string.format("This data is for the channel %s but you are on channel %s. Can't restore.", GuildAdsBackupDatabase.channel, GuildAds.channelName.."@"..GuildAds.factionName))
+			return;
+		end
+		
+		-- copy data into database
+		ChatFrame1:AddMessage("Restoring channel data")
+		GuildAdsDatabase.Data[GuildAds.realmName].channels[GuildAds.channelName.."@"..GuildAds.factionName] = deepcopy(GuildAdsBackupDatabase["ChannelData"])
+		
+		ChatFrame1:AddMessage("Restoring profile data")
+		GuildAdsDatabase.Data[GuildAds.realmName].profiles = deepcopy(GuildAdsBackupDatabase["ProfileData"])
+		
+		-- update hashtree
+		ChatFrame1:AddMessage("Updating hash tree")
+		GuildAdsHash.tree = GuildAdsHash:CreateHashTree()
+		
+		ChatFrame1:AddMessage("GuildAds database has been restored.");
+		ChatFrame1:AddMessage("To free addon memory, you should relog now.");
 	end;
 }
 
