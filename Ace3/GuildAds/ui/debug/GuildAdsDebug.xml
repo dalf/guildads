@@ -132,8 +132,15 @@
 					</OnHyperlinkClick>
 					<OnLoad>
 						self:SetBackdropColor(1,1,1,1);
-						self:EnableMouseWheel(1);
+						self:EnableMouseWheel(true);
 					</OnLoad>
+					<OnMouseWheel>
+						if ( delta > 0 ) then
+							self:ScrollUp();
+						else
+							self:ScrollDown();
+						end
+					</OnMouseWheel>
 				</Scripts>
 				<FontString justifyH="LEFT" font="Fonts\ARIALN.TTF">
 					<FontHeight>
