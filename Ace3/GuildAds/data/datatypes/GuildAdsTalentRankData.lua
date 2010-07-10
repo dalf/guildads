@@ -95,17 +95,33 @@ AceEvent:Embed(GuildAdsTalentRankDataType)
 -- Dynamic part only shares what is different from Static part.
 
 function GuildAdsTalentRankDataType:Initialize()
-	self:RegisterEvent("PLAYER_ENTERING_WORLD", "enterWorld");
+	self:RegisterEvent("CHARACTER_POINTS_CHANGED",		"onTalentEvent");
+	self:RegisterEvent("PLAYER_TALENT_UPDATE",				"onTalentEvent");
+	self:RegisterEvent("TALENTS_INVOLUNTARILY_RESET",	"onTalentEvent");
+	self:RegisterEvent("GLYPH_CHANGED", 							"onGlyphEvent");
+	self:RegisterEvent("GLYPH_ADDED", 								"onGlyphEvent");
+	self:RegisterEvent("GLYPH_REMOVED", 							"onGlyphEvent");
+	self:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED", "onTalentGroupEvent");
+	self:RegisterEvent("PLAYER_ALIVE", 								"onPlayerAlive"); -- fires at login but not reloadui (no suitable event fires at reloadui to indicate glyphs are ready)
 end
 
-function GuildAdsTalentRankDataType:enterWorld()
-	self:UnregisterEvent("PLAYER_ENTERING_WORLD");
-	self:RegisterEvent("CHARACTER_POINTS_CHANGED","onEvent");
-	self:RegisterEvent("PLAYER_TALENT_UPDATE","onEvent");
-	GuildAdsTask:AddNamedSchedule("GuildAdsTalentRankDataTypeInit", 8, nil, nil, self.onEvent, self)
+function GuildAdsTalentRankDataType:onPlayerAlive()
+	self:onTalentEvent();
+	self:onGlyphEvent();
+	self:onTalentGroupEvent();
 end
 
-function GuildAdsTalentRankDataType:onEvent()
+function GuildAdsTalentRankDataType:onTalentGroupEvent()
+	GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "Updating active talent group");
+	-- store active talent group
+	local data = self:get(GuildAds.playerName, "A")
+	data = data or {}
+	data.b = GetActiveTalentGroup()
+	self:set(GuildAds.playerName, "A", data);
+end
+
+function GuildAdsTalentRankDataType:onTalentEvent()
+	GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "Updating talent information");
 	for talentGroup = 1, GetNumTalentGroups() do
 		-- parse complete talent tree now
 		local name, iconTexture, pointsSpent, background, numTalents, tabIndex;
@@ -132,6 +148,20 @@ function GuildAdsTalentRankDataType:onEvent()
 			end
 			sep = ":"
 		end
+		-- merge new talent data with possibly already existing data
+		local data = self:get(GuildAds.playerName, tostring(talentGroup));
+		data = data or {}
+		data.t = table.concat(talentLinkTable,"")
+		data.b = (select(2,GetBuildInfo()))
+		self:set(GuildAds.playerName, tostring(talentGroup), data);
+		-- remove old talent data (from previous versions of GuildAds)
+		self:set(GuildAds.playerName, tostring(tabIndex)..":"..tostring(talentIndex), nil);
+	end
+end
+
+function GuildAdsTalentRankDataType:onGlyphEvent()
+	GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "Updating glyph information");
+	for talentGroup = 1, GetNumTalentGroups() do
 		-- pack glyph info
 		local glyphTable = {}
 		local sep = "";
@@ -155,17 +185,15 @@ function GuildAdsTalentRankDataType:onEvent()
 			end
 			sep = ":";
 		end
-		-- store it
-		local data = {
-			t = table.concat(talentLinkTable,""),
-			g = table.concat(glyphTable,""),
-			b = (select(2,GetBuildInfo()))
-		}
-		self:set(GuildAds.playerName, tostring(tabIndex)..":"..tostring(talentIndex), nil);
+		-- merge new talent data with possibly already existing data
+		local data = self:get(GuildAds.playerName, tostring(talentGroup));
+		data = data or {}
+		data.g = table.concat(glyphTable,"")
+		data.b = (select(2,GetBuildInfo()))
 		self:set(GuildAds.playerName, tostring(talentGroup), data);
+		-- remove old talent data (from previous versions of GuildAds)
+		self:set(GuildAds.playerName, tostring(tabIndex)..":"..tostring(talentIndex), nil);
 	end
-	-- store active talent group
-	self:set(GuildAds.playerName, "A", { b=GetActiveTalentGroup() });
 end
 
 function GuildAdsTalentRankDataType:getTableForPlayer(author)
@@ -230,4 +258,3 @@ function GuildAdsTalentRankDataType:set(author, id, info)
 end
 
 GuildAdsTalentRankDataType:register();
-
