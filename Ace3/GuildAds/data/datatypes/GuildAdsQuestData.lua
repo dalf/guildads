@@ -66,10 +66,10 @@ local AceEvent = LibStub("AceEvent-3.0")
 AceEvent:Embed(GuildAdsQuestDataType)
 
 function GuildAdsQuestDataType:Initialize()
-	GuildAdsTask:AddNamedSchedule("GuildAdsQuestDataTypeInit", 8, nil, nil, self.onEvent, self)
 	self:RegisterEvent("PLAYER_LEVEL_UP", "onEvent");
 	--self:RegisterEvent("UNIT_QUEST_LOG_CHANGED", "onEvent");
 	self:RegisterEvent("QUEST_LOG_UPDATE", "onEvent");
+	self:RegisterEvent("PLAYER_ALIVE", "onEvent");
 end
 
 function GuildAdsQuestDataType:GetVerboseQuestTag(questTag)
@@ -102,7 +102,7 @@ function GuildAdsQuestDataType:onEvent()
 					if questID then
 						flags = isComplete and isComplete+1 or 1
 						flags = isDaily and flags+4 or flags
-						GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "GuildAdsQuestDataType: setting "..tostring(questID).." ("..questName..")");
+						--GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "GuildAdsQuestDataType: setting "..tostring(questID).." ("..questName..")");
 						self:set(playerName, questID, {l=questLevel, c=questColor, n=questName, g=groupName, r=QuestTypeToDataType[questTag], s=flags})
 						questIDs[questID] = true;
 					end
