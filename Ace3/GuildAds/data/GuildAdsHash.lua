@@ -16,6 +16,7 @@ local bit_bxor = bit.bxor
 local string_sub = string.sub
 local table_insert = table.insert
 local table_concat = table.concat
+local table_remove = table.remove
 local string_format = string.format
 local string_byte = string.byte
 
@@ -160,7 +161,7 @@ function GuildAdsHash:CheckHashTree()
 				if (a and not b) or (not a and b) or (a and b and a.h ~= b.h) then
 					c=a or b
 					ChatFrame1:AddMessage("path "..l1..","..l2..","..l3.." differs");
-					for k,v in pairs(c.d) do
+					for k,v in ipairs(c.d) do
 						ChatFrame1:AddMessage(v.ID..(a and " missing" or ""));
 					end
 				end
@@ -174,7 +175,7 @@ end
 function GuildAdsHash:CalculateLeafChecksum(leaf)
 	local h;
 	h=self:fcs16init();
-	for _,hash in pairs(leaf) do
+	for _,hash in ipairs(leaf) do
 		h=self:fcs16update(h,hash.dt:getRevision(hash.p)); -- maybe ID should be included in the hash calculation?
 	end
 	return self:fcs16final(h);
@@ -241,7 +242,7 @@ function GuildAdsHash:UpdateTree(tree, playerName, dataTypeName)
 	-- is ID in tree?
 	treepath=tree[path]; -- just an optimisation
 	if treepath and treepath.d then
-		for k,v in pairs(treepath.d) do -- small loop, with 12 bit hash (path length = 3), 500 unique ids usually gives no more than 2 loops.
+		for k,v in ipairs(treepath.d) do -- small loop, with 12 bit hash (path length = 3), 500 unique ids usually gives no more than 2 loops.
 			if v.ID == ID then
 				-- hashID exists and contains ID: Just update leaf checksums and recalculate path checksums
 				GuildAds_ChatDebug(GA_DEBUG_HASH, "ID found %s",ID);
@@ -275,7 +276,6 @@ end
 
 -- remove ID from tree, possibly removing the entire hash and therefor also the entire branch (all the way to the root).
 function GuildAdsHash:RemoveID(tree,playerName,dataTypeName)
-	-- stub so far
 	local ID, hashID, path;
 	
 	ID=GuildAdsHash:getID(playerName, dataTypeName);
@@ -285,10 +285,10 @@ function GuildAdsHash:RemoveID(tree,playerName,dataTypeName)
 	if tree then
 		local treepath=tree[path]; -- just an optimisation
 		if treepath and treepath.d then
-			for k,v in pairs(treepath.d) do -- small loop, with 12 bit hash (path length = 3), 500 unique ids usually gives no more than 2 loops.
+			for k,v in ipairs(treepath.d) do -- small loop, with 12 bit hash (path length = 3), 500 unique ids usually gives no more than 2 loops.
 				if v.ID == ID then
 					GuildAds_ChatDebug(GA_DEBUG_HASH, "ID found. Deleting %s", ID);
-					treepath.d[k]=del(treepath.d[k]); -- removing an ID does not change the order. No sort necessary.
+					del(table_remove(treepath.d, k)); -- removing an ID does not change the order. No sort necessary.
 					if #treepath.d>0 then
 						treepath.h=GuildAdsHash:CalculateLeafChecksum(treepath.d); -- update leaf checksum
 					else
