@@ -8,22 +8,25 @@
 -- Licence: GPL version 2 (General Public License)
 ----------------------------------------------------------------------------------
 
-local GLYPHTYPE_MAJOR = 1;
-local GLYPHTYPE_MINOR = 2;
-local GLYPH_MINOR = { r = 0, g = 0.25, b = 1};
-local GLYPH_MAJOR = { r = 1, g = 0.25, b = 0};
-local NUM_GLYPH_SLOTS = 6
-local GLYPH_SLOTS = {};
--- Empty Texture
-GLYPH_SLOTS[0] = { left = 0.78125, right = 0.91015625, top = 0.69921875, bottom = 0.828125 };
--- Major Glyphs
-GLYPH_SLOTS[3] = { left = 0.392578125, right = 0.521484375, top = 0.87109375, bottom = 1 };
-GLYPH_SLOTS[1] = { left = 0, right = 0.12890625, top = 0.87109375, bottom = 1 };
-GLYPH_SLOTS[5] = { left = 0.26171875, right = 0.390625, top = 0.87109375, bottom = 1 };
--- Minor Glyphs
-GLYPH_SLOTS[2] = { left = 0.130859375, right = 0.259765625, top = 0.87109375, bottom = 1 };
-GLYPH_SLOTS[6] = { left = 0.654296875, right = 0.783203125, top = 0.87109375, bottom = 1 };
-GLYPH_SLOTS[4] = { left = 0.5234375, right = 0.65234375, top = 0.87109375, bottom = 1 };
+local GLYPH_TYPE_MAJOR = 1;
+local GLYPH_TYPE_MINOR = 2;
+local GLYPH_TYPE_PRIME = 3;
+
+local GLYPH_TYPE_INFO = {};
+GLYPH_TYPE_INFO[GLYPH_TYPE_PRIME] =  {
+	ring = { size = 82, left = 0.85839844, right = 0.93847656, top = 0.22265625, bottom = 0.30273438 };
+	highlight = { size = 96, left = 0.85839844, right = 0.95214844, top = 0.30468750, bottom = 0.39843750 };
+}
+GLYPH_TYPE_INFO[GLYPH_TYPE_MAJOR] =  {
+	ring = { size = 66, left = 0.85839844, right = 0.92285156, top = 0.00097656, bottom = 0.06542969 };
+	highlight = { size = 80, left = 0.85839844, right = 0.93652344, top = 0.06738281, bottom = 0.14550781 };
+}
+GLYPH_TYPE_INFO[GLYPH_TYPE_MINOR] =  {
+	ring = { size = 61, left = 0.92480469, right = 0.98437500, top = 0.00097656, bottom = 0.06054688 };
+	highlight = { size = 75, left = 0.85839844, right = 0.93164063, top = 0.14746094, bottom = 0.22070313 };
+}
+
+local NUM_GLYPH_SLOTS = 9;
 
 local Base64MatchString, base64chars, base64values, DecodeBase64Char, EncodeBase64Char
 do
@@ -102,6 +105,7 @@ GuildAdsTalentUI = {
 			-- make sure glyph ui covers all of the talent ui
 			local frameLevel = GuildAdsTalentFrame:GetFrameLevel() + 4;
 			GuildAdsGlyphFrame:SetFrameLevel(frameLevel);
+			GuildAdsGlyphFrame:SetScale(0.75)
 		end
 	end;
 	
@@ -178,6 +182,7 @@ GuildAdsTalentUI = {
 		else
 			GuildAdsTalentUI.shownSpec = "1"
 		end
+		GuildAdsTalentUI.GuildAdsTalentFrameActivateButton_onShow(self);
 		GuildAdsTalentUI.onShow();
 	end;
 	
@@ -209,7 +214,7 @@ GuildAdsTalentUI = {
 				--local talent = GuildAdsDB.profile.TalentRank:get(GuildAdsInspectWindow.playerName, tostring(data.b)); -- get active talent link
 				local talent = GuildAdsDB.profile.TalentRank:get(GuildAdsInspectWindow.playerName, GuildAdsTalentUI.shownSpec); -- get active talent link
 				if talent then
-					return select(1, string.split(";",talent.t)), talent.g, talent.b, tonumber(select(2, string.split(";",talent.t)))
+					return select(1, string.split(";",talent.t)), talent.g, talent.b, tonumber(select(2, string.split(";",talent.t)) or 0)
 				end
 			end
 		end
@@ -360,12 +365,12 @@ GuildAdsTalentUI = {
 		if selectedTab==4 then
 			GuildAdsTalentFrameScrollFrame:Hide();
 			GuildAdsGlyphFrame:Show();
-			GuildAdsTalentFrameActivateButton:Disable();
+			--GuildAdsTalentFrameActivateButton:Disable();
 			self.UpdateGlyphs();
 		else
 			GuildAdsTalentFrameScrollFrame:Show();
 			GuildAdsGlyphFrame:Hide();
-			GuildAdsTalentFrameActivateButton:Enable();
+			--GuildAdsTalentFrameActivateButton:Enable();
 			self.UpdateTalents();
 		end
 	end;
@@ -422,6 +427,7 @@ GuildAdsTalentUI = {
 		for i = 1, NUM_GLYPH_SLOTS do
 			GuildAdsTalentUI.Glyph_UpdateSlot(_G["GuildAdsGlyphFrameGlyph"..i]);
 		end
+		GuildAdsTalentFrameSpentPoints:SetFormattedText(GLYPHS);
 	end;
 
 	Glyph_OnLoad = function(self)
@@ -471,49 +477,49 @@ GuildAdsTalentUI = {
 			enabled, glyphType, glyphSpell, iconFilename = nil, nil, nil, nil;
 		end
 		
-		local isMinor = glyphType == 2;
-		if ( isMinor ) then
-			GuildAdsTalentUI.Glyph_SetGlyphType(self, GLYPHTYPE_MINOR);
-		else
-			GuildAdsTalentUI.Glyph_SetGlyphType(self, GLYPHTYPE_MAJOR);
-		end
-	
+		GuildAdsTalentUI.SetGlyphType(self, glyphType);
+
+		self.highlight:Hide();
+		
 		if ( not enabled ) then
-			self.shine:Hide();
-			self.background:Hide();
-			self.glyph:Hide();
-			self.ring:Hide();
-			self.setting:SetTexture("Interface\\Spellbook\\UI-GlyphFrame-Locked");
-			self.setting:SetTexCoord(.1, .9, .1, .9);
+			self:Hide();
 		elseif ( not glyphSpell ) then
-			self.spell = nil;
 			self.spellLink = nil;
-			self.shine:Show();
-			self.background:Show();
-			self.background:SetTexCoord(GLYPH_SLOTS[0].left, GLYPH_SLOTS[0].right, GLYPH_SLOTS[0].top, GLYPH_SLOTS[0].bottom);
-			self.glyph:Hide();
-			self.ring:Show();
+			self.glyph:SetTexture("");
+			self:Show();
 		else
-			self.spell = glyphSpell;
 			self.spellLink = glyphSpellLink;
-			self.shine:Show();
-			self.background:Show();
-			self.background:SetAlpha(1);
-			self.background:SetTexCoord(GLYPH_SLOTS[id].left, GLYPH_SLOTS[id].right, GLYPH_SLOTS[id].top, GLYPH_SLOTS[id].bottom);
 			self.glyph:Show();
 			if ( iconFilename ) then
-				self.glyph:SetTexture(iconFilename);
+				SetPortraitToTexture(self.glyph, iconFilename);
 			else
 				self.glyph:SetTexture("Interface\\Spellbook\\UI-Glyph-Rune1");
 			end
-			self.ring:Show();
+			self:Show();
 		end
 	end;
-	
-	Glyph_OnEnter = function(self)
-		if ( self.background:IsShown() ) then
-			self.highlight:Show();
+
+	SetGlyphType = function(glyph, glyphType)
+		local info = GLYPH_TYPE_INFO[glyphType];
+		if info then
+			glyph.glyphType = glyphType;
+			
+			glyph.ring:SetWidth(info.ring.size);
+			glyph.ring:SetHeight(info.ring.size);
+			glyph.ring:SetTexCoord(info.ring.left, info.ring.right, info.ring.top, info.ring.bottom);
+			
+			glyph.highlight:SetWidth(info.highlight.size);
+			glyph.highlight:SetHeight(info.highlight.size);
+			glyph.highlight:SetTexCoord(info.highlight.left, info.highlight.right, info.highlight.top, info.highlight.bottom);
+			
+			glyph.glyph:SetWidth(info.ring.size - 4);
+			glyph.glyph:SetHeight(info.ring.size - 4);
+			glyph.glyph:SetAlpha(0.75);
 		end
+	end;
+
+	Glyph_OnEnter = function(self)
+		self.highlight:Show();
 		if self.spellLink then
 			GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
 			GameTooltip:SetHyperlink(self.spellLink);
@@ -1013,43 +1019,6 @@ GuildAdsTalentUI = {
 			if ( link ) then
 				ChatEdit_InsertLink(link);
 			end
-		end
-	end;
-
-	Glyph_SetGlyphType = function(glyph, glyphType)
-		glyph.glyphType = glyphType;
-		
-		glyph.setting:SetTexture("Interface\\Spellbook\\UI-GlyphFrame");
-		if ( glyphType == GLYPHTYPE_MAJOR ) then
-			glyph.glyph:SetVertexColor(GLYPH_MAJOR.r, GLYPH_MAJOR.g, GLYPH_MAJOR.b);
-			glyph.setting:SetWidth(108);
-			glyph.setting:SetHeight(108);
-			glyph.setting:SetTexCoord(0.740234375, 0.953125, 0.484375, 0.697265625);
-			glyph.highlight:SetWidth(108);
-			glyph.highlight:SetHeight(108);
-			glyph.highlight:SetTexCoord(0.740234375, 0.953125, 0.484375, 0.697265625);
-			glyph.ring:SetWidth(82);
-			glyph.ring:SetHeight(82);
-			glyph.ring:SetPoint("CENTER", glyph, "CENTER", 0, -1);
-			glyph.ring:SetTexCoord(0.767578125, 0.92578125, 0.32421875, 0.482421875);
-			glyph.shine:SetTexCoord(0.9609375, 1, 0.9609375, 1);
-			glyph.background:SetWidth(70);
-			glyph.background:SetHeight(70);
-		else
-			glyph.glyph:SetVertexColor(GLYPH_MINOR.r, GLYPH_MINOR.g, GLYPH_MINOR.b);
-			glyph.setting:SetWidth(86);
-			glyph.setting:SetHeight(86);
-			glyph.setting:SetTexCoord(0.765625, 0.927734375, 0.15625, 0.31640625);
-			glyph.highlight:SetWidth(86);
-			glyph.highlight:SetHeight(86);
-			glyph.highlight:SetTexCoord(0.765625, 0.927734375, 0.15625, 0.31640625);
-			glyph.ring:SetWidth(62);
-			glyph.ring:SetHeight(62);
-			glyph.ring:SetPoint("CENTER", glyph, "CENTER", 0, 1);
-			glyph.ring:SetTexCoord(0.787109375, 0.908203125, 0.033203125, 0.154296875);
-			glyph.shine:SetTexCoord(0.9609375, 1, 0.921875, 0.9609375);
-			glyph.background:SetWidth(64);
-			glyph.background:SetHeight(64);
 		end
 	end;
 }
