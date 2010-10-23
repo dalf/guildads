@@ -209,11 +209,11 @@ GuildAdsTalentUI = {
 				--local talent = GuildAdsDB.profile.TalentRank:get(GuildAdsInspectWindow.playerName, tostring(data.b)); -- get active talent link
 				local talent = GuildAdsDB.profile.TalentRank:get(GuildAdsInspectWindow.playerName, GuildAdsTalentUI.shownSpec); -- get active talent link
 				if talent then
-					return talent.t, talent.g, talent.b
+					return select(1, string.split(";",talent.t)), talent.g, talent.b, tonumber(select(2, string.split(";",talent.t)))
 				end
 			end
 		end
-		return nil, nil, nil
+		return nil, nil, nil, nil
 	end;
 	
 	GetNumTalentTabs = function()
@@ -272,6 +272,14 @@ GuildAdsTalentUI = {
 		return 0;
 	end;
 	
+	GetUnspentTalentPoints = function(tabIndex)
+		if GuildAdsInspectWindow.playerName then
+			local _, _, _, unspent = GuildAdsTalentUI.GetTalentGlyphString()
+			return unspent
+		end
+		return 0;
+	end;
+
 	GetTalentInfo = function(tabIndex, talentIndex)
 		if GuildAdsInspectWindow.playerName then
 			-- get class data
@@ -293,8 +301,8 @@ GuildAdsTalentUI = {
 					local currentrank = talentString and GuildAdsTalentUI.GetCurrentRank(talentString, tabIndex, talentIndex) or data.cr;
 					-- modify talent:x:y link in data.n here. Values 0-5 come from currentrank, -1 from ?
 					local link = data.n
-					link = talentString and GuildAdsTalentUI.LinkSetRank(link, currentrank) or link; -- this only sets 0 to 5. The -1 is tricky!
-					return data.n, data.t, data.ti, data.co, currentrank, data.mr, 0, data.p;
+					link = talentString and GuildAdsTalentUI.LinkSetRank(link, currentrank-1) or link; -- this only sets 0 to 5. The -1 is tricky!
+					return link, data.t, data.ti, data.co, currentrank, data.mr, 0, data.p;
 				end
 			end
 		end
@@ -507,7 +515,7 @@ GuildAdsTalentUI = {
 			self.highlight:Show();
 		end
 		if self.spellLink then
-			GameTooltip:SetOwner(this, "ANCHOR_RIGHT");
+			GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
 			GameTooltip:SetHyperlink(self.spellLink);
 			GameTooltip:Show();
 		end
@@ -659,43 +667,43 @@ GuildAdsTalentUI = {
 				node = self.TALENT_BRANCH_ARRAY[i][j];
 				
 				-- Setup offsets
-				xOffset = ((j - 1) * 63) + INITIAL_TALENT_OFFSET_X + 2;
-				yOffset = -((i - 1) * 63) - INITIAL_TALENT_OFFSET_Y - 2;
+				xOffset = ((j - 1) * 63) + INITIAL_TALENT_OFFSET_X_DEFAULT + 2;
+				yOffset = -((i - 1) * 63) - INITIAL_TALENT_OFFSET_Y_DEFAULT - 2;
 			
 				if ( node.id ) then
 					-- Has talent
 					if ( node.up ~= 0 ) then
 						if ( not ignoreUp ) then
-							self.SetBranchTexture(i, j, TALENT_BRANCH_TEXTURECOORDS["up"][node.up], xOffset, yOffset + TALENT_BUTTON_SIZE);
+							self.SetBranchTexture(i, j, TALENT_BRANCH_TEXTURECOORDS["up"][node.up], xOffset, yOffset + TALENT_BUTTON_SIZE_DEFAULT);
 						else
 							ignoreUp = nil;
 						end
 					end
 					if ( node.down ~= 0 ) then
-						self.SetBranchTexture(i, j, TALENT_BRANCH_TEXTURECOORDS["down"][node.down], xOffset, yOffset - TALENT_BUTTON_SIZE + 1);
+						self.SetBranchTexture(i, j, TALENT_BRANCH_TEXTURECOORDS["down"][node.down], xOffset, yOffset - TALENT_BUTTON_SIZE_DEFAULT + 1);
 					end
 					if ( node.left ~= 0 ) then
-						self.SetBranchTexture(i, j, TALENT_BRANCH_TEXTURECOORDS["left"][node.left], xOffset - TALENT_BUTTON_SIZE, yOffset);
+						self.SetBranchTexture(i, j, TALENT_BRANCH_TEXTURECOORDS["left"][node.left], xOffset - TALENT_BUTTON_SIZE_DEFAULT, yOffset);
 					end
 					if ( node.right ~= 0 ) then
 						-- See if any connecting branches are gray and if so color them gray
 						tempNode = self.TALENT_BRANCH_ARRAY[i][j+1];	
 						if ( tempNode.left ~= 0 and tempNode.down < 0 ) then
-							self.SetBranchTexture(i, j-1, TALENT_BRANCH_TEXTURECOORDS["right"][tempNode.down], xOffset + TALENT_BUTTON_SIZE, yOffset);
+							self.SetBranchTexture(i, j-1, TALENT_BRANCH_TEXTURECOORDS["right"][tempNode.down], xOffset + TALENT_BUTTON_SIZE_DEFAULT, yOffset);
 						else
-							self.SetBranchTexture(i, j, TALENT_BRANCH_TEXTURECOORDS["right"][node.right], xOffset + TALENT_BUTTON_SIZE + 1, yOffset);
+							self.SetBranchTexture(i, j, TALENT_BRANCH_TEXTURECOORDS["right"][node.right], xOffset + TALENT_BUTTON_SIZE_DEFAULT + 1, yOffset);
 						end
 						
 					end
 					-- Draw arrows
 					if ( node.rightArrow ~= 0 ) then
-						self.SetArrowTexture(i, j, TALENT_ARROW_TEXTURECOORDS["right"][node.rightArrow], xOffset + TALENT_BUTTON_SIZE/2 + 5, yOffset);
+						self.SetArrowTexture(i, j, TALENT_ARROW_TEXTURECOORDS["right"][node.rightArrow], xOffset + TALENT_BUTTON_SIZE_DEFAULT/2 + 5, yOffset);
 					end
 					if ( node.leftArrow ~= 0 ) then
-						self.SetArrowTexture(i, j, TALENT_ARROW_TEXTURECOORDS["left"][node.leftArrow], xOffset - TALENT_BUTTON_SIZE/2 - 5, yOffset);
+						self.SetArrowTexture(i, j, TALENT_ARROW_TEXTURECOORDS["left"][node.leftArrow], xOffset - TALENT_BUTTON_SIZE_DEFAULT/2 - 5, yOffset);
 					end
 					if ( node.topArrow ~= 0 ) then
-						self.SetArrowTexture(i, j, TALENT_ARROW_TEXTURECOORDS["top"][node.topArrow], xOffset, yOffset + TALENT_BUTTON_SIZE/2 + 5);
+						self.SetArrowTexture(i, j, TALENT_ARROW_TEXTURECOORDS["top"][node.topArrow], xOffset, yOffset + TALENT_BUTTON_SIZE_DEFAULT/2 + 5);
 					end
 				else
 					-- Doesn't have a talent
@@ -709,7 +717,7 @@ GuildAdsTalentUI = {
 					elseif ( node.left ~= 0 and node.up ~= 0 ) then
 						self.SetBranchTexture(i, j, TALENT_BRANCH_TEXTURECOORDS["bottomright"][node.left], xOffset , yOffset);
 					elseif ( node.left ~= 0 and node.right ~= 0 ) then
-						self.SetBranchTexture(i, j, TALENT_BRANCH_TEXTURECOORDS["right"][node.right], xOffset + TALENT_BUTTON_SIZE, yOffset);
+						self.SetBranchTexture(i, j, TALENT_BRANCH_TEXTURECOORDS["right"][node.right], xOffset + TALENT_BUTTON_SIZE_DEFAULT, yOffset);
 						self.SetBranchTexture(i, j, TALENT_BRANCH_TEXTURECOORDS["left"][node.left], xOffset + 1, yOffset);
 					elseif ( node.right ~= 0 and node.down ~= 0 ) then
 						self.SetBranchTexture(i, j, TALENT_BRANCH_TEXTURECOORDS["topleft"][node.right], xOffset , yOffset);
@@ -954,23 +962,24 @@ GuildAdsTalentUI = {
 		local self=GuildAdsTalentUI;
 		--local cp1, cp2 = UnitCharacterPoints("player");
 		-- have to calculate it...
-		local cp1 = 0; 
-		for tabIndex = 1, self.GetNumTalentTabs()  do
-			local _, _, pointsSpent = self.GetTalentTabInfo(tabIndex);
-			cp1 = cp1 + pointsSpent;
-		end
-		cp1=(GuildAdsDB.profile.Main:get(GuildAdsInspectWindow.playerName, GuildAdsDB.profile.Main.Level) or 0)-9-cp1;
-		if cp1<0 then
-			cp1=0;
-		end
-		GuildAdsTalentFrameTalentPointsText:SetFormattedText(UNSPENT_TALENT_POINTS, HIGHLIGHT_FONT_COLOR_CODE..cp1..FONT_COLOR_CODE_CLOSE);
+		--local cp1 = 0; 
+		--for tabIndex = 1, self.GetNumTalentTabs()  do
+		--	local _, _, pointsSpent = self.GetTalentTabInfo(tabIndex);
+		--	cp1 = cp1 + pointsSpent;
+		--end
+		--cp1=(GuildAdsDB.profile.Main:get(GuildAdsInspectWindow.playerName, GuildAdsDB.profile.Main.Level) or 0)-9-cp1;
+		--if cp1<0 then
+		--	cp1=0;
+		--end
+		cp1 = GuildAdsTalentUI.GetUnspentTalentPoints();
+		GuildAdsTalentFrameTalentPointsText:SetFormattedText(UNSPENT_TALENT_POINTS, HIGHLIGHT_FONT_COLOR_CODE..tostring(cp1)..FONT_COLOR_CODE_CLOSE);
 		--GuildAdsTalentFrameTalentPointsText:SetText(cp1);
 		GuildAdsTalentFrame.talentPoints = cp1;
 	end;
 
 	SetTalentButtonLocation = function(button, tier, column)
-		column = ((column - 1) * 63) + INITIAL_TALENT_OFFSET_X;
-		tier = -((tier - 1) * 63) - INITIAL_TALENT_OFFSET_Y;
+		column = ((column - 1) * 63) + INITIAL_TALENT_OFFSET_X_DEFAULT;
+		tier = -((tier - 1) * 63) - INITIAL_TALENT_OFFSET_Y_DEFAULT;
 		button:SetPoint("TOPLEFT", button:GetParent(), "TOPLEFT", column, tier);
 	end;
 

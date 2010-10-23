@@ -151,7 +151,7 @@ function GuildAdsTalentRankDataType:onTalentEvent()
 		-- merge new talent data with possibly already existing data
 		local data = self:get(GuildAds.playerName, tostring(talentGroup));
 		data = data or {}
-		data.t = table.concat(talentLinkTable,"")
+		data.t = table.concat(talentLinkTable,"")..";"..tostring(GetUnspentTalentPoints(false, false, talentGroup));
 		data.b = (select(2,GetBuildInfo()))
 		self:set(GuildAds.playerName, tostring(talentGroup), data);
 		-- remove old talent data (from previous versions of GuildAds)
@@ -168,7 +168,7 @@ function GuildAdsTalentRankDataType:onGlyphEvent()
 		local ng = GetNumGlyphSockets();
 		for i = 1, ng do
 			tinsert(glyphTable, sep)
-			local enabled, glyphType, glyphSpellID, icon = GetGlyphSocketInfo(i, talentGroup);
+			local enabled, glyphType, glyphTooltipIndex, glyphSpellID, icon = GetGlyphSocketInfo(i, talentGroup);
 			if ( enabled ) then
 				--local link = GetGlyphLink(i);-- Retrieves the Glyph's link (nil of no glyph in Socket);
 				if ( glyphSpellID ) then

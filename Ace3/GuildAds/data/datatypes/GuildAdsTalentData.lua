@@ -115,10 +115,12 @@ end;
 function GuildAdsTalentDataType:onEvent()
 	local _, WoWClassId = UnitClass("player")
 	-- parse complete talent tree now
-	local name, iconTexture, pointsSpent, background, numTalents, tabIndex;
+	--local name, iconTexture, pointsSpent, background, 
+	local numTalents, tabIndex;
 	local talentIndex, nameTalent, talentLink, iconPath, tier, column, currentRank, maxRank, isExceptional, meetsPrereq, ptier, pcolumn, isLearnable;
 	for tabIndex=1,GetNumTalentTabs() do
-		name, iconTexture, pointsSpent, background = GetTalentTabInfo( tabIndex );
+		--name, iconTexture, pointsSpent, background = GetTalentTabInfo( tabIndex );
+		local id, name, description, iconTexture, pointsSpent, background, previewPointsSpent, isUnlocked = GetTalentTabInfo( tabIndex );
 		numTalents = GetNumTalents(tabIndex);
 		self:set(":"..WoWClassId, tostring(tabIndex)..":0", { n=name, t=iconTexture, b=background, nt=numTalents} );
 		self:set(GuildAds.playerName, tostring(tabIndex)..":0", nil); -- delete old data

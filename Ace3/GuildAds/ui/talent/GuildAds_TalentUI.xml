@@ -509,18 +509,6 @@
 							<Button name="GuildAdsTalentFrameTalent26" inherits="GuildAdsTalentButtonTemplate" id="26"/>
 							<Button name="GuildAdsTalentFrameTalent27" inherits="GuildAdsTalentButtonTemplate" id="27"/>
 							<Button name="GuildAdsTalentFrameTalent28" inherits="GuildAdsTalentButtonTemplate" id="28"/>
-							<Button name="GuildAdsTalentFrameTalent29" inherits="GuildAdsTalentButtonTemplate" id="29"/>
-							<Button name="GuildAdsTalentFrameTalent30" inherits="GuildAdsTalentButtonTemplate" id="30"/>
-							<Button name="GuildAdsTalentFrameTalent31" inherits="GuildAdsTalentButtonTemplate" id="31"/>
-							<Button name="GuildAdsTalentFrameTalent32" inherits="GuildAdsTalentButtonTemplate" id="32"/>
-							<Button name="GuildAdsTalentFrameTalent33" inherits="GuildAdsTalentButtonTemplate" id="33"/>
-							<Button name="GuildAdsTalentFrameTalent34" inherits="GuildAdsTalentButtonTemplate" id="34"/>
-							<Button name="GuildAdsTalentFrameTalent35" inherits="GuildAdsTalentButtonTemplate" id="35"/>
-							<Button name="GuildAdsTalentFrameTalent36" inherits="GuildAdsTalentButtonTemplate" id="36"/>
-							<Button name="GuildAdsTalentFrameTalent37" inherits="GuildAdsTalentButtonTemplate" id="37"/>
-							<Button name="GuildAdsTalentFrameTalent38" inherits="GuildAdsTalentButtonTemplate" id="38"/>
-							<Button name="GuildAdsTalentFrameTalent39" inherits="GuildAdsTalentButtonTemplate" id="39"/>
-							<Button name="GuildAdsTalentFrameTalent40" inherits="GuildAdsTalentButtonTemplate" id="40"/>
 
 							<Frame name="GuildAdsTalentFrameArrowFrame" setAllPoints="true">
 								<Layers>
