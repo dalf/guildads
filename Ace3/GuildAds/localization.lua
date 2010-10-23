@@ -204,6 +204,7 @@ GUILDADS_SKILLS	= {
 	[13] = "Lockpicking",
 	[14] = "Jewelcrafting",
 	[15] = "Inscription", -- NEW patch 3.02
+	[16] = "Archaeology", -- NEW with Cataclysm
 	
 	[20] = "Unarmed", -- was known as "Fist Weapons"
 	[21] = "Daggers",

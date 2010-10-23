@@ -376,9 +376,9 @@ GuildAdsSkill = {
 			GuildAdsSkill.skillButton.updateAll(nil, true);		
 		end;
 		
-		onEnter = function()
-			GameTooltip:SetOwner(this,"ANCHOR_BOTTOMRIGHT");
-			GameTooltip:AddLine(GUILDADS_SKILLS[this.skillId], 1.0, 1.0, 1.0);
+		onEnter = function(self)
+			GameTooltip:SetOwner(self,"ANCHOR_BOTTOMRIGHT");
+			GameTooltip:AddLine(GUILDADS_SKILLS[self.skillId], 1.0, 1.0, 1.0);
 			GameTooltip:Show();
 		end;
 		

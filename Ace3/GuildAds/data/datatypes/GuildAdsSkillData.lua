@@ -42,16 +42,17 @@ function GuildAdsSkillDataType:Initialize()
 	self:RegisterEvent("PLAYER_LEVEL_UP", "onEvent");
 end
 
-function GuildAdsSkillDataType:onEvent()
+function GuildAdsSkillDataType:doIt(...)
 	local playerName = UnitName("player");
 	local playerSkillIds = {};
 	-- add new skills
-	for i = 1, GetNumSkillLines(), 1 do	
-		local skillName, header, isExpanded, skillRank, numTempPoints, skillModifier, skillMaxRank, isAbandonable, stepCost, rankCost, minLevel, skillCostType = GetSkillLineInfo(i);
-		if (header ~= 1) then
-			local id = self:getIdFromName(skillName);
+	for i=1,select("#", ...) do
+		local professionIndex = select(i,...)
+		if professionIndex ~= nil then
+			local name, icon, skillLevel, maxSkillLevel, numAbilities, spelloffset, skillLine = GetProfessionInfo(professionIndex)
+			local id = self:getIdFromName(name);
 			if (id > 0) then
-				self:set(playerName, id, { v=skillRank; m=skillMaxRank });
+				self:set(playerName, id, { v=skillLevel; m=maxSkillLevel });
 				playerSkillIds[id] = true;
 			end
 		end
@@ -65,6 +66,11 @@ function GuildAdsSkillDataType:onEvent()
 			end
 		end
 	end
+end
+
+function GuildAdsSkillDataType:onEvent()
+	-- process
+	self:doIt(GetProfessions());
 end
 
 function GuildAdsSkillDataType:getIdFromName(SkillName)

@@ -153,7 +153,7 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 				GuildAdsSkill.filterBySkillButton.set(self.skillId, nil, true);
 			</OnClick>
 			<OnEnter>
-				GuildAdsSkill.filterBySkillButton.onEnter();
+				GuildAdsSkill.filterBySkillButton.onEnter(self);
 			</OnEnter>
 			<OnLeave>
 				GuildAdsSkill.filterBySkillButton.onLeave();
