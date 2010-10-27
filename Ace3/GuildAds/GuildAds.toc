@@ -1,4 +1,4 @@
-﻿## Interface: 30300
+﻿## Interface: 40000
 ## Title: GuildAds
 ## Author: Zarkan, Fkaï, Galmok
 ## Version: 2.6
