@@ -260,6 +260,7 @@ GUILDADS_FACTIONS = {
 	[11] = "Silvermoon City";       -- Horde
 	[12] = "Thunder Bluff";    			-- Horde
 	[13] = "Undercity";							-- Horde
+	[75] = "Bilgewater Cartel",			-- Horde
 	[14] = "Frostwolf Clan";				-- Horde Forces
 	[15] = "The Defilers";					-- Horde Forces
 	[16] = "Warsong Outriders";			-- Horde Forces
@@ -321,7 +322,14 @@ GUILDADS_FACTIONS = {
 	[72] = "Alliance Vanguard",			-- Alliance Vanguard
 	[73] = "Horde Expedition",			-- Horde Expedition
 	[74] = "The Ashen Verdict",			-- Wrath of the Lich King
-}; -- The last one used is 74
+	[76] = "Guild",									-- Your guild reputation: MUST BE CALLED Guild IN ALL LOCALIZATIONS
+	[77] = "Earthen Ring",					-- Cataclysm
+	[78] = "Guardians of Hyjal",		-- Cataclysm
+	[79] = "Therazane",							-- Cataclysm
+	[80] = "Dragonmaw Clan",				-- Cataclysm
+	[81] = "Ramkahen",							-- Cataclysm
+	[82] = "Hellscream's Reach",		-- Cataclysm
+}; -- The last one used is 82
 
 GUILDADS_FACTION_OPTIONS	= "Faction settings";
 GUILDADS_FACTION_HIDE_COLLAPSED = "Hide collapsed factions";
@@ -344,6 +352,8 @@ GUILDADS_FACTION_SHOWNORTHREND = "Show Northrend";
 GUILDADS_FACTION_SHOWHORDEEXPEDITION = "Show Horde Expedition"; -- same group as Alliance Vanguard
 GUILDADS_FACTION_SHOWALLIANCEVANGUARD = "Show Alliance Vanguard";
 GUILDADS_FACTION_SHOWSHOLAZARBASIN = "Show Scholazar Basin";
+
+GUILDADS_FACTION_SHOWCATACLYSM = "Show Cataclysm";
 
 GUILDADS_FACTION_SHOWOTHER = "Show Other";
 

@@ -57,6 +57,7 @@ function GuildAdsFactionDataType:onEvent(event, arg1)
 		local playerFactionIds = {};
 		-- add new factions
 		local allHeadersOpen = true
+		local nextIsGuild = false
 		for i = 1, GetNumFactions(), 1 do	
 			local factionName, description, standingId, bottomValue, topValue, earnedValue, atWarWith, canToggleAtWar, isHeader, isCollapsed, hasRep, isWatched, isChild = GetFactionInfo(i);
 			if (isHeader == nil or hasRep == 1) then
@@ -70,6 +71,21 @@ function GuildAdsFactionDataType:onEvent(event, arg1)
 				end
 			else
 				allHeadersOpen = allHeadersOpen and not isCollapsed
+			end
+			-- extract guild rep
+			if nextIsGuild then
+				local id = self:getIdFromName("Guild") -- 76
+				if id > 0 then
+					self:set(playerName, id, { v=earnedValue });
+					if not self:get(playerName, id) then
+						added = added + 1
+					end
+					playerFactionIds[id] = true;					
+				end
+				nextIsGuild = false;
+			end
+			if factionName==GUILD and not isCollapsed then
+				nextIsGuild = true
 			end
 		end
 		-- delete factions

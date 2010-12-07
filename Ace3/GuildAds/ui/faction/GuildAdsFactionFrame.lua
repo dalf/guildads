@@ -24,7 +24,9 @@ local GUILDADS_FACTION_GROUPS = {
 					[55] = 5, [56] = 7,
 					[57] = 7, [58] = 8, [59] = 9, [60] = 8, [61] = 8, [62] = 7,
 					[63] = 9, [64] = 7, [65] = 8, [66] = 8, [67] = 8, [68] = 7,
-					[69] = 7, [70] = 8, [71] = 8, [72] = 8, [73] = 8, [74] = 7
+					[69] = 7, [70] = 8, [71] = 8, [72] = 8, [73] = 8, [74] = 7,
+					[75] = 1, [76] = 6,
+					[77] = 10, [78] = 10, [79] = 10, [80] = 10, [81] = 10, [82] = 10
 				};
 local GUILDADS_FACTION_GROUP_OPTION = {
 					[0] = "ShowClassic";
@@ -36,7 +38,8 @@ local GUILDADS_FACTION_GROUP_OPTION = {
 					[6] = "ShowOther";
 					[7] = "ShowNorthrend";
 					[8] = "ShowNorthrendForces",
-					[9] = "ShowSholazarBasin"
+					[9] = "ShowSholazarBasin",
+					[10] = "ShowCataclysm"
 					};
 
 --- Index of the ad currently selected
@@ -136,6 +139,7 @@ GuildAdsFaction = {
 		GuildAdsFaction.updateCheckButton(GuildAds_FactionShowNorthrendCheckButton, GuildAdsFaction.getProfileValue(nil, "ShowNorthrend"));
 		GuildAdsFaction.updateCheckButton(GuildAds_FactionShowNorthrendForcesCheckButton, GuildAdsFaction.getProfileValue(nil, "ShowNorthrendForces"));
 		GuildAdsFaction.updateCheckButton(GuildAds_FactionShowSholazarBasinCheckButton, GuildAdsFaction.getProfileValue(nil, "ShowSholazarBasin"));
+		GuildAdsFaction.updateCheckButton(GuildAds_FactionShowCataclysmCheckButton, GuildAdsFaction.getProfileValue(nil, "ShowCataclysmBasin"));
 		GuildAdsFaction.updateCheckButton(GuildAds_FactionShowOtherCheckButton, GuildAdsFaction.getProfileValue(nil, "ShowOther"));
 		
 		GuildAdsDB.profile.Faction:registerUpdate(GuildAdsFaction.onDBUpdate);

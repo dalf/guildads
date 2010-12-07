@@ -543,7 +543,7 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 			</Button>
 			<Frame name="GuildAdsFactionOptionsFrame" inherits="GuildAdsConfig_OptionFrameBoxTemplate" parent="GuildAdsFactionFrame">
 				<Size>
-					<AbsDimension x="200" y="337"/>
+					<AbsDimension x="200" y="362"/>
 				</Size>
 				<Anchors>
 					<!-- <Anchor point="TOP"> -->
@@ -591,7 +591,7 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 						</Layers>
 						<Scripts>
 							<OnClick>
-								GuildAdsFaction.filters.checkButtonSetProfile(this,"HideCollapsed");
+								GuildAdsFaction.filters.checkButtonSetProfile(self,"HideCollapsed");
 							</OnClick>
 						</Scripts>
 					</CheckButton>
@@ -619,7 +619,7 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 						</Layers>
 						<Scripts>
 							<OnClick>
-								GuildAdsFaction.filters.checkButtonSetProfile(this,"OnlyLevel80");
+								GuildAdsFaction.filters.checkButtonSetProfile(self,"OnlyLevel80");
 							</OnClick>
 						</Scripts>
 					</CheckButton>
@@ -647,7 +647,7 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 						</Layers>
 						<Scripts>
 							<OnClick>
-								GuildAdsFaction.filters.checkButtonSetProfile(this,"ShowOfflines");
+								GuildAdsFaction.filters.checkButtonSetProfile(self,"ShowOfflines");
 							</OnClick>
 						</Scripts>
 					</CheckButton>
@@ -675,7 +675,7 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 						</Layers>
 						<Scripts>
 							<OnClick>
-								GuildAdsFaction.filters.checkButtonSetProfile(this,"ShowClassic");
+								GuildAdsFaction.filters.checkButtonSetProfile(self,"ShowClassic");
 							</OnClick>
 						</Scripts>
 					</CheckButton>
@@ -703,7 +703,7 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 						</Layers>
 						<Scripts>
 							<OnClick>
-								GuildAdsFaction.filters.checkButtonSetProfile(this,"ShowFaction");
+								GuildAdsFaction.filters.checkButtonSetProfile(self,"ShowFaction");
 							</OnClick>
 						</Scripts>
 					</CheckButton>
@@ -731,7 +731,7 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 						</Layers>
 						<Scripts>
 							<OnClick>
-								GuildAdsFaction.filters.checkButtonSetProfile(this,"ShowFactionForces");
+								GuildAdsFaction.filters.checkButtonSetProfile(self,"ShowFactionForces");
 							</OnClick>
 						</Scripts>
 					</CheckButton>
@@ -759,7 +759,7 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 						</Layers>
 						<Scripts>
 							<OnClick>
-								GuildAdsFaction.filters.checkButtonSetProfile(this,"ShowSteamwheedleCartel");
+								GuildAdsFaction.filters.checkButtonSetProfile(self,"ShowSteamwheedleCartel");
 							</OnClick>
 						</Scripts>
 					</CheckButton>
@@ -787,7 +787,7 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 						</Layers>
 						<Scripts>
 							<OnClick>
-								GuildAdsFaction.filters.checkButtonSetProfile(this,"ShowOutland");
+								GuildAdsFaction.filters.checkButtonSetProfile(self,"ShowOutland");
 							</OnClick>
 						</Scripts>
 					</CheckButton>
@@ -815,7 +815,7 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 						</Layers>
 						<Scripts>
 							<OnClick>
-								GuildAdsFaction.filters.checkButtonSetProfile(this,"ShowShattrathCity");
+								GuildAdsFaction.filters.checkButtonSetProfile(self,"ShowShattrathCity");
 							</OnClick>
 						</Scripts>
 					</CheckButton>
@@ -843,7 +843,7 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 						</Layers>
 						<Scripts>
 							<OnClick>
-								GuildAdsFaction.filters.checkButtonSetProfile(this,"ShowNorthrend");
+								GuildAdsFaction.filters.checkButtonSetProfile(self,"ShowNorthrend");
 							</OnClick>
 						</Scripts>
 					</CheckButton>
@@ -871,7 +871,7 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 						</Layers>
 						<Scripts>
 							<OnClick>
-								GuildAdsFaction.filters.checkButtonSetProfile(this,"ShowNorthrendForces");
+								GuildAdsFaction.filters.checkButtonSetProfile(self,"ShowNorthrendForces");
 							</OnClick>
 						</Scripts>
 					</CheckButton>
@@ -899,14 +899,42 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 						</Layers>
 						<Scripts>
 							<OnClick>
-								GuildAdsFaction.filters.checkButtonSetProfile(this,"ShowSholazarBasin");
+								GuildAdsFaction.filters.checkButtonSetProfile(self,"ShowSholazarBasin");
+							</OnClick>
+						</Scripts>
+					</CheckButton>
+
+					<CheckButton name="GuildAds_FactionShowCataclysmCheckButton" inherits="GuildAdsConfig_CheckButton">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="GuildAds_FactionShowSholazarBasinCheckButton" relativePoint="BOTTOMLEFT">
+								<Offset>
+									<AbsDimension x="0" y="-5" />
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Layers>
+							<Layer level="ARTWORK">
+								<FontString name="$parentLabel" inherits="GameFontNormalSmall" text="GUILDADS_FACTION_SHOWCATACLYSM">
+									<Anchors>
+										<Anchor point="LEFT" relativePoint="RIGHT">
+											<Offset>
+												<AbsDimension x="5" y="1"/>
+											</Offset>
+										</Anchor>
+									</Anchors>
+								</FontString>
+							</Layer>
+						</Layers>
+						<Scripts>
+							<OnClick>
+								GuildAdsFaction.filters.checkButtonSetProfile(self,"ShowCataclysm");
 							</OnClick>
 						</Scripts>
 					</CheckButton>
 
 					<CheckButton name="GuildAds_FactionShowOtherCheckButton" inherits="GuildAdsConfig_CheckButton">
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="GuildAds_FactionShowSholazarBasinCheckButton" relativePoint="BOTTOMLEFT">
+							<Anchor point="TOPLEFT" relativeTo="GuildAds_FactionShowCataclysmCheckButton" relativePoint="BOTTOMLEFT">
 								<Offset>
 									<AbsDimension x="0" y="-5" />
 								</Offset>
@@ -927,7 +955,7 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 						</Layers>
 						<Scripts>
 							<OnClick>
-								GuildAdsFaction.filters.checkButtonSetProfile(this,"ShowOther");
+								GuildAdsFaction.filters.checkButtonSetProfile(self,"ShowOther");
 							</OnClick>
 						</Scripts>
 					</CheckButton>
