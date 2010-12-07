@@ -171,7 +171,7 @@ local function getExtraTipLines(itemKey)
 					for index, item in unpackItemIterator(items) do
 						local itemLink
 						if tonumber(item) > 0 then
-							itemLink="item:"..item..":0:0:0:0:0:0:0:"..level
+							itemLink="item:"..item..":0:0:0:0:0:0:0:"..level..":0"
 						else
 							itemLink="enchant:"..tostring(-tonumber(item))
 						end
