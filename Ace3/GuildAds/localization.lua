@@ -153,7 +153,9 @@ GUILDADS_RACES	= {
 	[7] = "Tauren",
 	[8] = "Troll",
 	[9] = "Draenei",
-	[10] = "Blood Elf"
+	[10] = "Blood Elf",
+	[11] = "Worgen",
+	[12] = "Goblin"
 };
 
 -- Faction
@@ -169,7 +171,9 @@ GUILDADS_RACES_TO_FACTION = {
 	[7] = GUILDADS_HORDE,
 	[8] = GUILDADS_HORDE,
 	[9] = GUILDADS_ALLIANCE,
-	[10]= GUILDADS_HORDE
+	[10]= GUILDADS_HORDE,
+	[11]= GUILDADS_ALLIANCE,
+	[12]= GUILDADS_HORDE
 };
 
 -- Class				
