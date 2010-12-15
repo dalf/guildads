@@ -9,7 +9,7 @@
 ----------------------------------------------------------------------------------
 
 local GUILDADS_NUM_GLOBAL_FACTION_BUTTONS = 19;
-local GUILDADS_PLAYER_MAX_LEVEL = 80;
+local GUILDADS_PLAYER_MAX_LEVEL = 85;
 
 local GUILDADS_FACTION_GROUPS = {
 					[1] = 1, [2] = 1, [3] = 1, [4] = 1, [5] = 1, [6] = 2,
@@ -80,10 +80,11 @@ GuildAdsFaction = {
 			GuildAdsFaction.setProfileValue(nil, "HideCollapsed", true);
 		end
 		
-		if type(GuildAdsFaction.getRawProfileValue(nil, "OnlyLevel80"))=="nil" then
-			GuildAdsFaction.setProfileValue(nil, "OnlyLevel80", true);
+		if type(GuildAdsFaction.getRawProfileValue(nil, "OnlyLevel"))=="nil" then
+			GuildAdsFaction.setProfileValue(nil, "OnlyLevel", true);
 		end
-
+		GuildAdsFaction.setProfileValue(nil, "OnlyLevel80", nil); -- remove old profile value
+		
 		if type(GuildAdsFaction.getRawProfileValue(nil, "ShowOfflines"))=="nil" then
 			GuildAdsFaction.setProfileValue(nil, "ShowOfflines", true);
 		end
@@ -104,7 +105,7 @@ GuildAdsFaction = {
 		else
 			GuildAds_FactionShowNorthrendForcesCheckButtonLabel:SetText(GUILDADS_FACTION_SHOWALLIANCEVANGUARD);
 		end
-		
+		GuildAds_FactionOnlyLevelCheckButtonLabel:SetText(string.format(GUILDADS_FACTION_ONLY_LEVEL, GUILDADS_PLAYER_MAX_LEVEL));
 		-- delete old configuration (too be removed in the future)
 		GuildAdsFaction.setProfileValue(nil, "ShowDalaran", nil);
 		GuildAdsFaction.setProfileValue(nil, "ShowRaid", nil);
@@ -127,7 +128,7 @@ GuildAdsFaction = {
 		GuildAdsFaction.debug("onShow()");
 		
 		GuildAdsFaction.updateCheckButton(GuildAds_FactionHideCollapsedCheckButton, GuildAdsFaction.getProfileValue(nil, "HideCollapsed"));
-		GuildAdsFaction.updateCheckButton(GuildAds_FactionOnlyLevel80CheckButton, GuildAdsFaction.getProfileValue(nil, "OnlyLevel80"));
+		GuildAdsFaction.updateCheckButton(GuildAds_FactionOnlyLevelCheckButton, GuildAdsFaction.getProfileValue(nil, "OnlyLevel"));
 		GuildAdsFaction.updateCheckButton(GuildAds_FactionShowOfflinesCheckButton, GuildAdsFaction.getProfileValue(nil, "ShowOfflines"));
 		
 		GuildAdsFaction.updateCheckButton(GuildAds_FactionShowClassicCheckButton, GuildAdsFaction.getProfileValue(nil, "ShowClassic"));
@@ -195,7 +196,7 @@ GuildAdsFaction = {
 						if GuildAdsFaction.getProfileValue("Filters", id) then
 							for playerName, _, data in GuildAdsFactionDataType:iterator(nil, id) do
 								if GuildAdsFaction.getProfileValue(nil, "ShowOfflines") or GuildAdsGuild.isOnline(playerName) then
-									if not (GuildAdsFaction.getProfileValue(nil, "OnlyLevel80") and ((GuildAdsDB.profile.Main:get(playerName, GuildAdsDB.profile.Main.Level) or 0)<GUILDADS_PLAYER_MAX_LEVEL)) then
+									if not (GuildAdsFaction.getProfileValue(nil, "OnlyLevel") and ((GuildAdsDB.profile.Main:get(playerName, GuildAdsDB.profile.Main.Level) or 0)<GUILDADS_PLAYER_MAX_LEVEL)) then
 										hideCollapsed=true;
 									end
 								end
@@ -211,7 +212,7 @@ GuildAdsFaction = {
 					-- for each player
 					for playerName, _, data in GuildAdsFactionDataType:iterator(nil, id) do
 						if GuildAdsFaction.getProfileValue(nil, "ShowOfflines") or GuildAdsGuild.isOnline(playerName) then
-							if not (GuildAdsFaction.getProfileValue(nil, "OnlyLevel80") and ((GuildAdsDB.profile.Main:get(playerName, GuildAdsDB.profile.Main.Level) or 0)<GUILDADS_PLAYER_MAX_LEVEL)) then
+							if not (GuildAdsFaction.getProfileValue(nil, "OnlyLevel") and ((GuildAdsDB.profile.Main:get(playerName, GuildAdsDB.profile.Main.Level) or 0)<GUILDADS_PLAYER_MAX_LEVEL)) then
 								if insertHeader and (not hideCollapsed or factionOpen) then
 									tinsert(GuildAdsFaction.data.cache, new_kv("i", id, "h", factionOpen) );
 									insertHeader = nil;

@@ -337,7 +337,7 @@ GUILDADS_FACTIONS = {
 
 GUILDADS_FACTION_OPTIONS	= "Faction settings";
 GUILDADS_FACTION_HIDE_COLLAPSED = "Hide collapsed factions";
-GUILDADS_FACTION_ONLY_LEVEL_80	= "Show only level 80 players";
+GUILDADS_FACTION_ONLY_LEVEL	= "Show only level %s players";
 GUILDADS_FACTION_FACTION	= "Show Faction"; -- Should be updated runtime to either Horde or Alliance
 
 --GUILDADS_FACTION_CLASSIC = "Classic";

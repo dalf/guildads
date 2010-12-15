@@ -596,7 +596,7 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 						</Scripts>
 					</CheckButton>
 					
-					<CheckButton name="GuildAds_FactionOnlyLevel80CheckButton" inherits="GuildAdsConfig_CheckButton">
+					<CheckButton name="GuildAds_FactionOnlyLevelCheckButton" inherits="GuildAdsConfig_CheckButton">
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeTo="GuildAds_FactionHideCollapsedCheckButton" relativePoint="BOTTOMLEFT">
 								<Offset>
@@ -606,7 +606,7 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 						</Anchors>
 						<Layers>
 							<Layer level="ARTWORK">
-								<FontString name="$parentLabel" inherits="GameFontNormalSmall" text="GUILDADS_FACTION_ONLY_LEVEL_80" >
+								<FontString name="$parentLabel" inherits="GameFontNormalSmall" text="GUILDADS_FACTION_ONLY_LEVEL" >
 									<Anchors>
 										<Anchor point="LEFT" relativePoint="RIGHT">
 											<Offset>
@@ -619,14 +619,14 @@ C:\Projects\WoW\Bin\Interface\FrameXML\UI.xsd">
 						</Layers>
 						<Scripts>
 							<OnClick>
-								GuildAdsFaction.filters.checkButtonSetProfile(self,"OnlyLevel80");
+								GuildAdsFaction.filters.checkButtonSetProfile(self,"OnlyLevel");
 							</OnClick>
 						</Scripts>
 					</CheckButton>
 					
 					<CheckButton name="GuildAds_FactionShowOfflinesCheckButton" inherits="GuildAdsConfig_CheckButton">
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeTo="GuildAds_FactionOnlyLevel80CheckButton" relativePoint="BOTTOMLEFT">
+							<Anchor point="TOPLEFT" relativeTo="GuildAds_FactionOnlyLevelCheckButton" relativePoint="BOTTOMLEFT">
 								<Offset>
 									<AbsDimension x="0" y="0" />
 								</Offset>
