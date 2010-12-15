@@ -88,7 +88,7 @@ end
 
 function GuildAdsTradeSkillDataType:UpdateTradeSkills()
 	local skillId = GuildAdsSkillDataType:getIdFromName(GetTradeSkillLine());
-	if skillId > 0 and not IsTradeSkillLinked() then
+	if skillId > 0 and not IsTradeSkillLinked() and not IsTradeSkillGuild() then
 		local item, colddown, kind, open, itemRecipe, minMade, maxMade, q;
 		local tmp = {}
 		local added, deleted = 0, 0;
@@ -98,7 +98,6 @@ function GuildAdsTradeSkillDataType:UpdateTradeSkills()
 	
 		--	--self:clearAllWoW2TradeSkillItems(); -- old WoW2 items are no more
 		self:deleteWoW2TradeSkillItems(); -- only delete my own items
-
 		local tradeSkillLink = GetTradeSkillListLink()
 		local color, link
 		if tradeSkillLink then
@@ -387,7 +386,7 @@ function GuildAdsTradeSkillDataType:deleteOrphanTradeSkillItems()
 	local item, data;
 	local t = {};
 	for item, data in pairs(self:getTableForPlayer(GuildAds.playerName)) do
-		if item~="_u" and not data.s then
+		if item~="_u" and (not data.s or not GuildAdsSkillDataType:get(GuildAds.playerName,data.s) ) then
 			table.insert(t, item);
 		end
 	end
