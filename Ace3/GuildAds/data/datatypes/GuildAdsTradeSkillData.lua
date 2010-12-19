@@ -61,165 +61,66 @@ end
 
 function GuildAdsTradeSkillDataType:enterWorld()
 	self:UnregisterEvent("PLAYER_ENTERING_WORLD");
-	self:RegisterEvent("TRADE_SKILL_SHOW", "onEvent");
-	self:RegisterEvent("TRADE_SKILL_UPDATE", "onEvent");
-	self:RegisterEvent("TRADE_SKILL_CLOSE", "onEvent");
+	GuildAdsTask:AddNamedSchedule("GuildAdsTradeSkillDataTypeInit", 8, nil, nil, self.delayedCheck, self)
+	self:RegisterEvent("CHARACTER_POINTS_CHANGED", "refreshTradeSkillLinks");
+	self:RegisterEvent("CHAT_MSG_SKILL", "refreshTradeSkillLinks");
+	self:RegisterEvent("PLAYER_LEVEL_UP", "refreshTradeSkillLinks");
 end
 
--- Nearly impossible to get reliable tradeskill information. 
-local Orig_CloseTradeSkill = CloseTradeSkill
-function CloseTradeSkill()
-	GuildAdsTradeSkillDataType.tradeSkillWindowOpen=false;
-	-- call the original CloseTradeSkill
-	Orig_CloseTradeSkill();
+function GuildAdsTradeSkillDataType:delayedCheck()
+	GuildAdsTradeSkillDataType:doItemsExist()
+	self:refreshTradeSkillLinks()
 end
 
-function GuildAdsTradeSkillDataType:onEvent(event, arg1)
-	GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "GuildAdsTradeSkillDataType: event="..tostring(event));
-	if event=="TRADE_SKILL_SHOW" then
-		GuildAdsTradeSkillDataType.tradeSkillWindowOpen=true;
-		GuildAdsTradeSkillDataType:UpdateTradeSkills();
-	elseif event=="TRADE_SKILL_CLOSE" then
-		GuildAdsTradeSkillDataType.tradeSkillWindowOpen=false;
-	elseif GuildAdsTradeSkillDataType.tradeSkillWindowOpen then
-		GuildAdsTradeSkillDataType:UpdateTradeSkills();
-	end
-end
-
-function GuildAdsTradeSkillDataType:UpdateTradeSkills()
-	local skillId = GuildAdsSkillDataType:getIdFromName(GetTradeSkillLine());
-	if skillId > 0 and not IsTradeSkillLinked() and not IsTradeSkillGuild() then
-		local item, colddown, kind, open, itemRecipe, minMade, maxMade, q;
-		local tmp = {}
-		local added, deleted = 0, 0;
-		local t = self:getTableForPlayer(GuildAds.playerName);
-
-		self:deleteOrphanTradeSkillItems(); -- just in case there are any items without profession label
+function GuildAdsTradeSkillDataType:refreshTradeSkillLinks()
+	local tmp = {}
+	local t = self:getTableForPlayer(GuildAds.playerName)
+	local added, deleted = 0, 0
 	
-		--	--self:clearAllWoW2TradeSkillItems(); -- old WoW2 items are no more
-		self:deleteWoW2TradeSkillItems(); -- only delete my own items
-		local tradeSkillLink = GetTradeSkillListLink()
-		local color, link
-		if tradeSkillLink then
-			GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "GuildAdsTradeSkillDataType: TradeSkillLink available")
-			color, link = GuildAds_ExplodeItemRef(tradeSkillLink)
-			if link then
-				tmp[link]=true
-				if not t[link] then
-					added = added - 1
-				end
-					GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "GuildAdsTradeSkillDataType: Adding TradeSkill Link "..link)
-					self:set(GuildAds.playerName, link, { s=skillId, q=select(2, GetBuildInfo()) })
-					added = added + 1
-				--end
-			end
-		end
-
-		-- Check the TradeSkill UI to see if any filters are enabled.
-		local fullListShown = true
-		if TradeSkillFrameAvailableFilterCheckButton then
-			fullListShown = fullListShown and not TradeSkillFrameAvailableFilterCheckButton:GetChecked()
-			--GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "GuildAdsTradeSkillDataType: button = "..tostring(TradeSkillFrameAvailableFilterCheckButton:GetChecked() and "checked" or "not checked"))
-		end
-		if TradeSkillFrameEditBox then
-			fullListShown = fullListShown and (TradeSkillFrameEditBox:GetText() == "" or TradeSkillFrameEditBox:GetText() == SEARCH)
-			--GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "GuildAdsTradeSkillDataType: text = "..tostring(TradeSkillFrameEditBox:GetText()))
-		end
-		if TradeSkillInvSlotDropDown then
-			local dd = UIDropDownMenu_GetSelectedID(TradeSkillInvSlotDropDown)
-			fullListShown = fullListShown and (dd == 1 or not dd)
-			--GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "GuildAdsTradeSkillDataType: InvDropDown = "..(UIDropDownMenu_GetSelectedID(TradeSkillInvSlotDropDown) or ""))
-		end
-		if TradeSkillSubClassDropDown then
-			local dd = UIDropDownMenu_GetSelectedID(TradeSkillSubClassDropDown)
-			fullListShown = fullListShown and (dd == 1 or not dd)
-			--GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "GuildAdsTradeSkillDataType: ClassDropDown = "..(UIDropDownMenu_GetSelectedID(TradeSkillSubClassDropDown) or ""))
-		end
-		
-		-- Check to see if there are any headers. If not, item info is most likely not available yet.
-		local headers=false
-		for i=1,GetNumTradeSkills() do
-			_, kind, _, open = GetTradeSkillInfo(i);
-			if (kind == "header") then
-				headers = true
-			end
-		end
-		if not headers then
-			GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "GuildAdsTradeSkillDataType: no headers found")
-			return
-		end
-		
-		-- Check for new tradeskills
-		if not tradeSkillLink then
-			-- if there is no tradeskill link (Poisons, Mining and Runeforging) then gather items the hard way
-		for i=1,GetNumTradeSkills() do
-			_, kind, _, open = GetTradeSkillInfo(i);
-			if (kind ~= "header") then
-				item = GetTradeSkillItemLink(i);
-				
-				minMade, maxMade = GetTradeSkillNumMade(i);
-				itemRecipe = GetTradeSkillRecipeLink(i);
-				if item then
-					_, item = GuildAds_ExplodeItemRef(item);
-					tmp[item]=true;
-					-- don't share cooldown, causes too much update
-					--[[
-					cooldown = GetTradeSkillCooldown(i) 
-					if cooldown then
-						cooldown = cooldown / 60 + GuildAdsDB:GetCurrentTime();
-					end;
-					]]
-					_, itemRecipe = GuildAds_ExplodeItemRef(itemRecipe);
-					q=nil;
-					if minMade~=1 or maxMade~=1 then
-						q=tostring(minMade);
-						if maxMade~=minMade then
-							q=q.."-"..tostring(maxMade);
-						end
-					end
-					
-					-- if not (t[item] and t[item].e and t[item].q) then
-					if not (t[item]) then
-						self:set(GuildAds.playerName, item, { s=skillId, e=itemRecipe, q=q });
+	self:deleteOrphanTradeSkillItems(); -- just in case there are any items without profession label
+	
+	-- gather all my tradeskill links
+	for i = 1, select("#", GetProfessions()) do
+    local prof = select(i, GetProfessions())
+    if prof then
+    	local profName = GetProfessionInfo(prof)
+    	GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "Checking "..tostring(profName));
+      local tradeSkillLink = select(2, GetSpellLink(profName))
+      local skillId = GuildAdsSkillDataType:getIdFromName(profName)
+      if skillId > 0 and tradeSkillLink then
+				color, link = GuildAds_ExplodeItemRef(tradeSkillLink)
+				if link then
+					tmp[link]=true
+					if not t[link] then
+						GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "GuildAdsTradeSkillDataType: Adding TradeSkill Link "..link)
+						self:set(GuildAds.playerName, link, { s=skillId, q=select(2, GetBuildInfo()) })
 						added = added + 1
-					elseif not t[item].s then
-						t[item].s = skillId
 					end
 				end
-			else
-				fullListShown = fullListShown and open
-			end
-		end
-		else
-			-- not necessarily true, but will cause the individual item:XXs to be removed from the database
-			fullListShown = true
-		end
-		
-		GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "GuildAdsTradeSkillDataType: Full List Shown: "..(fullListShown and "true" or "false"))
-		
-		-- delete items not found in the above code
-		if fullListShown then
-			for k,v in pairs(tmp) do
-				GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "GuildAdsTradeSkillDataType: "..tostring(k))
-			end
-			local tmp2 = {};
-			local craft = self:getTableForPlayer(GuildAds.playerName);
-			for item, data in pairs(craft) do
-				if (item ~= "_u") and (data.s == skillId) then
-					GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "GuildAdsTradeSkillDataType: checking "..tostring(item))
-				end
-				if (not tmp[item]) and (item ~= "_u") and (data.s == skillId) then
-					tinsert(tmp2, item);
-				end
-			end
-			for _, item in pairs(tmp2) do
-				self:set(GuildAds.playerName, item, nil);
-				deleted = deleted + 1
-			end
-		end
-		GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "GuildAdsTradeSkillDataType: Updating tradeskill information (%s added, %s deleted)", added, deleted);
+      end
+    end
 	end
+	-- delete items not found in the above code
+	for k,v in pairs(tmp) do
+		GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "GuildAdsTradeSkillDataType: "..tostring(k))
+	end
+	local tmp2 = {}
+	local craft = self:getTableForPlayer(GuildAds.playerName)
+	for item, data in pairs(craft) do
+		if (item ~= "_u") and (data.s == skillId) then
+			GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "GuildAdsTradeSkillDataType: checking "..tostring(item))
+		end
+		if (not tmp[item]) and (item ~= "_u") and (data.s == skillId) then
+			tinsert(tmp2, item);
+		end
+	end
+	for _, item in pairs(tmp2) do
+		self:set(GuildAds.playerName, item, nil)
+		deleted = deleted + 1
+	end
+	GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "GuildAdsTradeSkillDataType: Updating tradeskill information (%s added, %s deleted)", added, deleted);
 end
+
 
 function GuildAdsTradeSkillDataType:GetTradeLink(playerName, professionID)
 	local skillName = GUILDADS_SKILLS[professionID];
@@ -254,6 +155,51 @@ function GuildAdsTradeSkillDataType:GetProfessionMastery(playerName, professionI
 			return spellId
 		end
 	end
+end
+
+function GuildAdsTradeSkillDataType:doItemsExist()
+	local players = GuildAdsDB.channel[GuildAds.channelName]:getPlayers()
+	local playerName
+	local found = false
+	for playerName in pairs(players) do
+		local craft = GuildAdsTradeSkillDataType:getTableForPlayer(playerName)
+		for item, data in pairs(craft) do
+			if string.find(item, "^item:.*$") or string.find(item, "^enchant:.*$") then
+				found = true
+				break
+			end
+		end
+		if found then
+			break
+		end
+	end
+	if found then
+		ChatFrame1:AddMessage("GuildAds: item-links found in database. GuildAds only stores trade-links now.")
+		ChatFrame1:AddMessage("If you use the latest GuildAds, you (or another in your network) should run this command:")
+		ChatFrame1:AddMessage("/run GuildAdsTradeSkillDataType:deleteTradeSkillItemLinks()")
+		ChatFrame1:AddMessage("This will delete all tradeskill related item-links and propagate this to the rest of the network.")
+		ChatFrame1:AddMessage("This could take a long time and disconnect you, hence the manual approach")
+	end
+end
+
+function GuildAdsTradeSkillDataType:deleteTradeSkillItemLinks()
+	-- delete item:* and enchant:* from the database (we only store trade:* now)
+	-- this causes revision updates
+	local players = GuildAdsDB.channel[GuildAds.channelName]:getPlayers();
+	local playerName;
+	for playerName in pairs(players) do
+		local tmp = {};
+		local craft = GuildAdsTradeSkillDataType:getTableForPlayer(playerName);
+		for item, data in pairs(craft) do
+			if string.find(item, "^item:.*$") or string.find(item, "^enchant:.*$") then
+				tinsert(tmp, item);
+			end
+		end
+		-- could have been put outside the loop, but then tmp could get huge
+		for _, item in pairs(tmp) do
+			self:set(playerName, item, nil);
+		end
+	end	
 end
 
 function GuildAdsTradeSkillDataType:deleteWoW2TradeSkillItems()
