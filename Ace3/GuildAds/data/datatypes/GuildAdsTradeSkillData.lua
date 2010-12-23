@@ -61,12 +61,13 @@ end
 
 function GuildAdsTradeSkillDataType:enterWorld()
 	self:UnregisterEvent("PLAYER_ENTERING_WORLD");
-	GuildAdsTask:AddNamedSchedule("GuildAdsTradeSkillDataTypeInit", 8, nil, nil, self.delayedCheck, self)
+	--GuildAdsTask:AddNamedSchedule("GuildAdsTradeSkillDataTypeInit", 25, nil, nil, self.delayedCheck, self) -- 
 	self:RegisterEvent("CHARACTER_POINTS_CHANGED", "refreshTradeSkillLinks");
 	self:RegisterEvent("CHAT_MSG_SKILL", "refreshTradeSkillLinks");
 	self:RegisterEvent("PLAYER_LEVEL_UP", "refreshTradeSkillLinks");
 end
 
+-- is called from GuildAdsTradeFrame:onChanneljoin
 function GuildAdsTradeSkillDataType:delayedCheck()
 	GuildAdsTradeSkillDataType:doItemsExist()
 	self:refreshTradeSkillLinks()

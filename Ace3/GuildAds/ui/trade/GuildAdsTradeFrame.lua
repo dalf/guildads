@@ -232,6 +232,8 @@ GuildAdsTrade = {
 		GuildAdsDB.channel[GuildAds.channelName].TradeOffer:registerUpdate(GuildAdsTrade.onDBUpdate);
 		GuildAdsDB.channel[GuildAds.channelName].TradeNeed:registerTransactionReceived(GuildAdsTrade.onReceivedTransaction);
 		GuildAdsDB.channel[GuildAds.channelName].TradeOffer:registerTransactionReceived(GuildAdsTrade.onReceivedTransaction);
+		-- check profession data for old stuff
+		GuildAdsDB.profile.TradeSkill:delayedCheck();
 	end;
 	
 	onChannelLeave = function()
