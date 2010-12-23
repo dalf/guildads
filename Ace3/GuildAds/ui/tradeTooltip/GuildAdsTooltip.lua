@@ -156,7 +156,7 @@ local function unpackItemIterator(text)
 	return unpackIterator, text;
 end
 
-local function getExtraTipLines(itemKey)
+function getExtraTipLines(itemKey)
 	local lines = {}
 	tinsert(lines, GUILDADS_TOOLTIP_USED);
 	if itemKey > 0 then
@@ -372,8 +372,12 @@ local function addGuildAdsInfo(tooltip, itemLink)
 				gatooltip:SetOwner(tooltip, "ANCHOR_PRESERVE");
 				gatooltip:SetParent(tooltip);
 				setPoints(tooltip);
-				for _, line in pairs(lines) do
-					gatooltip:AddLine(line)
+				--for _, line in pairs(lines) do
+				for line=1,100 do	
+					if not lines[line] then
+						break
+					end
+					gatooltip:AddLine(lines[line])
 				end
 				gatooltip:Show()
 			else
