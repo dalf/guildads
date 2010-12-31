@@ -75,6 +75,7 @@ end
 
 function GuildAdsTradeSkillDataType:refreshTradeSkillLinks()
 	local tmp = {}
+	local tmp2 = {}
 	local t = self:getTableForPlayer(GuildAds.playerName)
 	local added, deleted = 0, 0
 	
@@ -88,14 +89,25 @@ function GuildAdsTradeSkillDataType:refreshTradeSkillLinks()
     	GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "Checking "..tostring(profName));
       local tradeSkillLink = select(2, GetSpellLink(profName))
       local skillId = GuildAdsSkillDataType:getIdFromName(profName)
-      if skillId > 0 and tradeSkillLink then
-				color, link = GuildAds_ExplodeItemRef(tradeSkillLink)
-				if link then
-					tmp[link]=true
-					if not t[link] then
-						GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "GuildAdsTradeSkillDataType: Adding TradeSkill Link "..link)
-						self:set(GuildAds.playerName, link, { s=skillId, q=select(2, GetBuildInfo()) })
-						added = added + 1
+      if skillId > 0 then
+      	if tradeSkillLink then
+					color, link = GuildAds_ExplodeItemRef(tradeSkillLink)
+					if link then
+						tmp[link]=true
+						if not t[link] then
+							GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "GuildAdsTradeSkillDataType: Adding TradeSkill Link "..link)
+							self:set(GuildAds.playerName, link, { s=skillId, q=select(2, GetBuildInfo()) })
+							added = added + 1
+						end
+					end
+				end
+				local craft = self:getTableForPlayer(GuildAds.playerName)
+				for item, data in pairs(craft) do
+					if (item ~= "_u") and (data.s == skillId) then
+						GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "GuildAdsTradeSkillDataType: checking "..tostring(item))
+					end
+					if (not tmp[item]) and (item ~= "_u") and (data.s == skillId) then
+						tinsert(tmp2, item);
 					end
 				end
       end
@@ -104,16 +116,6 @@ function GuildAdsTradeSkillDataType:refreshTradeSkillLinks()
 	-- delete items not found in the above code
 	for k,v in pairs(tmp) do
 		GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "GuildAdsTradeSkillDataType: "..tostring(k))
-	end
-	local tmp2 = {}
-	local craft = self:getTableForPlayer(GuildAds.playerName)
-	for item, data in pairs(craft) do
-		if (item ~= "_u") and (data.s == skillId) then
-			GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "GuildAdsTradeSkillDataType: checking "..tostring(item))
-		end
-		if (not tmp[item]) and (item ~= "_u") and (data.s == skillId) then
-			tinsert(tmp2, item);
-		end
 	end
 	for _, item in pairs(tmp2) do
 		self:set(GuildAds.playerName, item, nil)
