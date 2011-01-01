@@ -1236,10 +1236,11 @@ GuildAdsTrade = {
 								while item do
 									_, _, item8 = item:find("^(item:%-?%d+:%-?%d+:%-?%d+:%-?%d+:%-?%d+:%-?%d+:%-?%d+:%-?%d+)");
 									item8 = item8 or item
-									--item8 = item:gsub("^(item:%-?%d+:%-?%d+:%-?%d+:%-?%d+:%-?%d+:%-?%d+:%-?%d+:%-?%d+):%-?%d+:%-?%d+$", "%1");
 									t = tmptable[item8]
 									if t then
-										tinsert(t, playerName);
+										if t[#t] ~= playerName then
+											tinsert(t, playerName)
+										end
 										if not t.e then
 											t.e=t.e or data.e;
 										end
