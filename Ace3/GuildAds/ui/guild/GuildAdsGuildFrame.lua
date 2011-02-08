@@ -941,7 +941,7 @@ GuildAdsGuild = {
 			local currentLevel;
 			for _, playerName in pairs(adTable) do
 				local level = GuildAdsDB.profile.Main:get(playerName, GuildAdsDB.profile.Main.Level);
-				if not currentLevel 
+				if not currentLevel and not level
 					or level>currentLevel 
 					or (level==currentLevel and playerName<mainPlayerForAccount) then
 						currentLevel = level;
