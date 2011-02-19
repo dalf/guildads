@@ -176,7 +176,9 @@ function getExtraTipLines(itemKey)
 							itemLink="enchant:"..tostring(-tonumber(item))
 						end
 						local link
-						local itemInfo = GuildAds_ItemInfo[itemLink] or {}; -- this lined previously caused wow to crash
+						--local itemInfo = GuildAds_ItemInfo[itemLink] or {}; -- this line can crash wow
+						local itemName, _, itemQuality = GetItemInfo(itemLink);
+						local itemInfo = { name=itemName, quality=itemQuality}
 						if (itemInfo and itemInfo.name) then
 		  					local r, g, b, hex = GuildAds_GetItemQualityColor(itemInfo.quality);
 		  					link = hex..itemInfo.name.."|r";
