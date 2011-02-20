@@ -94,9 +94,9 @@ function GuildAdsTradeSkillDataType:refreshTradeSkillLinks()
 					color, link = GuildAds_ExplodeItemRef(tradeSkillLink)
 					if link then
 						tmp[link]=true
-						if not t[link] then
+						-- even if no new recipies are learned, update the link to ensure it is tagged with the new build info
+						if self:set(GuildAds.playerName, link, { s=skillId, q=select(2, GetBuildInfo()) }) then
 							GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "GuildAdsTradeSkillDataType: Adding TradeSkill Link "..link)
-							self:set(GuildAds.playerName, link, { s=skillId, q=select(2, GetBuildInfo()) })
 							added = added + 1
 						end
 					end

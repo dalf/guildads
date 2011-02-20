@@ -180,19 +180,19 @@ function getExtraTipLines(itemKey)
 						local itemName, _, itemQuality = GetItemInfo(itemLink);
 						local itemInfo = { name=itemName, quality=itemQuality}
 						if (itemInfo and itemInfo.name) then
-		  					local r, g, b, hex = GuildAds_GetItemQualityColor(itemInfo.quality);
-		  					link = hex..itemInfo.name.."|r";
-		  				else
-		  					link = itemLink
-		  				end
-	  					if not headerInserted then
-	  						tinsert(lines, set)
-	  						headerInserted = true
-	  					end
-	  					local t = {}
-	  					local gai = GuildAdsItems[keyTable[itemLink]]
-	  					if gai then
-	  						if gai.TradeSkill and gai.TradeSkill[GuildAds.playerName] then
+	  					local r, g, b, hex = GuildAds_GetItemQualityColor(itemInfo.quality);
+	  					link = hex..itemInfo.name.."|r";
+	  				else
+	  					link = itemLink
+	  				end
+  					if not headerInserted then
+  						tinsert(lines, set)
+  						headerInserted = true
+  					end
+  					local t = {}
+  					local gai = GuildAdsItems[keyTable[itemLink]]
+  					if gai then
+  						if gai.TradeSkill and gai.TradeSkill[GuildAds.playerName] then
 								t.i = "   + "..link
 							else
 								t.i = "   "..link
@@ -731,7 +731,7 @@ GuildAdsTradeTooltip = {
 						local itemLink = LPTFunc:ItemInSet(-link,"Tradeskill.RecipeLinks")
 						if itemLink then
 							if tonumber(itemLink) > 0 then
-								item="item:"..itemLink..":0:0:0:0:0:0:0:"..level
+								item="item:"..itemLink..":0:0:0:0:0:0:0:"..level..":0"
 								itemTable[item]=true
 							end
 						end
