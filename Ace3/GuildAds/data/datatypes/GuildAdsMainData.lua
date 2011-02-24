@@ -31,7 +31,9 @@ local GARaces = {
 	["Tauren"] = 7,
 	["Troll"] = 8,
 	["Draenei"] = 9,
-	["BloodElf"] = 10
+	["BloodElf"] = 10,
+	["Worgen"] = 11,
+	["Goblin"] = 12
 }
 
 
