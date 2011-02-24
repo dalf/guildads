@@ -6,7 +6,7 @@
 	
 	<Frame name="GuildAdsTradeTooltipOptionsFrame" inherits="GuildAdsConfig_OptionFrameBoxTemplate" parent="GuildAdsOptionsWindowFrame">
 		<Size>
-			<AbsDimension x="380" y="145"/>
+			<AbsDimension x="380" y="170"/>
 		</Size>
 		<Anchors>
 			<Anchor point="TOP">
@@ -161,13 +161,45 @@
 					</OnClick>
 				</Scripts>
 			</CheckButton>
-		
+
+			<CheckButton name="GuildAdsTradeTooltip_AllowServerQueryCheckButton" inherits="GuildAdsConfig_CheckButton">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsTradeTooltip_ShowCraftableTooltipCheckButton" relativePoint="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="0" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Layers>
+					<Layer level="ARTWORK">
+						<FontString name="$parentLabel" inherits="GameFontNormalSmall" text="GUILDADS_TOOLTIP_ALLOW_SERVER_QUERY" >
+							<Anchors>
+								<Anchor point="LEFT" relativePoint="RIGHT">
+									<Offset>
+										<AbsDimension x="5" y="1"/>
+									</Offset>
+								</Anchor>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnClick>
+						if ( self:GetChecked() ) then
+							PlaySound("igMainMenuOptionCheckBoxOff");
+						else
+							PlaySound("igMainMenuOptionCheckBoxOn");
+						end
+					</OnClick>
+				</Scripts>
+			</CheckButton>
+					
 			<Slider name="GuildAdsTradeTooltip_ExtraTooltipScale" inherits="OptionsSliderTemplate">
 	    			<Size>
 					<AbsDimension x="330" y="16"/>
 				</Size>
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="GuildAdsTradeTooltip_ShowCraftableTooltipCheckButton" relativePoint="BOTTOMLEFT">
+					<Anchor point="TOPLEFT" relativeTo="GuildAdsTradeTooltip_AllowServerQueryCheckButton" relativePoint="BOTTOMLEFT">
 						<Offset>
 							<AbsDimension x="10" y="-10"/>
 						</Offset>

@@ -27,6 +27,7 @@ GUILDADS_TOOLTIP_SHOW_CRAFTED_BY = "Show 'Made by'" ;
 GUILDADS_TOOLTIP_SHOW_NEW	= "Show 'Ask'";
 GUILDADS_TOOLTIP_SHOW_HAVE	= "Show 'Have'";
 GUILDADS_TOOLTIP_SHOW_EXTRA_TOOLTIP = "Show craft tooltip";
+GUILDADS_TOOLTIP_ALLOW_SERVER_QUERY = "Allow Server Query (can crash wow)";
 GUILDADS_TOOLTIP_SCALE		= "Craft tooltip scale";
 GUILDADS_TOOLTIP_USED		= "GuildAds:";
 GUILDADS_ADS_OPTIONS		= "Ads settings";

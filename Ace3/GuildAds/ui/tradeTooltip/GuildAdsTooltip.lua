@@ -175,10 +175,13 @@ function getExtraTipLines(itemKey)
 						else
 							itemLink="enchant:"..tostring(-tonumber(item))
 						end
-						local link
-						--local itemInfo = GuildAds_ItemInfo[itemLink] or {}; -- this line can crash wow
-						local itemName, _, itemQuality = GetItemInfo(itemLink);
-						local itemInfo = { name=itemName, quality=itemQuality}
+						local link, itemInfo
+						if (GuildAdsTradeTooltip.getProfileValue(nil, "AllowServerQuery")) then
+							local itemInfo = GuildAds_ItemInfo[itemLink] or {}; -- this line can crash wow
+						else
+							local itemName, _, itemQuality = GetItemInfo(itemLink);
+							itemInfo = { name=itemName, quality=itemQuality}
+						end
 						if (itemInfo and itemInfo.name) then
 	  					local r, g, b, hex = GuildAds_GetItemQualityColor(itemInfo.quality);
 	  					link = hex..itemInfo.name.."|r";
@@ -591,6 +594,9 @@ GuildAdsTradeTooltip = {
 		if type(GuildAdsTradeTooltip.getRawProfileValue(nil, "ShowHave"))=="nil" then
 			GuildAdsTradeTooltip.setProfileValue(nil, "ShowHave", true);
 		end
+		if type(GuildAdsTradeTooltip.getRawProfileValue(nil, "AllowServerQuery"))=="nil" then
+			GuildAdsTradeTooltip.setProfileValue(nil, "AllowServerQuery", false);
+		end
 		GuildAdsTooltip:SetScale(GuildAdsTradeTooltip.clipTooltipScale(GuildAdsTradeTooltip.getProfileValue(nil, "TooltipScale") or 1.0))
 	end;
 	
@@ -618,6 +624,12 @@ GuildAdsTradeTooltip = {
 		else
 			GuildAdsTradeTooltip_ShowHaveCheckButton:SetChecked(0);
 		end
+
+		if (GuildAdsTradeTooltip.getProfileValue(nil, "AllowServerQuery")) then
+			GuildAdsTradeTooltip_AllowServerQueryCheckButton:SetChecked(1);
+		else
+			GuildAdsTradeTooltip_AllowServerQueryCheckButton:SetChecked(0);
+		end
 		local scale = GuildAdsTradeTooltip.getProfileValue(nil, "TooltipScale")
 		scale = GuildAdsTradeTooltip.clipTooltipScale(scale)
 		GuildAdsTradeTooltip.setProfileValue(nil, "TooltipScale", scale)
@@ -630,6 +642,8 @@ GuildAdsTradeTooltip = {
 			GuildAdsTradeTooltip.setProfileValue(nil, "ShowCraftedBy", GuildAdsTradeTooltip_ShowCraftedByCheckButton:GetChecked() and true or false);
 			GuildAdsTradeTooltip.setProfileValue(nil, "ShowAsk", GuildAdsTradeTooltip_ShowAskCheckButton:GetChecked() and true or false);
 			GuildAdsTradeTooltip.setProfileValue(nil, "ShowHave", GuildAdsTradeTooltip_ShowHaveCheckButton:GetChecked() and true or false);
+			GuildAdsTradeTooltip.setProfileValue(nil, "AllowServerQuery", GuildAdsTradeTooltip_AllowServerQueryCheckButton:GetChecked() and true or false);
+			
 			local scale = GuildAdsTradeTooltip_ExtraTooltipScale:GetValue()
 			scale = GuildAdsTradeTooltip.clipTooltipScale(scale)
 			GuildAdsTradeTooltip.setProfileValue(nil, "TooltipScale", scale)
@@ -643,6 +657,7 @@ GuildAdsTradeTooltip = {
 		GuildAdsTradeTooltip_ShowCraftedByCheckButton:SetChecked(1);
 		GuildAdsTradeTooltip_ShowAskCheckButton:SetChecked(1);
 		GuildAdsTradeTooltip_ShowHaveCheckButton:SetChecked(1);
+		GuildAdsTradeTooltip_AllowServerQueryCheckButton:SetChecked(0);
 		GuildAdsTradeTooltip_ExtraTooltipScale:SetValue(1.0);
 	end;
 	
