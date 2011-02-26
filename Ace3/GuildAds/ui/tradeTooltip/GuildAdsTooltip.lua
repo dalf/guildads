@@ -177,7 +177,7 @@ function getExtraTipLines(itemKey)
 						end
 						local link, itemInfo
 						if (GuildAdsTradeTooltip.getProfileValue(nil, "AllowServerQuery")) then
-							local itemInfo = GuildAds_ItemInfo[itemLink] or {}; -- this line can crash wow
+							itemInfo = GuildAds_ItemInfo[itemLink] or {}; -- this line can crash wow
 						else
 							local itemName, _, itemQuality = GetItemInfo(itemLink);
 							itemInfo = { name=itemName, quality=itemQuality}
