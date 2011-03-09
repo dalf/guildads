@@ -122,40 +122,44 @@ end
 
 function GuildAdsTalentRankDataType:onTalentEvent()
 	GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "Updating talent information");
-	for talentGroup = 1, GetNumTalentGroups() do
-		-- parse complete talent tree now
-		local name, iconTexture, pointsSpent, background, numTalents, tabIndex;
-		local talentIndex, nameTalent, talentLink, iconPath, tier, column, currentRank, maxRank, isExceptional, meetsPrereq, ptier, pcolumn, isLearnable;
-		local talentLinkTable={};
-		local sep = "";
-		local _, WoWClassId = UnitClass("player")
-		-- pack talent info
-		local rest
-		for tabIndex = 1, GetNumTalentTabs() do
-			tinsert(talentLinkTable, sep)
-			local q = false;
-			for talentIndex = 1, GetNumTalents(tabIndex) do
-				_,_,_,_,currentRank = GetTalentInfo(tabIndex, talentIndex, false, false, talentGroup);
-				if q then
-					tinsert(talentLinkTable, EncodeBase64Char(rest+currentRank*8))
-				else
-					rest = currentRank;
+	if (GetNumTalentTabs(false, false) > 0) then -- from MainMenuBarMicroButtons.lua
+		for talentGroup = 1, GetNumTalentGroups() do
+			-- parse complete talent tree now
+			local name, iconTexture, pointsSpent, background, numTalents, tabIndex;
+			local talentIndex, nameTalent, talentLink, iconPath, tier, column, currentRank, maxRank, isExceptional, meetsPrereq, ptier, pcolumn, isLearnable;
+			local talentLinkTable={};
+			local sep = "";
+			local _, WoWClassId = UnitClass("player")
+			-- pack talent info
+			local rest
+			for tabIndex = 1, GetNumTalentTabs() do
+				tinsert(talentLinkTable, sep)
+				local q = false;
+				for talentIndex = 1, GetNumTalents(tabIndex) do
+					_,_,_,_,currentRank = GetTalentInfo(tabIndex, talentIndex, false, false, talentGroup);
+					if q then
+						tinsert(talentLinkTable, EncodeBase64Char(rest+currentRank*8))
+					else
+						rest = currentRank;
+					end
+					q=not q
 				end
-				q=not q
+				if q then
+					tinsert(talentLinkTable,EncodeBase64Char(rest))
+				end
+				sep = ":"
 			end
-			if q then
-				tinsert(talentLinkTable,EncodeBase64Char(rest))
-			end
-			sep = ":"
+			-- merge new talent data with possibly already existing data
+			local data = self:get(GuildAds.playerName, tostring(talentGroup));
+			data = data or {}
+			data.t = table.concat(talentLinkTable,"")..";"..tostring(GetUnspentTalentPoints(false, false, talentGroup));
+			data.b = (select(2,GetBuildInfo()))
+			self:set(GuildAds.playerName, tostring(talentGroup), data);
+			-- remove old talent data (from previous versions of GuildAds)
+			self:set(GuildAds.playerName, tostring(tabIndex)..":"..tostring(talentIndex), nil);
 		end
-		-- merge new talent data with possibly already existing data
-		local data = self:get(GuildAds.playerName, tostring(talentGroup));
-		data = data or {}
-		data.t = table.concat(talentLinkTable,"")..";"..tostring(GetUnspentTalentPoints(false, false, talentGroup));
-		data.b = (select(2,GetBuildInfo()))
-		self:set(GuildAds.playerName, tostring(talentGroup), data);
-		-- remove old talent data (from previous versions of GuildAds)
-		self:set(GuildAds.playerName, tostring(tabIndex)..":"..tostring(talentIndex), nil);
+	else
+		GuildAds_ChatDebug(GA_DEBUG_PLUGIN, "Talent information isn't ready yet.");
 	end
 end
 
