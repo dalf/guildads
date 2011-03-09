@@ -311,7 +311,7 @@ GuildAdsTalentUI = {
 				end
 			end
 		end
-		return "", "", 0,0, 0,0,0,0;		
+		return nil, nil, 1,1, 0,0,0,0;		
 	end;
 	-- talent color: ff4e96f7
 	
@@ -605,54 +605,58 @@ GuildAdsTalentUI = {
 			if ( i <= numTalents ) then
 				-- Set the button info
 				name, iconTexture, tier, column, rank, maxRank, isExceptional, meetsPrereq = self.GetTalentInfo(PanelTemplates_GetSelectedTab(GuildAdsTalentFrame), i);
-				button.link = name
-				getglobal("GuildAdsTalentFrameTalent"..i.."Rank"):SetText(rank);
-				self.SetTalentButtonLocation(button, tier, column);
-				self.TALENT_BRANCH_ARRAY[tier][column].id = button:GetID();
-				
-				-- If player has no talent points then show only talents with points in them
-				if ( (GuildAdsTalentFrame.talentPoints <= 0 and rank == 0)  ) then
-					forceDesaturated = 1;
-				else
-					forceDesaturated = nil;
-				end
-
-				-- If the player has spent at least 5 talent points in the previous tier
-				if ( ( (tier - 1) * 5 <= GuildAdsTalentFrame.pointsSpent ) ) then
-					tierUnlocked = 1;
-				else
-					tierUnlocked = nil;
-				end
-				SetItemButtonTexture(button, iconTexture);
-				
-				-- Talent must meet prereqs or the player must have no points to spend
-				if ( self.SetPrereqs(tier, column, forceDesaturated, tierUnlocked, self.GetTalentPrereqs(PanelTemplates_GetSelectedTab(GuildAdsTalentFrame), i)) and meetsPrereq ) then
-					SetItemButtonDesaturated(button, nil);
+				if name then
+					button.link = name
+					getglobal("GuildAdsTalentFrameTalent"..i.."Rank"):SetText(rank);
+					self.SetTalentButtonLocation(button, tier, column);
+					self.TALENT_BRANCH_ARRAY[tier][column].id = button:GetID();
 					
-					if ( rank < maxRank ) then
-						-- Rank is green if not maxed out
-						getglobal("GuildAdsTalentFrameTalent"..i.."Slot"):SetVertexColor(0.1, 1.0, 0.1);
-						getglobal("GuildAdsTalentFrameTalent"..i.."Rank"):SetTextColor(GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b);
+					-- If player has no talent points then show only talents with points in them
+					if ( (GuildAdsTalentFrame.talentPoints <= 0 and rank == 0)  ) then
+						forceDesaturated = 1;
 					else
-						getglobal("GuildAdsTalentFrameTalent"..i.."Slot"):SetVertexColor(1.0, 0.82, 0);
-						getglobal("GuildAdsTalentFrameTalent"..i.."Rank"):SetTextColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);
+						forceDesaturated = nil;
 					end
-					getglobal("GuildAdsTalentFrameTalent"..i.."RankBorder"):Show();
-					getglobal("GuildAdsTalentFrameTalent"..i.."Rank"):Show();
+	
+					-- If the player has spent at least 5 talent points in the previous tier
+					if ( ( (tier - 1) * 5 <= GuildAdsTalentFrame.pointsSpent ) ) then
+						tierUnlocked = 1;
+					else
+						tierUnlocked = nil;
+					end
+					SetItemButtonTexture(button, iconTexture);
+					
+					-- Talent must meet prereqs or the player must have no points to spend
+					if ( self.SetPrereqs(tier, column, forceDesaturated, tierUnlocked, self.GetTalentPrereqs(PanelTemplates_GetSelectedTab(GuildAdsTalentFrame), i)) and meetsPrereq ) then
+						SetItemButtonDesaturated(button, nil);
+						
+						if ( rank < maxRank ) then
+							-- Rank is green if not maxed out
+							getglobal("GuildAdsTalentFrameTalent"..i.."Slot"):SetVertexColor(0.1, 1.0, 0.1);
+							getglobal("GuildAdsTalentFrameTalent"..i.."Rank"):SetTextColor(GREEN_FONT_COLOR.r, GREEN_FONT_COLOR.g, GREEN_FONT_COLOR.b);
+						else
+							getglobal("GuildAdsTalentFrameTalent"..i.."Slot"):SetVertexColor(1.0, 0.82, 0);
+							getglobal("GuildAdsTalentFrameTalent"..i.."Rank"):SetTextColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b);
+						end
+						getglobal("GuildAdsTalentFrameTalent"..i.."RankBorder"):Show();
+						getglobal("GuildAdsTalentFrameTalent"..i.."Rank"):Show();
+					else
+						SetItemButtonDesaturated(button, 1, 0.65, 0.65, 0.65);
+						button.link = GuildAdsTalentUI.LinkSetRank(button.link, "-1");
+						getglobal("GuildAdsTalentFrameTalent"..i.."Slot"):SetVertexColor(0.5, 0.5, 0.5);
+						if ( rank == 0 ) then
+							getglobal("GuildAdsTalentFrameTalent"..i.."RankBorder"):Hide();
+							getglobal("GuildAdsTalentFrameTalent"..i.."Rank"):Hide();
+						else
+							getglobal("GuildAdsTalentFrameTalent"..i.."RankBorder"):SetVertexColor(0.5, 0.5, 0.5);
+							getglobal("GuildAdsTalentFrameTalent"..i.."Rank"):SetTextColor(GRAY_FONT_COLOR.r, GRAY_FONT_COLOR.g, GRAY_FONT_COLOR.b);
+						end
+					end
+					
+					button:Show();
 				else
-					SetItemButtonDesaturated(button, 1, 0.65, 0.65, 0.65);
-					button.link = GuildAdsTalentUI.LinkSetRank(button.link, "-1");
-					getglobal("GuildAdsTalentFrameTalent"..i.."Slot"):SetVertexColor(0.5, 0.5, 0.5);
-					if ( rank == 0 ) then
-						getglobal("GuildAdsTalentFrameTalent"..i.."RankBorder"):Hide();
-						getglobal("GuildAdsTalentFrameTalent"..i.."Rank"):Hide();
-					else
-						getglobal("GuildAdsTalentFrameTalent"..i.."RankBorder"):SetVertexColor(0.5, 0.5, 0.5);
-						getglobal("GuildAdsTalentFrameTalent"..i.."Rank"):SetTextColor(GRAY_FONT_COLOR.r, GRAY_FONT_COLOR.g, GRAY_FONT_COLOR.b);
-					end
+					button:Hide();
 				end
-				
-				button:Show();
 			else	
 				button:Hide();
 			end
