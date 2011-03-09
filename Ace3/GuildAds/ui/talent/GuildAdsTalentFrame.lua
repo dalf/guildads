@@ -457,11 +457,11 @@ GuildAdsTalentUI = {
 				
 			-- extract glyph information (glyph id, major/minor type, texture path)
 			glyph, glyphType, iconFilename = string.split(",", glyph or "")
-			glyphType = tonumber(glyphType)
+			glyphType = tonumber(glyphType) or select(2,GetGlyphSocketInfo(id)) or GLYPH_TYPE_MINOR;
 			iconFilename = iconFilename and string.gsub(iconFilename, "\@", "Interface\\Spellbook\\");
 	
-			if glyph and glyph~="-" and glyph~="" then
-				local spellname = GetSpellInfo(glyph)
+			if glyph and glyph~="-" and glyph~="" and glyphType then
+				local spellname = GetSpellInfo(glyph) or "Database malfunction"
 				enabled = true;
 				glyphSpell = glyph
 				glyphSpellLink = "\124cff71d5ff\124Hspell:"..glyph.."\124h["..spellname.."]\124h\124r";
