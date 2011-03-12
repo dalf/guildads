@@ -257,6 +257,7 @@ GUILDADS_FACTIONS = {
 	[3]  = "Gnomeregan Exiles";   	-- Alliance
 	[4]  = "Ironforge";           	-- Alliance
 	[5]  = "Stormwind";           	-- Alliance
+	[83] = "Gilneas", 							-- Alliance
 	[6]  = "Silverwing Sentinels";	-- Alliance Forces
 	[7]  = "Stormpike Guard";       -- Alliance Forces
 	[8]  = "The League of Arathor"; -- Alliance Forces
@@ -331,10 +332,12 @@ GUILDADS_FACTIONS = {
 	[77] = "The Earthen Ring",			-- Cataclysm
 	[78] = "Guardians of Hyjal",		-- Cataclysm
 	[79] = "Therazane",							-- Cataclysm
-	[80] = "Dragonmaw Clan",				-- Cataclysm
+	[80] = "Dragonmaw Clan",				-- Cataclysm (Horde)
 	[81] = "Ramkahen",							-- Cataclysm
-	[82] = "Hellscream's Reach",		-- Cataclysm
-}; -- The last one used is 82
+	[82] = "Hellscream's Reach",		-- Cataclysm (Horde)
+	[84] = "Wildhammer Clan", 			-- Cataclysm (Alliance)
+	[85] = "Baradin's Wardens",			-- Cataclysm (Alliance)
+}; -- The last one used is 85
 
 GUILDADS_FACTION_OPTIONS	= "Faction settings";
 GUILDADS_FACTION_HIDE_COLLAPSED = "Hide collapsed factions";
