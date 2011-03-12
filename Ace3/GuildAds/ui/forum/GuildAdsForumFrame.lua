@@ -71,6 +71,11 @@ GuildAdsForum = {
 	onReceivedTransaction = function(dataType, playerName, newKeys, deletedKeys)
 		GuildAdsForum.data.resetCache();
 		GuildAdsForum.delayedUpdate();
+		if newKeys and #newKeys>0 then
+			for _, id in pairs(newKeys) do
+				GuildAdsMinimapButtonCore.addAlertText("Forum: New posting by "..tostring(playerName));
+			end
+		end
 	end;
 	
 	onChannelJoin = function()
