@@ -307,7 +307,7 @@ GuildAdsTalentUI = {
 					-- modify talent:x:y link in data.n here. Values 0-5 come from currentrank, -1 from ?
 					local link = data.n
 					link = talentString and GuildAdsTalentUI.LinkSetRank(link, currentrank-1) or link; -- this only sets 0 to 5. The -1 is tricky!
-					return link, data.t, data.ti, data.co, currentrank, data.mr, 0, data.p;
+					return link, data.t, data.ti, data.co, currentrank, data.mr, 0, 1; --last one was data.p, but meetsPrereqs seems to be changing for each player and has hence to be ignored for now
 				end
 			end
 		end

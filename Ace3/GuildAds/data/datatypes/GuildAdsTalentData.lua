@@ -139,7 +139,7 @@ function GuildAdsTalentDataType:onEvent()
 																co=column,
 																cr=currentRank,
 																mr=maxRank,
-																p=meetsPrereq,
+																p=1, --meetsPrereq, -- meetsPrereqs seems to be changing for each player and has hence to be ignored for now
 																pt=ptier,
 																pc=pcolumn,
 																pl=isLearnable});
