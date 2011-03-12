@@ -249,7 +249,35 @@ GUILDADS_FACTIONS = {
 	[52] = "La Escama de las Arenas";
 	[53] = "Tranquillien";
 	[54] = "El Ojo Violeta";
-}; -- last one used is 55
+	[56] = "Caballeros de la Espada de \195\144bano", -- Wrath of the Lich King
+	[57] = "Cruzada Argenta", -- Wrath of the Lich King
+	[58] = "Liga de Expedicionarios", -- Alliance Vanguard
+	[59] = "Tribu Coraz\195\179n Fren\195\169tico", -- Sholazar Basin
+	[60] = "Los Natoescarcha", -- Alliance Vanguard
+	[61] = "La Mano de la Venganza", -- Horde Expedition
+	[62] = "Los Kalu'ak", -- Wrath of the Lich King
+	[63] = "Los Or\195\161culos", -- Sholazar Basin
+	[64] = "Los Hijos de Hodir", -- Wrath of the Lich King
+	[65] = "Los taunka", -- Horde Expedition
+	[66] = "Expedici\195\179n de Denuedo", -- Alliance Vanguard
+	[67] = "Ofensiva Grito de Guerra", -- Horde Expedition
+	[68] = "El Acuerdo del Reposo del Drag\195\179n", -- Wrath of the Lich King
+	[69] = "Kirin Tor", -- Wrath of the Lich King
+	[70] = "El Pacto de Plata", -- Alliance Vanguard
+	[71] = "Los Atracasol", -- Horde Expedition
+	[72] = "Vanguardia de la Alianza", -- Alliance Vanguard
+	[73] = "Expedici\195\179n de la Horda", -- Horde Expedition
+	[74] = "El Veredicto Cin\195\169reo", -- Wrath of the Lich King
+	[76] = "Guild", -- Your guild reputation: MUST BE CALLED Guild in ALL LOCALIZATIONS
+	[77] = "El Anillo de la Tierra", -- Cataclysm
+	[78] = "Guardianes de Hyjal", -- Cataclysm
+	[79] = "Therazane", -- Cataclysm
+	[80] = "Clan Faucedraco", -- Cataclysm Horde
+	[81] = "Ramkahen", -- Cataclysm
+	[82] = "Mando Grito Infernal", -- Cataclysm Horde
+	[84] = "Clan Martillo Salvaje", -- Wildhammer Clan - Cataclysm Alliance
+	[85] = "Celadores de Baradin", -- Baradin's Wardens - Cataclysm Alliance
+}; -- last one used is 85
 
 GUILDADSTOOLTIPS_ADS_TITLE = TRADE;
 GUILDADSTOOLTIPS_ADS =  "Te permite ver los anuncios actuales de tus compañeros de GuildAds";
