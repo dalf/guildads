@@ -19,6 +19,11 @@
 					GameTooltip:Hide();
 				end
 			</OnLeave>
+			<OnShow>
+				-- CharacterFrameTabButtonTemplate defines an OnShow function referencing :Parent() which we do not have at this point. Override
+				GuildAdsWindow:DummyOnShow();
+				PanelTemplates_TabResize(self, 0); <!-- size to fit text, no padding-->
+			</OnShow>
 		</Scripts>
 	</Button>
 	

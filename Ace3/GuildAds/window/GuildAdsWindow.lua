@@ -87,6 +87,9 @@ function GuildAdsWindow:InitializeTab(currTab, id, info, previousTab)
 	end
 end
 
+function GuildAdsWindow:DummyOnShow()
+end
+
 function GuildAdsWindow:SelectFrame(frameName)
     for id, info in pairs(self.tabDescription) do
 		if frameName == info.frame then
