@@ -85,7 +85,7 @@ function GuildAdsMainDataType:onInitialize()
 	self:RegisterEvent("PLAYER_GUILD_UPDATE", "onGuildUpdate")
 end
 
-function GuildAdsMainDataType:onLevelUp()
+function GuildAdsMainDataType:onLevelUp(event, arg1)
 	self:set(GuildAds.playerName, self.Level, arg1);
 end
 

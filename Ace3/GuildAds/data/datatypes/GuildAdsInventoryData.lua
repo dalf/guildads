@@ -47,7 +47,7 @@ function GuildAdsInventoryDataType:PLAYER_LEAVING_WORLD()
 	self:UnregisterEvent("UNIT_INVENTORY_CHANGED");
 end
 
-function GuildAdsInventoryDataType:UNIT_INVENTORY_CHANGED()
+function GuildAdsInventoryDataType:UNIT_INVENTORY_CHANGED(event, arg1)
 	if arg1 == "player" then
 		self:onEvent();
 	end
