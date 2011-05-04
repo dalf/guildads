@@ -65,6 +65,7 @@ function GuildAdsTradeSkillDataType:enterWorld()
 	self:RegisterEvent("CHARACTER_POINTS_CHANGED", "refreshTradeSkillLinks");
 	self:RegisterEvent("CHAT_MSG_SKILL", "refreshTradeSkillLinks");
 	self:RegisterEvent("PLAYER_LEVEL_UP", "refreshTradeSkillLinks");
+	self:RegisterEvent("TRADE_SKILL_CLOSE", "refreshTradeSkillLinks");
 end
 
 -- is called from GuildAdsTradeFrame:onChanneljoin
