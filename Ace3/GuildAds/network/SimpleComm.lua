@@ -11,7 +11,7 @@ SimpleComm = {}
 
 SIMPLECOMM_CHARACTERSPERTICK_MAX = 255;	-- char per tick
 SIMPLECOMM_OUTBOUND_TICK_DELAY = 1.2;	-- delay in second between tick
-
+SIMPLECOMM_ADDON_OUTBOUND_TICK_DELAY = 0.5 -- delay in seconds between ticks when sending to the addon channel
 SIMPLECOMM_INBOUND_TICK_DELAY = 0.125;	-- TODO : change from 0.125 to 0.5 according to FPS
 
 local PIPE_ENTITIE = "\127p";
@@ -673,7 +673,11 @@ local function SimpleComm_Callback(event, channelName, a1)
 		if (currentChannel.onJoin) then
 			currentChannel.onJoin()
 		end
-		GuildAdsTask:AddNamedSchedule("SimpleCommSendQueue", SIMPLECOMM_OUTBOUND_TICK_DELAY, true, nil, sendQueue)
+		if currentChannel.useGuildAddonChannel then
+			GuildAdsTask:AddNamedSchedule("SimpleCommSendQueue", SIMPLECOMM_ADDON_OUTBOUND_TICK_DELAY, true, nil, sendQueue)
+		else
+			GuildAdsTask:AddNamedSchedule("SimpleCommSendQueue", SIMPLECOMM_OUTBOUND_TICK_DELAY, true, nil, sendQueue)
+		end
 		
 		currentChannel.id = a1;
 		SimpleComm_SetChannelStatus("Connected");
