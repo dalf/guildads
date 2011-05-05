@@ -570,7 +570,11 @@ function GuildAdsComm:CheckTimeout(state, stateTime)
 end
 
 function GuildAdsComm:SetGlobalTimeout()
-	GuildAdsTask:AddNamedSchedule("CheckGlobalTimeout", self.delay.GlobalTimeout, nil, nil, self.GlobalTimeout, self);
+	if not currentChannel.useGuildAddonChannel then
+		GuildAdsTask:AddNamedSchedule("CheckGlobalTimeout", self.delay.GlobalTimeout, nil, nil, self.GlobalTimeout, self);
+	else
+		GuildAdsComm:UnsetGlobalTimeout()
+	end
 end
 
 function GuildAdsComm:UnsetGlobalTimeout()
