@@ -226,7 +226,7 @@ function GuildAds:JoinChannel()
 	
 	if self.channelName then
 		local command, alias = GuildAds:GetDefaultChannelAlias();
-		GuildAdsComm:JoinChannel(self.channelName, self.channelPassword, command, alias);
+		GuildAdsComm:JoinChannel(self.channelName, self.channelPassword, self.channelNameFrom, command, alias);
 	end
 	
 	GuildAds_ChatDebug(GA_DEBUG_GLOBAL,"[GuildAds:JoinChannel] end");
@@ -404,8 +404,8 @@ function GuildAds:UnconfigureChannel()
 end
 
 function GuildAds:CheckChannelConfig()
-	local channelName, channelPassword = self:GetDefaultChannel();
-	if (channelName ~= self.channelName or channelPassword ~= self.channelPassword) then
+	local channelName, channelPassword, channelNameFrom = self:GetDefaultChannel();
+	if (channelName ~= self.channelName or channelPassword ~= self.channelPassword or self.channelNameFrom ~= channelNameFrom) then
 		if self.channelName then
 			GuildAdsComm:LeaveChannel()
 		end

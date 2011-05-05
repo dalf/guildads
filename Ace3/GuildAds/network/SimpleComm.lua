@@ -4,7 +4,7 @@
 --
 -- Author: Zarkan@Ner'zhul-EU, Fkaï@Ner'zhul-EU, Galmok@Stormrage-EU
 -- URL : http://guildads.sourceforge.net
--- Email : guildads@gmail.com
+-- Email : galmok@gmail.com
 -- Licence: GPL version 2 (General Public License)
 ----------------------------------------------------------------------------------
 SimpleComm = {}
@@ -271,8 +271,11 @@ end
 -- 
 ---------------------------------------------------------------------------------
 local function sendQueue()
-	local clearAFK = GetCVar("autoClearAFK");
-	SetCVar("autoClearAFK", 0);
+	local clearAFK
+	if currentChannel.useGuildAddonChannel then
+		clearAFK = GetCVar("autoClearAFK");
+		SetCVar("autoClearAFK", 0);
+	end
 	-- GetLanguageByIndex(1), GetDefaultLanguage()
 	
 	local sentBytes = 0;
@@ -313,13 +316,20 @@ local function sendQueue()
 				num_messages = num_messages + 1
 			end
 		else
-			currentChannel.drunkTemplate[2] = text
-			text = table_concat(currentChannel.drunkTemplate)
-			-- GuildAds_ChatDebug(GA_DEBUG_CHANNEL, "Send to the channel: %s", text);
-			assert(text:len()<=255, "Too long chat message");
-			GuildAdsDatabase.lastChatMessageSent = text;
-			SendChatMessage(text, "CHANNEL", nil, currentChannel.id);
-			GuildAdsDatabase.lastChatMessageSent = nil;
+			if currentChannel.useGuildAddonChannel then
+				assert(text:len()+currentChannel.prefix:len()+1<=255, "Too long guild addon message");
+				GuildAdsDatabase.lastChatMessageSent = text;
+				SendAddonMessage(currentChannel.prefix, text, "GUILD");
+				GuildAdsDatabase.lastChatMessageSent = nil;
+			else
+				currentChannel.drunkTemplate[2] = text
+				text = table_concat(currentChannel.drunkTemplate)
+				-- GuildAds_ChatDebug(GA_DEBUG_CHANNEL, "Send to the channel: %s", text);
+				assert(text:len()<=255, "Too long chat message");
+				GuildAdsDatabase.lastChatMessageSent = text;
+				SendChatMessage(text, "CHANNEL", nil, currentChannel.id);
+				GuildAdsDatabase.lastChatMessageSent = nil;
+			end
 			sentBytes = sentBytes + string.len(text);
 			num_messages = num_messages + 1
 		end
@@ -336,7 +346,9 @@ local function sendQueue()
 	
 	currentChannel.outboundQueueLast = previousMessage;
 	
-	SetCVar("autoClearAFK", clearAFK);
+	if currentChannel.useGuildAddonChannel then
+		SetCVar("autoClearAFK", clearAFK);
+	end
 	if (sentBytes> 0) then
 		GuildAds_ChatDebug(GA_DEBUG_CHANNEL_HIGH, "%i bytes sent", sentBytes)
 		currentChannel.stats.totalSentBytes = currentChannel.stats.totalSentBytes + sentBytes
@@ -464,12 +476,41 @@ local function parseMetaMessage(author, callback, channel)
 	end	
 end
 
+guildOnline = {}
+function scanGuildRoster()
+	local index = 1
+	local changes = new()
+	local numGuild = GetNumGuildMembers()
+	for i = 1, numGuild do
+		local name, rank, rankIndex, level, class, zone, note, officernote, online, status, classFileName, achievementPoints, achievementRank, isMobile = GetGuildRosterInfo(index);
+		index = index + 1
+		if guildOnline[name] then
+			if online then
+				-- no change
+			else
+				-- went offline
+				changes[name] = false
+				guildOnline[name] = nil
+			end
+		else
+			if online then
+				-- came online
+				changes[name] = true
+				guildOnline[name] = true
+			else
+				-- no change
+			end
+		end
+	end
+	return changes
+end
+
 local function onEvent(self, event, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)
 	if currentChannel.name then
 		currentChannel.id = GetChannelName(currentChannel.name);
 		
 		-- event=CHAT_MSG_CHANNEL; arg1=chat message; arg2=author; arg3=language; arg4=channel name with number; arg8=channel number; arg9=channel name without number
-		if (event == "CHAT_MSG_CHANNEL") and (arg8 == currentChannel.id) then
+		if (event == "CHAT_MSG_CHANNEL") and (arg8 == currentChannel.id) and not currentChannel.useGuildAddonChannel then
 			currentChannel.disconnected[arg2] = nil;
 			-- get rid of prefix and " ...hic!"
 			local message, match = arg1:gsub("^"..currentChannel.prefix.."\t(.*)\029.-$", "%1")
@@ -484,14 +525,40 @@ local function onEvent(self, event, arg1, arg2, arg3, arg4, arg5, arg6, arg7, ar
 			parseMessage(arg4, arg2, nil, false)
 			currentChannel.stats.totalReceivedBytes = currentChannel.stats.totalReceivedBytes + arg2:len()
 			currentChannel.stats.totalReceivedMessages = currentChannel.stats.totalReceivedMessages + 1
-		elseif (event == "CHAT_MSG_CHANNEL_JOIN") and (arg8 == currentChannel.id) then
+		elseif (event == "CHAT_MSG_ADDON") and (arg1==currentChannel.prefix) and (arg3=="GUILD") and currentChannel.useGuildAddonChannel then
+			currentChannel.disconnected[arg4] = nil
+			parseMessage(arg4, arg2, currentChannel.name, false)
+			currentChannel.stats.totalReceivedBytes = currentChannel.stats.totalReceivedBytes + arg2:len()
+			currentChannel.stats.totalReceivedMessages = currentChannel.stats.totalReceivedMessages + 1			
+		elseif (event == "CHAT_MSG_CHANNEL_JOIN") and (arg8 == currentChannel.id) and not currentChannel.useGuildAddonChannel then
 			currentChannel.disconnected[arg2] = nil
 			parseMetaMessage(arg2, currentChannel.onSomeoneJoin, currentChannel.name)
-		elseif (event == "CHAT_MSG_CHANNEL_LEAVE") and (arg8 == currentChannel.id) then
+		elseif (event == "CHAT_MSG_CHANNEL_LEAVE") and (arg8 == currentChannel.id) and not currentChannel.useGuildAddonChannel then
 			currentChannel.disconnected[arg2] = time()
 			parseMetaMessage(arg2, currentChannel.onSomeoneLeave, currentChannel.name)
 		elseif (event == "CHAT_MSG_CHANNEL_LIST") and (arg8 == currentChannel.id) then
 			CHAT_MSG_CHANNEL_LIST(arg1)
+		end
+		-- online/offline detection
+		if (event == "GUILD_ROSTER_UPDATE" or event == "GUILD_TRADESKILL_UPDATE" or event == "GUILD_RANKS_UPDATE") then
+			-- scan guild list for online/offline changes
+			local changes = scanGuildRoster()
+			for player, online in pairs(changes) do
+				-- fake join/leave events (recursive call)
+				if online then
+					GuildAds_ChatDebug(GA_DEBUG_CHANNEL_HIGH,  "Guild logon (%s)", player)
+					if currentChannel.useGuildAddonChannel then
+						currentChannel.disconnected[player] = nil
+						parseMetaMessage(player, currentChannel.onSomeoneJoin, currentChannel.name)
+					end
+				else
+					GuildAds_ChatDebug(GA_DEBUG_CHANNEL_HIGH,  "Guild logoff (%s)", player)
+					if currentChannel.useGuildAddonChannel then
+						currentChannel.disconnected[player] = time()
+						parseMetaMessage(player, currentChannel.onSomeoneLeave, currentChannel.name)
+					end
+				end
+			end
 		end
 	end
 	
@@ -526,6 +593,7 @@ local function onEvent(self, event, arg1, arg2, arg3, arg4, arg5, arg6, arg7, ar
 		if arg1==CLEARED_AFK or arg1==CLEARED_DND then
 			setFlag(nil, nil);
 		end
+	
 	end
 end
 
@@ -535,7 +603,7 @@ end
 -- 
 ---------------------------------------------------------------------------------
 local function filter_message(self, event, ...)
-	local arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12 = ...
+	local arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15 = ...
 	
 	-- Hide if this is an internal message
 	if currentChannel.isChatMessageVisible and currentChannel.isChatMessageVisible(arg1, arg2) then
@@ -556,7 +624,7 @@ local function filter_message(self, event, ...)
 			arg4 = currentChannel.aliasName.." -                                ";
 		end
 	end
-	return false, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12
+	return false, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15
 end
 
 local function filter_hide(self, event, ...)
@@ -564,7 +632,6 @@ local function filter_hide(self, event, ...)
 	if (currentChannel.name) then
 		currentChannel.id = GetChannelName(currentChannel.name);
 		if (arg8 == currentChannel.id) then
-			GuildAds_ChatDebug(GA_DEBUG_CHANNEL_HIGH,  arg1)
 			return true
 		end
 	end
@@ -637,7 +704,7 @@ end
 function SimpleComm_SendMessage(who, text)
 	if not(who and currentChannel.disconnected[who]) then
 		local queueLast = currentChannel.outboundQueueLast
-		text = Encode(text, who==nil)
+		text = Encode(text, who==nil and not currentChannel.useGuildAddonChannel)
 		local textLength = text:len()
 		if (textLength + queueLast.length + 1 <= currentChannel.maxMessageLength and queueLast.to == who) then
 			if queueLast.text then
@@ -694,8 +761,6 @@ function SimpleComm_Initialize(
 					FilterText,
 					OnJoin, OnLeave, OnSomeoneJoin, OnSomeoneLeave, OnMessage, 
 					FlagListener, StatusListener)
-	SetCVar("spamFilter", 0) -- dont hide multiple identical lines from same sender (this may not be necessary as GuildAds most likely does not send 2 or more identical lines right after each other)
-	SetCVar("profanityFilter", 0); -- enables words like "slut" and such. Enabling profanity filter could easily cause datacorruption!
 	
 	currentChannel.prefix = Prefix
 	currentChannel.drunkTemplate[1] = Prefix.."\t"
@@ -726,10 +791,13 @@ function SimpleComm_Initialize(
 	end
 	
 	dataChannelLib:RegisterAddon("GuildAds", SimpleComm_Callback)
+	
+	RegisterAddonMessagePrefix(currentChannel.prefix)
+	
 	SimpleComm_SetChannelStatus("Initializing")
 end
 
-function SimpleComm_Join(Channel, Password)
+function SimpleComm_Join(Channel, Password, channelNameFrom)
 	GuildAds_ChatDebug(GA_DEBUG_CHANNEL, "[SimpleComm_Join] begin");
 	
 	-- some sanity check
@@ -742,13 +810,22 @@ function SimpleComm_Join(Channel, Password)
 	-- Init Channel
 	currentChannel.name = Channel;
 	currentChannel.password = Password;
+	currentChannel.channelNameFrom = channelNameFrom;
+	currentChannel.useGuildAddonChannel = channelNameFrom=="guildName" and true or false;
 	
 	-- Reset out queue
 	currentChannel.outboundQueueLast = currentChannel.outboundQueueHeader
 	currentChannel.outboundQueueHeader.next = nil
 	
-	local result = dataChannelLib:OpenChannel("GuildAds", currentChannel.name, currentChannel.password, DEFAULT_CHAT_FRAME);
-	GuildAds_ChatDebug(GA_DEBUG_CHANNEL, "[SimpleComm_Join] Channel %s", result and "joined" or "NOT joined");
+	if not currentChannel.useGuildAddonChannel then
+		SetCVar("spamFilter", 0) -- dont hide multiple identical lines from same sender (this may not be necessary as GuildAds most likely does not send 2 or more identical lines right after each other)
+		SetCVar("profanityFilter", 0); -- enables words like "slut" and such. Enabling profanity filter could easily cause datacorruption!
+		
+		local result = dataChannelLib:OpenChannel("GuildAds", currentChannel.name, currentChannel.password, DEFAULT_CHAT_FRAME);
+		GuildAds_ChatDebug(GA_DEBUG_CHANNEL, "[SimpleComm_Join] Channel %s", result and "joined" or "NOT joined");
+	else
+		GuildAdsTask:AddNamedSchedule("SimpleCommJoinCallback", 0.5, nil, nil, SimpleComm_Callback, dataChannelLib.YOU_JOINED, currentChannel.name, -1); -- channelid = -1
+	end
 	
 	if firstJoin then
 		firstJoin = nil;
@@ -756,6 +833,9 @@ function SimpleComm_Join(Channel, Password)
 		-- Set timer
 		frame:Show();
 	end
+	
+	-- update local copy of guild online/offline status
+	scanGuildRoster();
 	
 	GuildAds_ChatDebug(GA_DEBUG_CHANNEL, "[SimpleComm_Join] end");
 	
@@ -768,11 +848,15 @@ function SimpleComm_Leave()
 	GuildAdsTask:DeleteNamedSchedule("SimpleCommSendQueue")
 	GuildAdsTask:DeleteNamedSchedule("SimpleCommUnqueueMessage")
 	
-	dataChannelLib:CloseChannel("GuildAds", currentChannel.name);
+	if not currentChannel.useGuildAddonChannel then
+		dataChannelLib:CloseChannel("GuildAds", currentChannel.name);
+	end
 	
 	-- set channel
 	currentChannel.name = nil;
 	currentChannel.password = nil;
+	currentChannel.channelNameFrom = nil;
+	currentChannel.useGuildAddonChannel = nil;
 	GuildAds_ChatDebug(GA_DEBUG_CHANNEL, "[SimpleComm_Leave] end");
 end
 
@@ -810,6 +894,9 @@ local function onLoad()
 	frame:RegisterEvent("CHAT_MSG_CHANNEL_JOIN")
 	frame:RegisterEvent("CHAT_MSG_CHANNEL_LEAVE")
 	frame:RegisterEvent("CHAT_MSG_SYSTEM")
+	frame:RegisterEvent("GUILD_ROSTER_UPDATE")
+	frame:RegisterEvent("GUILD_TRADESKILL_UPDATE")
+	frame:RegisterEvent("GUILD_RANKS_UPDATE")
 	
 	ChatFrame_AddMessageEventFilter("CHAT_MSG_CHANNEL", filter_message)
 	ChatFrame_AddMessageEventFilter("CHAT_MSG_CHANNEL_JOIN", filter_hide)

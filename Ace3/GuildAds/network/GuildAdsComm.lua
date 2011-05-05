@@ -8,7 +8,7 @@
 -- Licence: GPL version 2 (General Public License)
 ----------------------------------------------------------------------------------
 
-GUILDADS_VERSION_PROTOCOL = "6";
+GUILDADS_VERSION_PROTOCOL = "7";
 GUILDADS_MSG_PREFIX_NOVERSION = "GA";
 GUILDADS_MSG_PREFIX_REGEX = "^GA(.*)\t";
 
@@ -248,12 +248,13 @@ function GuildAdsComm:Initialize()
 	);
 end
 
-function GuildAdsComm:JoinChannel(channel, password, command, alias)
+function GuildAdsComm:JoinChannel(channel, password, channelNameFrom, command, alias)
 	--LoggingChat(true);
 	self.channelName = channel
 	self.channelPassword = password
+	self.channelNameFrom = channelNameFrom
 	
-	if SimpleComm_Join(channel, password) then
+	if SimpleComm_Join(channel, password, channelNameFrom) then
 		SimpleComm_SetAlias(command, alias)
 	end
 end
@@ -268,6 +269,7 @@ function GuildAdsComm:LeaveChannel()
 	
 		self.channelName = nil
 		self.channelPassword = nil
+		self.channelNameFrom = nil
 	end
 end
 
@@ -538,10 +540,17 @@ function GuildAdsComm:SetState(state, timeout)
 	end
 end
 
+local expectedTokenSender = false
 function GuildAdsComm:CheckTimeout(state, stateTime)
 	if state==self.state and stateTime==self.stateTime then
 		self.stats.Timeout[state] = (self.stats.Timeout[state] or 0) + 1
 		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "Timeout for state: %s", state);
+		-- who failed to send the new token?
+		if expectedTokenSender == GuildAds.playerName then
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "I failed to send the new token position");
+		else
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "%s failed to send the new token position", expectedTokenSender or "");
+		end
 		-- move token to the next 
 		local newToken = 1;
 		if self.token<#self.playerList then
@@ -553,6 +562,7 @@ function GuildAdsComm:CheckTimeout(state, stateTime)
 		else
 			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "%s will send the new token position", self.playerList[newToken] or "");
 		end
+		expectedTokenSender = self.playerList[newToken]
 		--self:MoveToken(newToken);
 	else
 		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "NO Timeout for state: %s=%s, %s=%s", state, self.state, stateTime, self.stateTime);

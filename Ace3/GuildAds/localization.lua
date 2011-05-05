@@ -38,7 +38,7 @@ GUILDADS_ICON			= "Minimap icon";
 GUILDADS_ADJUST_ANGLE		= "Adjust angle";
 GUILDADS_ADJUST_RADIUS		= "Adjust radius";
 
-GUILDADS_AUTOCHANNELCONFIG	= "Automatic channel configuration";
+GUILDADS_AUTOCHANNELCONFIG	= "Use guild addon channel";
 GUILDADS_MANUALCHANNELCONFIG	= "Manual channel configuration";
 
 GUILDADS_ERROR_NOTINITIALIZED 	= "GuildAds is not initialized."
