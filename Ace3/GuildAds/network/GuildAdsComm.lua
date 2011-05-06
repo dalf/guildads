@@ -164,6 +164,7 @@ GuildAdsComm = GuildAds:NewModule("GuildAdsComm", {
 	token = 1,
 	channelName = "",
 	channelPassword = "",
+	channelNameFrom = "",
 	
 	minimumRevision = GUILDADS_REVISION_NUMBER,
 	maximumRevision = GUILDADS_REVISION_NUMBER,
@@ -570,7 +571,7 @@ function GuildAdsComm:CheckTimeout(state, stateTime)
 end
 
 function GuildAdsComm:SetGlobalTimeout()
-	if not currentChannel.useGuildAddonChannel then
+  if self.channelNameFrom~="guildName" then
 		GuildAdsTask:AddNamedSchedule("CheckGlobalTimeout", self.delay.GlobalTimeout, nil, nil, self.GlobalTimeout, self);
 	else
 		GuildAdsComm:UnsetGlobalTimeout()
