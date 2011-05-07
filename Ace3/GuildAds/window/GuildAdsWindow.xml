@@ -25,6 +25,11 @@
 				PanelTemplates_TabResize(self, 0); <!-- size to fit text, no padding-->
 			</OnShow>
 		</Scripts>
+		<OnEvent>
+			if (self:IsVisible()) then
+				PanelTemplates_TabResize(self, 0); <!-- size to fit text, no padding-->
+			end
+		</OnEvent>
 	</Button>
 	
 </Ui>
