@@ -18,6 +18,7 @@
 
 local clearedWoW2
 local wowIdToGuildAdsId = {}
+local alreadyInformed = false
 
 GuildAdsTradeSkillDataType = GuildAdsTableDataType:new({
 	metaInformations = {
@@ -177,12 +178,13 @@ function GuildAdsTradeSkillDataType:doItemsExist()
 			break
 		end
 	end
-	if found then
+	if found and not alreadyInformed then
 		ChatFrame1:AddMessage("GuildAds: item-links found in database. GuildAds only stores trade-links now.")
 		ChatFrame1:AddMessage("If you use the latest GuildAds, you (or another in your network) should run this command:")
 		ChatFrame1:AddMessage("/run GuildAdsTradeSkillDataType:deleteTradeSkillItemLinks()")
 		ChatFrame1:AddMessage("This will delete all tradeskill related item-links and propagate this to the rest of the network.")
 		ChatFrame1:AddMessage("This could take a long time and disconnect you, hence the manual approach")
+		alreadyInformed = true
 	end
 end
 
