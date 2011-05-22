@@ -26,6 +26,8 @@ SimpleComm_oldSendChatMessage = nil;
 local frame
 
 local firstJoin = true
+local guildChannelJoined = false
+local guildChannelReady = false
 
 -- dataChannelLib --------------------------------------------
 local dataChannelLib = DataChannelLib:GetInstance("1");
@@ -400,6 +402,48 @@ end
 
 ---------------------------------------------------------------------------------
 --
+-- DataChannelLib callback
+-- 
+---------------------------------------------------------------------------------
+local function SimpleComm_Callback(event, channelName, a1)
+	if event==dataChannelLib.YOU_JOINED then
+		GuildAds_ChatDebug(GA_DEBUG_CHANNEL, "[SimpleCommCallback] YOU_JOINED");
+		if (currentChannel.slashCmd) then
+			setAliasChannel();
+		end
+		if (currentChannel.onJoin) then
+			currentChannel.onJoin()
+		end
+		if currentChannel.useGuildAddonChannel then
+			GuildAdsTask:AddNamedSchedule("SimpleCommSendQueue", SIMPLECOMM_ADDON_OUTBOUND_TICK_DELAY, true, nil, sendQueue)
+		else
+			GuildAdsTask:AddNamedSchedule("SimpleCommSendQueue", SIMPLECOMM_OUTBOUND_TICK_DELAY, true, nil, sendQueue)
+		end
+		
+		currentChannel.id = a1;
+		SimpleComm_SetChannelStatus("Connected");
+	elseif event==dataChannelLib.YOU_LEFT then
+		GuildAds_ChatDebug(GA_DEBUG_CHANNEL, "[SimpleCommCallback] YOU_LEFT");
+		if (currentChannel.slashCmd) then
+			unsetAliasChannel();
+		end
+		if (currentChannel.onLeave) then
+			currentChannel.onLeave()
+		end
+		SimpleComm_SetChannelStatus("Disconnected");
+	elseif event==dataChannelLib.TOO_MANY_CHANNELS then
+		SimpleComm_SetChannelStatus("Error", GUILDADS_ERROR_TOOMANYCHANNELS)
+	elseif event==dataChannelLib.WRONG_NAME then
+		SimpleComm_SetChannelStatus("Error", GUILDADS_ERROR_JOINCHANNELFAILED)
+	elseif event==dataChannelLib.WRONG_PASSWORD then
+		SimpleComm_SetChannelStatus("Error", GUILDADS_ERROR_WRONGPASSWORD)
+	elseif event==dataChannelLib.PASSWORD_CHANGED then
+		currentChannel.password = a1;
+	end
+end
+
+---------------------------------------------------------------------------------
+--
 -- Received message
 -- 
 ---------------------------------------------------------------------------------
@@ -525,11 +569,14 @@ local function onEvent(self, event, arg1, arg2, arg3, arg4, arg5, arg6, arg7, ar
 			parseMessage(arg4, arg2, nil, false)
 			currentChannel.stats.totalReceivedBytes = currentChannel.stats.totalReceivedBytes + arg2:len()
 			currentChannel.stats.totalReceivedMessages = currentChannel.stats.totalReceivedMessages + 1
-		elseif (event == "CHAT_MSG_ADDON") and (arg1==currentChannel.prefix) and (arg3=="GUILD") and currentChannel.useGuildAddonChannel then
+		elseif (event == "CHAT_MSG_ADDON") and (arg1==currentChannel.prefix) and (arg3=="GUILD") then
+			guildChannelReady = true
 			currentChannel.disconnected[arg4] = nil
-			parseMessage(arg4, arg2, currentChannel.name, false)
-			currentChannel.stats.totalReceivedBytes = currentChannel.stats.totalReceivedBytes + arg2:len()
-			currentChannel.stats.totalReceivedMessages = currentChannel.stats.totalReceivedMessages + 1			
+			if currentChannel.useGuildAddonChannel then
+				parseMessage(arg4, arg2, currentChannel.name, false)
+				currentChannel.stats.totalReceivedBytes = currentChannel.stats.totalReceivedBytes + arg2:len()
+				currentChannel.stats.totalReceivedMessages = currentChannel.stats.totalReceivedMessages + 1			
+			end
 		elseif (event == "CHAT_MSG_CHANNEL_JOIN") and (arg8 == currentChannel.id) and not currentChannel.useGuildAddonChannel then
 			currentChannel.disconnected[arg2] = nil
 			parseMetaMessage(arg2, currentChannel.onSomeoneJoin, currentChannel.name)
@@ -539,27 +586,33 @@ local function onEvent(self, event, arg1, arg2, arg3, arg4, arg5, arg6, arg7, ar
 		elseif (event == "CHAT_MSG_CHANNEL_LIST") and (arg8 == currentChannel.id) then
 			CHAT_MSG_CHANNEL_LIST(arg1)
 		end
-		-- online/offline detection
-		if (event == "GUILD_ROSTER_UPDATE" or event == "GUILD_TRADESKILL_UPDATE" or event == "GUILD_RANKS_UPDATE") then
-			-- scan guild list for online/offline changes
-			local changes = scanGuildRoster()
-			for player, online in pairs(changes) do
-				-- fake join/leave events (recursive call)
-				if online then
-					GuildAds_ChatDebug(GA_DEBUG_CHANNEL_HIGH,  "Guild logon (%s)", player)
-					if currentChannel.useGuildAddonChannel then
-						currentChannel.disconnected[player] = nil
-						parseMetaMessage(player, currentChannel.onSomeoneJoin, currentChannel.name)
-					end
-				else
-					GuildAds_ChatDebug(GA_DEBUG_CHANNEL_HIGH,  "Guild logoff (%s)", player)
-					if currentChannel.useGuildAddonChannel then
-						currentChannel.disconnected[player] = time()
-						parseMetaMessage(player, currentChannel.onSomeoneLeave, currentChannel.name)
-					end
-				end
+	end
+	-- online/offline detection
+	if (event == "GUILD_ROSTER_UPDATE" or event == "GUILD_TRADESKILL_UPDATE" or event == "GUILD_RANKS_UPDATE") then
+		-- scan guild list for online/offline changes
+		local changes = scanGuildRoster()
+		for player, online in pairs(changes) do
+			-- fake join/leave events
+			if online then
+				GuildAds_ChatDebug(GA_DEBUG_CHANNEL_HIGH,  "Guild logon (%s)", player)
+				parseMetaMessage(player, currentChannel.onSomeoneJoin, currentChannel.name)
+				currentChannel.disconnected[player] = nil
+			else
+				GuildAds_ChatDebug(GA_DEBUG_CHANNEL_HIGH,  "Guild logoff (%s)", player)
+				currentChannel.disconnected[player] = time()
+				parseMetaMessage(player, currentChannel.onSomeoneLeave, currentChannel.name) -- not instant action. if minimizing wow right after, this internal message is lost.
 			end
 		end
+		if event == "GUILD_ROSTER_UPDATE" then
+			guildChannelReady = true
+		end
+	end
+	-- regardless of event, schedule a channel joined event
+	if guildChannelReady and currentChannel.useGuildAddonChannel and not guildChannelJoined then
+		guildChannelJoined = true
+		GuildAdsTask:DeleteNamedSchedule("SimpleCommJoinGuildChannel")
+		SimpleComm_Callback(dataChannelLib.YOU_JOINED, currentChannel.name, -1);
+		--GuildAdsTask:AddNamedSchedule("SimpleCommJoinCallback", 0.5, nil, nil, SimpleComm_Callback, dataChannelLib.YOU_JOINED, currentChannel.name, -1); -- channelid = -1
 	end
 	
 	-- update DND/AFK/Drunk status
@@ -596,7 +649,6 @@ local function onEvent(self, event, arg1, arg2, arg3, arg4, arg5, arg6, arg7, ar
 	
 	end
 end
-
 ---------------------------------------------------------------------------------
 --
 -- Chat frame filters
@@ -660,45 +712,7 @@ local function filter_CHANNEL_LIST(self, event, ...)
 	end
 	return false, ...
 end
----------------------------------------------------------------------------------
---
--- DataChannelLib callback
--- 
----------------------------------------------------------------------------------
-local function SimpleComm_Callback(event, channelName, a1)
-	if event==dataChannelLib.YOU_JOINED then
-		if (currentChannel.slashCmd) then
-			setAliasChannel();
-		end
-		if (currentChannel.onJoin) then
-			currentChannel.onJoin()
-		end
-		if currentChannel.useGuildAddonChannel then
-			GuildAdsTask:AddNamedSchedule("SimpleCommSendQueue", SIMPLECOMM_ADDON_OUTBOUND_TICK_DELAY, true, nil, sendQueue)
-		else
-			GuildAdsTask:AddNamedSchedule("SimpleCommSendQueue", SIMPLECOMM_OUTBOUND_TICK_DELAY, true, nil, sendQueue)
-		end
-		
-		currentChannel.id = a1;
-		SimpleComm_SetChannelStatus("Connected");
-	elseif event==dataChannelLib.YOU_LEFT then
-		if (currentChannel.slashCmd) then
-			unsetAliasChannel();
-		end
-		if (currentChannel.onLeave) then
-			currentChannel.onLeave()
-		end
-		SimpleComm_SetChannelStatus("Disconnected");
-	elseif event==dataChannelLib.TOO_MANY_CHANNELS then
-		SimpleComm_SetChannelStatus("Error", GUILDADS_ERROR_TOOMANYCHANNELS)
-	elseif event==dataChannelLib.WRONG_NAME then
-		SimpleComm_SetChannelStatus("Error", GUILDADS_ERROR_JOINCHANNELFAILED)
-	elseif event==dataChannelLib.WRONG_PASSWORD then
-		SimpleComm_SetChannelStatus("Error", GUILDADS_ERROR_WRONGPASSWORD)
-	elseif event==dataChannelLib.PASSWORD_CHANGED then
-		currentChannel.password = a1;
-	end
-end
+
 
 ---------------------------------------------------------------------------------
 --
@@ -801,6 +815,15 @@ function SimpleComm_Initialize(
 	SimpleComm_SetChannelStatus("Initializing")
 end
 
+function SimpleComm_ResetOutQueue()
+	currentChannel.outboundQueueLast = currentChannel.outboundQueueHeader
+	currentChannel.outboundQueueHeader.next = nil
+end
+
+function SimpleComm_SendQueue()
+	sendQueue()
+end
+
 function SimpleComm_Join(Channel, Password, channelNameFrom)
 	GuildAds_ChatDebug(GA_DEBUG_CHANNEL, "[SimpleComm_Join] begin");
 	
@@ -818,17 +841,22 @@ function SimpleComm_Join(Channel, Password, channelNameFrom)
 	currentChannel.useGuildAddonChannel = channelNameFrom=="guildName" and true or false;
 	
 	-- Reset out queue
-	currentChannel.outboundQueueLast = currentChannel.outboundQueueHeader
-	currentChannel.outboundQueueHeader.next = nil
+	SimpleComm_ResetOutQueue()
+	--currentChannel.outboundQueueLast = currentChannel.outboundQueueHeader
+	--currentChannel.outboundQueueHeader.next = nil
 	
+	local result
 	if not currentChannel.useGuildAddonChannel then
 		SetCVar("spamFilter", 0) -- dont hide multiple identical lines from same sender (this may not be necessary as GuildAds most likely does not send 2 or more identical lines right after each other)
 		SetCVar("profanityFilter", 0); -- enables words like "slut" and such. Enabling profanity filter could easily cause datacorruption!
 		
-		local result = dataChannelLib:OpenChannel("GuildAds", currentChannel.name, currentChannel.password, DEFAULT_CHAT_FRAME);
+		result = dataChannelLib:OpenChannel("GuildAds", currentChannel.name, currentChannel.password, DEFAULT_CHAT_FRAME);
 		GuildAds_ChatDebug(GA_DEBUG_CHANNEL, "[SimpleComm_Join] Channel %s", result and "joined" or "NOT joined");
 	else
-		GuildAdsTask:AddNamedSchedule("SimpleCommJoinCallback", 0.5, nil, nil, SimpleComm_Callback, dataChannelLib.YOU_JOINED, currentChannel.name, -1); -- channelid = -1
+		if guildChannelReady then
+			GuildAdsTask:AddNamedSchedule("SimpleCommJoinGuildChannel", 3, nil, nil, onEvent, "JOIN GUILD CHANNEL"); -- fake event. This just schedules the channel join handler
+		end
+		result = true
 	end
 	
 	if firstJoin then
@@ -849,14 +877,21 @@ end
 function SimpleComm_Leave()
 	GuildAds_ChatDebug(GA_DEBUG_CHANNEL, "[SimpleComm_Leave] begin");
 	-- leave channel
-	GuildAdsTask:DeleteNamedSchedule("SimpleCommSendQueue")
-	GuildAdsTask:DeleteNamedSchedule("SimpleCommUnqueueMessage")
 	
 	if not currentChannel.useGuildAddonChannel then
 		dataChannelLib:CloseChannel("GuildAds", currentChannel.name);
+	else
+		currentChannel.onLeave()
 	end
+	guildChannelJoined = false;
 	
-	-- set channel
+	-- delete SimpleComm timers
+	GuildAdsTask:DeleteNamedSchedule("SimpleCommSendQueue")
+	GuildAdsTask:DeleteNamedSchedule("SimpleCommUnqueueMessage")
+	GuildAdsTask:DeleteNamedSchedule("SimpleCommJoinGuildChannel")
+	GuildAdsTask:DeleteNamedSchedule("SimpleCommJoinCallback")
+
+	-- unset channel
 	currentChannel.name = nil;
 	currentChannel.password = nil;
 	currentChannel.channelNameFrom = nil;

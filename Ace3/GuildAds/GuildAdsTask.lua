@@ -26,6 +26,10 @@ local frame
 local timers = {}
 local heap = {}
 local localtime = 0
+local lasttime = 0
+local _localtime = 0
+local eventcount = 0
+local disconnected = false
 
 -- Dispatcher ----------------------------------------------
 local function errorhandler(err)
@@ -122,6 +126,18 @@ end
 local function OnUpdate(self, elapsed)
 	localtime = localtime + elapsed;
 	local schedule = heap[1]
+	--if not fake then
+	--	eventcount = 0
+	--end
+	if disconnected then
+		GuildAds_ChatDebug(GA_DEBUG_GLOBAL, "Reconnecting (maybe).", elapsed)
+		if GuildAdsComm and not GuildAdsComm.channelName then
+		-- rejoin if GuildAds was previously disconnected
+		GuildAds_ChatDebug(GA_DEBUG_GLOBAL, "Reconnecting.", elapsed)
+		GuildAds:JoinChannel()
+		disconnected = false
+	end
+	end
 	while schedule and schedule.timeToFire < localtime do
 		-- if there is lag, get back in time, and exit for now
 		if elapsed>0.5 then
@@ -218,7 +234,46 @@ function GuildAdsTask:GetOnUpdate()
 	return OnUpdate;
 end
 
+
+local function OnEvent(self, event, ...)
+	local time = GetTime()
+	if _localtime == localtime then
+		-- according to OnUpdate, no time has passed since last event
+		-- this can be ok: Several events can happen at the same time
+
+		if time - lasttime > 1 then
+			-- according to events, some time (1 second) has passed
+
+			if eventcount > 0 and disconnected == false then
+				-- 1 events has passed, all with time elapsed between them, yet no OnUpdate call:
+				-- wow is probably minimized and we will have to simulate OnUpdate calls from the OnEvent calls.
+				--GuildAds_ChatDebug(GA_DEBUG_GLOBAL, "Fake OnUpdate (%s)", time - lasttime)
+				GuildAds_ChatDebug(GA_DEBUG_GLOBAL, "OnUpdate not being called. Disconnecting. (%s)", time - lasttime)
+				disconnected = true
+				-- 
+				
+				GuildAds:LeaveChannel()
+				
+				-- Send D> message directly as the send queue is driven by OnUpdate (and hence not running)
+				-- This REALLY needs to be put the correct place. This is an ugly hack!
+				--SendAddonMessage(GUILDADS_MSG_PREFIX, "D>", "GUILD");
+				--OnUpdate(self, time - lasttime, true)
+			else
+				eventcount = eventcount + 1
+			end
+		end
+	end
+	lasttime = time
+	_localtime = localtime
+end
+
 function GuildAdsTask:Initialize()
 	frame = CreateFrame("Frame")
 	frame:SetScript("OnUpdate", OnUpdate)
+
+	lasttime = GetTime()
+	frame:RegisterEvent("CHAT_MSG_ADDON")
+	frame:RegisterEvent("CHAT_MSG_CHANNEL")
+	--frame:RegisterAllEvents()
+	frame:SetScript("OnEvent", OnEvent)
 end

@@ -162,7 +162,7 @@ GuildAdsComm = GuildAds:NewModule("GuildAdsComm", {
 	playerChatFlags = {},
 	databaseIdList = {},
 	token = 1,
-	channelName = "",
+	channelName = nil,
 	channelPassword = "",
 	channelNameFrom = "",
 	
@@ -263,14 +263,27 @@ end
 function GuildAdsComm:LeaveChannel()
 	--LoggingChat(false);
 	if self.channelName then
+		GuildAdsTask:DeleteNamedSchedule("Initialise");
+		GuildAdsTask:DeleteNamedSchedule("Tick");
+		GuildAdsTask:DeleteNamedSchedule("MoveToken");
+		GuildAdsTask:DeleteNamedSchedule("SendSearch");
+		GuildAdsTask:DeleteNamedSchedule("SendHashSearch");
+		GuildAdsTask:DeleteNamedSchedule("SendPlayerList");
+		self:UnsetGlobalTimeout();
+		
 		-- Send leave message in case we don't actually leave the channel.
+		SimpleComm_ResetOutQueue()
 		self:SendPlayerLeaving()
+		SimpleComm_SendQueue()
+		
+		self:SetState("DISCONNECTED", false)
 		
 		SimpleComm_Leave();
 	
 		self.channelName = nil
 		self.channelPassword = nil
 		self.channelNameFrom = nil
+		--self.playerList = {}
 	end
 end
 
@@ -353,7 +366,7 @@ function GuildAdsComm.OnJoin(self)
 	
 	-- Get ready to store responding players
 	self.logging_on=true;
-	self.sendPlayerList=false; -- set to true to enable sending of the P message (not fully operational)
+	self.sendPlayerList=true; -- set to true to enable sending of the P message (not fully operational)
 	
 	-- Send Meta
 	self:SendMeta();
@@ -562,6 +575,7 @@ function GuildAdsComm:CheckTimeout(state, stateTime)
 			self:SendMoveToken(newToken);
 		else
 			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "%s will send the new token position", self.playerList[newToken] or "");
+			--self:SetState("MOVETOKEN", self.delay.MoveToken+self.delay.Timeout);
 		end
 		expectedTokenSender = self.playerList[newToken]
 		--self:MoveToken(newToken);
@@ -571,11 +585,7 @@ function GuildAdsComm:CheckTimeout(state, stateTime)
 end
 
 function GuildAdsComm:SetGlobalTimeout()
-  if self.channelNameFrom~="guildName" then
-		GuildAdsTask:AddNamedSchedule("CheckGlobalTimeout", self.delay.GlobalTimeout, nil, nil, self.GlobalTimeout, self);
-	else
-		GuildAdsComm:UnsetGlobalTimeout()
-	end
+	GuildAdsTask:AddNamedSchedule("CheckGlobalTimeout", self.delay.GlobalTimeout, nil, nil, self.GlobalTimeout, self);
 end
 
 function GuildAdsComm:UnsetGlobalTimeout()
@@ -590,8 +600,13 @@ function GuildAdsComm:GlobalTimeout()
 	GuildAdsTask:DeleteNamedSchedule("MoveToken")
 	GuildAdsTask:DeleteNamedSchedule("CheckTimeout")
 	
-	-- GuildAdsComm guesses that player tree is broken : someone has disconnect, and it didn't catch it
-	SimpleComm_GetMembers(GuildAdsComm.ChannelListComplete)
+	if self.channelNameFrom~="guildName" then
+		-- GuildAdsComm guesses that player tree is broken : someone has disconnect, and it didn't catch it
+		SimpleComm_GetMembers(GuildAdsComm.ChannelListComplete)
+	else
+		GuildAdsTask:AddNamedSchedule("SendPlayerList", random(self.delay.AnswerMeta), nil, nil, self.SendPlayerList, self);
+		--self:SendPlayerList();
+	end
 end
 
 function GuildAdsComm.ChannelListComplete(playerList)
@@ -885,7 +900,9 @@ function GuildAdsComm:DisableFullProtocol()
 		O=true,
 		K=true,
 		CT=true,
-		T=true
+		T=true,
+		D=true,
+		P=true
 	};
 end
 
@@ -895,7 +912,7 @@ end
 -- 
 --------------------------------------------------------------------------------
 function GuildAdsComm:ReceiveMeta(channelName, personName, revision, revisionString, startTime, playerCount, databaseId)
-	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "ReceiveMeta(%s)", personName);
+	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "ReceiveMeta[%s]", personName);
 	-- store information about this player
 	self.playerMeta[personName] = {
 		onlineSince = startTime;
@@ -953,6 +970,7 @@ function GuildAdsComm:ReceiveMeta(channelName, personName, revision, revisionStr
 		-- set the global time out
 		GuildAdsComm:SetGlobalTimeout()
 	end
+	GuildAdsTask:DeleteNamedSchedule("MoveToken");
 end
 
 function GuildAdsComm:ReceiveChatFlag(channelName, personName, flag, text)
@@ -960,7 +978,7 @@ function GuildAdsComm:ReceiveChatFlag(channelName, personName, flag, text)
 end
 
 function GuildAdsComm:ReceiveHashSearch(channelName, personName, path, hashSequence)
-	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "ReceiveHashSearch(%s, %s)", path, hashSequence);
+	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "ReceiveHashSearch[%s](%s, %s)", personName, path, hashSequence);
 	GuildAdsHash:ReceiveSearch(path, hashSequence);
 	self:DequeueHashSearch(path); -- enough that 1 player makes a hash search for this path. Everyone else can dequeue it.
 	self:SetState("HASHSEARCHING", self.delay.SearchDelay+self.delay.Timeout);
@@ -973,12 +991,12 @@ function GuildAdsComm:ReceiveHashSearch(channelName, personName, path, hashSeque
 end
 
 function GuildAdsComm:ReceiveHashSearchResultToParent(channelName, personName, path, hashChanged, who, amount, numplayers)
-	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "ReceiveHashSearchFromChild(%s, %i)= %s, %i, %i", path, hashChanged, who, amount, numplayers or 1);
+	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "ReceiveHashSearchFromChild[%s](%s, %i)= %s, %i, %i", personName, path, hashChanged, who, amount, numplayers or 1);
 	GuildAdsHash:ReceiveHashSearchToParent(personName, path, hashChanged, who, amount, numplayers);
 end
 
 function GuildAdsComm:ReceiveHashSearchResult(channelName, personName, path, hashChanged, who, amount)
-	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "ReceiveHashSearchResult(%s, %i) = %s", path, hashChanged, who, amount);
+	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "ReceiveHashSearchResult[%s](%s, %i) = %s", personName, path, hashChanged, who, amount);
 	
 	local depth = (path=="" and 0) or select("#", strsplit(",",path))
 	-- local pathTable=GuildAdsHash:stringToPath(path); local depth=#pathTable;
@@ -1010,7 +1028,7 @@ end
 
 function GuildAdsComm:ReceiveSearch(channelName, personName, dataTypeName, playerName)
 	local DTS = self.DTS[dataTypeName];
-	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "ReceiveSearch(%s, %s)", tostring(DTS), playerName);
+	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "ReceiveSearch[%s](%s, %s)", personName, tostring(DTS), playerName);
 	DTS:ReceiveSearch(playerName)
 	-- Add playerName to the current channel
 	GuildAdsDB.channel[GuildAds.channelName]:addPlayer(playerName);
@@ -1029,7 +1047,7 @@ end
 
 function GuildAdsComm:ReceiveSearchResultToParent(channelName, personName, dataTypeName, playerName, who, revision, weight, worstRevision, version)
 	local DTS = self.DTS[dataTypeName];
-	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "ReceiveRevision(%s, %s)= %s (%i->%i) v%s", tostring(DTS), playerName, who, worstRevision, revision, tostring(version));
+	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "ReceiveRevision[%s](%s, %s)= %s (%i->%i) v%s", personName, tostring(DTS), playerName, who, worstRevision, revision, tostring(version));
 	DTS:ReceiveRevision(personName, playerName, who, revision, weight, worstRevision, version)
 end
 
@@ -1039,7 +1057,7 @@ function GuildAdsComm:ReceiveSearchResult(channelName, personName, dataTypeName,
 	self.stats.RevisionSearch = self.stats.RevisionSearch + 1
 	
 	local DTS = self.DTS[dataTypeName];
-	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "ReceiveSearchResult(%s, %s) = %s (%i->%i)", tostring(DTS), playerName, who, fromRevision, toRevision);
+	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "ReceiveSearchResult[%s](%s, %s) = %s (%i->%i)", personName, tostring(DTS), playerName, who, fromRevision, toRevision);
 	-- parse message
 	DTS:ReceiveSearchResult(playerName, who, fromRevision, toRevision)
 	-- no update : move the token
@@ -1071,7 +1089,7 @@ function GuildAdsComm:ReceiveOpenTransaction(channelName, personName, dataTypeNa
 			if self.transactions[personName] then
 				GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "|cffff1e00Duplicate|r OPEN TRANSACTION from %s (already open)", personName);
 			end
-			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"ReceiveOpenTransaction(%s, %s, %s)", tostring(DTS), playerName, fromRevision);
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"ReceiveOpenTransaction[%s](%s, %s, %s)", personName, tostring(DTS), playerName, fromRevision);
 			-- add transaction
 			local allowed, adminBy = GuildAdsDB.channel[GuildAds.channelName]:isPlayerAllowed(playerName);
 			self.transactions[personName] = new_kv(
@@ -1086,7 +1104,7 @@ function GuildAdsComm:ReceiveOpenTransaction(channelName, personName, dataTypeNa
 			-- parse message
 			DTS:ReceiveOpenTransaction(self.transactions[personName], playerName, fromRevision, toRevision, version or 1);
 			if self.transactions[personName].ignore then
-				GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"|cffff1e00Ignore|r ReceiveOpenTransaction(%s, %s, %s) (blacklisted)", tostring(DTS), playerName, fromRevision);
+				GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"|cffff1e00Ignore|r ReceiveOpenTransaction[%s](%s, %s, %s) (blacklisted)", personName, tostring(DTS), playerName, fromRevision);
 				-- find out who has blacklisted that player and queue Admin/<that player>
 				if self.DTS["Admin"] and adminBy then
 					GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"|cffff1e00Ignore|r ReceiveOpenTransaction: Queueing Admin/%s ", adminBy);
@@ -1096,10 +1114,10 @@ function GuildAdsComm:ReceiveOpenTransaction(channelName, personName, dataTypeNa
 				self.stats.AcceptedTransaction = self.stats.AcceptedTransaction + 1
 			end
 		else
-			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"|cffff1e00Ignore|r ReceiveOpenTransaction(%s, %s, %s) (my update)", tostring(DTS), playerName, fromRevision);
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"|cffff1e00Ignore|r ReceiveOpenTransaction[%s](%s, %s, %s) (my update)", personName, tostring(DTS), playerName, fromRevision);
 		end
 	else
-		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"|cffff1e00Ignore|r ReceiveOpenTransaction(%s, %s) (unknown playerMeta for %s)", playerName, fromRevision, personName);
+		GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"|cffff1e00Ignore|r ReceiveOpenTransaction[%s](%s, %s) (unknown playerMeta for %s)", personName, playerName, fromRevision, personName);
 	end
 	-- reset timeout
 	self:SetState("UPDATING", self.delay.TransactionDelay+self.delay.Timeout);
@@ -1195,7 +1213,7 @@ function GuildAdsComm:ReceiveCloseTransaction(channelName, personName)
 end
 
 function GuildAdsComm:ReceiveMoveToken(channelName, personName, index)
-	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"ReceiveMoveToken(%s)", tostring(index));
+	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"ReceiveMoveToken[%s](%s)", personName, tostring(index));
 	if index then
 		index = tonumber(index);
 		assert(index>=0, "Invalid token (<0)");
@@ -1211,11 +1229,16 @@ function GuildAdsComm:ReceiveMoveToken(channelName, personName, index)
 end
 
 function GuildAdsComm:ReceivePlayerList(channelName, personName, playersSerialized)
-	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"ReceivePlayerList(%s)", playersSerialized);
+	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"ReceivePlayerList[%s](%s)", personName, playersSerialized);
 	-- NOTE: from the time the playerSerialized is sent to we receive it, players may have come online or gone offline!
 	-- This means playersSerialized may occasionally be wrong
 	
 	-- This function assumes that self.playerTree is in perfect sync with self.playerList
+	
+	-- delete any pending SendPlayerList calls.
+	GuildAdsTask:DeleteNamedSchedule("SendPlayerList");
+	-- queue move token. It is cancelled if a meta is received
+	GuildAdsTask:AddNamedSchedule("MoveToken", self.delay.Init, nil, nil, self.MoveToken, self, 1, nil);
 	
 	-- check self.playerList against playersSerialized
 	-- players mentioned in playerList but not in playersSerialized must be logged off: self:SetOnlineStatus(playerName, false)
@@ -1258,7 +1281,7 @@ function GuildAdsComm:ReceivePlayerList(channelName, personName, playersSerializ
 end
 
 function GuildAdsComm:ReceivePlayerLeaving(channelName, personName, playerName)
-	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"ReceivePlayerLeaving(%s)", playerName);
+	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"ReceivePlayerLeaving[%s](%s)", personName, playerName);
 	if playerName then
 		-- have to handle the situation when playerName == GuildAds.playerName (!!)
 		self:SetOnlineStatus(playerName, false)
