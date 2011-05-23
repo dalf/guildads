@@ -507,6 +507,7 @@ function GuildAdsComm:SetOnlineStatus(playerName, status)
 		self.stats.Join = self.stats.Join + 1
 		-- change to online
 		if (not self.playerTree[playerName]) then
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "Inserting %s in active playerList", tostring(playerName));
 			table.insert(self.playerList, playerName);
 			self:_UpdateTree();
 			self.token = 1;
@@ -515,11 +516,14 @@ function GuildAdsComm:SetOnlineStatus(playerName, status)
 				GuildAdsPlugin_OnEvent(GAS_EVENT_CONNECTION, playerName, true);
 			end
 			GuildAdsPlugin_OnEvent(GAS_EVENT_ONLINE, playerName, true);
+		else
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "Inserting %s in active playerList (already inserted)", tostring(playerName));
 		end
 	else
 		self.stats.Leave = self.stats.Leave + 1
 		-- change to offline
 		if (self.playerTree[playerName]) then
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "Removing %s from active playerList", tostring(playerName));
 			self.playerTree[playerName] = nil;
 			local f = function(i, p) 
 				if p==playerName then 
@@ -533,6 +537,8 @@ function GuildAdsComm:SetOnlineStatus(playerName, status)
 			end
 			GuildAdsPlugin_OnEvent(GAS_EVENT_ONLINE, playerName, false);
 			GuildAdsPlugin_OnEvent(GAS_EVENT_CONNECTION, playerName, false);
+		else
+			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL, "Removing %s from active playerList (already removed)", tostring(playerName));			
 		end
 	end
 end
@@ -1282,7 +1288,7 @@ end
 
 function GuildAdsComm:ReceivePlayerLeaving(channelName, personName, playerName)
 	GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"ReceivePlayerLeaving[%s](%s)", personName, playerName);
-	if playerName then
+	if playerName and strlen(playerName)>0 then
 		-- have to handle the situation when playerName == GuildAds.playerName (!!)
 		self:SetOnlineStatus(playerName, false)
 		if playerName == GuildAds.playerName then
