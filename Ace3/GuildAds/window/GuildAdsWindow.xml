@@ -24,12 +24,12 @@
 				GuildAdsWindow:DummyOnShow();
 				PanelTemplates_TabResize(self, 0); <!-- size to fit text, no padding-->
 			</OnShow>
+			<OnEvent>
+				if (self:IsVisible()) then
+					PanelTemplates_TabResize(self, 0); <!-- size to fit text, no padding-->
+				end
+			</OnEvent>
 		</Scripts>
-		<OnEvent>
-			if (self:IsVisible()) then
-				PanelTemplates_TabResize(self, 0); <!-- size to fit text, no padding-->
-			end
-		</OnEvent>
 	</Button>
 	
 </Ui>
