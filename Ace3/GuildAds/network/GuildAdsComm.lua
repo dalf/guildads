@@ -1280,7 +1280,7 @@ function GuildAdsComm:ReceivePlayerList(channelName, personName, playersSerializ
 		if not playerWorkTable[player] then
 			-- player is marked online with me, but didn't respond to last M sent (client crash/lagged).
 			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"ReceivePlayerList() Correctly marking player as offline: %s", player);
-			self:SetOnlineStatus(playerName, false)
+			self:SetOnlineStatus(player, false)
 		end
 	end
 	del(playerWorkTable)
