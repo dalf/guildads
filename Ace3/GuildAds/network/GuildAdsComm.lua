@@ -1255,6 +1255,7 @@ function GuildAdsComm:ReceivePlayerList(channelName, personName, playersSerializ
 	
 	local sendMeta=false;
 	local amOnline=false;
+	-- check received list for players the do not know about me (send Meta if they dont)
 	for player in string.gmatch(playersSerialized, "([^\/]+)/?$?") do
 		player = tostring(player);
 		playerWorkTable[player]=true;
@@ -1268,6 +1269,19 @@ function GuildAdsComm:ReceivePlayerList(channelName, personName, playersSerializ
 			amOnline=true
 		end
 	end
+	-- check my own list to see if I have players listed that aren't known by the list sender (remove from my list in that case unless it is me that should be removed)
+	for _,player in pairs(self.playerList) do
+		if not playerWorkTable[player] then
+			if player~=GuildAds.playerName then
+				-- player is marked online with me, but didn't respond to last M sent (client crash/lagged).
+				GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"ReceivePlayerList() Correctly marking player as offline: %s", player);
+				self:SetOnlineStatus(player, false)
+			else
+				-- The sender did not see me online, I better send a new Meta
+				sendMeta = true
+			end
+		end
+	end
 	if sendMeta or not amOnline then
 		-- I don't know about all active clients. Send Meta and wait for everyone to respond.
 		-- NOTE: This is a somewhat bandwidth wasteful solution but is backwards compatible.
@@ -1275,13 +1289,6 @@ function GuildAdsComm:ReceivePlayerList(channelName, personName, playersSerializ
 		GuildAdsTask:AddNamedSchedule("SendMeta", random(self.delay.SearchDelay), nil, nil, self.SendMeta, self, nil);
 	else
 		GuildAdsTask:DeleteNamedSchedule("SendMeta");		
-	end
-	for _,player in pairs(self.playerList) do
-		if not playerWorkTable[player] then
-			-- player is marked online with me, but didn't respond to last M sent (client crash/lagged).
-			GuildAds_ChatDebug(GA_DEBUG_PROTOCOL,"ReceivePlayerList() Correctly marking player as offline: %s", player);
-			self:SetOnlineStatus(player, false)
-		end
 	end
 	del(playerWorkTable)
 end

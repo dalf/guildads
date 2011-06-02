@@ -168,7 +168,12 @@ end
 
 function SimpleComm_newSendChatMessage(msg, sys, lang, name)
 	if (sys == currentChannel.slashCmdUpper) then
-		return SimpleComm_oldSendChatMessage(string.gsub(msg, "|", PIPE_ENTITIE), "CHANNEL", lang, GetChannelName( currentChannel.name ));
+		if currentChannel.useGuildAddonChannel then
+			return SendAddonMessage(currentChannel.prefix, msg, "GUILD");
+			--return SimpleComm_oldSendChatMessage(string.gsub(msg, "|", PIPE_ENTITIE), "CHANNEL", lang, GetChannelName( currentChannel.name ));
+		else
+			return SimpleComm_oldSendChatMessage(string.gsub(msg, "|", PIPE_ENTITIE), "CHANNEL", lang, GetChannelName( currentChannel.name ));
+		end
 	else
 		return SimpleComm_oldSendChatMessage(msg, sys, lang, name);
 	end
@@ -881,7 +886,7 @@ function SimpleComm_Leave()
 	if not currentChannel.useGuildAddonChannel then
 		dataChannelLib:CloseChannel("GuildAds", currentChannel.name);
 	else
-		currentChannel.onLeave()
+		SimpleComm_Callback(dataChannelLib.YOU_LEFT, currentChannel.name, -1)
 	end
 	guildChannelJoined = false;
 	
