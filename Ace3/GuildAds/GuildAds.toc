@@ -1,4 +1,4 @@
-﻿## Interface: 40100
+﻿## Interface: 40200
 ## Title: GuildAds
 ## Author: Zarkan, Fkaï, Galmok
 ## Version: 2.7
@@ -9,7 +9,7 @@
 ## DefaultState: Enabled
 ## LoadOnDemand: 0
 ## SavedVariables: GuildAdsDatabase,  LIB_TRADE_LINKS_PATCH_DATA
-## X-eMail: guildads AT gmail DOT com
+## X-eMail: galmok AT gmail DOT com
 ## X-Website: http://guildads.sf.net
 ## X-License: GPL v2
 ## X-Category: Guild

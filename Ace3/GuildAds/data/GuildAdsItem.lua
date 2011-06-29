@@ -259,7 +259,8 @@ end
 ---------------------------------------------------------------------------------
 function GuildAds_GetItemQualityColor(quality)
 	if quality>=0 and quality<=7 then -- item colours
-		return GetItemQualityColor(quality)
+		local r, g, b, hex = GetItemQualityColor(quality)
+		return r, g, b, "|c"..hex
 	elseif quality==-1 then -- enchant color
 		return 1.0,208/255,0,"|cffffd000";
 	end
