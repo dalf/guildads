@@ -337,7 +337,8 @@ GUILDADS_FACTIONS = {
 	[82] = "Hellscream's Reach",		-- Cataclysm (Horde)
 	[84] = "Wildhammer Clan", 			-- Cataclysm (Alliance)
 	[85] = "Baradin's Wardens",			-- Cataclysm (Alliance)
-}; -- The last one used is 85
+	[86] = "Avengers of Hyjal",			-- Cataclysm (patch 4.2)
+}; -- The last one used is 86
 
 GUILDADS_FACTION_OPTIONS	= "Faction settings";
 GUILDADS_FACTION_HIDE_COLLAPSED = "Hide collapsed factions";
