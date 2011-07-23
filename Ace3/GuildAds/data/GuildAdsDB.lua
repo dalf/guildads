@@ -221,12 +221,20 @@ function GuildAdsDBChannel:ShowACL()
 	if GuildAds.channelName then
 		local data;
 		local dataType=GuildAdsDB.channel[GuildAds.channelName].Admin;
+		local tab = {}
 		for id in dataType:iteratorIds() do
 			data=dataType:getNewestData(id);
-			if GuildAdsDBChannel:IsGuildID(id) then
-				GuildAds:Print("Guild "..string.sub(id,2).." is "..(data.a and "whitelisted" or "blacklisted").." for "..GuildAdsDB:FormatTime(data.t or 0).." with reason: "..tostring(data.c));
+			table.insert(tab, { id=id, a=data.a, t=data.t, c=data.c})
+		end
+		-- sort it (by name)
+		sort(tab, function(a,b) if a.id<b.id then return true; elseif a.id>b.id then return false; else return nil; end; end)
+		-- print it
+		for id, data in ipairs(tab) do
+			if GuildAdsDBChannel:IsGuildID(data.id) then
+				GuildAds:Print("Guild "..string.sub(data.id,2).." is "..(data.a and "whitelisted" or "blacklisted").." for "..GuildAdsDB:FormatTime(data.t or 0).." with reason: "..tostring(data.c));
 			else
-				GuildAds:Print("Player "..id.." is "..(data.a and "whitelisted" or "blacklisted").." for "..GuildAdsDB:FormatTime(data.t or 0).." with reason: "..tostring(data.c));
+				GuildAds:Print("Player "..data.id.." is "..(data.a and "whitelisted" or "blacklisted").." for "..GuildAdsDB:FormatTime(data.t or 0).." with reason: "..tostring(data.c));
+				
 			end
 		end
 	else
