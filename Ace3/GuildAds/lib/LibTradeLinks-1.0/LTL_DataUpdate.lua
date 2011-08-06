@@ -119,7 +119,7 @@ local TradeLink = {}
 
 --				bmap = string.rep("A", bytes)
 
-				local tradeString = string.format("trade:%d:%d:%d:%s:%s", tradeList[tradeIndex], 450, 450, playerGUID, bmap)
+				local tradeString = string.format("trade:%d:%d:%d:%s:%s", tradeList[tradeIndex], 525, 525, playerGUID, bmap)
 
 --local link = "|cffffd000|H"..tradeString.."|h["..GetSpellInfo(tradeList[tradeIndex]).."]|h|r"
 --DEFAULT_CHAT_FRAME:AddMessage(tradeString)
